@@ -19,10 +19,11 @@ public class ResponseHandler {
 	private ResponseHandler() {
 	};
 
-	public static ResponseEntity<Map<String, Object>> response(Map<String, Object> result, HttpStatus httpStatus, String message,String isError) {
+	public static ResponseEntity<Map<String, Object>> response(Map<String, Object> result, HttpStatus httpStatus, String message,boolean isError,Object responseObject) {
+		result.put("data", responseObject);
 		result.put("message", message);
 		result.put("isError", isError);
-		result.put("status", httpStatus);
+		result.put("status", httpStatus.value());
 		return new ResponseEntity<Map<String, Object>>(result, httpStatus);
 	}
 }
