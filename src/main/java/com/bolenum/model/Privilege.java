@@ -1,16 +1,22 @@
 package com.bolenum.model;
 
+
+import java.util.Set;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+
 
 import com.bolenum.model.Role;
 
+
+
 @Entity
-@Table(name = "privilege")
 public class Privilege {
 	
 	    @Id
@@ -19,15 +25,12 @@ public class Privilege {
 
 	    private String name;
 	    
-	    @ManyToMany
-	    private Role role;
-	    
 	    public Privilege() {
-	        super();
+	    
 	    }
 
 	    public Privilege(final String name) {
-	        super();
+	      
 	        this.name = name;
 	    }
 
@@ -46,14 +49,5 @@ public class Privilege {
 		public void setName(String name) {
 			this.name = name;
 		}
-
-		public Role getRole() {
-			return role;
-		}
-
-		public void setRole(Role role) {
-			this.role = role;
-		}
 	    
-
 }

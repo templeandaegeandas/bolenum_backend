@@ -3,6 +3,8 @@
  */
 package com.bolenum.util;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -19,11 +21,17 @@ public class ResponseHandler {
 	private ResponseHandler() {
 	};
 
-	public static ResponseEntity<Map<String, Object>> response(Map<String, Object> result, HttpStatus httpStatus, String message,boolean isError,Object responseObject) {
-		result.put("data", responseObject);
-		result.put("message", message);
-		result.put("isError", isError);
-		result.put("status", httpStatus.value());
-		return new ResponseEntity<Map<String, Object>>(result, httpStatus);
+	private static Map<String, Object> map = new HashMap<String, Object>();
+	
+	public static ResponseEntity<Object> response(HttpStatus httpStatus,Boolean isError, String message, Object responseObject) {
+		
+		map.put("timestamp", new Date());
+		map.put("status", httpStatus);
+		map.put("error",isError);
+		map.put("message", message);
+		map.put("data",responseObject);
+		return new ResponseEntity<Object>(map,httpStatus);
+	
+		
 	}
 }
