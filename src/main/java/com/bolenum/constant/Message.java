@@ -31,10 +31,9 @@ public class Message {
 	public static final String INVALIDUSERNAME = "user.username.error";
 	
 	public static final String PRIVILEGE_ADDED_SUCCESSFULLY = "previlege.added.successfully";
-	
+	public static final String PRIVILEGE_REMOVED_SUCCESSFULLY= "previlege.removed.successfully";
 	public static final String ROLE_ADDED_SUCCESSFULLY = "role.added.successfully";
 	
+	public static final String ROLE_DELETED_SUCCESSFULLY = "role.deleted.successfully";
 	
-
-
 }

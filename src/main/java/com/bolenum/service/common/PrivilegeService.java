@@ -4,7 +4,11 @@ import com.bolenum.model.Privilege;
 
 
 public interface PrivilegeService {
-	
-	public void saveRole(Privilege privilege);
+
+
+	public void savePrivilege(Privilege privilege);
+
+	public void deletePrivilege(String name);
+
 
 }

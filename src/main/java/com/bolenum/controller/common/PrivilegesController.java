@@ -1,7 +1,10 @@
 package com.bolenum.controller.common;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -14,6 +17,7 @@ import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.controller.user.UserController;
 import com.bolenum.model.Privilege;
+import com.bolenum.service.common.PrivilegeService;
 import com.bolenum.util.ResponseHandler;
 
 import io.swagger.annotations.Api;
@@ -26,10 +30,28 @@ public class PrivilegesController {
 
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-	@RequestMapping(value = "/addPrivileges", method = RequestMethod.GET)
-	public ResponseEntity<Object> addPrivileges(@RequestBody Privilege privilege, BindingResult result) {
-		
-		 return ResponseHandler.response(HttpStatus.ACCEPTED,false, Message.PRIVILEGE_ADDED_SUCCESSFULLY, null);
+	@Autowired
+	private PrivilegeService privilegeService;
+	
+	@RequestMapping(value = "/addPrivileges", method = RequestMethod.POST)
+	public ResponseEntity<Object> addPrivileges(@Valid @RequestBody Privilege privilege, BindingResult result) {
+		 if(result.hasErrors())
+		 {
+		        return ResponseHandler.response(HttpStatus.ACCEPTED,true, Message.ERROR, null);	 
+	     }
+		 else
+		 {
+			 privilegeService.savePrivilege(privilege);
+			 return ResponseHandler.response(HttpStatus.ACCEPTED,false, Message.PRIVILEGE_ADDED_SUCCESSFULLY, null);
+		 }
 		 
 	}
+	
+	@RequestMapping(value = "/removePrivileges", method = RequestMethod.GET)
+	public ResponseEntity<Object> deletePrivileges(@RequestBody String name, BindingResult result) {
+		
+		 privilegeService.deletePrivilege(name);
+		 return ResponseHandler.response(HttpStatus.ACCEPTED,false, Message.PRIVILEGE_REMOVED_SUCCESSFULLY, null);	 
+	}
+	
 }

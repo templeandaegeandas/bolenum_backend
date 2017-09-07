@@ -6,9 +6,6 @@ import javax.validation.constraints.Pattern;
 
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.Set;
-
-import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity // This tells Hibernate to make a table out of this class
 public class User {
@@ -25,12 +22,11 @@ public class User {
 
 	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Incorrect email id")
 	@NotNull
-	@NotEmpty
 	@Column(unique = true)
 	private String emailId;
 
 	@NotNull
-	@NotEmpty
+
 	private String password;
 
 	private String address;

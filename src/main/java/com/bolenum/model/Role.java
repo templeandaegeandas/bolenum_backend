@@ -17,9 +17,10 @@ public class Role {
     private Long id;
     private String name;
     private String description;
+    
     @OneToMany
     private Set<Privilege> privileges;
-
+    
 	public Set<Privilege> getPrivileges() {
 		return privileges;
 	}
