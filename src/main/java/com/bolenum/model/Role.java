@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
 public class Role {
@@ -15,7 +16,11 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    
+    @NotBlank
     private String name;
+    
+    @NotBlank
     private String description;
     
     @OneToMany

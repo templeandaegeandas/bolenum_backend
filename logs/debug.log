@@ -1,0 +1,8 @@
+2017-09-08 13:47:02 [restartedMain] INFO  com.bolenum.BolenumApplication - Starting BolenumApplication on HimanshuKumar with PID 22906 (/home/himanshu/Documents/bolenum/bolenum_backend/target/classes started by himanshu in /home/himanshu/Documents/bolenum/bolenum_backend)
+2017-09-08 13:47:02 [restartedMain] DEBUG com.bolenum.BolenumApplication - Running with Spring Boot v1.5.6.RELEASE, Spring v4.3.10.RELEASE
+2017-09-08 13:47:02 [restartedMain] INFO  com.bolenum.BolenumApplication - No active profile set, falling back to default profiles: default
+2017-09-08 13:47:08 [restartedMain] INFO  com.bolenum.BolenumApplication - Started BolenumApplication in 6.115 seconds (JVM running for 7.028)
+2017-09-08 13:48:26 [restartedMain] INFO  com.bolenum.BolenumApplication - Starting BolenumApplication on HimanshuKumar with PID 23439 (/home/himanshu/Documents/bolenum/bolenum_backend/target/classes started by himanshu in /home/himanshu/Documents/bolenum/bolenum_backend)
+2017-09-08 13:48:26 [restartedMain] DEBUG com.bolenum.BolenumApplication - Running with Spring Boot v1.5.6.RELEASE, Spring v4.3.10.RELEASE
+2017-09-08 13:48:26 [restartedMain] INFO  com.bolenum.BolenumApplication - No active profile set, falling back to default profiles: default
+2017-09-08 13:48:31 [restartedMain] INFO  com.bolenum.BolenumApplication - Started BolenumApplication in 5.21 seconds (JVM running for 5.954)

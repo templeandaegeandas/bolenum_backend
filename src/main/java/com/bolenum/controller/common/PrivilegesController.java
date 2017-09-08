@@ -33,10 +33,11 @@ public class PrivilegesController {
 	@Autowired
 	private PrivilegeService privilegeService;
 	
-	@RequestMapping(value = "/addPrivileges", method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.POST)
 	public ResponseEntity<Object> addPrivileges(@Valid @RequestBody Privilege privilege, BindingResult result) {
 		 if(result.hasErrors())
 		 {
+			    logger.error("message logged at error level");
 		        return ResponseHandler.response(HttpStatus.ACCEPTED,true, Message.ERROR, null);	 
 	     }
 		 else
@@ -47,7 +48,7 @@ public class PrivilegesController {
 		 
 	}
 	
-	@RequestMapping(value = "/removePrivileges", method = RequestMethod.GET)
+	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.DELETE)
 	public ResponseEntity<Object> deletePrivileges(@RequestBody String name, BindingResult result) {
 		
 		 privilegeService.deletePrivilege(name);

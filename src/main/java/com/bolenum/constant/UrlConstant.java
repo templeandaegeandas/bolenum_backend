@@ -11,6 +11,9 @@ public class UrlConstant {
 	public static final String BASE_ADMIN_URI_V1 = BASE_URI_V1 + "admin/";
 	public static final String BASE_ROLE_URI_V1 = BASE_URI_V1 + "role/";
 	public static final String BASE_PRIVILEGE_URI_V1 = BASE_URI_V1 + "action/";
+	public static final String PRIVILEGE_URI="privilege";
+	public static final String ROLE_URI="/UserRole";
+	
 	
 	
 }

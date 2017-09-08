@@ -20,6 +20,7 @@ public class BolenumApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(BolenumApplication.class, args);
+		
 	}
 
 	@Bean
