@@ -1,33 +1,49 @@
 package com.bolenum.service.common;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.dao.common.PrivilegeRepo;
 import com.bolenum.model.Privilege;
 
+/**
+ * @Author himanshu
+ * @Date 08-Sep-2017
+ */
+
 @Service
 public class PrivilegeServiceImpl implements PrivilegeService {
-	
+
 	@Autowired
-	private PrivilegeRepo privilegeRepo ;
+	private PrivilegeRepo privilegeRepo;
 
-	
-	@Override
-	public void savePrivilege(Privilege privilege) {
-		// TODO Auto-generated method stub
-		privilegeRepo.saveAndFlush(privilege);
-		
-	}
-	
-	@Override
-	public void deletePrivilege(String name) {
-		// TODO Auto-generated method stub
-		Privilege privilege=privilegeRepo.findByName(name);
-		privilegeRepo.delete(privilege);
-		
+	public Privilege savePrivilege(Privilege privilege) {
+		return privilegeRepo.saveAndFlush(privilege);
+
 	}
 
+	@Override
+	public Boolean deletePrivilege(Long id) {
+		Privilege privilege = privilegeRepo.findById(id);
+		if (privilege != null) {
+			privilegeRepo.delete(id);
+			return true;
 
+		} else {
+			return false;
+		}
+	}
 
-	
+	@Override
+	public Privilege viewPrivilege(Long id) {
+		Privilege privilege = privilegeRepo.findById(id);
+		if (privilege != null) {
+			privilegeRepo.findById(id);
+			return privilege;
+
+		} else {
+			return null;
+		}
+	}
+
 }

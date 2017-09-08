@@ -22,6 +22,10 @@ import com.bolenum.util.ResponseHandler;
 
 import io.swagger.annotations.Api;
 
+/**
+ * @Author himanshu
+ * @Date 08-Sep-2017
+ */
 @RestController
 @RequestMapping(value = UrlConstant.BASE_PRIVILEGE_URI_V1)
 @Api(value = "Privileges Controller", description = "Privileges releated methods")
@@ -32,27 +36,53 @@ public class PrivilegesController {
 
 	@Autowired
 	private PrivilegeService privilegeService;
-	
+
+	/**
+	 * to add privileges
+	 * 
+	 * @param privilege
+	 * @param result
+	 * @return response
+	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.POST)
 	public ResponseEntity<Object> addPrivileges(@Valid @RequestBody Privilege privilege, BindingResult result) {
-		 if(result.hasErrors())
-		 {
-			    logger.error("message logged at error level");
-		        return ResponseHandler.response(HttpStatus.ACCEPTED,true, Message.ERROR, null);	 
-	     }
-		 else
-		 {
-			 privilegeService.savePrivilege(privilege);
-			 return ResponseHandler.response(HttpStatus.ACCEPTED,false, Message.PRIVILEGE_ADDED_SUCCESSFULLY, null);
-		 }
-		 
+		if (result.hasErrors()) {
+			logger.error("message logged at error level");
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.ERROR, null);
+		} else {
+			privilegeService.savePrivilege(privilege);
+			return ResponseHandler.response(HttpStatus.OK, false, Message.PRIVILEGE_ADDED_SUCCESSFULLY, null);
+		}
 	}
-	
+
+	/**
+	 * 
+	 * @param id
+	 * @return response
+	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.DELETE)
-	public ResponseEntity<Object> deletePrivileges(@RequestBody String name, BindingResult result) {
-		
-		 privilegeService.deletePrivilege(name);
-		 return ResponseHandler.response(HttpStatus.ACCEPTED,false, Message.PRIVILEGE_REMOVED_SUCCESSFULLY, null);	 
+	public ResponseEntity<Object> deletePrivileges(Long id) {
+		Boolean response = privilegeService.deletePrivilege(id);
+		if (response) {
+			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.PRIVILEGE_REMOVED_SUCCESSFULLY,
+					"requested privileges removed successfully");
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PRIVILEGE_NOT_FOUND,
+					"please request valid privilege");
+		}
+
 	}
-	
+
+	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.GET)
+	public ResponseEntity<Object> getPrivileges(Long id) {
+		Privilege privilege = privilegeService.viewPrivilege(id);
+		if (privilege!=null) {
+			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.PRIVILEGE_FOUND,
+					privilege.getName());
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PRIVILEGE_NOT_FOUND,
+					"please request valid privilege");
+		}
+
+	}
 }

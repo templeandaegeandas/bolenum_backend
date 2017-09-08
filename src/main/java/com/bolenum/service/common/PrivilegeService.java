@@ -6,9 +6,12 @@ import com.bolenum.model.Privilege;
 public interface PrivilegeService {
 
 
-	public void savePrivilege(Privilege privilege);
+	public Privilege savePrivilege(Privilege privilege);
 
-	public void deletePrivilege(String name);
+	public Boolean deletePrivilege(Long id);
+	
+	public Boolean viewPrivilege(Long id);
+
 
 
 }
