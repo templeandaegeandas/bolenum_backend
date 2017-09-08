@@ -10,7 +10,7 @@ public interface PrivilegeService {
 
 	public Boolean deletePrivilege(Long id);
 	
-	public Boolean viewPrivilege(Long id);
+	public Privilege viewPrivilege(Long id);
 
 
 
