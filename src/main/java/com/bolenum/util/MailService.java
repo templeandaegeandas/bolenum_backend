@@ -6,12 +6,13 @@ import org.springframework.mail.SimpleMailMessage;
 
 import org.springframework.stereotype.Service;
 
-import com.alchemistcoin.model.User;
+import com.bolenum.model.User;
+
+
 
 @Service
 public class MailService 
 {
-	
 	  @Autowired
 	  private MailSender mailSender;
 	 
