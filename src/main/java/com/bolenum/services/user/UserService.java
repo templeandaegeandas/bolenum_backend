@@ -9,9 +9,10 @@ import com.bolenum.model.User;
  */
 
 public interface UserService {
-	public void RegisterUser(User user) ;
+	public void registerUser(User user) ;
 	public void saveUser(User user);
 	public boolean verifyUserToken(String token);
-	public Boolean userIsExist(User user);
-	boolean isUserAlreadyRegistered(User user);
+	public boolean isUserAlreadyRegistered(User user);
+	public boolean isUserExist(User user);
+	public void sendToken(User user);
 }

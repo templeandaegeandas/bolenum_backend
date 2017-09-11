@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 	private MailService emailservice;
 
 	@Override
-	public void RegisterUser(User user) {
+	public void registerUser(User user) {
 		saveUser(user);
 		sendToken(user);
 	}
@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
 		userRepository.save(user);
 	}
 
-	private void sendToken(User user) {
+	public void sendToken(User user) {
 		String token = TokenGenerator.generateToken();
 		Date date = new Date();
 		emailservice.mailSend(user, token);
@@ -50,10 +50,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public Boolean userIsExist(User user) {
-		User Existinguser = userRepository.findByEmailId(user.getEmailId());
+	public boolean isUserExist(User user) {
+		User existingUser = userRepository.findByEmailId(user.getEmailId());
 
-		if (Existinguser != null && Existinguser.getEmailId().equals(user.getEmailId())) {
+		if (existingUser != null && existingUser.getEmailId().equals(user.getEmailId())) {
 			return true;
 		} else {
 			return false;
@@ -62,8 +62,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean isUserAlreadyRegistered(User user) {
-		User Existinguser = userRepository.findByEmailId(user.getEmailId());
-		if (Existinguser.getIsEnabled() == true) {
+		User existingUser = userRepository.findByEmailId(user.getEmailId());
+		if (existingUser.getIsEnabled() == true) {
 			return true;
 		} else {
 			return false;

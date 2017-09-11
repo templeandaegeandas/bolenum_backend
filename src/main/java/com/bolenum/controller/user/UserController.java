@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -31,23 +32,26 @@ public class UserController {
 
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-	@RequestMapping(value = "/register", method = RequestMethod.GET)
+	@Autowired
+	private UserService userService;
+
+	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody User user, BindingResult result) {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
 		} else {
-			Boolean isUserExist = UserService.userIsExist(user);
+			Boolean isUserExist = userService.isUserExist(user);
 			if (!isUserExist) {
-				UserService.RegisterUser(user);
+				userService.registerUser(user);
 				// System.out.println(user.getEmailId());
 				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, user.getEmailId());
 			} else {
-				boolean isRegistered = UserService.userIsAlreadyRegistered(user);
+				boolean isRegistered = userService.isUserAlreadyRegistered(user);
 				if (isRegistered) {
 					return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
 							user.getEmailId());
 				} else {
-					UserService.userIsAlreadyRegistered(user);
+					userService.sendToken(user);
 					return ResponseHandler.response(HttpStatus.OK, false, Message.EMAIL_ALREADY_EXISTS,
 							user.getEmailId());
 				}
