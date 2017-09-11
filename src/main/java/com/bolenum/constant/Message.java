@@ -23,5 +23,10 @@ public class Message {
 	public static final String ROLE_NOT_FOUND = "role not found";
 	public static final String ROLE_FOUND = "requested role found";
 	
+	public static final String INVALID_EMAIL = "invalid email";
+	public static final String EMAIL_ALREADY_EXISTS = "email already exist";
+	
+	
+	
 	
 }

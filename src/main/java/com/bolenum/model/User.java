@@ -26,7 +26,6 @@ public class User {
 	private String emailId;
 
 	@NotNull
-
 	private String password;
 
 	private String address;
