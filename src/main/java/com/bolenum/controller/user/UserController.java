@@ -31,8 +31,8 @@ public class UserController {
 
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-	@RequestMapping(value = "/adduser", method = RequestMethod.GET)
-	public ResponseEntity<Object> addUser(@Valid @RequestBody User user, BindingResult result) {
+	@RequestMapping(value = "/register", method = RequestMethod.GET)
+	public ResponseEntity<Object> registerUser(@Valid @RequestBody User user, BindingResult result) {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
 		} else {

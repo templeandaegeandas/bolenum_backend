@@ -2,21 +2,16 @@ package com.bolenum.services.user;
 
 import com.bolenum.model.User;
 
+/**
+ * 
+ * @Author Himanshu
+ * @Date 11-Sep-2017
+ */
+
 public interface UserService {
-
-	static Boolean userIsExist(User user) {
-		return null;
-	}
-
-	static void RegisterUser(User user) {
-		
-	}
-
-	static boolean userIsAlreadyRegistered(User user) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	
-
+	public void RegisterUser(User user) ;
+	public void saveUser(User user);
+	public boolean verifyUserToken(String token);
+	public Boolean userIsExist(User user);
+	public boolean userIsAlreadyRegistered(User user);
 }
