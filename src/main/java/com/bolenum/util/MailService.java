@@ -10,6 +10,7 @@ import com.bolenum.model.User;
 
 @Service
 public class MailService {
+
 	@Autowired
 	private MailSender mailSender;
 

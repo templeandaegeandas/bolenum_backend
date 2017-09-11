@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.TokenType;
 import com.bolenum.dao.user.TokenRepository;
@@ -14,6 +15,7 @@ import com.bolenum.services.user.UserService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.TokenGenerator;
 
+@Service
 public class UserServiceImpl implements UserService {
 
 	@Autowired
