@@ -1,14 +1,13 @@
-package com.bolenum.service.user;
+package com.bolenum.services.user;
 
 import com.bolenum.model.User;
-import com.bolenum.service.user.UserService;
+import com.bolenum.services.user.UserService;
 
 public class UserServiceImpl implements UserService{
 
 	@Override
 	public Boolean userIsExist(User user) {
-		// TODO Auto-generated method stub
-		return null;
+		return false;
 	}
 
 }

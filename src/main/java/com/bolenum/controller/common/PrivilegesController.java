@@ -17,7 +17,7 @@ import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.controller.user.UserController;
 import com.bolenum.model.Privilege;
-import com.bolenum.service.common.PrivilegeService;
+import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.util.ResponseHandler;
 
 import io.swagger.annotations.Api;
@@ -28,7 +28,7 @@ import io.swagger.annotations.Api;
  */
 @RestController
 @RequestMapping(value = UrlConstant.BASE_PRIVILEGE_URI_V1)
-@Api(value = "Privileges Controller", description = "Privileges releated methods")
+@Api(value = "Privileges Controller")
 
 public class PrivilegesController {
 

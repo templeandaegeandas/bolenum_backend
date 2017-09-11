@@ -23,7 +23,7 @@ import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping(value = UrlConstant.BASE_USER_URI_V1)
-@Api(value = "User Controller", description = "User releated methods")
+@Api(value = "User Controller")
 public class UserController {
 
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);

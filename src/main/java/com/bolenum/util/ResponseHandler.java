@@ -17,21 +17,20 @@ import org.springframework.http.ResponseEntity;
  */
 
 public class ResponseHandler {
-	
+
 	private ResponseHandler() {
-	};
+	}
 
 	private static Map<String, Object> map = new HashMap<String, Object>();
-	
-	public static ResponseEntity<Object> response(HttpStatus httpStatus,Boolean isError, String message, Object responseObject) {
-		
-		map.put("timestamp", new Date());
+
+	public static ResponseEntity<Object> response(HttpStatus httpStatus, Boolean isError, String message, Object responseObject) {
+
+		map.put("timestamp", new Date().getTime());
 		map.put("status", httpStatus.value());
-		map.put("error",isError);
+		map.put("isError", isError);
 		map.put("message", message);
-		map.put("data",responseObject);
-		return new ResponseEntity<Object>(map,httpStatus);
-	
-		
+		map.put("data", responseObject);
+		return new ResponseEntity<Object>(map, httpStatus);
+
 	}
 }

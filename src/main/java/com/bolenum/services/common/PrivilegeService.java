@@ -1,4 +1,4 @@
-package com.bolenum.service.common;
+package com.bolenum.services.common;
 
 import com.bolenum.model.Privilege;
 

@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.Role;
-import com.bolenum.service.common.RoleService;
+import com.bolenum.services.common.RoleService;
 import com.bolenum.util.ResponseHandler;
 import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping(value = UrlConstant.BASE_ROLE_URI_V1)
-@Api(value = "User Role Controller", description = "User Role releated methods")
+@Api(value = "User Role Controller")
 public class RoleController {
 
 	public static final Logger logger = LoggerFactory.getLogger(RoleController.class);
