@@ -88,22 +88,6 @@ public class RoleController {
 	}
 	
 	
-	/**
-	 * to update roles
-	 * 
-	 * @param id
-	 * @return
-	 */
-	@RequestMapping(value = UrlConstant.ROLE_URI, method = RequestMethod.PUT)
-	public ResponseEntity<Object> updateRoles(Long id) {
-		Role role = roleService.updateRole(id);
-		if (role != null) {
-			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.ROLE_FOUND, role.getName());
-		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.ROLE_NOT_FOUND,
-					"please request valid role");
-		}
-	}
 
 
 }

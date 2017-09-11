@@ -94,22 +94,4 @@ public class PrivilegesController {
 		}
 	}
 
-	/**
-	 * 
-	 * to update privileges
-	 *
-	 * @param id
-	 * @return response
-	 */
-	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.PUT)
-	public ResponseEntity<Object> updatePrivileges(Long id) {
-		Privilege privilege = privilegeService.updatePrivilege(id);
-		if (privilege != null) {
-			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.PRIVILEGE_FOUND, privilege.getName());
-		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PRIVILEGE_NOT_FOUND,
-					"please request valid privilege");
-		}
-	}
-
 }

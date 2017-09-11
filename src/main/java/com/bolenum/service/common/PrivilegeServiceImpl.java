@@ -44,14 +44,4 @@ public class PrivilegeServiceImpl implements PrivilegeService {
 		}
 	}
 
-	@Override
-	public Privilege updatePrivilege(Long id) {
-		Privilege privilege = privilegeRepo.findById(id);
-		if (privilege != null) {
-			return privilege;
-		} else {
-			return null;
-		}
-	}
-
 }
