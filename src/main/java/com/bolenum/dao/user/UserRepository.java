@@ -6,4 +6,6 @@ import com.bolenum.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+	User findByEmailId(String emailId);
+
 }

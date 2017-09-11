@@ -50,19 +50,60 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean verifyUserToken(String token) {
-		return false;
-	}
-
-	@Override
 	public Boolean userIsExist(User user) {
-		return false;
+		User Existinguser = userRepository.findByEmailId(user.getEmailId());
+
+		if (Existinguser != null && Existinguser.getEmailId().equals(user.getEmailId())) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
-	public boolean userIsAlreadyRegistered(User user) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isUserAlreadyRegistered(User user) {
+		User Existinguser = userRepository.findByEmailId(user.getEmailId());
+		if (Existinguser.getIsEnabled() == true) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean verifyUserToken(String token) {
+		// check the token is exist in verification_token table
+
+		VerificationToken verificationToken = tokenRepository.findByToken(token);
+		User user = verificationToken.getUser();
+
+		boolean isExpired = isTokenExpired(verificationToken);
+		System.out.println("isExpired =" + isExpired);
+
+		if (verificationToken != null && user != null && user.getIsEnabled() == false && isExpired == false) {
+			user.setIsEnabled(true);
+			userRepository.saveAndFlush(user);
+			return true;
+		} else {
+			return false;
+		}
+
+	}
+
+	public boolean isTokenExpired(VerificationToken verificationTokenToCheck) {
+		Date date = new Date();
+		Timestamp currentTimeStamp = new Timestamp(date.getTime());
+		Long currentTime = currentTimeStamp.getTime();
+
+		Timestamp timestampToCheckExpiry = verificationTokenToCheck.getCreatedOn();
+		timestampToCheckExpiry.setTime(timestampToCheckExpiry.getTime() + (((14 * 60) + 59) * 1000));
+		Long tokenExpiry = timestampToCheckExpiry.getTime();
+
+		if (currentTime > tokenExpiry) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
