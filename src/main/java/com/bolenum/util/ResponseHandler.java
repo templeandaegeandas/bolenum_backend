@@ -26,7 +26,7 @@ public class ResponseHandler {
 	public static ResponseEntity<Object> response(HttpStatus httpStatus,Boolean isError, String message, Object responseObject) {
 		
 		map.put("timestamp", new Date());
-		map.put("status", httpStatus);
+		map.put("status", httpStatus.value());
 		map.put("error",isError);
 		map.put("message", message);
 		map.put("data",responseObject);

@@ -12,6 +12,7 @@ public interface PrivilegeService {
 	
 	public Privilege viewPrivilege(Long id);
 
+	public Privilege updatePrivilege(Long id);
 
-
+	
 }

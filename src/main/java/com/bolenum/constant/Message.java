@@ -33,10 +33,12 @@ public class Message {
 	public static final String PRIVILEGE_ADDED_SUCCESSFULLY = "previlege added successfully";
 	public static final String PRIVILEGE_REMOVED_SUCCESSFULLY= "previlege removed successfully";
 	public static final String PRIVILEGE_NOT_FOUND= "privilege not found";
+	public static final String PRIVILEGE_FOUND = "requested privilege found";
 	
 	public static final String ROLE_ADDED_SUCCESSFULLY = "role added successfully";
-	
 	public static final String ROLE_DELETED_SUCCESSFULLY = "role deleted successfully";
-	public static final String PRIVILEGE_FOUND = "requested privilege found";
+	public static final String ROLE_NOT_FOUND = "role not found";
+	public static final String ROLE_FOUND = "requested role found";
+	
 	
 }

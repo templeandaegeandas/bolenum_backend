@@ -8,6 +8,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotBlank;
+
 
 @Entity
 public class Privilege {
@@ -19,6 +21,9 @@ public class Privilege {
 	    @NotNull
 	    @Column(unique=true)
 	    private String name;
+	    
+	    @NotBlank
+	    private String description;
 	    
 	    public Privilege() {
 	    
@@ -43,6 +48,14 @@ public class Privilege {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
 		}
 	    
 }

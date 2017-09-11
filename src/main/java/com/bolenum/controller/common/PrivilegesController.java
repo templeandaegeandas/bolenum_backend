@@ -50,12 +50,15 @@ public class PrivilegesController {
 			logger.error("message logged at error level");
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.ERROR, null);
 		} else {
+
 			privilegeService.savePrivilege(privilege);
 			return ResponseHandler.response(HttpStatus.OK, false, Message.PRIVILEGE_ADDED_SUCCESSFULLY, null);
 		}
 	}
 
 	/**
+	 * 
+	 * to delete privileges
 	 * 
 	 * @param id
 	 * @return response
@@ -64,25 +67,49 @@ public class PrivilegesController {
 	public ResponseEntity<Object> deletePrivileges(Long id) {
 		Boolean response = privilegeService.deletePrivilege(id);
 		if (response) {
-			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.PRIVILEGE_REMOVED_SUCCESSFULLY,
+			return ResponseHandler.response(HttpStatus.OK, false, Message.PRIVILEGE_REMOVED_SUCCESSFULLY,
 					"requested privileges removed successfully");
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PRIVILEGE_NOT_FOUND,
 					"please request valid privilege");
 		}
-
 	}
 
+	/**
+	 * 
+	 * to view privileges
+	 * 
+	 * @param id
+	 * @return response
+	 * 
+	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.GET)
 	public ResponseEntity<Object> getPrivileges(Long id) {
 		Privilege privilege = privilegeService.viewPrivilege(id);
-		if (privilege!=null) {
-			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.PRIVILEGE_FOUND,
-					privilege.getName());
+		if (privilege != null) {
+			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.PRIVILEGE_FOUND, privilege.getName());
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PRIVILEGE_NOT_FOUND,
 					"please request valid privilege");
 		}
-
 	}
+
+	/**
+	 * 
+	 * to update privileges
+	 *
+	 * @param id
+	 * @return response
+	 */
+	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.PUT)
+	public ResponseEntity<Object> updatePrivileges(Long id) {
+		Privilege privilege = privilegeService.updatePrivilege(id);
+		if (privilege != null) {
+			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.PRIVILEGE_FOUND, privilege.getName());
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PRIVILEGE_NOT_FOUND,
+					"please request valid privilege");
+		}
+	}
+
 }

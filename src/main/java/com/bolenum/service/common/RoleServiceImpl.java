@@ -10,13 +10,44 @@ import com.bolenum.model.Role;
 public class RoleServiceImpl implements RoleService {
 
 	@Autowired
-    private RoleRepo roleRepo;
+	private RoleRepo roleRepo;
+
 	@Override
-	public void saveRole(Role role) {
-		
-		// TODO Auto-generated method stub
-		roleRepo.saveAndFlush(role);
-		
+	public Role saveRole(Role role) {
+		return roleRepo.saveAndFlush(role);
+
 	}
+
+	@Override
+	public Boolean deleteRole(Long id) {
+		Role role = roleRepo.findById(id);
+		if (role != null) {
+			roleRepo.delete(id);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public Role viewRole(Long id) {
+		Role role = roleRepo.findById(id);
+		if (role != null) {
+			return role;
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public Role updateRole(Long id) {
+		Role role = roleRepo.findById(id);
+		if (role != null) {
+			return role;
+		} else {
+			return null;
+		}
+	}
+	
 
 }

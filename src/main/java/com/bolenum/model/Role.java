@@ -1,8 +1,8 @@
 package com.bolenum.model;
 
-
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,27 +12,20 @@ import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
 public class Role {
-	
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    
-    @NotBlank
-    private String name;
-    
-    @NotBlank
-    private String description;
-    
-    @OneToMany
-    private Set<Privilege> privileges;
-    
-	public Set<Privilege> getPrivileges() {
-		return privileges;
-	}
 
-	public void setPrivileges(Set<Privilege> privileges) {
-		this.privileges = privileges;
-	}
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+
+	@NotBlank
+	@Column(unique=true)
+	private String name;
+
+	@NotBlank
+	private String description;
+
+	@OneToMany
+	private Set<Privilege> privileges;
 
 	public Long getId() {
 		return id;
@@ -56,6 +49,14 @@ public class Role {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Set<Privilege> getPrivileges() {
+		return privileges;
+	}
+
+	public void setPrivileges(Set<Privilege> privileges) {
+		this.privileges = privileges;
 	}
 
 }

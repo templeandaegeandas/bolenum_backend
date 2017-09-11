@@ -9,6 +9,7 @@ import com.bolenum.model.Privilege;
 /**
  * @Author himanshu
  * @Date 08-Sep-2017
+ * 
  */
 
 @Service
@@ -28,7 +29,6 @@ public class PrivilegeServiceImpl implements PrivilegeService {
 		if (privilege != null) {
 			privilegeRepo.delete(id);
 			return true;
-
 		} else {
 			return false;
 		}
@@ -38,9 +38,17 @@ public class PrivilegeServiceImpl implements PrivilegeService {
 	public Privilege viewPrivilege(Long id) {
 		Privilege privilege = privilegeRepo.findById(id);
 		if (privilege != null) {
-			privilegeRepo.findById(id);
 			return privilege;
+		} else {
+			return null;
+		}
+	}
 
+	@Override
+	public Privilege updatePrivilege(Long id) {
+		Privilege privilege = privilegeRepo.findById(id);
+		if (privilege != null) {
+			return privilege;
 		} else {
 			return null;
 		}
