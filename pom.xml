@@ -86,6 +86,12 @@
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+		</dependency>
+
 		<!-- javamelody -->
 		<dependency>
 			<groupId>net.bull.javamelody</groupId>

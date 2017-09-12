@@ -1,8 +1,6 @@
 package com.bolenum.services.user;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +13,11 @@ import com.bolenum.services.user.UserService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.TokenGenerator;
 
+/**
+ * 
+ * @Author Himanshu
+ * @Date 12-Sep-2017
+ */
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -29,48 +32,27 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void registerUser(User user) {
-		saveUser(user);
-		sendToken(user);
-	}
-
-	@Override
-	public void saveUser(User user) {
-		Date date = new Date();
-		user.setCreatedOn(new Timestamp(date.getTime()));
+		user.setCreatedOn(new DateTime());
 		user.setIsEnabled(false);
 		userRepository.save(user);
+		sendToken(user);
 	}
 
 	public void sendToken(User user) {
 		String token = TokenGenerator.generateToken();
-		Date date = new Date();
-		emailservice.registrationMailSend(user.getEmailId(), token);
+		DateTime date = new DateTime();
 		VerificationToken verificationToken = new VerificationToken(token, user);
 		verificationToken.setTokentype(TokenType.REGISTRATION);
-		verificationToken.setCreatedOn(new Timestamp(date.getTime()));
+		verificationToken.setCreatedOn(date);
 		tokenRepository.saveAndFlush(verificationToken);
+		emailservice.registrationMailSend(user.getEmailId(), token);
 	}
 
-	@Override
-	public boolean isUserExist(User user) {
-		User existingUser = userRepository.findByEmailId(user.getEmailId());
-
-		if (existingUser != null && existingUser.getEmailId().equals(user.getEmailId())) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public boolean isUserAlreadyRegistered(User user) {
-		User existingUser = userRepository.findByEmailId(user.getEmailId());
-		if (existingUser.getIsEnabled() == true) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+	public void sendTokenIfUserAlreadyExist(User user) {
+		  VerificationToken verificationToken =tokenRepository.findByUser(user);
+          verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
+          emailservice.registrationMailSend(user.getEmailId(), verificationToken.getToken());
+	} 
 
 	@Override
 	public boolean verifyUserToken(String token) {
@@ -80,7 +62,7 @@ public class UserServiceImpl implements UserService {
 		User user = verificationToken.getUser();
 
 		boolean isExpired = isTokenExpired(verificationToken);
-		System.out.println("isExpired =" + isExpired);
+		// System.out.println("isExpired =" + isExpired);
 
 		if (verificationToken != null && user != null && user.getIsEnabled() == false && isExpired == false) {
 			user.setIsEnabled(true);
@@ -93,19 +75,21 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public boolean isTokenExpired(VerificationToken verificationTokenToCheck) {
-		Date date = new Date();
-		Timestamp currentTimeStamp = new Timestamp(date.getTime());
-		Long currentTime = currentTimeStamp.getTime();
 
-		Timestamp timestampToCheckExpiry = verificationTokenToCheck.getCreatedOn();
-		timestampToCheckExpiry.setTime(timestampToCheckExpiry.getTime() + (((14 * 60) + 59) * 1000));
-		Long tokenExpiry = timestampToCheckExpiry.getTime();
+		DateTime tokenCreatedTime = verificationTokenToCheck.getCreatedOn();
+		DateTime expirationDate = tokenCreatedTime.plusHours(2);
 
-		if (currentTime > tokenExpiry) {
-			return true;
-		} else {
+		if (expirationDate.isBeforeNow()) {
 			return false;
+		} else {
+			return true;
 		}
+
+	}
+
+	@Override
+	public User findByEmail(User user) {
+		return userRepository.findByEmailId(user.getEmailId());
 	}
 
 }

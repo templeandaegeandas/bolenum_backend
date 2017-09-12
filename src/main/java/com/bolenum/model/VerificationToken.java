@@ -1,7 +1,5 @@
 package com.bolenum.model;
 
-import java.sql.Timestamp;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,6 +8,7 @@ import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
+import org.joda.time.DateTime;
 
 import com.bolenum.constant.TokenType;
 
@@ -28,11 +27,11 @@ public class VerificationToken {
 
 	private String token;
 
-	private Timestamp createdOn;
+	private DateTime createdOn;
 
-	private Timestamp updatedOn;
+	private DateTime updatedOn;
 
-	private Timestamp deletedOn;
+	private DateTime deletedOn;
 
 	public VerificationToken() {
 	}
@@ -62,27 +61,27 @@ public class VerificationToken {
 		this.token = token;
 	}
 
-	public Timestamp getCreatedOn() {
+	public DateTime getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Timestamp createdOn) {
+	public void setCreatedOn(DateTime createdOn) {
 		this.createdOn = createdOn;
 	}
 
-	public Timestamp getUpdatedOn() {
+	public DateTime getUpdatedOn() {
 		return updatedOn;
 	}
 
-	public void setUpdatedOn(Timestamp updatedOn) {
+	public void setUpdatedOn(DateTime updatedOn) {
 		this.updatedOn = updatedOn;
 	}
 
-	public Timestamp getDeletedOn() {
+	public DateTime getDeletedOn() {
 		return deletedOn;
 	}
 
-	public void setDeletedOn(Timestamp deletedOn) {
+	public void setDeletedOn(DateTime deletedOn) {
 		this.deletedOn = deletedOn;
 	}
 

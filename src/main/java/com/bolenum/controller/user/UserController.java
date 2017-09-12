@@ -40,17 +40,17 @@ public class UserController {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
 		} else {
-			Boolean isUserExist = userService.isUserExist(user);
-			if (!isUserExist) {
+			User isUserExist = userService.findByEmail(user);
+			if (isUserExist==null) {
 				userService.registerUser(user);
 				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, user.getEmailId());
 			} else {
-				boolean isRegistered = userService.isUserAlreadyRegistered(user);
-				if (isRegistered) {
+				
+				if (isUserExist.getIsEnabled()) {
 					return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
 							user.getEmailId());
 				} else {
-					userService.sendToken(user);
+					userService.sendTokenIfUserAlreadyExist(isUserExist);
 					return ResponseHandler.response(HttpStatus.OK, false, Message.EMAIL_ALREADY_EXISTS,
 							user.getEmailId());
 				}

@@ -6,6 +6,7 @@ import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.joda.time.DateTime;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -48,19 +49,19 @@ public class User {
 	private Date dob;
 
 	@ApiModelProperty(hidden = true)
-	private Boolean isEnabled;
+	private Boolean isEnabled=false;
 	@ApiModelProperty(hidden = true)
-	private Boolean isDeleted;
+	private Boolean isDeleted=false;
 	@ApiModelProperty(hidden = true)
-	private Boolean isLocked;
+	private Boolean isLocked=false;
 	@CreationTimestamp
 	@ApiModelProperty(hidden = true)
-	private Timestamp createdOn;
+	private DateTime createdOn;
 	@UpdateTimestamp
 	@ApiModelProperty(hidden = true)
-	private Timestamp updatedOn;
+	private DateTime updatedOn;
 	@ApiModelProperty(hidden = true)
-	private Timestamp deletedOn;
+	private DateTime deletedOn;
 
 	@OneToOne
 	private Role role;
@@ -193,27 +194,27 @@ public class User {
 		this.isLocked = isLocked;
 	}
 
-	public Timestamp getCreatedOn() {
+	public DateTime getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Timestamp createdOn) {
+	public void setCreatedOn(DateTime createdOn) {
 		this.createdOn = createdOn;
 	}
 
-	public Timestamp getUpdatedOn() {
+	public DateTime getUpdatedOn() {
 		return updatedOn;
 	}
 
-	public void setUpdatedOn(Timestamp updatedOn) {
+	public void setUpdatedOn(DateTime updatedOn) {
 		this.updatedOn = updatedOn;
 	}
 
-	public Timestamp getDeletedOn() {
+	public DateTime getDeletedOn() {
 		return deletedOn;
 	}
 
-	public void setDeletedOn(Timestamp deletedOn) {
+	public void setDeletedOn(DateTime deletedOn) {
 		this.deletedOn = deletedOn;
 	}
 
