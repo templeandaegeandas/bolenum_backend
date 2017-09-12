@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
 	public void sendToken(User user) {
 		String token = TokenGenerator.generateToken();
 		Date date = new Date();
-		emailservice.mailSend(user, token);
+		emailservice.registrationMailSend(user.getEmailId(), token);
 		VerificationToken verificationToken = new VerificationToken(token, user);
 		verificationToken.setTokentype(TokenType.REGISTRATION);
 		verificationToken.setCreatedOn(new Timestamp(date.getTime()));

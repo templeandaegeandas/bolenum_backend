@@ -35,7 +35,7 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.GET)
+	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody User user, BindingResult result) {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
@@ -43,7 +43,6 @@ public class UserController {
 			Boolean isUserExist = userService.isUserExist(user);
 			if (!isUserExist) {
 				userService.registerUser(user);
-				// System.out.println(user.getEmailId());
 				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, user.getEmailId());
 			} else {
 				boolean isRegistered = userService.isUserAlreadyRegistered(user);

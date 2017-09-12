@@ -4,6 +4,11 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import io.swagger.annotations.ApiModelProperty;
+
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -42,16 +47,19 @@ public class User {
 
 	private Date dob;
 
+	@ApiModelProperty(hidden = true)
 	private Boolean isEnabled;
-
+	@ApiModelProperty(hidden = true)
 	private Boolean isDeleted;
-
+	@ApiModelProperty(hidden = true)
 	private Boolean isLocked;
-
+	@CreationTimestamp
+	@ApiModelProperty(hidden = true)
 	private Timestamp createdOn;
-
+	@UpdateTimestamp
+	@ApiModelProperty(hidden = true)
 	private Timestamp updatedOn;
-
+	@ApiModelProperty(hidden = true)
 	private Timestamp deletedOn;
 
 	@OneToOne
