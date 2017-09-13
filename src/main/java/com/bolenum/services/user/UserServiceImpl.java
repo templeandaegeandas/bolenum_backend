@@ -91,4 +91,9 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByEmailId(email);
 	}
 
+	@Override
+	public User saveUser(User user) {
+		return userRepository.saveAndFlush(user);
+	}
+
 }

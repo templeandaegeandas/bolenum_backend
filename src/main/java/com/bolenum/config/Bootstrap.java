@@ -86,7 +86,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			form.setEmailId("admin@bolenum.com");
 			form.setPassword(passwordEncoder.encode("12345"));
 			form.setRoles(roleAdmin);
-			userService.registerUser(form);
+			userService.saveUser(form);
 		} else {
 			logger.debug("admin exist");
 		}

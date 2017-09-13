@@ -10,6 +10,7 @@ import com.bolenum.model.User;
 
 public interface UserService {
 	public void registerUser(User user) ;
+	public User saveUser(User user);
 	public boolean verifyUserToken(String token);
 	public User findByEmail(String email);
 	public void sendToken(User user);
