@@ -17,4 +17,5 @@ public class UrlConstant {
 	public static final String PRIVILEGE_URI = "privilege";
 	public static final String ROLE_URI = "role";
 	public static final String REGISTER_USER = "register";
+	public static final String USER_MAIL_VERIFY = "verify";
 }

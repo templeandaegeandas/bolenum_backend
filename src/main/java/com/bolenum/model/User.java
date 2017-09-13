@@ -52,11 +52,11 @@ public class User {
 	private Date dob;
 
 	@ApiModelProperty(hidden = true)
-	private Boolean isEnabled=false;
+	private Boolean isEnabled = false;
 	@ApiModelProperty(hidden = true)
-	private Boolean isDeleted=false;
+	private Boolean isDeleted = false;
 	@ApiModelProperty(hidden = true)
-	private Boolean isLocked=false;
+	private Boolean isLocked = false;
 	@ApiModelProperty(hidden = true)
 	@CreationTimestamp
 	private Date createdOn;
@@ -197,8 +197,6 @@ public class User {
 		this.isLocked = isLocked;
 	}
 
-
-
 	/**
 	 * @return the createdOn
 	 */
@@ -207,7 +205,8 @@ public class User {
 	}
 
 	/**
-	 * @param createdOn the createdOn to set
+	 * @param createdOn
+	 *            the createdOn to set
 	 */
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
@@ -221,7 +220,8 @@ public class User {
 	}
 
 	/**
-	 * @param updatedOn the updatedOn to set
+	 * @param updatedOn
+	 *            the updatedOn to set
 	 */
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
@@ -235,7 +235,8 @@ public class User {
 	}
 
 	/**
-	 * @param deletedOn the deletedOn to set
+	 * @param deletedOn
+	 *            the deletedOn to set
 	 */
 	public void setDeletedOn(Date deletedOn) {
 		this.deletedOn = deletedOn;
@@ -249,7 +250,8 @@ public class User {
 	}
 
 	/**
-	 * @param role the role to set
+	 * @param role
+	 *            the role to set
 	 */
 	public void setRole(Role role) {
 		this.role = role;

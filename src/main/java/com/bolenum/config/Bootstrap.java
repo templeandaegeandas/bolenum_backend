@@ -17,7 +17,7 @@ import com.bolenum.model.User;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
 import com.bolenum.services.user.UserService;
-import com.bolenum.util.PasswordEncoder;
+import com.bolenum.util.PasswordEncoderUtil;
 
 /**
  * @author chandan kumar singh
@@ -33,7 +33,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private PrivilegeService privilegeService;
 
 	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private PasswordEncoderUtil passwordEncoder;
 
 	private Set<Privilege> privileges = new HashSet<>();
 
@@ -83,6 +83,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		User admin = userService.findByEmail("admin@bolenum.com");
 		if (admin == null) {
 			User form = new User();
+			form.setIsEnabled(true);
 			form.setFirstName("bolenum");
 			form.setEmailId("admin@bolenum.com");
 			form.setPassword(passwordEncoder.encode("12345"));

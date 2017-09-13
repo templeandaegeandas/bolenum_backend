@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bolenum.constant.Message;
+import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.ResponseHandler;
-import com.bolenum.constant.Message;
-import com.bolenum.constant.UrlConstant;
+
 import io.swagger.annotations.Api;
 
 /**
@@ -44,19 +45,34 @@ public class UserController {
 			if (isUserExist == null) {
 				userService.registerUser(user);
 				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, user.getEmailId());
+			} else if (isUserExist != null && isUserExist.getIsEnabled()) {
+				return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
+						user.getEmailId());
 			} else {
-
-				if (isUserExist.getIsEnabled()) {
-					return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
-							user.getEmailId());
-				} else {
-					userService.sendTokenIfUserAlreadyExist(isUserExist);
-					return ResponseHandler.response(HttpStatus.OK, false, Message.EMAIL_ALREADY_EXISTS,
-							user.getEmailId());
-				}
-
+				//userService.reRegister(isUserExist);
+				return ResponseHandler.response(HttpStatus.OK, false, Message.EMAIL_ALREADY_EXISTS, user.getEmailId());
 			}
-		}
 
+		}
 	}
+
+	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
+	public ResponseEntity<Object> userMailVerfy(@Valid @RequestBody User user, BindingResult result) {
+		if (result.hasErrors()) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
+		} else {
+			User isUserExist = userService.findByEmail(user.getEmailId());
+			if (isUserExist == null) {
+				userService.registerUser(user);
+				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, user.getEmailId());
+			} else if (isUserExist != null && isUserExist.getIsEnabled()) {
+				return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
+						user.getEmailId());
+			} else {
+				return ResponseHandler.response(HttpStatus.OK, false, Message.EMAIL_ALREADY_EXISTS, user.getEmailId());
+			}
+
+		}
+	}
+
 }

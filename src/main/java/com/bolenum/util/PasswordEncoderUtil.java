@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * @date 12-Sep-2017
  */
 @Service
-public class PasswordEncoder {
+public class PasswordEncoderUtil {
 	private static BCryptPasswordEncoder passwordEncoder = null;
 
 	@Value("${bolenum.tokensecret}")
