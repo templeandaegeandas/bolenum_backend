@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.Message;
+import com.bolenum.constant.TokenType;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
@@ -36,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
 			if (passwordEncoder.matches(password, user.getPassword())) {
 				// Generate Token and Save it for the logged in user
 				AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
+				authToken.setTokentype(TokenType.AUTHENTICATION);
 				AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
 				return savedAuthToken;
 			} else {

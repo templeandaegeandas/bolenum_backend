@@ -53,17 +53,22 @@ public class User {
 
 	@ApiModelProperty(hidden = true)
 	private Boolean isEnabled = false;
+	
 	@ApiModelProperty(hidden = true)
 	private Boolean isDeleted = false;
+	
 	@ApiModelProperty(hidden = true)
 	private Boolean isLocked = false;
+	
 	@ApiModelProperty(hidden = true)
 	@CreationTimestamp
 	private Date createdOn;
-	@ApiModelProperty(hidden = true)
-	private Date updatedOn;
+	
 	@ApiModelProperty(hidden = true)
 	@UpdateTimestamp
+	private Date updatedOn;
+	
+	@ApiModelProperty(hidden = true)
 	private Date deletedOn;
 
 	@OneToOne
