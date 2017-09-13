@@ -1,5 +1,7 @@
 package com.bolenum.services.user;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
-	
+
 	@Autowired
 	private RoleRepo roleRepo;
 
@@ -80,18 +82,21 @@ public class UserServiceImpl implements UserService {
 		return false;
 	}
 
-	// public boolean isTokenExpired(VerificationToken verificationTokenToCheck) {
+	public boolean isTokenExpired(AuthenticationToken verificationTokenToCheck) {
 
-	// DateTime tokenCreatedTime = verificationTokenToCheck.getCreatedOn();
-	// DateTime expirationDate = tokenCreatedTime.plusHours(2);
-	//
-	// if (expirationDate.isBeforeNow()) {
-	// return false;
-	// } else {
-	// return true;
-	// }
+		Date tokenCreatedTime = verificationTokenToCheck.getCreatedOn();
+		long HOUR = 3600 * 1000;
+		long expirationTime = tokenCreatedTime.getTime() + 2 * HOUR;
+		if (expirationTime > tokenCreatedTime.getTime())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 
-	// }
+	}
 
 	@Override
 	public User findByEmail(String email) {
@@ -105,10 +110,10 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void reRegister(User isUserExist) {
-        AuthenticationToken verificationToken=tokenRepository.findByUser(isUserExist);
-        tokenRepository.delete(verificationToken);
-        registerUser(isUserExist);
-        
+		AuthenticationToken verificationToken = tokenRepository.findByUser(isUserExist);
+		tokenRepository.delete(verificationToken);
+		registerUser(isUserExist);
+
 	}
 
 }
