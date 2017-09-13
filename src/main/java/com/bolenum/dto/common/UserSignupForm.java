@@ -5,10 +5,14 @@ package com.bolenum.dto.common;
 
 import java.util.Date;
 
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
-import com.bolenum.model.Role;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.bolenum.model.User;
 
 /**
  * @author chandan kumar singh
@@ -18,20 +22,32 @@ public class UserSignupForm {
 
 	private Long userId;
 
-	@NotNull
+	@NotEmpty
+	@Pattern(regexp = "([a-zA-Z]+)", message = "first Name must be valid")
 	private String firstName;
 
+	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
 	private String middleName;
 
+	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
 	private String lastName;
 
-	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Incorrect email id")
+	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "please enter valid email")
 	@NotNull
 	private String emailId;
 
 	@NotNull
+	@Length(min = 8, max = 64, message = "password length must be between 8 and 64 character")
+	@Pattern.List({ @Pattern(regexp = "(?=.*[0-9]).+", message = "Password must contain one digit."),
+			@Pattern(regexp = "(?=.*[a-z]).+", message = "Password must contain one lowercase letter."),
+			@Pattern(regexp = "(?=.*[A-Z]).+", message = "Password must contain one upper letter."),
+			@Pattern(regexp = "(?=.*[!@#$%^&*+=?-_()/\"\\.,<>~`;:]).+", message = "Password must contain one special character."),
+			@Pattern(regexp = "(?=\\S+$).+", message = "Password must contain no whitespace.") })
 	private String password;
-	private Role role;
+
+	@NotNull
+	public String repassword = "";
+
 	private String address;
 
 	private String city;
@@ -55,7 +71,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param userId
-	 * the userId to set
+	 *            the userId to set
 	 */
 	public void setUserId(Long userId) {
 		this.userId = userId;
@@ -70,7 +86,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param firstName
-	 * the firstName to set
+	 *            the firstName to set
 	 */
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
@@ -100,7 +116,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param lastName
-	 * the lastName to set
+	 *            the lastName to set
 	 */
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
@@ -115,7 +131,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param emailId
-	 * the emailId to set
+	 *            the emailId to set
 	 */
 	public void setEmailId(String emailId) {
 		this.emailId = emailId;
@@ -130,7 +146,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param password
-	 * the password to set
+	 *            the password to set
 	 */
 	public void setPassword(String password) {
 		this.password = password;
@@ -144,23 +160,8 @@ public class UserSignupForm {
 	}
 
 	/**
-	 * @return the role
-	 */
-	public Role getRole() {
-		return role;
-	}
-
-	/**
-	 * @param role 
-	 * the role to set
-	 */
-	public void setRole(Role role) {
-		this.role = role;
-	}
-
-	/**
 	 * @param address
-	 * the address to set
+	 *            the address to set
 	 */
 	public void setAddress(String address) {
 		this.address = address;
@@ -175,7 +176,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param city
-	 * the city to set
+	 *            the city to set
 	 */
 	public void setCity(String city) {
 		this.city = city;
@@ -190,7 +191,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param state
-	 * the state to set
+	 *            the state to set
 	 */
 	public void setState(String state) {
 		this.state = state;
@@ -205,7 +206,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param country
-	 * the country to set
+	 *            the country to set
 	 */
 	public void setCountry(String country) {
 		this.country = country;
@@ -220,7 +221,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param mobileNumber
-	 * the mobileNumber to set
+	 *            the mobileNumber to set
 	 */
 	public void setMobileNumber(String mobileNumber) {
 		this.mobileNumber = mobileNumber;
@@ -235,7 +236,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param gender
-	 * the gender to set
+	 *            the gender to set
 	 */
 	public void setGender(String gender) {
 		this.gender = gender;
@@ -250,10 +251,31 @@ public class UserSignupForm {
 
 	/**
 	 * @param dob
-	 *  the dob to set
+	 *            the dob to set
 	 */
 	public void setDob(Date dob) {
 		this.dob = dob;
 	}
 
+	@AssertTrue(message = "password did not match")
+	private boolean isValid() {
+		boolean check = this.password.equals(this.repassword);
+		return check;
+	}
+
+	public User copy(User user) {
+		user.setFirstName(this.firstName);
+		user.setMiddleName(this.middleName);
+		user.setLastName(this.lastName);
+		user.setEmailId(this.emailId);
+		user.setPassword(this.password);
+		user.setAddress(this.address);
+		user.setCity(this.city);
+		user.setState(this.state);
+		user.setCountry(this.country);
+		user.setMobileNumber(this.mobileNumber);
+		user.setGender(this.gender);
+		user.setDob(this.dob);
+		return user;
+	}
 }

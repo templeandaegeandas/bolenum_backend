@@ -42,7 +42,20 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		addPrivileges();
+		addRole();
 		createAdmin();
+	}
+
+	/**
+	 * @description addRole
+	 * @param 
+	 * @return void
+	 * @exception 
+	 * 
+	 */
+	private void addRole() {
+		Role role = new Role("ROLE_USER","user role",privilegeService.findAll());
+		roleService.findOrCreate(role);
 	}
 
 	/**

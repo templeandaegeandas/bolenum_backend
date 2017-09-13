@@ -11,6 +11,8 @@ public class Message {
 	}
 	public static final String SUCCESS = "success";
 	public static final String ERROR = "something went wrong";
+	public static final String INVALID_REQ = "Invalid request data!!!";
+	
 	public static final String MAIL_SENT_SUCCESSFULLY = "mail sent successfully";
 	public static final String INVALID_CRED = "Invalid credentials!!!";
 	
