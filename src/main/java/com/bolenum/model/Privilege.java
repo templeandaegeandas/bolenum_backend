@@ -7,8 +7,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.NotBlank;
-
 @Entity
 public class Privilege {
 
@@ -20,7 +18,6 @@ public class Privilege {
 	@Column(unique = true)
 	private String name;
 
-	@NotBlank
 	private String description;
 
 	public Privilege() {

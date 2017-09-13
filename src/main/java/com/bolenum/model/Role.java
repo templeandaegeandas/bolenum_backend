@@ -2,13 +2,11 @@ package com.bolenum.model;
 
 import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
+import javax.persistence.ManyToMany;
 import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
@@ -18,14 +16,13 @@ public class Role {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	@NotBlank
-	@Column(unique = true)
+
 	private String name;
 
 	@NotBlank
 	private String description;
 
-	@OneToMany // (cascade = CascadeType.PERSIST)
+	@ManyToMany
 	private Set<Privilege> privileges;
 
 	public Role() {

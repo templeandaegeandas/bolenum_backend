@@ -7,7 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
-
+/**
+ * 
+ * @Author Himanshu
+ * @Date 13-Sep-2017
+ */
 @Service
 public class MailService {
 	public static final Logger logger = LoggerFactory.getLogger(MailService.class);

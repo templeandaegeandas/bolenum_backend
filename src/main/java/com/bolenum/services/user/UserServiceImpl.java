@@ -7,6 +7,7 @@ import com.bolenum.constant.TokenType;
 import com.bolenum.model.User;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
+import com.bolenum.repo.common.RoleRepo;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
@@ -31,20 +32,23 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
+	
+	@Autowired
+	private RoleRepo roleRepo;
 
 	@Override
 	public void registerUser(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		//user.setRole(role);
+		user.setRole(roleRepo.findByNameIgnoreCase("ROLE_USER"));
 		userRepository.save(user);
 		mailVerification(user);
 	}
 
 	private void mailVerification(User user) {
 		String token = TokenGenerator.generateToken();
-		AuthenticationToken verificationToken = new AuthenticationToken(token, user);
-		verificationToken.setTokentype(TokenType.REGISTRATION);
-		tokenRepository.saveAndFlush(verificationToken);
+		AuthenticationToken authenticationToken = new AuthenticationToken(token, user);
+		authenticationToken.setTokentype(TokenType.REGISTRATION);
+		tokenRepository.saveAndFlush(authenticationToken);
 		emailservice.registrationMailSend(user.getEmailId(), token);
 	}
 
