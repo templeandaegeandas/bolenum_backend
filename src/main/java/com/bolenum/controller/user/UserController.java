@@ -40,12 +40,12 @@ public class UserController {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
 		} else {
-			User isUserExist = userService.findByEmail(user);
-			if (isUserExist==null) {
+			User isUserExist = userService.findByEmail(user.getEmailId());
+			if (isUserExist == null) {
 				userService.registerUser(user);
 				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, user.getEmailId());
 			} else {
-				
+
 				if (isUserExist.getIsEnabled()) {
 					return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
 							user.getEmailId());

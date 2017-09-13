@@ -1,5 +1,7 @@
 package com.bolenum.services.common;
 
+import java.util.Set;
+
 import com.bolenum.model.Privilege;
 
 /**
@@ -12,6 +14,10 @@ public interface PrivilegeService {
 
 	public Boolean deletePrivilege(Long id);
 
-	public Privilege viewPrivilege(Long id);
+	public Privilege findPrivilegeById(Long id);
+	public Privilege findByName(String name);
+	public Privilege findOrCreate(Privilege privilege);
+	
+	public Set<Privilege> findAll();
 
 }

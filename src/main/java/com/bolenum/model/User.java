@@ -1,19 +1,22 @@
 package com.bolenum.model;
 
-import javax.persistence.*;
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.joda.time.DateTime;
 
 import io.swagger.annotations.ApiModelProperty;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
-@Entity // This tells Hibernate to make a table out of this class
+@Entity
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -54,14 +57,14 @@ public class User {
 	private Boolean isDeleted=false;
 	@ApiModelProperty(hidden = true)
 	private Boolean isLocked=false;
+	@ApiModelProperty(hidden = true)
 	@CreationTimestamp
+	private Date createdOn;
 	@ApiModelProperty(hidden = true)
-	private DateTime createdOn;
+	private Date updatedOn;
+	@ApiModelProperty(hidden = true)
 	@UpdateTimestamp
-	@ApiModelProperty(hidden = true)
-	private DateTime updatedOn;
-	@ApiModelProperty(hidden = true)
-	private DateTime deletedOn;
+	private Date deletedOn;
 
 	@OneToOne
 	private Role role;
@@ -194,28 +197,62 @@ public class User {
 		this.isLocked = isLocked;
 	}
 
-	public DateTime getCreatedOn() {
+
+
+	/**
+	 * @return the createdOn
+	 */
+	public Date getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(DateTime createdOn) {
+	/**
+	 * @param createdOn the createdOn to set
+	 */
+	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
 	}
 
-	public DateTime getUpdatedOn() {
+	/**
+	 * @return the updatedOn
+	 */
+	public Date getUpdatedOn() {
 		return updatedOn;
 	}
 
-	public void setUpdatedOn(DateTime updatedOn) {
+	/**
+	 * @param updatedOn the updatedOn to set
+	 */
+	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
 	}
 
-	public DateTime getDeletedOn() {
+	/**
+	 * @return the deletedOn
+	 */
+	public Date getDeletedOn() {
 		return deletedOn;
 	}
 
-	public void setDeletedOn(DateTime deletedOn) {
+	/**
+	 * @param deletedOn the deletedOn to set
+	 */
+	public void setDeletedOn(Date deletedOn) {
 		this.deletedOn = deletedOn;
+	}
+
+	/**
+	 * @return the role
+	 */
+	public Role getRole() {
+		return role;
+	}
+
+	/**
+	 * @param role the role to set
+	 */
+	public void setRole(Role role) {
+		this.role = role;
 	}
 
 	public Role getRoles() {

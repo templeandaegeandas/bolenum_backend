@@ -13,7 +13,7 @@ public interface RoleService {
 	public Boolean deleteRole(Long id);
 
 	public Role viewRole(Long id);
-
-
+	public Role findByName(String name);
+	public Role findOrCreate(Role role);
 
 }

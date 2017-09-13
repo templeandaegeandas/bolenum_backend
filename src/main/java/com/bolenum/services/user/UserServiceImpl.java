@@ -9,7 +9,6 @@ import com.bolenum.dao.user.TokenRepository;
 import com.bolenum.dao.user.UserRepository;
 import com.bolenum.model.User;
 import com.bolenum.model.VerificationToken;
-import com.bolenum.services.user.UserService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.TokenGenerator;
 
@@ -32,12 +31,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void registerUser(User user) {
-		user.setCreatedOn(new DateTime());
-		user.setIsEnabled(false);
+		//user.setCreatedOn(new DateTime());
+		user.setIsEnabled(true);
 		userRepository.save(user);
-		sendToken(user);
+		//sendToken(user);
 	}
-
+	
 	public void sendToken(User user) {
 		String token = TokenGenerator.generateToken();
 		DateTime date = new DateTime();
@@ -49,10 +48,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public void sendTokenIfUserAlreadyExist(User user) {
-		  VerificationToken verificationToken =tokenRepository.findByUser(user);
-          verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
-          emailservice.registrationMailSend(user.getEmailId(), verificationToken.getToken());
-	} 
+		VerificationToken verificationToken = tokenRepository.findByUser(user);
+		verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
+		emailservice.registrationMailSend(user.getEmailId(), verificationToken.getToken());
+	}
 
 	@Override
 	public boolean verifyUserToken(String token) {
@@ -88,8 +87,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User findByEmail(User user) {
-		return userRepository.findByEmailId(user.getEmailId());
+	public User findByEmail(String email) {
+		return userRepository.findByEmailId(email);
 	}
 
 }

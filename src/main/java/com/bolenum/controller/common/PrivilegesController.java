@@ -85,7 +85,7 @@ public class PrivilegesController {
 	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.GET)
 	public ResponseEntity<Object> getPrivileges(Long id) {
-		Privilege privilege = privilegeService.viewPrivilege(id);
+		Privilege privilege = privilegeService.findPrivilegeById(id);
 		if (privilege != null) {
 			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.PRIVILEGE_FOUND, privilege.getName());
 		} else {

@@ -14,6 +14,7 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public Role saveRole(Role role) {
+		System.out.println("save role ssssssss: "+role.getName());
 		return roleRepo.saveAndFlush(role);
 
 	}
@@ -39,6 +40,22 @@ public class RoleServiceImpl implements RoleService {
 		}
 	}
 
+	@Override
+	public Role findOrCreate(Role role) {
+		System.out.println("role name: "+role.getName());
+		Role newRole = roleRepo.findByName(role.getName().trim());
+		System.out.println("newRole == null: "+(newRole == null));
+		if (newRole == null) {
+			System.out.println("---new role is null--------------------------");
+			return saveRole(role);
+		} else {
+			return saveRole(newRole);
+		}
+	}
 
+	@Override
+	public Role findByName(String name) {
+		return roleRepo.findByName(name);
+	}
 
 }

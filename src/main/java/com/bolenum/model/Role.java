@@ -2,6 +2,7 @@ package com.bolenum.model;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,14 +19,24 @@ public class Role {
 	private Long id;
 
 	@NotBlank
-	@Column(unique=true)
+	@Column(unique = true)
 	private String name;
 
 	@NotBlank
 	private String description;
 
-	@OneToMany
+	@OneToMany//(cascade = CascadeType.PERSIST)
 	private Set<Privilege> privileges;
+
+	public Role() {
+
+	}
+
+	public Role(String name, String description, Set<Privilege> privileges) {
+		this.name = name;
+		this.description = description;
+		this.privileges = privileges;
+	}
 
 	public Long getId() {
 		return id;

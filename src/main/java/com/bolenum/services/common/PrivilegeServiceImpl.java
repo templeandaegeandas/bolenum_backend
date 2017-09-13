@@ -1,5 +1,10 @@
 package com.bolenum.services.common;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +19,8 @@ import com.bolenum.model.Privilege;
 
 @Service
 public class PrivilegeServiceImpl implements PrivilegeService {
+
+	private static final Logger logger = LoggerFactory.getLogger(PrivilegeServiceImpl.class);
 
 	@Autowired
 	private PrivilegeRepo privilegeRepo;
@@ -35,13 +42,31 @@ public class PrivilegeServiceImpl implements PrivilegeService {
 	}
 
 	@Override
-	public Privilege viewPrivilege(Long id) {
-		Privilege privilege = privilegeRepo.findById(id);
-		if (privilege != null) {
-			return privilege;
-		} else {
-			return null;
+	public Privilege findPrivilegeById(Long id) {
+		return privilegeRepo.findById(id);
+	}
+
+	@Override
+	public Privilege findOrCreate(Privilege privilege) {
+		Privilege p = findByName(privilege.getName().trim());
+		logger.debug("privalege name in find or create: " + privilege.getName().trim());
+		logger.debug("find by name result: " + p);
+		if (p == null) {
+			logger.debug("privalege p is null ");
+			return savePrivilege(privilege);
 		}
+		return savePrivilege(p);
+	}
+
+	@Override
+	public Privilege findByName(String name) {
+		return privilegeRepo.findByNameIgnoreCase(name);
+	}
+
+	@Override
+	public Set<Privilege> findAll() {
+		// TODO Auto-generated method stub
+		return  new HashSet<Privilege>(privilegeRepo.findAll());
 	}
 
 }
