@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.dao.common.PrivilegeRepo;
 import com.bolenum.model.Privilege;
+import com.bolenum.repo.common.PrivilegeRepo;
 
 /**
  * @Author himanshu

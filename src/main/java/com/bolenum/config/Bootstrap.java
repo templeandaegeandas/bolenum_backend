@@ -11,7 +11,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import com.bolenum.controller.user.UserController;
 import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
 import com.bolenum.model.User;
@@ -38,7 +37,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	private Set<Privilege> privileges = new HashSet<>();
 
-	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+	private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -55,7 +54,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	 *
 	 */
 	private void addPrivileges() {
-		logger.info("I am in method");
 		Privilege add = new Privilege("add", "adding");
 		Privilege edit = new Privilege("edit", "editing");
 		Privilege get = new Privilege("view", "showing");
@@ -73,7 +71,10 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * @description createAdmin @param @return void @exception
+	 * @description createAdmin 
+	 * @param 
+	 * @return void 
+	 * @exception
 	 * 
 	 */
 	private void createAdmin() {

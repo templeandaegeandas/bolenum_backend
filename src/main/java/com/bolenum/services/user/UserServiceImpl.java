@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.TokenType;
-import com.bolenum.dao.user.TokenRepository;
-import com.bolenum.dao.user.UserRepository;
 import com.bolenum.model.User;
 import com.bolenum.model.VerificationToken;
+import com.bolenum.repo.user.TokenRepository;
+import com.bolenum.repo.user.UserRepository;
 import com.bolenum.util.MailService;
 import com.bolenum.util.TokenGenerator;
 
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User findByEmail(String email) {
-		return userRepository.findByEmailId(email);
+		return userRepository.findByEmailIdIgnoreCase(email);
 	}
 
 	@Override

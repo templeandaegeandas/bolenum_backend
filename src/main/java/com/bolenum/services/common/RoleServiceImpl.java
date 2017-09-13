@@ -1,20 +1,22 @@
 package com.bolenum.services.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.dao.common.RoleRepo;
 import com.bolenum.model.Role;
+import com.bolenum.repo.common.RoleRepo;
 
 @Service
 public class RoleServiceImpl implements RoleService {
-
+	private static final Logger logger = LoggerFactory.getLogger(RoleServiceImpl.class);
 	@Autowired
 	private RoleRepo roleRepo;
 
 	@Override
 	public Role saveRole(Role role) {
-		System.out.println("save role ssssssss: "+role.getName());
+		logger.debug("save and flush role meth: "+role.getName());
 		return roleRepo.saveAndFlush(role);
 
 	}
@@ -42,20 +44,21 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public Role findOrCreate(Role role) {
-		System.out.println("role name: "+role.getName());
-		Role newRole = roleRepo.findByName(role.getName().trim());
-		System.out.println("newRole == null: "+(newRole == null));
+		logger.debug("find or create role: "+role.getName().trim());
+		Role newRole = roleRepo.findByNameIgnoreCase(role.getName().trim());
 		if (newRole == null) {
-			System.out.println("---new role is null--------------------------");
+			logger.debug("find or create role: got new role");
 			return saveRole(role);
 		} else {
+			logger.debug("find or create role: role exists");
 			return saveRole(newRole);
 		}
 	}
 
 	@Override
 	public Role findByName(String name) {
-		return roleRepo.findByName(name);
+		logger.debug("find by name: "+name);
+		return roleRepo.findByNameIgnoreCase(name);
 	}
 
 }

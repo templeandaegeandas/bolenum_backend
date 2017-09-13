@@ -1,4 +1,4 @@
-package com.bolenum.dao.user;
+package com.bolenum.repo.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

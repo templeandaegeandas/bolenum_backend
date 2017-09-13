@@ -1,4 +1,4 @@
-package com.bolenum.dao.user;
+package com.bolenum.repo.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -6,6 +6,6 @@ import com.bolenum.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	User findByEmailId(String emailId);
+	User findByEmailIdIgnoreCase(String emailId);
 
 }

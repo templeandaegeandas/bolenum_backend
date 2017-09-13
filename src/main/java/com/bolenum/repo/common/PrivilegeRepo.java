@@ -1,4 +1,4 @@
-package com.bolenum.dao.common;
+package com.bolenum.repo.common;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

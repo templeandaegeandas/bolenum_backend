@@ -1,4 +1,4 @@
-package com.bolenum.dao.common;
+package com.bolenum.repo.common;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -8,6 +8,6 @@ public interface RoleRepo extends JpaRepository<Role, Long> {
 
 	Role findById(Long id);
 
-	Role findByName(String name);
+	Role findByNameIgnoreCase(String name);
 
 }
