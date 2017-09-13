@@ -12,6 +12,7 @@ public class Message {
 	public static final String SUCCESS = "success";
 	public static final String ERROR = "something went wrong";
 	public static final String MAIL_SENT_SUCCESSFULLY = "mail sent successfully";
+	public static final String INVALID_CRED = "Invalid credentials!!!";
 	
 	public static final String PRIVILEGE_ADDED_SUCCESSFULLY = "previlege added successfully";
 	public static final String PRIVILEGE_REMOVED_SUCCESSFULLY= "previlege removed successfully";
@@ -26,4 +27,7 @@ public class Message {
 	public static final String INVALID_EMAIL = "invalid email";
 	public static final String EMAIL_ALREADY_EXISTS = "email already exist";
 	
+	
+	public static final String USER_NOT_FOUND = "User does not exists";
+
 }

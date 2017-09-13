@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import com.bolenum.constant.TokenType;
 import com.bolenum.model.User;
 import com.bolenum.model.AuthenticationToken;
-import com.bolenum.repo.user.TokenRepository;
+import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Autowired
-	private TokenRepository tokenRepository;
+	private AuthenticationTokenRepo tokenRepository;
 
 	@Autowired
 	private MailService emailservice;
