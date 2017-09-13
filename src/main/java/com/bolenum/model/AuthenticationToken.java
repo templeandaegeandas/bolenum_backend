@@ -20,7 +20,7 @@ import com.bolenum.constant.TokenType;
  * 
  */
 @Entity
-public class VerificationToken {
+public class AuthenticationToken {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -39,14 +39,14 @@ public class VerificationToken {
 	
 	private Date deletedOn;
 
-	public VerificationToken() {
+	public AuthenticationToken() {
 	}
 
-	public VerificationToken(String token) {
+	public AuthenticationToken(String token) {
 		this.token = token;
 	}
 
-	public VerificationToken(String token, User user) {
+	public AuthenticationToken(String token, User user) {
 		this.token = token;
 		this.user = user;
 	}

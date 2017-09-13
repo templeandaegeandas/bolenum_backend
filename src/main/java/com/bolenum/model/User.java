@@ -256,13 +256,4 @@ public class User {
 	public void setRole(Role role) {
 		this.role = role;
 	}
-
-	public Role getRoles() {
-		return role;
-	}
-
-	public void setRoles(Role role) {
-		this.role = role;
-	}
-
 }

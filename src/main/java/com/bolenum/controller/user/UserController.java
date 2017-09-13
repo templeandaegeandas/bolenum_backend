@@ -49,7 +49,8 @@ public class UserController {
 				return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
 						user.getEmailId());
 			} else {
-				//userService.reRegister(isUserExist);
+				user.setUserId(isUserExist.getUserId());
+				userService.reRegister(user);
 				return ResponseHandler.response(HttpStatus.OK, false, Message.EMAIL_ALREADY_EXISTS, user.getEmailId());
 			}
 

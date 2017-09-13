@@ -4,12 +4,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.bolenum.model.User;
-import com.bolenum.model.VerificationToken;
+import com.bolenum.model.AuthenticationToken;
 
 @Repository("tokenRepository")
 
-public interface TokenRepository extends JpaRepository<VerificationToken, String> {
-	VerificationToken findByToken(String token);
+public interface TokenRepository extends JpaRepository<AuthenticationToken, String> {
+	AuthenticationToken findByToken(String token);
 
-	VerificationToken findByUser(User user);
+	AuthenticationToken findByUser(User user);
 }
