@@ -57,30 +57,30 @@ public class UserServiceImpl implements UserService {
 		emailservice.registrationMailSend(user.getEmailId(), token);
 	}
 
-//	public void sendTokenIfUserAlreadyExist(User user) {
-//		// VerificationToken verificationToken = tokenRepository.findByUser(user);
-//		// verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
-//		// emailservice.registrationMailSend(user.getEmailId(),
-//		// verificationToken.getToken());
-//	}
+	// public void sendTokenIfUserAlreadyExist(User user) {
+	// // VerificationToken verificationToken = tokenRepository.findByUser(user);
+	// //
+	// verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
+	// // emailservice.registrationMailSend(user.getEmailId(),
+	// // verificationToken.getToken());
+	// }
 
 	@Override
 	public boolean verifyUserToken(String token) {
-		// check the token is exist in verification_token table
-
-		AuthenticationToken authenticationToken = tokenRepository.findByToken(token);
-		User user = authenticationToken.getUser();
-
-		boolean isExpired = isTokenExpired(authenticationToken);
-		//System.out.println("isExpired =" + isExpired);
-
-		if (user != null && user.getIsEnabled() == false && isExpired == false) {
-			user.setIsEnabled(true);
-			userRepository.saveAndFlush(user);
-			return true;
-		} else {
-			return false;
+		
+		if (token != null && !token.isEmpty()) {
+			AuthenticationToken authenticationToken = tokenRepository.findByToken(token);
+			if (authenticationToken != null) {
+				User user = authenticationToken.getUser();
+				boolean isExpired = isTokenExpired(authenticationToken);
+				if (user != null && user.getIsEnabled() == false && isExpired == false) {
+					user.setIsEnabled(true);
+					userRepository.saveAndFlush(user);
+					return true;
+				}
+			}
 		}
+		return false;
 	}
 
 	public boolean isTokenExpired(AuthenticationToken verificationTokenToCheck) {
@@ -93,7 +93,6 @@ public class UserServiceImpl implements UserService {
 		} else {
 			return true;
 		}
-
 	}
 
 	@Override

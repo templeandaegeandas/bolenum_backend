@@ -14,6 +14,7 @@ import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.bolenum.util.TokenGenerator;
 
@@ -29,7 +30,9 @@ public class AuthServiceImpl implements AuthService {
 	private PasswordEncoderUtil passwordEncoder;
 	@Autowired
 	private AuthenticationTokenRepo authenticationTokenRepo;
-
+	@Autowired
+	private MailService emailservice;
+	
 	@Override
 	public AuthenticationToken login(String email, String password) throws InvalidPasswordException {
 		User user = userRepository.findByEmailIdIgnoreCase(email);
@@ -50,12 +53,18 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public Boolean resetPassword(String email) {
-		User user=userRepository.findByEmailIdIgnoreCase(email);
-		return false;
+		return null;
 		
-	}
-	
 
-	
+	}
+
+	@Override
+	public void validateUser(String email) {
+		User user = userRepository.findByEmailIdIgnoreCase(email);
+		if (user != null) {
+              
+		}
+		return false;
+	}
 
 }
