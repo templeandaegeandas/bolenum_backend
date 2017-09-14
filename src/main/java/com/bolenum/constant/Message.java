@@ -30,7 +30,7 @@ public class Message {
 	public static final String EMAIL_ALREADY_EXISTS = "email already exist";
 	
 	
-	
+	public static final String LOGIN_SUCCESS = "login successfully";
 	public static final String INVALID_TOKEN = "requested token is not valid";
 	
 	//************USER MESSAGE***************//

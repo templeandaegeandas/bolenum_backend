@@ -3,6 +3,9 @@
  */
 package com.bolenum.controller.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +46,19 @@ public class AuthController {
 			} catch (UsernameNotFoundException | InvalidPasswordException e) {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
 			}
-			return ResponseHandler.response(HttpStatus.OK, false, "Login sucessful", token);
+			return ResponseHandler.response(HttpStatus.OK, false, Message.LOGIN_SUCCESS, loginResponse(token));
 		}
+	}
+
+	private Map<String, Object> loginResponse(AuthenticationToken token) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("fName", token.getUser().getFirstName());
+		map.put("mName", token.getUser().getMiddleName());
+		map.put("lName", token.getUser().getLastName());
+		map.put("name", token.getUser().getFullName());
+		map.put("email", token.getUser().getEmailId());
+		map.put("role", token.getUser().getRole().getName());
+		map.put("token", token.getToken());
+		return map;
 	}
 }

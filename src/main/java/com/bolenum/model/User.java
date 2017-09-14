@@ -53,21 +53,21 @@ public class User {
 
 	@ApiModelProperty(hidden = true)
 	private Boolean isEnabled = false;
-	
+
 	@ApiModelProperty(hidden = true)
 	private Boolean isDeleted = false;
-	
+
 	@ApiModelProperty(hidden = true)
 	private Boolean isLocked = false;
-	
+
 	@ApiModelProperty(hidden = true)
 	@CreationTimestamp
 	private Date createdOn;
-	
+
 	@ApiModelProperty(hidden = true)
 	@UpdateTimestamp
 	private Date updatedOn;
-	
+
 	@ApiModelProperty(hidden = true)
 	private Date deletedOn;
 
@@ -104,6 +104,10 @@ public class User {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public String getFullName() {
+		return this.firstName + (this.middleName == null ? "" : this.middleName) + (this.lastName == null ? "" : this.lastName);
 	}
 
 	public String getEmailId() {
