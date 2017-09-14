@@ -4,7 +4,6 @@
 package com.bolenum.services.common;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.Message;
@@ -32,29 +31,23 @@ public class AuthServiceImpl implements AuthService {
 	private AuthenticationTokenRepo authenticationTokenRepo;
 	@Autowired
 	private MailService emailservice;
-	
+
 	@Override
-	public AuthenticationToken login(String email, String password) throws InvalidPasswordException {
-		User user = userRepository.findByEmailIdIgnoreCase(email);
-		if (user != null) {
-			if (passwordEncoder.matches(password, user.getPassword())) {
-				// Generate Token and Save it for the logged in user
-				AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
-				authToken.setTokentype(TokenType.AUTHENTICATION);
-				AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
-				return savedAuthToken;
-			} else {
-				throw new InvalidPasswordException(Message.INVALID_CRED);
-			}
+	public AuthenticationToken login(String password, User user) throws InvalidPasswordException {
+		if (passwordEncoder.matches(password, user.getPassword())) {
+			// Generate Token and Save it for the logged in user
+			AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
+			authToken.setTokentype(TokenType.AUTHENTICATION);
+			AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
+			return savedAuthToken;
 		} else {
-			throw new UsernameNotFoundException(Message.USER_NOT_FOUND);
+			throw new InvalidPasswordException(Message.INVALID_CRED);
 		}
 	}
 
 	@Override
 	public Boolean resetPassword(String email) {
 		return null;
-		
 
 	}
 
@@ -62,9 +55,9 @@ public class AuthServiceImpl implements AuthService {
 	public void validateUser(String email) {
 		User user = userRepository.findByEmailIdIgnoreCase(email);
 		if (user != null) {
-              
+
 		}
-		return false;
+		// return false;
 	}
 
 }

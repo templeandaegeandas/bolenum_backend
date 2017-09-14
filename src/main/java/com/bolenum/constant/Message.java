@@ -37,5 +37,6 @@ public class Message {
 	
 	public static final String USER_NOT_FOUND = "User does not exists";
 	public static final String REGIS_SUCCESS = "Check your email to complete registration";
+	public static final String MAIL_VERIFY_ERROR = "Please verify your email";
 
 }

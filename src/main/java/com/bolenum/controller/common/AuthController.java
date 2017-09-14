@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +25,10 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.LoginForm;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
+import com.bolenum.model.User;
 import com.bolenum.services.common.AuthService;
+import com.bolenum.services.user.UserService;
 import com.bolenum.util.ResponseHandler;
-import org.apache.commons.validator.routines.EmailValidator;
 
 import io.swagger.annotations.Api;
 
@@ -40,18 +42,28 @@ public class AuthController {
 	@Autowired
 	private AuthService authService;
 
+	@Autowired
+	private UserService userService;
+
 	@RequestMapping(value = UrlConstant.USER_LOGIN, method = RequestMethod.POST)
 	ResponseEntity<Object> login(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
 		} else {
-			AuthenticationToken token;
-			try {
-				token = authService.login(loginForm.getEmailId(), loginForm.getPassword());
-			} catch (UsernameNotFoundException | InvalidPasswordException e) {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+			User user = userService.findByEmail(loginForm.getEmailId());
+			if (user == null) {
+				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true, Message.USER_NOT_FOUND, null);
+			} else if (!user.getIsEnabled()) {
+				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true, Message.MAIL_VERIFY_ERROR, null);
+			} else {
+				AuthenticationToken token;
+				try {
+					token = authService.login(loginForm.getPassword(),user);
+				} catch (UsernameNotFoundException | InvalidPasswordException e) {
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+				}
+				return ResponseHandler.response(HttpStatus.OK, false, Message.LOGIN_SUCCESS, loginResponse(token));
 			}
-			return ResponseHandler.response(HttpStatus.OK, false, Message.LOGIN_SUCCESS, loginResponse(token));
 		}
 	}
 
@@ -71,7 +83,7 @@ public class AuthController {
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
 		boolean valid = EmailValidator.getInstance().isValid(email);
 		if (valid) {
-			//authService.validateUser(email);
+			// authService.validateUser(email);
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
