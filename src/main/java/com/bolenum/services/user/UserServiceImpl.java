@@ -2,6 +2,8 @@ package com.bolenum.services.user;
 
 import java.util.Date;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ import com.bolenum.util.TokenGenerator;
  * @Author Himanshu
  * @Date 12-Sep-2017
  */
+@Transactional
 @Service
 public class UserServiceImpl implements UserService {
 

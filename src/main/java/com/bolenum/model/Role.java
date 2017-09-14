@@ -2,6 +2,7 @@ package com.bolenum.model;
 
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,7 +17,8 @@ public class Role {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-
+	@NotBlank
+	@Column(unique=true)
 	private String name;
 
 	@NotBlank

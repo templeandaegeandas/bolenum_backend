@@ -16,9 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.model.User;
 import com.bolenum.services.user.UserService;
+import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.ResponseHandler;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.Api;
 
@@ -38,18 +42,23 @@ public class UserController {
 	private UserService userService;
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
-	public ResponseEntity<Object> registerUser(@Valid @RequestBody User user, BindingResult result) {
+	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm userForm, BindingResult result) throws  JsonProcessingException {
 		if (result.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ, ErrorCollectionUtil.getErrorMap(result));
 		} else {
-			User isUserExist = userService.findByEmail(user.getEmailId());
+			User isUserExist = userService.findByEmail(userForm.getEmailId());
 			if (isUserExist == null) {
+				User user = userForm.copy(new User());
+				ObjectMapper mapper = new ObjectMapper();
+				String requestBean = mapper.writeValueAsString(user);
+				System.out.println(requestBean);
 				userService.registerUser(user);
 				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, user.getEmailId());
 			} else if (isUserExist != null && isUserExist.getIsEnabled()) {
 				return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
-						user.getEmailId());
+						isUserExist.getEmailId());
 			} else {
+				User user = userForm.copy(new User());
 				user.setUserId(isUserExist.getUserId());
 				userService.reRegister(user);
 				return ResponseHandler.response(HttpStatus.OK, false, Message.EMAIL_ALREADY_EXISTS, user.getEmailId());
