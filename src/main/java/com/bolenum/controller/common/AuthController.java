@@ -68,8 +68,8 @@ public class AuthController {
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
 		boolean valid = EmailValidator.getInstance().isValid(email);
 		if (valid) {
-			authService.validateUser(email);
-			
+			//authService.validateUser(email);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
 		}
