@@ -42,14 +42,16 @@ public class UserController {
 	private UserService userService;
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
-	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm userForm, BindingResult result) throws  JsonProcessingException {
-		
+	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm userForm, BindingResult result)
+			throws JsonProcessingException {
+
 		ObjectMapper mapper = new ObjectMapper();
 		String requestObj = mapper.writeValueAsString(userForm);
-		logger.debug("Requested Object:",requestObj);
-		
+		logger.debug("Requested Object:", requestObj);
+
 		if (result.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ, ErrorCollectionUtil.getErrorMap(result));
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ,
+					ErrorCollectionUtil.getErrorMap(result));
 		} else {
 			User isUserExist = userService.findByEmail(userForm.getEmailId());
 			if (isUserExist == null) {
@@ -63,7 +65,7 @@ public class UserController {
 				User user = userForm.copy(new User());
 				user.setUserId(isUserExist.getUserId());
 				requestObj = mapper.writeValueAsString(user);
-				logger.debug("Requested Object for Re Register",user);
+				logger.debug("Requested Object for Re Register", user);
 				userService.reRegister(user);
 				return ResponseHandler.response(HttpStatus.OK, false, Message.REGIS_SUCCESS, user.getEmailId());
 			}
@@ -87,5 +89,11 @@ public class UserController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
 		}
 	}
-
+//	
+////	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.PUT)
+//	public ResponseEntity<Object> user(@Valid @RequestBody  ) {
+//	
+//	}
+//	
+//
 }
