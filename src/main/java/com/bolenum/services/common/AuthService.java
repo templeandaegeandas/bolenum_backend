@@ -12,4 +12,6 @@ import com.bolenum.model.AuthenticationToken;
  */
 public interface AuthService {
 	AuthenticationToken login(String email, String password) throws InvalidPasswordException;
+
+	Boolean resetPassword(String email);
 }

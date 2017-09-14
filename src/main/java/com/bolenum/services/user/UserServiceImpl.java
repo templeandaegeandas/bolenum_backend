@@ -89,9 +89,9 @@ public class UserServiceImpl implements UserService {
 		long HOUR = 3600 * 1000;
 		long expirationTime = tokenCreatedTime.getTime() + 2 * HOUR;
 		if (expirationTime > tokenCreatedTime.getTime()) {
-			return true;
-		} else {
 			return false;
+		} else {
+			return true;
 		}
 
 	}

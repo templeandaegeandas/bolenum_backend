@@ -48,4 +48,14 @@ public class AuthServiceImpl implements AuthService {
 		}
 	}
 
+	@Override
+	public Boolean resetPassword(String email) {
+		User user=userRepository.findByEmailIdIgnoreCase(email);
+		return false;
+		
+	}
+	
+
+	
+
 }
