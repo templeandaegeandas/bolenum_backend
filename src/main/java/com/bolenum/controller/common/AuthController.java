@@ -26,11 +26,14 @@ import com.bolenum.model.AuthenticationToken;
 import com.bolenum.services.common.AuthService;
 import com.bolenum.util.ResponseHandler;
 
+import io.swagger.annotations.Api;
+
 /**
  * @author chandan kumar singh
  * @date 13-Sep-2017
  */
 @RestController
+@Api(value = "Authentication Controller")
 public class AuthController {
 	@Autowired
 	private AuthService authService;
