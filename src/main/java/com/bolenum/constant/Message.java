@@ -29,5 +29,7 @@ public class Message {
 	
 	
 	public static final String USER_NOT_FOUND = "User does not exists";
+	public static final String INVALID_TOKEN = "requested token is not valid";
+	
 
 }

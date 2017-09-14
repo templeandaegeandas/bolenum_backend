@@ -54,32 +54,30 @@ public class UserServiceImpl implements UserService {
 		emailservice.registrationMailSend(user.getEmailId(), token);
 	}
 
-	public void sendTokenIfUserAlreadyExist(User user) {
-		// VerificationToken verificationToken = tokenRepository.findByUser(user);
-		// verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
-		// emailservice.registrationMailSend(user.getEmailId(),
-		// verificationToken.getToken());
-	}
+//	public void sendTokenIfUserAlreadyExist(User user) {
+//		// VerificationToken verificationToken = tokenRepository.findByUser(user);
+//		// verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
+//		// emailservice.registrationMailSend(user.getEmailId(),
+//		// verificationToken.getToken());
+//	}
 
 	@Override
 	public boolean verifyUserToken(String token) {
 		// check the token is exist in verification_token table
 
-		// VerificationToken verificationToken = tokenRepository.findByToken(token);
-		// User user = verificationToken.getUser();
-		//
-		// boolean isExpired = isTokenExpired(verificationToken);
-		// // System.out.println("isExpired =" + isExpired);
-		//
-		// if (verificationToken != null && user != null && user.getIsEnabled() == false
-		// && isExpired == false) {
-		// user.setIsEnabled(true);
-		// userRepository.saveAndFlush(user);
-		// return true;
-		// } else {
-		// return false;
-		// }
-		return false;
+		AuthenticationToken authenticationToken = tokenRepository.findByToken(token);
+		User user = authenticationToken.getUser();
+
+		boolean isExpired = isTokenExpired(authenticationToken);
+		//System.out.println("isExpired =" + isExpired);
+
+		if (user != null && user.getIsEnabled() == false && isExpired == false) {
+			user.setIsEnabled(true);
+			userRepository.saveAndFlush(user);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public boolean isTokenExpired(AuthenticationToken verificationTokenToCheck) {
@@ -87,12 +85,9 @@ public class UserServiceImpl implements UserService {
 		Date tokenCreatedTime = verificationTokenToCheck.getCreatedOn();
 		long HOUR = 3600 * 1000;
 		long expirationTime = tokenCreatedTime.getTime() + 2 * HOUR;
-		if (expirationTime > tokenCreatedTime.getTime())
-		{
+		if (expirationTime > tokenCreatedTime.getTime()) {
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 

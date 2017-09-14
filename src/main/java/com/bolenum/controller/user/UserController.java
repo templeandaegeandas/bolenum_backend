@@ -11,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.Message;
@@ -58,21 +59,19 @@ public class UserController {
 	}
 
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
-	public ResponseEntity<Object> userMailVerfy(@Valid @RequestBody User user, BindingResult result) {
-		if (result.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
-		} else {
-			User isUserExist = userService.findByEmail(user.getEmailId());
-			if (isUserExist == null) {
-				userService.registerUser(user);
-				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, user.getEmailId());
-			} else if (isUserExist != null && isUserExist.getIsEnabled()) {
-				return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
-						user.getEmailId());
-			} else {
-				return ResponseHandler.response(HttpStatus.OK, false, Message.EMAIL_ALREADY_EXISTS, user.getEmailId());
-			}
+	public ResponseEntity<Object> userMailVerfy(@RequestParam String token) {
 
+		if ((token != null) && (!token.isEmpty())) {
+			boolean isVerified = userService.verifyUserToken(token);
+			if (isVerified) {
+				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, null);
+			} else {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
+			}
+		}
+
+		else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
 		}
 	}
 
