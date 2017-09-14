@@ -30,8 +30,12 @@ public class Message {
 	public static final String EMAIL_ALREADY_EXISTS = "email already exist";
 	
 	
-	public static final String USER_NOT_FOUND = "User does not exists";
+	
 	public static final String INVALID_TOKEN = "requested token is not valid";
 	
+	//************USER MESSAGE***************//
+	
+	public static final String USER_NOT_FOUND = "User does not exists";
+	public static final String REGIS_SUCCESS = "Check your email to complete registration";
 
 }

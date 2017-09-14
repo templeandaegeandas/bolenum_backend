@@ -44,7 +44,6 @@ public class AuthController {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
 			}
 			return ResponseHandler.response(HttpStatus.OK, false, "Login sucessful", token);
-
 		}
 	}
 }
