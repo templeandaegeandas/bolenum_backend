@@ -45,34 +45,33 @@ public class UserController {
 	private UserService userService;
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
-	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm userForm, BindingResult result)
-			throws JsonProcessingException {
-
-		ObjectMapper mapper = new ObjectMapper();
-		String requestObj = mapper.writeValueAsString(userForm);
-		logger.debug("Requested Object:", requestObj);
-
+	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ,
 					ErrorCollectionUtil.getErrorMap(result));
 		} else {
-			User isUserExist = userService.findByEmail(userForm.getEmailId());
-			if (isUserExist == null) {
-				User user = userForm.copy(new User());
-				userService.registerUser(user);
-				return ResponseHandler.response(HttpStatus.OK, false, Message.REGIS_SUCCESS, user.getEmailId());
-			} else if (isUserExist != null && isUserExist.getIsEnabled()) {
-				return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
-						isUserExist.getEmailId());
-			} else {
-				User user = userForm.copy(new User());
-				user.setUserId(isUserExist.getUserId());
-				requestObj = mapper.writeValueAsString(user);
-				logger.debug("Requested Object for Re Register", user);
-				userService.reRegister(user);
-				return ResponseHandler.response(HttpStatus.OK, false, Message.REGIS_SUCCESS, user.getEmailId());
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				String requestObj = mapper.writeValueAsString(signupForm);
+				logger.debug("Requested Object:", requestObj);
+				User isUserExist = userService.findByEmail(signupForm.getEmailId());
+				if (isUserExist == null) {
+					User user = signupForm.copy(new User());
+					userService.registerUser(user);
+					return ResponseHandler.response(HttpStatus.OK, false, Message.REGIS_SUCCESS, user.getEmailId());
+				} else if (isUserExist != null && isUserExist.getIsEnabled()) {
+					return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS, isUserExist.getEmailId());
+				} else {
+					User user = signupForm.copy(new User());
+					user.setUserId(isUserExist.getUserId());
+					requestObj = mapper.writeValueAsString(user);
+					logger.debug("Requested Object for Re Register", user);
+					userService.reRegister(user);
+					return ResponseHandler.response(HttpStatus.OK, false, Message.REGIS_SUCCESS, user.getEmailId());
+				}
+			} catch (JsonProcessingException e) {
+				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true, Message.ERROR, null);
 			}
-
 		}
 	}
 
@@ -110,4 +109,12 @@ public class UserController {
 		}
 	}
 
+	//
+	//// @RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method =
+	// RequestMethod.PUT)
+	// public ResponseEntity<Object> user(@Valid @RequestBody ) {
+	//
+	// }
+	//
+	//
 }

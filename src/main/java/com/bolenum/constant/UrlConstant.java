@@ -21,5 +21,7 @@ public class UrlConstant {
 	public static final String USER_LOGIN = BASE_URI_V1 + "login";
 	public static final String USER_LOOUT = BASE_URI_V1 + "logout";
 	public static final String CHANGE_PASSWORD = "change/password";
+	public static final String USER_LOGOUT = BASE_URI_V1 + "logout";
+	public static final String FORGET_PASSWORD = BASE_URI_V1 + "forgetpassword";
 
 }

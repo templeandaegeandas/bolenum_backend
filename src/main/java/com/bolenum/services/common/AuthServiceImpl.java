@@ -5,7 +5,6 @@ package com.bolenum.services.common;
 
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.Message;
@@ -17,6 +16,7 @@ import com.bolenum.model.UserActivity;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.user.UserActivityRepository;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.bolenum.util.TokenGenerator;
 
@@ -34,26 +34,37 @@ public class AuthServiceImpl implements AuthService {
 	private AuthenticationTokenRepo authenticationTokenRepo;
 	@Autowired
 	private UserActivityRepository userActivityRepository;
+	@Autowired
+	private MailService emailservice;
 
 	@Override
-	public AuthenticationToken login(String email, String password, String ipAddress, String browserName)
-			throws InvalidPasswordException {
+	public AuthenticationToken login(String password, User user, String ipAddress, String browserName) throws InvalidPasswordException {
+		if (passwordEncoder.matches(password, user.getPassword())) {
+			// Generate Token and Save it for the logged in user
+			AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
+			authToken.setTokentype(TokenType.AUTHENTICATION);
+			AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
+			UserActivity userActivity = new UserActivity(ipAddress, browserName, savedAuthToken);
+			userActivityRepository.save(userActivity);
+			return savedAuthToken;
+		} else {
+			throw new InvalidPasswordException(Message.INVALID_CRED);
+		}
+	}
+
+	@Override
+	public Boolean resetPassword(String email) {
+		return null;
+
+	}
+
+	@Override
+	public void validateUser(String email) {
 		User user = userRepository.findByEmailIdIgnoreCase(email);
 		if (user != null) {
-			if (passwordEncoder.matches(password, user.getPassword())) {
-				// Generate Token and Save it for the logged in user
-				AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
-				authToken.setTokentype(TokenType.AUTHENTICATION);
-				AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
-				UserActivity userActivity = new UserActivity(ipAddress, browserName, savedAuthToken);
-				userActivityRepository.save(userActivity);
-				return savedAuthToken;
-			} else {
-				throw new InvalidPasswordException(Message.INVALID_CRED);
-			}
-		} else {
-			throw new UsernameNotFoundException(Message.USER_NOT_FOUND);
+
 		}
+		// return false;
 	}
 
 	@Override

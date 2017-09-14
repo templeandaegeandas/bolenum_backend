@@ -3,7 +3,11 @@
  */
 package com.bolenum.config.security;
 
+import java.util.Arrays;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,8 +25,11 @@ import com.bolenum.config.security.filter.TokenAuthenticationFilter;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	@Autowired
+	private Environment environment;
+
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
 
@@ -40,6 +47,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring().antMatchers("/favicon.ico");
 		web.ignoring().antMatchers("/api/v1/authorize/role");
 		web.ignoring().antMatchers("/api/v1/user/verify");
+		web.ignoring().antMatchers("/monitoring");
+		web.ignoring().antMatchers("/refresh");
+		// Check if Active profiles contains "dev" or "stag"
+		if (Arrays.stream(environment.getActiveProfiles())
+				.anyMatch(env -> (env.equalsIgnoreCase("dev") || env.equalsIgnoreCase("stag")))) {
+			web.ignoring().antMatchers("/resources/**");
+			web.ignoring().antMatchers("/swagger-ui.html");
+			web.ignoring().antMatchers("/webjars/**");
+			web.ignoring().antMatchers("/configuration/**");
+			web.ignoring().antMatchers("/swagger-resources/**");
+			web.ignoring().antMatchers("/v2/**");
 
+		}
 	}
 }

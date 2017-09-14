@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bolenum.dto.common;
 
 import java.util.Date;
@@ -14,15 +11,14 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.bolenum.model.User;
 
-import io.swagger.annotations.ApiModelProperty;
-
 /**
- * @author chandan kumar singh
- * @date 12-Sep-2017
+ * 
+ * @Author Himanshu
+ * @Date 14-Sep-2017
+ * 
  */
-public class UserSignupForm {
-	
-	@ApiModelProperty(hidden = true)
+public class EditUserForm {
+
 	private Long userId;
 
 	@NotEmpty
