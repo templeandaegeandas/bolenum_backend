@@ -7,9 +7,12 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.Message;
 import com.bolenum.constant.TokenType;
-import com.bolenum.model.User;
+import com.bolenum.dto.common.PasswordForm;
+import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
+import com.bolenum.model.User;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.common.RoleRepo;
 import com.bolenum.repo.user.UserRepository;
@@ -57,12 +60,14 @@ public class UserServiceImpl implements UserService {
 		emailservice.registrationMailSend(user.getEmailId(), token);
 	}
 
-//	public void sendTokenIfUserAlreadyExist(User user) {
-//		// VerificationToken verificationToken = tokenRepository.findByUser(user);
-//		// verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
-//		// emailservice.registrationMailSend(user.getEmailId(),
-//		// verificationToken.getToken());
-//	}
+	// public void sendTokenIfUserAlreadyExist(User user) {
+	// // VerificationToken verificationToken =
+	// tokenRepository.findByUser(user);
+	// //
+	// verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
+	// // emailservice.registrationMailSend(user.getEmailId(),
+	// // verificationToken.getToken());
+	// }
 
 	@Override
 	public boolean verifyUserToken(String token) {
@@ -72,7 +77,7 @@ public class UserServiceImpl implements UserService {
 		User user = authenticationToken.getUser();
 
 		boolean isExpired = isTokenExpired(authenticationToken);
-		//System.out.println("isExpired =" + isExpired);
+		// System.out.println("isExpired =" + isExpired);
 
 		if (user != null && user.getIsEnabled() == false && isExpired == false) {
 			user.setIsEnabled(true);
@@ -89,9 +94,9 @@ public class UserServiceImpl implements UserService {
 		long HOUR = 3600 * 1000;
 		long expirationTime = tokenCreatedTime.getTime() + 2 * HOUR;
 		if (expirationTime > tokenCreatedTime.getTime()) {
-			return true;
-		} else {
 			return false;
+		} else {
+			return true;
 		}
 
 	}
@@ -112,6 +117,17 @@ public class UserServiceImpl implements UserService {
 		tokenRepository.delete(verificationToken);
 		registerUser(isUserExist);
 
+	}
+
+	@Override
+	public boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException {
+		if (passwordEncoder.matches(passwordForm.getOldPassword(), user.getPassword())) {
+			user.setPassword(passwordEncoder.encode(passwordForm.getNewPassword()));
+			userRepository.save(user);
+			return true;
+		} else {
+			throw new InvalidPasswordException(Message.INVALID_CRED);
+		}
 	}
 
 }

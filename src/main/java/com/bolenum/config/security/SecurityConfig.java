@@ -21,27 +21,25 @@ import com.bolenum.config.security.filter.TokenAuthenticationFilter;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled=true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter{
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
 
-		http.csrf().disable().
-		sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-		.and().authorizeRequests().antMatchers(HttpMethod.POST,"/api/v1/login").permitAll()
-		.antMatchers(HttpMethod.POST,"/api/v1/user/register").permitAll().anyRequest().authenticated();
-		
+		http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.authorizeRequests().antMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
+				.antMatchers(HttpMethod.POST, "/api/v1/user/register").permitAll().anyRequest().authenticated();
+
 		// Implementing Token based authentication in this filter
 		final TokenAuthenticationFilter tokenFilter = new TokenAuthenticationFilter();
 		http.addFilterBefore(tokenFilter, BasicAuthenticationFilter.class);
 	}
-	
+
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-	    web.ignoring().antMatchers("/favicon.ico");
-	    web.ignoring().antMatchers("/api/v1/authorize/role");
-	    web.ignoring().antMatchers("/api/v1/user/verify");
-	    
-	    
+		web.ignoring().antMatchers("/favicon.ico");
+		web.ignoring().antMatchers("/api/v1/authorize/role");
+		web.ignoring().antMatchers("/api/v1/user/verify");
+
 	}
 }
