@@ -34,7 +34,7 @@ public class TokenAuthenticationFilter extends GenericFilterBean {
 		// extract token from header
 		String token = httpRequest.getHeader("Authorization");
 		if (token != null && !token.isEmpty()) {
-			AuthenticationTokenRepo authenticationTokenRepository = (AuthenticationTokenRepo) WebApplicationContextUtils
+			AuthenticationTokenRepo authenticationTokenRepository = WebApplicationContextUtils
 					.getRequiredWebApplicationContext(httpRequest.getServletContext())
 					.getBean(AuthenticationTokenRepo.class);
 			// check whether token is valid
