@@ -16,10 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
+import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.User;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.ErrorCollectionUtil;
+import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,9 +46,9 @@ public class UserController {
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
-
 		if (result.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ, ErrorCollectionUtil.getErrorMap(result));
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ,
+					ErrorCollectionUtil.getErrorMap(result));
 		} else {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
@@ -83,10 +86,38 @@ public class UserController {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
 			}
 		}
-
 		else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
 		}
 	}
 	
+<<<<<<< HEAD
+=======
+//	@PreAuthorize("hasRole('USER')")
+	@RequestMapping(value = UrlConstant.CHANGE_PASSWORD, method = RequestMethod.PUT)
+	public ResponseEntity<Object> changePassword(@Valid @RequestBody PasswordForm passwordForm) {
+		User user = GenericUtils.getLoggedInUser();
+		boolean response;
+		try {
+			response = userService.changePassword(user, passwordForm);
+		} catch (InvalidPasswordException e) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ, null);
+		}
+		if (response) {
+			return ResponseHandler.response(HttpStatus.OK, false, Message.PASSWORD_CHANGED, null);
+		}
+		else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PASSWORD_CHANGED_FAILURE, null);
+		}
+	}
+
+	//
+	//// @RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method =
+	// RequestMethod.PUT)
+	// public ResponseEntity<Object> user(@Valid @RequestBody ) {
+	//
+	// }
+	//
+	//
+>>>>>>> 5c65e872c99e24806c3d04d72528f6f0e146670e
 }

@@ -3,6 +3,7 @@
  */
 package com.bolenum.config.security;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,10 +18,11 @@ import com.bolenum.model.User;
  * @author chandan kumar singh
  * @date 13-Sep-2017
  */
-public class ApplicationUserDetail implements UserDetails {
+public class ApplicationUserDetail implements UserDetails,Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private User user;
+	
+	transient User user;
 
 	public ApplicationUserDetail(User user) {
 		this.user = user;
@@ -28,7 +30,7 @@ public class ApplicationUserDetail implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<GrantedAuthority> authList=new ArrayList<GrantedAuthority>();
+		List<GrantedAuthority> authList=new ArrayList<>();
 		GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getPrivileges().toString());
 		authList.add(authority);
 		return authList;

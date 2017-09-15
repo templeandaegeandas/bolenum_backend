@@ -7,9 +7,12 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.Message;
 import com.bolenum.constant.TokenType;
-import com.bolenum.model.User;
+import com.bolenum.dto.common.PasswordForm;
+import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
+import com.bolenum.model.User;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.common.RoleRepo;
 import com.bolenum.repo.user.UserRepository;
@@ -105,6 +108,17 @@ public class UserServiceImpl implements UserService {
 		tokenRepository.delete(verificationToken);
 		registerUser(isUserExist);
 
+	}
+
+	@Override
+	public boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException {
+		if (passwordEncoder.matches(passwordForm.getOldPassword(), user.getPassword())) {
+			user.setPassword(passwordEncoder.encode(passwordForm.getNewPassword()));
+			userRepository.save(user);
+			return true;
+		} else {
+			throw new InvalidPasswordException(Message.INVALID_CRED);
+		}
 	}
 
 }
