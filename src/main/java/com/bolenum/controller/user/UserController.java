@@ -20,6 +20,7 @@ import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.User;
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
@@ -43,6 +44,8 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private LocaleService localService;
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
@@ -102,10 +105,10 @@ public class UserController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ, null);
 		}
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, Message.PASSWORD_CHANGED, null);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(Message.PASSWORD_CHANGED), null);
 		}
 		else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PASSWORD_CHANGED_FAILURE, null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage(Message.PASSWORD_CHANGED_FAILURE), null);
 		}
 	}
 

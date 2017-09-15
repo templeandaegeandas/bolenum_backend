@@ -13,6 +13,12 @@ import com.bolenum.model.User;
  */
 public interface AuthService {
 
+	/**
+	 * 
+	 * @param token
+	 * @return boolean
+	 */
+
 	boolean logOut(String token);
 
 	AuthenticationToken login(String email, User user, String ipAddress, String browserName)

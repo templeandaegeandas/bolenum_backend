@@ -6,6 +6,13 @@ import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.Length;
 
+/**
+ * 
+ * @author vishal_kumar
+ * @date 14-sep-2017
+ *
+ */
+
 public class PasswordForm {
 
 	@NotNull
@@ -19,7 +26,7 @@ public class PasswordForm {
 			@Pattern(regexp = "(?=\\S+$).+", message = "Password must contain no whitespace.") })
 	private String newPassword;
 	@NotNull
-	private String confirmPassword="";
+	private String confirmPassword = "";
 
 	public String getOldPassword() {
 		return oldPassword;

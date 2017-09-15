@@ -28,6 +28,7 @@ import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.services.common.AuthService;
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.ResponseHandler;
 
@@ -45,6 +46,9 @@ public class AuthController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private LocaleService localService;
 
 	@RequestMapping(value = UrlConstant.USER_LOGIN, method = RequestMethod.POST)
 	ResponseEntity<Object> login(@Valid @RequestBody LoginForm loginForm, @RequestParam String ipAddress,
@@ -86,9 +90,9 @@ public class AuthController {
 	ResponseEntity<Object> logout(@RequestHeader("Authorization") String token) {
 		boolean response = authService.logOut(token);
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, Message.LOGOUT_SUCCESS, null);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(Message.LOGOUT_SUCCESS), null);
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.LOGOUT_FAILURE, null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage(Message.LOGOUT_FAILURE), null);
 		}
 	}
 
