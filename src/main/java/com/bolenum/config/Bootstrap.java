@@ -2,7 +2,6 @@ package com.bolenum.config;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,24 +46,21 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * @description addRole
+	 * @description addRole 
 	 * @param 
-	 * @return void
-	 * @exception 
-	 * 
+	 * @return void 
+	 * @exception
 	 */
 	private void addRole() {
-		Role role = new Role("ROLE_USER","user role",privilegeService.findAll());
+		Role role = new Role("ROLE_USER", "user role", privilegeService.findAll());
 		roleService.findOrCreate(role);
 	}
 
 	/**
-	 * 
-	 * @description addPrivileges
+	 * @description addPrivileges 
 	 * @param 
-	 * @return void
-	 * @exception 
-	 *
+	 * @return void 
+	 * @exception
 	 */
 	private void addPrivileges() {
 		Privilege add = new Privilege("add", "adding");
@@ -75,23 +71,17 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		privileges.add(edit);
 		privileges.add(get);
 		privileges.add(del);
-		privileges.forEach(new Consumer<Privilege>() {
-			@Override
-			public void accept(Privilege p) {
-				privilegeService.findOrCreate(p);
-			}
-		});
+		privileges.forEach(Privilege -> privilegeService.findOrCreate(Privilege));
 	}
 
 	/**
 	 * @description createAdmin 
 	 * @param 
-	 * @return void 
+	 * @return void
 	 * @exception
-	 * 
 	 */
 	private void createAdmin() {
-		Role r=new Role("ROLE_ADMIN","Admin role",privilegeService.findAll());
+		Role r = new Role("ROLE_ADMIN", "Admin role", privilegeService.findAll());
 		Role roleAdmin = roleService.findOrCreate(r);
 		User admin = userService.findByEmail("admin@bolenum.com");
 		if (admin == null) {
