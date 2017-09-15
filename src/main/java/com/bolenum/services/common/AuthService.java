@@ -3,6 +3,7 @@
  */
 package com.bolenum.services.common;
 
+import com.bolenum.dto.common.ResetPasswordForm;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
@@ -24,10 +25,12 @@ public interface AuthService {
 	AuthenticationToken login(String email, User user, String ipAddress, String browserName)
 			throws InvalidPasswordException;
 
-	public boolean resetPassword(String email);
+	public void resetPassword(String email, ResetPasswordForm resetPasswordForm);
 
 	public boolean validateUser(String email);
 	
 	public void sendTokenToResetPassword(String email);
+
+	boolean verifyToken(String token);
 
 }

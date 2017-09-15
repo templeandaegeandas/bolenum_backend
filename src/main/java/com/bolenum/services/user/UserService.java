@@ -2,6 +2,7 @@ package com.bolenum.services.user;
 
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.exceptions.InvalidPasswordException;
+import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 
 /**
@@ -17,4 +18,5 @@ public interface UserService {
 	public User findByEmail(String email);
 	public void reRegister(User isUserExist);
 	boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException;
+	boolean isTokenExpired(AuthenticationToken verificationTokenToCheck);
 }

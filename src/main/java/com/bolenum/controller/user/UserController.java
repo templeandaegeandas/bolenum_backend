@@ -63,7 +63,8 @@ public class UserController {
 					userService.registerUser(user);
 					return ResponseHandler.response(HttpStatus.OK, false, Message.REGIS_SUCCESS, user.getEmailId());
 				} else if (isUserExist != null && isUserExist.getIsEnabled()) {
-					return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS, isUserExist.getEmailId());
+					return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
+							isUserExist.getEmailId());
 				} else {
 					User user = signupForm.copy(new User());
 					user.setUserId(isUserExist.getUserId());
@@ -81,22 +82,15 @@ public class UserController {
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
 	public ResponseEntity<Object> userMailVerfy(@RequestParam String token) {
 
-		if ((token != null) && (!token.isEmpty())) {
-			boolean isVerified = userService.verifyUserToken(token);
-			if (isVerified) {
-				return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, null);
-			} else {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
-			}
+		boolean isVerified = userService.verifyUserToken(token);
+		if (isVerified) {
+			return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, null);
 		}
-		else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
-		}
+
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
 	}
-	
-<<<<<<< HEAD
-=======
-//	@PreAuthorize("hasRole('USER')")
+
+	// @PreAuthorize("hasRole('USER')")
 	@RequestMapping(value = UrlConstant.CHANGE_PASSWORD, method = RequestMethod.PUT)
 	public ResponseEntity<Object> changePassword(@Valid @RequestBody PasswordForm passwordForm) {
 		User user = GenericUtils.getLoggedInUser();
@@ -107,20 +101,12 @@ public class UserController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ, null);
 		}
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(Message.PASSWORD_CHANGED), null);
-		}
-		else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage(Message.PASSWORD_CHANGED_FAILURE), null);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(Message.PASSWORD_CHANGED),
+					null);
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localService.getMessage(Message.PASSWORD_CHANGED_FAILURE), null);
 		}
 	}
 
-	//
-	//// @RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method =
-	// RequestMethod.PUT)
-	// public ResponseEntity<Object> user(@Valid @RequestBody ) {
-	//
-	// }
-	//
-	//
->>>>>>> 5c65e872c99e24806c3d04d72528f6f0e146670e
 }

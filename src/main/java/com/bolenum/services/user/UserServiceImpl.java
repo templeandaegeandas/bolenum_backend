@@ -64,7 +64,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean verifyUserToken(String token) {
-
 		if (token != null && !token.isEmpty()) {
 			AuthenticationToken authenticationToken = tokenRepository.findByToken(token);
 			if (authenticationToken != null) {
@@ -80,6 +79,7 @@ public class UserServiceImpl implements UserService {
 		return false;
 	}
 
+	@Override
 	public boolean isTokenExpired(AuthenticationToken verificationTokenToCheck) {
 
 		Date tokenCreatedTime = verificationTokenToCheck.getCreatedOn();

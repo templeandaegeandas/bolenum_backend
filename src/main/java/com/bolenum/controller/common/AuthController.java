@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.LoginForm;
+import com.bolenum.dto.common.ResetPasswordForm;
+import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
@@ -45,7 +47,7 @@ public class AuthController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private LocaleService localService;
 
@@ -89,13 +91,15 @@ public class AuthController {
 	ResponseEntity<Object> logout(@RequestHeader("Authorization") String token) {
 		boolean response = authService.logOut(token);
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(Message.LOGOUT_SUCCESS), null);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(Message.LOGOUT_SUCCESS),
+					null);
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage(Message.LOGOUT_FAILURE), null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localService.getMessage(Message.LOGOUT_FAILURE), null);
 		}
 	}
 
-	@RequestMapping(value = UrlConstant.FORGET_PASSWORD, method = RequestMethod.GET)
+	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
 		boolean isValid = GenericUtils.isValidMail(email);
 		if (isValid) {
@@ -106,5 +110,25 @@ public class AuthController {
 			}
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
+	}
+
+	@RequestMapping(value = UrlConstant.FORGET_PASS_VERIFY, method = RequestMethod.PUT)
+	public ResponseEntity<Object> resetPassword(@RequestParam String token, @Valid @RequestBody ResetPasswordForm resetPasswordForm, BindingResult result) {
+		boolean isVerified = authService.verifyToken(token);
+        if(!isVerified)
+        {
+		     return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_TOKEN, null);
+        }
+        else if(!result.hasErrors() && isVerified)
+        {
+        	authService.resetPassword(token,resetPasswordForm);
+        	return ResponseHandler.response(HttpStatus.OK, false, Message.PASSWORD_CHANGED, null);
+        }
+        else
+        {
+        	return ResponseHandler.response(HttpStatus.CONFLICT, true, Message.PASSWORD_NOT_MATCHED, null);
+        }
+        
+        
 	}
 }

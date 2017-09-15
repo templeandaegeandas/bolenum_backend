@@ -49,6 +49,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring().antMatchers("/api/v1/user/verify");
 		web.ignoring().antMatchers("/monitoring");
 		web.ignoring().antMatchers("/refresh");
+		web.ignoring().antMatchers("/api/v1/forgetpassword");
+		
 		// Check if Active profiles contains "dev" or "stag"
 		if (Arrays.stream(environment.getActiveProfiles())
 				.anyMatch(env -> (env.equalsIgnoreCase("dev") || env.equalsIgnoreCase("stag")))) {
