@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.bolenum.util.ResponseHandler;
+
 /**
  * 
  * @author Vishal Kumar
@@ -36,71 +38,104 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // 400
 
+    /**
+     * 
+     * @param ex
+     * @param request
+     * @return ResponseEntity
+     */
+    
     @ExceptionHandler({ ConstraintViolationException.class })
     public ResponseEntity<Object> handleBadRequest(final ConstraintViolationException ex, final WebRequest request) {
-        final String bodyOfResponse = ex.getMessage();
-        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
     }
 
+    /**
+     * 
+     * @param ex
+     * @param request
+     * @return ResponseEntity
+     */
+    
     @ExceptionHandler({ DataIntegrityViolationException.class })
     public ResponseEntity<Object> handleBadRequest(final DataIntegrityViolationException ex, final WebRequest request) {
-        final String bodyOfResponse = ex.getMessage();
-        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
-        final String bodyOfResponse = ex.getMessage();
-        // ex.getCause() instanceof JsonMappingException, JsonParseException // for additional information later on
-        return handleExceptionInternal(null, bodyOfResponse, headers, HttpStatus.BAD_REQUEST, request);
+        return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
     }
     
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(final MissingServletRequestParameterException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
-        final String bodyOfResponse = ex.getMessage();
-        // ex.getCause() instanceof JsonMappingException, JsonParseException // for additional information later on
-        return handleExceptionInternal(null, bodyOfResponse, headers, HttpStatus.BAD_REQUEST, request);
+        return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
     }
 
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex, final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
-        final String bodyOfResponse = ex.getMessage();
-        return handleExceptionInternal(ex, bodyOfResponse, headers, HttpStatus.BAD_REQUEST, request);
+        return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+//        return new ResponseEntity<Object>(ex.getMessage(), new HttpHeaders(), );
     }
 
     // 403
+    
+    /**
+     * 
+     * @param ex
+     * @param request
+     * @return ResponseEntity
+     */
+    
     @ExceptionHandler({ AccessDeniedException.class })
     public ResponseEntity<Object> handleAccessDeniedException(final Exception ex, final WebRequest request) {
-        System.out.println("request" + request.getUserPrincipal());
-        return new ResponseEntity<Object>(ex.getMessage(), new HttpHeaders(), HttpStatus.FORBIDDEN);
+        return ResponseHandler.response(HttpStatus.FORBIDDEN, true, ex.getMessage(), null);
     }
 
     // 404
 
+    /**
+     * 
+     * @param ex
+     * @param request
+     * @return ResponseEntity
+     */
+    
     @ExceptionHandler(value = { EntityNotFoundException.class })
     protected ResponseEntity<Object> handleNotFound(final RuntimeException ex, final WebRequest request) {
-        final String bodyOfResponse = ex.getMessage();
-        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+        return ResponseHandler.response(HttpStatus.NOT_FOUND, true, ex.getMessage(), null);
     }
 
     // 409
 
+    /**
+     * 
+     * @param ex
+     * @param request
+     * @return ResponseEntity
+     */
+    
     @ExceptionHandler({ InvalidDataAccessApiUsageException.class, DataAccessException.class })
     protected ResponseEntity<Object> handleConflict(final RuntimeException ex, final WebRequest request) {
-        final String bodyOfResponse = ex.getMessage();
-        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.CONFLICT, request);
+        return ResponseHandler.response(HttpStatus.CONFLICT, true, ex.getMessage(), null);
     }
 
     // 412
 
     // 500
 
+    /**
+     * 
+     * @param ex
+     * @param request
+     * @return ResponseEntity
+     */
+    
     @ExceptionHandler({ NullPointerException.class, IllegalArgumentException.class, IllegalStateException.class })
     public ResponseEntity<Object> handleInternal(final RuntimeException ex, final WebRequest request) {
         logger.error("500 Status Code");
-        final String bodyOfResponse = ex.getMessage();
-        return handleExceptionInternal(ex, bodyOfResponse, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+        return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true, ex.getMessage(), null);
     }
 
 }

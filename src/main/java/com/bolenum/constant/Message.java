@@ -30,18 +30,20 @@ public class Message {
 	public static final String EMAIL_ALREADY_EXISTS = "email already exist";
 
 	public static final String LOGIN_SUCCESS = "login successfully";
-	public static final String LOGOUT_SUCCESS = "logout successfully";
-	public static final String LOGOUT_FAILURE = "logout not completed";
+	public static final String LOGOUT_SUCCESS = "logout.success";
+	public static final String LOGOUT_FAILURE = "logout.failure";
 	public static final String INVALID_TOKEN = "requested token is not valid";
 
 	// ************USER MESSAGE***************//
 
 	public static final String USER_NOT_FOUND = "User does not exists";
 	public static final String REGIS_SUCCESS = "Check your email to complete registration";
-	public static final String PASSWORD_CHANGED = "Password changed successfully";
-	public static final String PASSWORD_CHANGED_FAILURE = "Password not changed!";
+	public static final String PASSWORD_CHANGED = "user.password.change.success";
+	public static final String PASSWORD_CHANGED_FAILURE = "user.password.change.failure";
 	public static final String PASSWORD_NOT_MATCHED = "New password and Confirm password not matched!";
 
 	public static final String MAIL_VERIFY_ERROR = "Please verify your email";
 
+	// ************ADMIN MESSAGE***************//
+	public static final String USERS_LIST = "admin.user.list";
 }

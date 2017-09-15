@@ -7,6 +7,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+/**
+ * 
+ * @author vishal_kumar
+ * @date 14-sep-2017
+ */
+
 @Entity
 public class UserActivity {
 
@@ -28,9 +34,9 @@ public class UserActivity {
 	}
 
 	public UserActivity() {
-		
+
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
