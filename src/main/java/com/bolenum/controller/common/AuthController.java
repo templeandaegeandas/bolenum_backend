@@ -26,8 +26,6 @@ import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.services.common.AuthService;
 import com.bolenum.util.ResponseHandler;
-import org.apache.commons.validator.routines.EmailValidator;
-
 import io.swagger.annotations.Api;
 
 /**
@@ -69,13 +67,15 @@ public class AuthController {
 
 	@RequestMapping(value = UrlConstant.FORGET_PASSWORD, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
-		boolean valid = EmailValidator.getInstance().isValid(email);
-		if (valid) {
-			//authService.validateUser(email);
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
-		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
+		boolean isValid = authService.isValidMail(email);
+		if (isValid) {
+			boolean isValidUser = authService.validateUser(email);
+			if (isValidUser) {
+				authService.sendTokenToResetPassword(email);
+				return ResponseHandler.response(HttpStatus.OK,false, Message.MAIL_SENT_SUCCESSFULLY,email);
+			}
 		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
 	}
 
 }

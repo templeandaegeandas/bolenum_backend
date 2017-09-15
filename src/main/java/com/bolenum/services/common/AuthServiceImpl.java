@@ -3,6 +3,7 @@
  */
 package com.bolenum.services.common;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,9 @@ public class AuthServiceImpl implements AuthService {
 	private PasswordEncoderUtil passwordEncoder;
 	@Autowired
 	private AuthenticationTokenRepo authenticationTokenRepo;
+	
 	@Autowired
-	private MailService emailservice;
+	private MailService emailService; 
 	
 	@Override
 	public AuthenticationToken login(String email, String password) throws InvalidPasswordException {
@@ -51,20 +53,47 @@ public class AuthServiceImpl implements AuthService {
 		}
 	}
 
-	@Override
-	public Boolean resetPassword(String email) {
-		return null;
-		
-
-	}
 
 	@Override
-	public void validateUser(String email) {
+	public boolean validateUser(String email) {
 		User user = userRepository.findByEmailIdIgnoreCase(email);
 		if (user != null) {
-              
+			return true;
 		}
 		return false;
 	}
 
+	public boolean isValidMail(String email) {
+		if (email == null || "".equals(email))
+			return false;
+
+		email = email.trim();
+
+		EmailValidator ev = EmailValidator.getInstance();
+		return ev.isValid(email);
+	}
+
+	public void sendTokenToResetPassword(String email)
+	{
+		
+		User existingUser=userRepository.findByEmailIdIgnoreCase(email);
+		AuthenticationToken previousToken = authenticationTokenRepo.findByUser(existingUser);
+		authenticationTokenRepo.delete(previousToken);
+		String token = TokenGenerator.generateToken();
+		AuthenticationToken authenticationToken = new AuthenticationToken(token,existingUser);
+		emailService.mailSend(email, token);
+		authenticationToken.setTokentype(TokenType.FORGOT_PASSWORD);
+		authenticationTokenRepo.saveAndFlush(authenticationToken);
+		
+	}
+	
+	@Override
+	public boolean resetPassword(String email) {
+		
+		return false;
+
+	}
+	
+	
+	
 }

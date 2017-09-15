@@ -46,28 +46,22 @@ public class UserServiceImpl implements UserService {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		user.setRole(roleRepo.findByNameIgnoreCase("ROLE_USER"));
 		userRepository.save(user);
-		mailVerification(user);
-	}
-
-	private void mailVerification(User user) {
-		String token = TokenGenerator.generateToken();
-		AuthenticationToken authenticationToken = new AuthenticationToken(token, user);
+		AuthenticationToken authenticationToken = mailVerification(user);
 		authenticationToken.setTokentype(TokenType.REGISTRATION);
 		tokenRepository.saveAndFlush(authenticationToken);
-		emailservice.registrationMailSend(user.getEmailId(), token);
+
 	}
 
-	// public void sendTokenIfUserAlreadyExist(User user) {
-	// // VerificationToken verificationToken = tokenRepository.findByUser(user);
-	// //
-	// verificationToken.setCreatedOn(verificationToken.getCreatedOn().plusHours(2));
-	// // emailservice.registrationMailSend(user.getEmailId(),
-	// // verificationToken.getToken());
-	// }
+	private AuthenticationToken mailVerification(User user) {
+		String token = TokenGenerator.generateToken();
+		AuthenticationToken authenticationToken = new AuthenticationToken(token, user);
+		emailservice.registrationMailSend(user.getEmailId(), token);
+		return authenticationToken;
+	}
 
 	@Override
 	public boolean verifyUserToken(String token) {
-		
+
 		if (token != null && !token.isEmpty()) {
 			AuthenticationToken authenticationToken = tokenRepository.findByToken(token);
 			if (authenticationToken != null) {
@@ -87,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
 		Date tokenCreatedTime = verificationTokenToCheck.getCreatedOn();
 		long HOUR = 3600 * 1000;
-		long expirationTime = tokenCreatedTime.getTime() + 2 * HOUR;
+		long expirationTime = tokenCreatedTime.getTime() + (2 * HOUR);
 		if (expirationTime > tokenCreatedTime.getTime()) {
 			return false;
 		} else {

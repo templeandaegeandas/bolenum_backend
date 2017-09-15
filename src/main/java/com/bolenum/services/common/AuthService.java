@@ -13,7 +13,12 @@ import com.bolenum.model.AuthenticationToken;
 public interface AuthService {
 	AuthenticationToken login(String email, String password) throws InvalidPasswordException;
 
-	Boolean resetPassword(String email);
+	public boolean resetPassword(String email);
 
-	void validateUser(String email);
+	public boolean validateUser(String email);
+
+	public boolean isValidMail(String email);
+	
+	public void sendTokenToResetPassword(String email);
+
 }

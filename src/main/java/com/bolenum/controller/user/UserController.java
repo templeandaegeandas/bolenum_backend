@@ -88,12 +88,5 @@ public class UserController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
 		}
 	}
-	//
-	//// @RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method =
-	// RequestMethod.PUT)
-	// public ResponseEntity<Object> user(@Valid @RequestBody ) {
-	//
-	// }
-	//
-	//
+	
 }
