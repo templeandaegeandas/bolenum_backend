@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.LoginForm;
 import com.bolenum.dto.common.ResetPasswordForm;
@@ -54,13 +52,16 @@ public class AuthController {
 	ResponseEntity<Object> login(@Valid @RequestBody LoginForm loginForm, @RequestParam String ipAddress,
 			@RequestParam String browserName, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.email"),
+					null);
 		} else {
 			User user = userService.findByEmail(loginForm.getEmailId());
 			if (user == null) {
-				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true, Message.USER_NOT_FOUND, null);
+				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
+						localService.getMessage("user.not.found"), null);
 			} else if (!user.getIsEnabled()) {
-				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true, Message.MAIL_VERIFY_ERROR, null);
+				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
+						localService.getMessage("user.mail.verify.error"), null);
 			} else {
 				AuthenticationToken token;
 				try {
@@ -68,7 +69,8 @@ public class AuthController {
 				} catch (UsernameNotFoundException | InvalidPasswordException e) {
 					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
 				}
-				return ResponseHandler.response(HttpStatus.OK, false, Message.LOGIN_SUCCESS, loginResponse(token));
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("login.success"),
+						loginResponse(token));
 			}
 		}
 	}
@@ -90,11 +92,10 @@ public class AuthController {
 	ResponseEntity<Object> logout(@RequestHeader("Authorization") String token) {
 		boolean response = authService.logOut(token);
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(Message.LOGOUT_SUCCESS),
-					null);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("logout.success"), null);
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localService.getMessage(Message.LOGOUT_FAILURE), null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("logout.failure"),
+					null);
 		}
 	}
 
@@ -105,10 +106,11 @@ public class AuthController {
 			boolean isValidUser = authService.validateUser(email);
 			if (isValidUser) {
 				authService.sendTokenToResetPassword(email);
-				return ResponseHandler.response(HttpStatus.OK, false, Message.MAIL_SENT_SUCCESSFULLY, email);
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("mail.sent.success"),
+						email);
 			}
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_EMAIL, null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.email"), null);
 	}
 
 	@RequestMapping(value = UrlConstant.FORGET_PASS_VERIFY, method = RequestMethod.PUT)
@@ -116,12 +118,15 @@ public class AuthController {
 			@Valid @RequestBody ResetPasswordForm resetPasswordForm, BindingResult result) {
 		User verifiedUser = authService.verifyToken(token);
 		if (verifiedUser == null) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_TOKEN, null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("token.invalid"),
+					null);
 		} else if (!result.hasErrors() && verifiedUser != null) {
 			authService.resetPassword(verifiedUser, resetPasswordForm);
-			return ResponseHandler.response(HttpStatus.OK, false, Message.PASSWORD_CHANGED, verifiedUser.getEmailId());
+			return ResponseHandler.response(HttpStatus.OK, false,
+					localService.getMessage("user.password.change.success"), verifiedUser.getEmailId());
 		} else {
-			return ResponseHandler.response(HttpStatus.CONFLICT, true, Message.PASSWORD_NOT_MATCHED, null);
+			return ResponseHandler.response(HttpStatus.CONFLICT, true,
+					localService.getMessage("user.password.not.matched"), null);
 		}
 
 	}

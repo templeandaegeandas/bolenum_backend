@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.Role;
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.common.RoleService;
 import com.bolenum.util.ResponseHandler;
 
@@ -35,6 +35,9 @@ public class RoleController {
 
 	@Autowired
 	private RoleService roleService;
+	
+	@Autowired
+	private LocaleService localService;
 
 	/**
 	 * to add role
@@ -47,10 +50,10 @@ public class RoleController {
 	@RequestMapping(value = UrlConstant.ROLE_URI, method = RequestMethod.POST)
 	public ResponseEntity<Object> addRoles(@Valid @RequestBody Role role, BindingResult result) {
 		if (result.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.ERROR, null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("message.error"), null);
 		} else {
 			roleService.saveRole(role);
-			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.ROLE_ADDED_SUCCESSFULLY,
+			return ResponseHandler.response(HttpStatus.ACCEPTED, false, localService.getMessage("role.add.success"),
 					role.getName());
 		}
 	}
@@ -65,10 +68,10 @@ public class RoleController {
 	public ResponseEntity<Object> deleteRoles(Long id) {
 		Boolean response = roleService.deleteRole(id);
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, Message.PRIVILEGE_REMOVED_SUCCESSFULLY,
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("privilege.remove.success"),
 					"requested role removed successfully");
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.ROLE_NOT_FOUND,
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("role.not.found"),
 					"please request valid role");
 		}
 	}
@@ -83,9 +86,9 @@ public class RoleController {
 	public ResponseEntity<Object> getRoles(Long id) {
 		Role role = roleService.viewRole(id);
 		if (role != null) {
-			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.ROLE_FOUND, role.getName());
+			return ResponseHandler.response(HttpStatus.ACCEPTED, false, localService.getMessage("role.found"), role.getName());
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.ROLE_NOT_FOUND,
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,localService.getMessage("role.not.found"),
 					"please request valid role");
 		}
 	}

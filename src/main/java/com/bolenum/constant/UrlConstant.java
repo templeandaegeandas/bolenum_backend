@@ -23,7 +23,7 @@ public class UrlConstant {
 	public static final String CHANGE_PASSWORD = "change/password";
 	public static final String USER_LOGOUT = BASE_URI_V1 + "logout";
 	public static final String FORGET_PASS = BASE_URI_V1 + "forgetpassword";
-	public static final String FORGET_PASS_VERIFY = FORGET_PASS + "verify";
+	public static final String FORGET_PASS_VERIFY = FORGET_PASS + "/verify";
 
 	public static final String LIST_USERS = "list/users";
 

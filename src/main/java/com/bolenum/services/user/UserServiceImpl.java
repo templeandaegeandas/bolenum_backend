@@ -14,6 +14,7 @@ import com.bolenum.model.User;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.common.RoleRepo;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.bolenum.util.TokenGenerator;
@@ -41,6 +42,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private RoleRepo roleRepo;
+	
+	@Autowired
+	private LocaleService localService;
 
 	@Override
 	public void registerUser(User user) {
@@ -85,7 +89,7 @@ public class UserServiceImpl implements UserService {
 			userRepository.save(user);
 			return true;
 		} else {
-			throw new InvalidPasswordException(Message.INVALID_CRED);
+			throw new InvalidPasswordException(localService.getMessage("invalid.credential"));
 		}
 	}
 

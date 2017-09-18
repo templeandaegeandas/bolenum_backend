@@ -15,7 +15,6 @@ import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.user.UserActivityRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.user.AuthenticationTokenService;
-import com.bolenum.services.user.UserService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.bolenum.util.TokenGenerator;
@@ -39,11 +38,13 @@ public class AuthServiceImpl implements AuthService {
 	private MailService emailService;
 
 	private UserActivityRepository userActivityRepository;
-	
+
 	@Autowired
 	private AuthenticationTokenService authenticationTokenService;
-	
 
+	@Autowired
+	private LocaleService localeService;
+	
 	@Override
 	public AuthenticationToken login(String password, User user, String ipAddress, String browserName)
 			throws InvalidPasswordException {
@@ -56,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
 			userActivityRepository.save(userActivity);
 			return savedAuthToken;
 		} else {
-			throw new InvalidPasswordException(Message.INVALID_CRED);
+			throw new InvalidPasswordException(localeService.getMessage("invalid.credential"));
 		}
 	}
 

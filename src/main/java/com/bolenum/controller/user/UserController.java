@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
@@ -51,11 +50,13 @@ public class UserController {
 	
 	@Autowired
 	private AuthenticationTokenService authenticationTokenService;
+	
+	
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
 		if (result.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ,
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.request"),
 					ErrorCollectionUtil.getErrorMap(result));
 		} else {
 			try {
@@ -66,9 +67,9 @@ public class UserController {
 				if (isUserExist == null) {
 					User user = signupForm.copy(new User());
 					userService.registerUser(user);
-					return ResponseHandler.response(HttpStatus.OK, false, Message.REGIS_SUCCESS, user.getEmailId());
+					return ResponseHandler.response(HttpStatus.OK, false,localService.getMessage("user.registarion.success"), user.getEmailId());
 				} else if (isUserExist != null && isUserExist.getIsEnabled()) {
-					return ResponseHandler.response(HttpStatus.CONFLICT, false, Message.EMAIL_ALREADY_EXISTS,
+					return ResponseHandler.response(HttpStatus.CONFLICT, false,localService.getMessage("email.already.exist"),
 							isUserExist.getEmailId());
 				} else {
 					User user = signupForm.copy(new User());
@@ -76,10 +77,10 @@ public class UserController {
 					requestObj = mapper.writeValueAsString(user);
 					logger.debug("Requested Object for Re Register", user);
 					userService.reRegister(user);
-					return ResponseHandler.response(HttpStatus.OK, false, Message.REGIS_SUCCESS, user.getEmailId());
+					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("user.registarion.success"), user.getEmailId());
 				}
 			} catch (JsonProcessingException e) {
-				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true, Message.ERROR, null);
+				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true, localService.getMessage("message.error"), null);
 			}
 		}
 	}
@@ -89,10 +90,10 @@ public class UserController {
 
 		boolean isVerified = authenticationTokenService.verifyUserToken(token);
 		if (isVerified) {
-			return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, null);
+			return ResponseHandler.response(HttpStatus.OK, false,localService.getMessage("message.success"), null);
 		}
 
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, Message.INVALID_TOKEN, null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,localService.getMessage("token.invalid"), null);
 	}
 
 	// @PreAuthorize("hasRole('USER')")
@@ -103,14 +104,14 @@ public class UserController {
 		try {
 			response = userService.changePassword(user, passwordForm);
 		} catch (InvalidPasswordException e) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.INVALID_REQ, null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,localService.getMessage("invalid.request"), null);
 		}
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(Message.PASSWORD_CHANGED),
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("user.password.change.success"),
 					null);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localService.getMessage(Message.PASSWORD_CHANGED_FAILURE), null);
+					localService.getMessage("user.password.change.failure"), null);
 		}
 	}
 

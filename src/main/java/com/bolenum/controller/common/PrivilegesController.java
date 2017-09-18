@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.controller.user.UserController;
 import com.bolenum.model.Privilege;
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.util.ResponseHandler;
 
@@ -36,7 +36,11 @@ public class PrivilegesController {
 
 	@Autowired
 	private PrivilegeService privilegeService;
+	
 
+	@Autowired
+	private LocaleService localService;
+	
 	/**
 	 * to add privileges
 	 * 
@@ -48,11 +52,11 @@ public class PrivilegesController {
 	public ResponseEntity<Object> addPrivileges(@Valid @RequestBody Privilege privilege, BindingResult result) {
 		if (result.hasErrors()) {
 			logger.error("message logged at error level");
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.ERROR, null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("message.error"), null);
 		} else {
 
 			privilegeService.savePrivilege(privilege);
-			return ResponseHandler.response(HttpStatus.OK, false, Message.PRIVILEGE_ADDED_SUCCESSFULLY, null);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("privilege.add.success"), null);
 		}
 	}
 
@@ -67,10 +71,10 @@ public class PrivilegesController {
 	public ResponseEntity<Object> deletePrivileges(Long id) {
 		Boolean response = privilegeService.deletePrivilege(id);
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, Message.PRIVILEGE_REMOVED_SUCCESSFULLY,
+			return ResponseHandler.response(HttpStatus.OK, false,localService.getMessage("privilege.remove.success"),
 					"requested privileges removed successfully");
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PRIVILEGE_NOT_FOUND,
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("privilege.not.found"),
 					"please request valid privilege");
 		}
 	}
@@ -87,9 +91,9 @@ public class PrivilegesController {
 	public ResponseEntity<Object> getPrivileges(Long id) {
 		Privilege privilege = privilegeService.findPrivilegeById(id);
 		if (privilege != null) {
-			return ResponseHandler.response(HttpStatus.ACCEPTED, false, Message.PRIVILEGE_FOUND, privilege.getName());
+			return ResponseHandler.response(HttpStatus.ACCEPTED, false, localService.getMessage("privilege.found.success"), privilege.getName());
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, Message.PRIVILEGE_NOT_FOUND,
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,localService.getMessage("privilege.not.found"),
 					"please request valid privilege");
 		}
 	}
