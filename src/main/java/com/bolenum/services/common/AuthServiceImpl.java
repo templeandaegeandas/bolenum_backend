@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bolenum.services.common;
 
 import java.util.Date;
@@ -17,13 +14,14 @@ import com.bolenum.model.UserActivity;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.user.UserActivityRepository;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.bolenum.util.TokenGenerator;
 
 /**
- * @author chandan kumar singh
+ * @author Himanshu
  * @date 13-Sep-2017
  */
 @Service
@@ -41,9 +39,10 @@ public class AuthServiceImpl implements AuthService {
 	private MailService emailService;
 
 	private UserActivityRepository userActivityRepository;
-
+	
 	@Autowired
-	private UserService userService;
+	private AuthenticationTokenService authenticationTokenService;
+	
 
 	@Override
 	public AuthenticationToken login(String password, User user, String ipAddress, String browserName)
@@ -100,27 +99,24 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public boolean verifyToken(String token) {
+	public User verifyToken(String token) {
 		if (token != null && !token.isEmpty()) {
 			AuthenticationToken authenticationToken = authenticationTokenRepo.findByToken(token);
 			if (authenticationToken != null) {
 				User user = authenticationToken.getUser();
-				boolean isExpired = userService.isTokenExpired(authenticationToken);
+				boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
 				if (user != null && user.getIsEnabled() == true && isExpired == false) {
-					return true;
+					return user;
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	@Override
-	public void resetPassword(String token,ResetPasswordForm resetPasswordForm) {
-		AuthenticationToken authenticationToken = authenticationTokenRepo.findByToken(token);
-		User user = authenticationToken.getUser();
+	public void resetPassword(User user, ResetPasswordForm resetPasswordForm) {
 		user.setPassword(passwordEncoder.encode(resetPasswordForm.getNewPassword()));
 		userRepository.save(user);
-	
 	}
 
 }

@@ -21,6 +21,7 @@ import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.User;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
@@ -44,8 +45,12 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	
 	@Autowired
 	private LocaleService localService;
+	
+	@Autowired
+	private AuthenticationTokenService authenticationTokenService;
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
@@ -82,7 +87,7 @@ public class UserController {
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
 	public ResponseEntity<Object> userMailVerfy(@RequestParam String token) {
 
-		boolean isVerified = userService.verifyUserToken(token);
+		boolean isVerified = authenticationTokenService.verifyUserToken(token);
 		if (isVerified) {
 			return ResponseHandler.response(HttpStatus.OK, false, Message.SUCCESS, null);
 		}
