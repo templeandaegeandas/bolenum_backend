@@ -1,7 +1,5 @@
 package com.bolenum.services.user;
 
-import java.util.Date;
-
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +14,7 @@ import com.bolenum.model.User;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.common.RoleRepo;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.bolenum.util.TokenGenerator;
@@ -33,7 +32,7 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Autowired
-	private AuthenticationTokenRepo tokenRepository;
+	private AuthenticationTokenRepo authenticationTokenRepo;
 
 	@Autowired
 	private MailService emailservice;
@@ -43,6 +42,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private RoleRepo roleRepo;
+	
+	@Autowired
+	private LocaleService localService;
 
 	@Override
 	public void registerUser(User user) {
@@ -51,7 +53,7 @@ public class UserServiceImpl implements UserService {
 		userRepository.save(user);
 		AuthenticationToken authenticationToken = mailVerification(user);
 		authenticationToken.setTokentype(TokenType.REGISTRATION);
-		tokenRepository.saveAndFlush(authenticationToken);
+		authenticationTokenRepo.saveAndFlush(authenticationToken);
 
 	}
 
@@ -60,36 +62,6 @@ public class UserServiceImpl implements UserService {
 		AuthenticationToken authenticationToken = new AuthenticationToken(token, user);
 		emailservice.registrationMailSend(user.getEmailId(), token);
 		return authenticationToken;
-	}
-
-	@Override
-	public boolean verifyUserToken(String token) {
-		if (token != null && !token.isEmpty()) {
-			AuthenticationToken authenticationToken = tokenRepository.findByToken(token);
-			if (authenticationToken != null) {
-				User user = authenticationToken.getUser();
-				boolean isExpired = isTokenExpired(authenticationToken);
-				if (user != null && user.getIsEnabled() == false && isExpired == false) {
-					user.setIsEnabled(true);
-					userRepository.saveAndFlush(user);
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean isTokenExpired(AuthenticationToken verificationTokenToCheck) {
-
-		Date tokenCreatedTime = verificationTokenToCheck.getCreatedOn();
-		long HOUR = 3600 * 1000;
-		long expirationTime = tokenCreatedTime.getTime() + (2 * HOUR);
-		if (expirationTime > tokenCreatedTime.getTime()) {
-			return false;
-		} else {
-			return true;
-		}
 	}
 
 	@Override
@@ -104,8 +76,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void reRegister(User isUserExist) {
-		AuthenticationToken verificationToken = tokenRepository.findByUser(isUserExist);
-		tokenRepository.delete(verificationToken);
+		AuthenticationToken verificationToken = authenticationTokenRepo.findByUser(isUserExist);
+		authenticationTokenRepo.delete(verificationToken);
 		registerUser(isUserExist);
 
 	}
@@ -117,7 +89,7 @@ public class UserServiceImpl implements UserService {
 			userRepository.save(user);
 			return true;
 		} else {
-			throw new InvalidPasswordException(Message.INVALID_CRED);
+			throw new InvalidPasswordException(localService.getMessage("invalid.credential"));
 		}
 	}
 

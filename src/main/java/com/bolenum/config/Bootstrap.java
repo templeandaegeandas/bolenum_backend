@@ -46,10 +46,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * @description addRole 
-	 * @param 
-	 * @return void 
-	 * @exception
+	 * @description addRole @param @return void @exception
 	 */
 	private void addRole() {
 		Role role = new Role("ROLE_USER", "user role", privilegeService.findAll());
@@ -57,10 +54,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * @description addPrivileges 
-	 * @param 
-	 * @return void 
-	 * @exception
+	 * @description addPrivileges @param @return void @exception
 	 */
 	private void addPrivileges() {
 		Privilege add = new Privilege("add", "adding");
@@ -75,10 +69,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * @description createAdmin 
-	 * @param 
-	 * @return void
-	 * @exception
+	 * @description createAdmin @param @return void @exception
 	 */
 	private void createAdmin() {
 		Role r = new Role("ROLE_ADMIN", "Admin role", privilegeService.findAll());

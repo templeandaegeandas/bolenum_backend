@@ -4,6 +4,13 @@ import org.springframework.data.domain.Page;
 
 import com.bolenum.model.User;
 
+/**
+ * 
+ * @author Vishal Kumar
+ * @date 18-sep-2017
+ *
+ */
+
 public interface AdminService {
 
 	/**
