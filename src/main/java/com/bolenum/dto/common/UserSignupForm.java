@@ -64,6 +64,8 @@ public class UserSignupForm {
 	private String gender;
 
 	private Date dob;
+	
+	private Boolean termsConditions = false;
 
 	/**
 	 * @return the userId
@@ -260,6 +262,14 @@ public class UserSignupForm {
 		this.dob = dob;
 	}
 
+	public Boolean getTermsConditions() {
+		return termsConditions;
+	}
+
+	public void setTermsConditions(Boolean termsConditions) {
+		this.termsConditions = termsConditions;
+	}
+
 	@AssertTrue(message = "password did not match")
 	private boolean isValid() {
 		boolean check = this.password.equals(this.repassword);
@@ -279,6 +289,7 @@ public class UserSignupForm {
 		user.setMobileNumber(this.mobileNumber);
 		user.setGender(this.gender);
 		user.setDob(this.dob);
+		user.setTermsConditions(this.termsConditions);
 		return user;
 	}
 }

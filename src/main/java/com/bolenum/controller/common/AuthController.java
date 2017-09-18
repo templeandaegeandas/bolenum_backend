@@ -24,7 +24,6 @@ import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.LoginForm;
 import com.bolenum.dto.common.ResetPasswordForm;
-import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;

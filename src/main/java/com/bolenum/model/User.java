@@ -50,6 +50,8 @@ public class User {
 	private String gender;
 
 	private Date dob;
+	
+	private Boolean termsConditions = false;
 
 	@ApiModelProperty(hidden = true)
 	private Boolean isEnabled = false;
@@ -180,6 +182,14 @@ public class User {
 
 	public void setDob(Date dob) {
 		this.dob = dob;
+	}
+
+	public Boolean getTermsConditions() {
+		return termsConditions;
+	}
+
+	public void setTermsConditions(Boolean termsConditions) {
+		this.termsConditions = termsConditions;
 	}
 
 	public Boolean getIsEnabled() {
