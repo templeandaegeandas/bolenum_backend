@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.Message;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
-import com.bolenum.services.admin.AdminService;
+import com.bolenum.services.admin.AdminServiceImpl;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
@@ -28,7 +29,7 @@ import com.bolenum.util.ResponseHandler;
 public class AdminController {
 	
 	@Autowired
-	private AdminService adminService;
+	private AdminServiceImpl adminService;
 	@Autowired
 	private LocaleService localeService;
 
@@ -44,6 +45,12 @@ public class AdminController {
 		User user = GenericUtils.getLoggedInUser();
 		Page<User> userList =  adminService.getUsersList(pageNumber, pageSize, user);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage(Message.USERS_LIST), userList);
+	}
+	
+	@RequestMapping(value = UrlConstant.GET_USER_BY_ID, method = RequestMethod.GET)
+	public ResponseEntity<Object> getUsersById(@PathVariable Long userId) {
+		User user = adminService.getUserById(userId);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.get.by.id"), user);
 	}
 	
 }

@@ -26,5 +26,6 @@ public class UrlConstant {
 	public static final String FORGET_PASS_VERIFY =FORGET_PASS + "verify";
 	
 	public static final String LIST_USERS = "list/users";
+	public static final String GET_USER_BY_ID = "user/{userId}";
 
 }

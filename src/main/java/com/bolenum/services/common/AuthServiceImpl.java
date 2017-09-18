@@ -39,7 +39,8 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private MailService emailService;
-
+	
+	@Autowired
 	private UserActivityRepository userActivityRepository;
 
 	@Autowired
