@@ -10,9 +10,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.bolenum.model.User;
+import com.bolenum.util.GenericUtils;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -27,24 +29,25 @@ public class UserSignupForm {
 
 	@NotEmpty
 	@Pattern(regexp = "([a-zA-Z]+)", message = "first Name must be valid")
+	@Length(min = 3, message = "Name length must be 3 character and above")
 	private String firstName;
 
 	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
 	private String middleName;
 
 	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
+	@Length(min = 3, message = "Name length must be 3 character and above")
 	private String lastName;
 
-	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "please enter valid email")
-	@NotNull
+	@NotBlank(message="Please enter email id")
 	private String emailId;
-
+	
 	@NotNull
 	@Length(min = 8, max = 64, message = "password length must be between 8 and 64 character")
 	@Pattern.List({ @Pattern(regexp = "(?=.*[0-9]).+", message = "Password must contain one digit."),
 			@Pattern(regexp = "(?=.*[a-z]).+", message = "Password must contain one lowercase letter."),
 			@Pattern(regexp = "(?=.*[A-Z]).+", message = "Password must contain one upper letter."),
-			@Pattern(regexp = "(?=.*[!@#$%^&*+=?-_()/\"\\.,<>~`;:]).+", message = "Password must contain one special character."),
+			@Pattern(regexp = "(?=.*[!<>~`:,;@#$%^&+=?_-]).+", message = "Password must contain one special character."),
 			@Pattern(regexp = "(?=\\S+$).+", message = "Password must contain no whitespace.") })
 	private String password;
 
@@ -226,7 +229,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param mobileNumber
-	 *            the mobileNumber to set
+	 * the mobileNumber to set
 	 */
 	public void setMobileNumber(String mobileNumber) {
 		this.mobileNumber = mobileNumber;
@@ -276,6 +279,13 @@ public class UserSignupForm {
 		return check;
 	}
 
+
+	@AssertTrue(message = "enter valid email")
+	private boolean isMailValid() {
+		boolean check = GenericUtils.isValidMail(this.emailId);
+		return check;
+	}
+	
 	public User copy(User user) {
 		user.setFirstName(this.firstName);
 		user.setMiddleName(this.middleName);
