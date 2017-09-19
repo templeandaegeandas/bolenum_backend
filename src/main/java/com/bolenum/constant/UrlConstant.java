@@ -27,5 +27,11 @@ public class UrlConstant {
 
 	public static final String LIST_USERS = "list/users";
 	public static final String GET_USER_BY_ID = "user/{userId}";
+	
+	/********************** KYC API ***********************/
+	public static final String UPLOAD_DOCUMENT = "/kyc/upload";
+	public static final String APPROVE_DOCUMENT = "/kyc/approve/{userId}";
+	public static final String DISAPPROVE_DOCUMENT = "/kyc/disapprove";
+
 
 }
