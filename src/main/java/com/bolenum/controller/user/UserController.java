@@ -62,7 +62,7 @@ public class UserController {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
 				String requestObj = mapper.writeValueAsString(signupForm);
-				logger.debug("Requested Object:", requestObj);
+				logger.debug("Requested Object:"+requestObj);
 				User isUserExist = userService.findByEmail(signupForm.getEmailId());
 				if (isUserExist == null) {
 					User user = signupForm.copy(new User());

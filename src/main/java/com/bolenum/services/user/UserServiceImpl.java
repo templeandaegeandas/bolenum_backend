@@ -5,7 +5,6 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.constant.Message;
 import com.bolenum.constant.TokenType;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.exceptions.InvalidPasswordException;
