@@ -21,10 +21,10 @@ public class LoginForm {
 	@NotBlank(message = "Please enter password")
 	private String password;
 
-	@NotBlank(message = "Your ip address is not present")
+	//@NotBlank(message = "Your ip address is not present")
 	private String ipAddress;
 	
-	@NotBlank(message = "browser name is invalid")
+	//@NotBlank(message = "browser name is invalid")
 	private String browserName;
 
 	public LoginForm() {
