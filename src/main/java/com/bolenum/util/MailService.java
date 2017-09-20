@@ -33,7 +33,7 @@ public class MailService {
 	public void mailSend(String to, String token) {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setSubject("verification link for reset password");
-		message.setText("please verify by clicking on link http://" + serverUrl + "/api/v1/forgetpassword/verify?token=" + token);
+		message.setText("please verify by clicking on link http://" + serverUrl + "/#/resetpassword?token=" + token);
 		message.setTo(to);
 		mailSender.send(message);
 	}
