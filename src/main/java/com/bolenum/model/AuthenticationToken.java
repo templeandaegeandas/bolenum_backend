@@ -39,6 +39,8 @@ public class AuthenticationToken {
 	
 	private Date deletedOn;
 
+	private boolean isDeleted = false;
+	
 	public AuthenticationToken() {
 	}
 
@@ -105,6 +107,21 @@ public class AuthenticationToken {
 
 	public void setTokentype(TokenType tokentype) {
 		this.tokentype = tokentype;
+	}
+
+	/**
+	 * @return the isDeleted
+	 */
+	public boolean isDeleted() {
+		return isDeleted;
+	}
+
+	/**
+	 * @param isDeleted 
+	 * the isDeleted to set
+	 */
+	public void setDeleted(boolean isDeleted) {
+		this.isDeleted = isDeleted;
 	}
 
 }
