@@ -1,7 +1,6 @@
 package com.bolenum.model;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,7 +8,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -29,7 +27,6 @@ public class User {
 
 	private String lastName;
 
-	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Incorrect email id")
 	@NotNull
 	@Column(unique = true)
 	private String emailId;
@@ -50,7 +47,7 @@ public class User {
 	private String gender;
 
 	private Date dob;
-	
+
 	private Boolean termsConditions = false;
 
 	@ApiModelProperty(hidden = true)
@@ -75,6 +72,9 @@ public class User {
 
 	@OneToOne
 	private Role role;
+
+	@OneToOne
+	private UserKyc userKyc;
 
 	public Long getUserId() {
 		return userId;
@@ -109,7 +109,8 @@ public class User {
 	}
 
 	public String getFullName() {
-		return this.firstName + (this.middleName == null ? "" : this.middleName) + (this.lastName == null ? "" : this.lastName);
+		return this.firstName + (this.middleName == null ? "" : this.middleName)
+				+ (this.lastName == null ? "" : this.lastName);
 	}
 
 	public String getEmailId() {
@@ -275,4 +276,13 @@ public class User {
 	public void setRole(Role role) {
 		this.role = role;
 	}
+
+	public UserKyc getUserKyc() {
+		return userKyc;
+	}
+
+	public void setUserKyc(UserKyc userKyc) {
+		this.userKyc = userKyc;
+	}
+
 }

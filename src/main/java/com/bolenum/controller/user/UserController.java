@@ -56,13 +56,13 @@ public class UserController {
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
 		if (result.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.request"),
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(result),
 					ErrorCollectionUtil.getErrorMap(result));
 		} else {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
 				String requestObj = mapper.writeValueAsString(signupForm);
-				logger.debug("Requested Object:", requestObj);
+				logger.debug("Requested Object:"+requestObj);
 				User isUserExist = userService.findByEmail(signupForm.getEmailId());
 				if (isUserExist == null) {
 					User user = signupForm.copy(new User());

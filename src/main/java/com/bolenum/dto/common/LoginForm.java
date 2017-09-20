@@ -3,8 +3,12 @@
  */
 package com.bolenum.dto.common;
 
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+
+import org.hibernate.validator.constraints.NotBlank;
+
+import com.bolenum.util.GenericUtils;
 
 /**
  * @author chandan kumar singh
@@ -12,8 +16,7 @@ import javax.validation.constraints.Pattern;
  */
 public class LoginForm {
 
-	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "Incorrect email id")
-	@NotNull
+	@NotBlank
 	private String emailId;
 
 	@NotNull
@@ -45,6 +48,11 @@ public class LoginForm {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	@AssertTrue(message = "enter valid email")
+	private boolean isMailValid() {
+		boolean check = GenericUtils.isValidMail(this.emailId);
+		return check;
 	}
 	
 }

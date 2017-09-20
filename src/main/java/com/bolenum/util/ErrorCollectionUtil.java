@@ -4,6 +4,7 @@
 package com.bolenum.util;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -27,5 +28,10 @@ public class ErrorCollectionUtil {
 			}
 		});
 		return errors;
+	}
+	public static String getError(BindingResult bindingResult) {
+		List<FieldError> list = bindingResult.getFieldErrors();
+		String message = list.get(0).getDefaultMessage();
+		return message;
 	}
 }

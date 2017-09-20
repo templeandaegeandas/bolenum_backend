@@ -25,11 +25,6 @@ public class GenericUtils {
 	}
 	
 	public static boolean isValidMail(String email) {
-		if (email == null || "".equals(email))
-			return false;
-
-		email = email.trim();
-
 		EmailValidator ev = EmailValidator.getInstance();
 		return ev.isValid(email);
 	}
