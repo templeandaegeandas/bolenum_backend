@@ -19,6 +19,8 @@ import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
+import io.swagger.annotations.Api;
+
 /**
  * @Author Himanshu Kumar
  *
@@ -26,6 +28,7 @@ import com.bolenum.util.ResponseHandler;
  */
 @RestController
 @RequestMapping(value = UrlConstant.BASE_ADMIN_URI_V1)
+@Api(value="Admin Controller")
 public class AdminController {
 
 	@Autowired
