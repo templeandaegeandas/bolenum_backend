@@ -1,9 +1,11 @@
 package com.bolenum.repo.common;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.bolenum.constant.TokenType;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 
@@ -15,6 +17,8 @@ import com.bolenum.model.User;
 public interface AuthenticationTokenRepo extends JpaRepository<AuthenticationToken, Serializable> {
 	AuthenticationToken findByToken(String token);
 
-	AuthenticationToken findByUser(User user);
+	List<AuthenticationToken> findByUser(User user);
+
+	TokenType findByToken(User existingUser);
 	
 }

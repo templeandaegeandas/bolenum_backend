@@ -1,6 +1,8 @@
 package com.bolenum.services.common;
 
 import java.util.Date;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private MailService emailService;
-	
+
 	@Autowired
 	private UserActivityRepository userActivityRepository;
 
@@ -45,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private LocaleService localeService;
-	
+
 	@Override
 	public AuthenticationToken login(String password, User user, String ipAddress, String browserName)
 			throws InvalidPasswordException {
@@ -90,8 +92,14 @@ public class AuthServiceImpl implements AuthService {
 	public void sendTokenToResetPassword(String email) {
 
 		User existingUser = userRepository.findByEmailIdIgnoreCase(email);
-		AuthenticationToken previousToken = authenticationTokenRepo.findByUser(existingUser);
-		authenticationTokenRepo.delete(previousToken);
+	
+		List<AuthenticationToken> previousToken= authenticationTokenRepo.findByUser(existingUser);
+		for(AuthenticationToken token:previousToken) {
+			if(token.getTokentype() == TokenType.FORGOT_PASSWORD) {
+				authenticationTokenRepo.delete(token);
+			}
+		}
+		// authenticationTokenRepo.delete(previousToken);
 		String token = TokenGenerator.generateToken();
 		AuthenticationToken authenticationToken = new AuthenticationToken(token, existingUser);
 		emailService.mailSend(email, token);

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
+
 import io.swagger.annotations.Api;
 
 /**
@@ -102,8 +104,11 @@ public class AuthController {
 	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
 		boolean isValid = GenericUtils.isValidMail(email);
+		System.out.println("valid email::?"+isValid);
 		if (isValid) {
 			boolean isValidUser = authService.validateUser(email);
+			System.out.println("isValidUser isValidUser::?"+isValidUser);
+
 			if (isValidUser) {
 				authService.sendTokenToResetPassword(email);
 				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("mail.sent.success"),
