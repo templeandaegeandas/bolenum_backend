@@ -1,5 +1,7 @@
 package com.bolenum.services.user;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +77,14 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void reRegister(User isUserExist) {
-		AuthenticationToken verificationToken = authenticationTokenRepo.findByUser(isUserExist);
-		authenticationTokenRepo.delete(verificationToken);
+		
+		List<AuthenticationToken> verificationToken= authenticationTokenRepo.findByUser(isUserExist);
+		
+		for(AuthenticationToken token:verificationToken) {
+			if(token.getTokentype() == TokenType.FORGOT_PASSWORD) {
+				authenticationTokenRepo.delete(token);
+			}
+		}
 		registerUser(isUserExist);
 
 	}
