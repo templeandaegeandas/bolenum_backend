@@ -34,10 +34,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         super();
     }
 
-    // API
-
-    // 400
-
     /**
      * 
      * @param ex

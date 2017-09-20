@@ -28,15 +28,14 @@ public class UserSignupForm {
 	private Long userId;
 
 	@NotEmpty
-	@Pattern(regexp = "([a-zA-Z]+)", message = "first Name must be valid")
-	@Length(min = 3, message = "Name length must be 3 character and above")
+	@Pattern(regexp = "([a-zA-Z]+)", message = "First name must be valid")
+	@Length(min = 3, message = "First name length must be 3 characters and above")
 	private String firstName;
 
-	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
+	@Pattern(regexp = "([a-zA-Z]+)", message = "Middle name must be valid")
 	private String middleName;
 
-	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
-	@Length(min = 3, message = "Name length must be 3 character and above")
+	@Pattern(regexp = "(^[a-zA-Z]{3,}$)", message = "Last name must be valid & 3 characters and above")
 	private String lastName;
 
 	@NotBlank(message="Please enter email id")

@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +31,10 @@ import com.bolenum.model.User;
 import com.bolenum.services.common.AuthService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
+
 import io.swagger.annotations.Api;
 
 /**
@@ -47,12 +52,12 @@ public class AuthController {
 
 	@Autowired
 	private LocaleService localService;
+	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 	@RequestMapping(value = UrlConstant.USER_LOGIN, method = RequestMethod.POST)
-	ResponseEntity<Object> login(@Valid @RequestBody LoginForm loginForm, @RequestParam String ipAddress,
-			@RequestParam String browserName, BindingResult bindingResult) {
+	ResponseEntity<Object> login(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.email"),
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(bindingResult),
 					null);
 		} else {
 			User user = userService.findByEmail(loginForm.getEmailId());
@@ -65,7 +70,8 @@ public class AuthController {
 			} else {
 				AuthenticationToken token;
 				try {
-					token = authService.login(loginForm.getPassword(), user, ipAddress, browserName);
+					token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
+							loginForm.getBrowserName());
 				} catch (UsernameNotFoundException | InvalidPasswordException e) {
 					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
 				}

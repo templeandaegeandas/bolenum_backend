@@ -1,10 +1,10 @@
 package com.bolenum.services.common;
 
 import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.constant.Message;
 import com.bolenum.constant.TokenType;
 import com.bolenum.dto.common.ResetPasswordForm;
 import com.bolenum.exceptions.InvalidPasswordException;
