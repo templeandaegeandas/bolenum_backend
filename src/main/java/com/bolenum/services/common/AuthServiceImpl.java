@@ -94,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
 
 		User existingUser = userRepository.findByEmailIdIgnoreCase(email);
 	
-		List<AuthenticationToken> previousToken= authenticationTokenRepo.findByUser(existingUser);
+		List<AuthenticationToken> previousToken= authenticationTokenRepo.findByUserAndTokentype(existingUser,TokenType.FORGOT_PASSWORD);
 		
 		for(AuthenticationToken token:previousToken) {
 			if(token.getTokentype() == TokenType.FORGOT_PASSWORD) {

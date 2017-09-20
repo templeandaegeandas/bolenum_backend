@@ -17,7 +17,7 @@ import com.bolenum.model.User;
 public interface AuthenticationTokenRepo extends JpaRepository<AuthenticationToken, Serializable> {
 	AuthenticationToken findByToken(String token);
 
-	List<AuthenticationToken> findByUser(User user);
+	List<AuthenticationToken> findByUserAndTokentype(User user,TokenType tokentype);
 	List<AuthenticationToken> findByUserAndIsDeleted(User user, boolean isDeleted);
 	List<AuthenticationToken> findByUserAndIsDeletedAndTokentype(User user, boolean isDeleted,TokenType token);
 

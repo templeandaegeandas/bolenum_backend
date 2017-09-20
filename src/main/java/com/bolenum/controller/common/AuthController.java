@@ -109,7 +109,7 @@ public class AuthController {
 	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
 		boolean isValid = GenericUtils.isValidMail(email);
-		System.out.println("valid email::?"+isValid);
+	
 		if (isValid) {
 			boolean isValidUser = authService.validateUser(email);
 			System.out.println("isValidUser isValidUser::?"+isValidUser);

@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 		List<AuthenticationToken> verificationToken= authenticationTokenRepo.findByUser(isUserExist);
 		
 		for(AuthenticationToken token:verificationToken) {
-			if(token.getTokentype() == TokenType.FORGOT_PASSWORD) {
+			if(token.getTokentype() == TokenType.REGISTRATION) {
 				authenticationTokenRepo.delete(token);
 			}
 		}
