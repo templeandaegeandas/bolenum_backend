@@ -95,12 +95,12 @@ public class AuthServiceImpl implements AuthService {
 		User existingUser = userRepository.findByEmailIdIgnoreCase(email);
 	
 		List<AuthenticationToken> previousToken= authenticationTokenRepo.findByUser(existingUser);
+		
 		for(AuthenticationToken token:previousToken) {
 			if(token.getTokentype() == TokenType.FORGOT_PASSWORD) {
 				authenticationTokenRepo.delete(token);
 			}
 		}
-		// authenticationTokenRepo.delete(previousToken);
 		String token = TokenGenerator.generateToken();
 		AuthenticationToken authenticationToken = new AuthenticationToken(token, existingUser);
 		emailService.mailSend(email, token);
