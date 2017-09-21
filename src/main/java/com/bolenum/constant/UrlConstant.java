@@ -31,12 +31,12 @@ public class UrlConstant {
 	/********************** ADMIN API ***********************/
 public static final String LIST_USERS = "list/users";
 	public static final String GET_USER_BY_ID = "user/{userId}";
-	public static final String SUBMITTED_KYC_LIST = "list/kyc";
 	
 	/********************** KYC API ***********************/
-	public static final String UPLOAD_DOCUMENT = "/kyc/upload";
-	public static final String APPROVE_DOCUMENT = "/kyc/approve/{userId}";
-	public static final String DISAPPROVE_DOCUMENT = "/kyc/disapprove";
-	public static final String GET_KYC_BY_ID = "/kyc/{kycId}";
+	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "/kyc/upload";
+	public static final String APPROVE_DOCUMENT = BASE_URI_V1 + "/kyc/approve/{userId}";
+	public static final String DISAPPROVE_DOCUMENT = BASE_URI_V1 + "/kyc/disapprove";
+	public static final String GET_KYC_BY_ID = BASE_URI_V1 + "/kyc/{kycId}";
+	public static final String SUBMITTED_KYC_LIST = BASE_URI_V1 + "list/kyc";
 
 }

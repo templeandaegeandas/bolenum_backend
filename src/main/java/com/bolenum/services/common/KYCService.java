@@ -2,6 +2,7 @@ package com.bolenum.services.common;
 
 import java.io.IOException;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.model.User;
@@ -39,6 +40,14 @@ public interface KYCService {
 	 * @return User
 	 */
 	User disApprovedKycDocument(Long userId, String rejectionMessage);
+	
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @return Page<User>
+	 */
+	Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 	/**
 	 * 

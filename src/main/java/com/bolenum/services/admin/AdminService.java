@@ -29,12 +29,4 @@ public interface AdminService {
 	 */
 	User getUserById(Long userId);
 
-	/**
-	 * 
-	 * @param pageNumber
-	 * @param pageSize
-	 * @return Page<User>
-	 */
-	Page<User> getSubmitedKycList(int pageNumber, int pageSize);
-
 }

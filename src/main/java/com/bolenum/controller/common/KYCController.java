@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,6 @@ import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
 @RestController
-@RequestMapping(value = UrlConstant.BASE_USER_URI_V1)
 public class KYCController {
 
 	@Autowired
@@ -67,6 +67,14 @@ public class KYCController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("user.document.approve.failed"), null);
 		}
 	}
+	
+	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy, 
+			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
+		Page<User> kycList = kycService.getSubmitedKycList(pageNumber, pageSize, sortBy, sortOrder, searchData);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("submitted.kyc.list"), kycList);
+	}
+	
 	
 	@RequestMapping(value = UrlConstant.GET_KYC_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getKycById(@PathVariable Long kycId) {

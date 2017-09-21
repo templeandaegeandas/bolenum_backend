@@ -58,10 +58,4 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.get.by.id"), user);
 	}
 	
-	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize) {
-		Page<User> kycList = adminService.getSubmitedKycList(pageNumber, pageSize);
-		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("submitted.kyc.list"), kycList);
-	}
-	
 }
