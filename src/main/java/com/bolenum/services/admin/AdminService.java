@@ -20,7 +20,7 @@ public interface AdminService {
 	 * @param user
 	 * @return Page
 	 */
-	Page<User> getUsersList(int pageNumber, int pageSize, User user);
+	Page<User> getUsersList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData, User user);
 	
 	/**
 	 * 
