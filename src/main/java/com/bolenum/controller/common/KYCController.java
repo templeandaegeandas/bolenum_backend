@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -69,10 +68,14 @@ public class KYCController {
 		}
 	}
 	
-	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize) {
-		Page<UserKyc> kycList = kycService.getSubmitedKycList(pageNumber, pageSize);
-		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("submitted.kyc.list"), kycList);
+	@RequestMapping(value = UrlConstant.GET_KYC_BY_ID, method = RequestMethod.GET)
+	public ResponseEntity<Object> getKycById(@PathVariable Long kycId) {
+		UserKyc userKyc = kycService.getUserKycById(kycId);
+		if (userKyc != null) {
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("user.kyc.get.by.id.success"), userKyc);
+		}
+		else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("user.kyc.get.by.id.failed"), null);
+		}
 	}
-	
 }

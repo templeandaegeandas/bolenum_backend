@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.DocumentStatus;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 
@@ -34,5 +35,13 @@ public class AdminServiceImpl implements AdminService{
 	@Override
 	public User getUserById(Long userId) {
 		return userRepository.findOne(userId);
+	}
+
+
+	@Override
+	public Page<User> getSubmitedKycList(int pageNumber, int pageSize) {
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "createdOn");
+		Page<User> userList = userRepository.findByUserKycDocumentStatusIn(DocumentStatus.SUBMITTED, pageRequest);
+		return userList;
 	}
 }
