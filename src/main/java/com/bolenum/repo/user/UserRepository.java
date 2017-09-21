@@ -11,7 +11,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	User findByEmailIdIgnoreCase(String emailId);
 	
-	Page<User> findByUserIdIsNotIn(Long userId, Pageable pageable);
+	Page<User> findByFirstNameContainingOrLastNameContainingOrEmailIdContainingAndUserIdNotIn(String firstName,String lastName, String email, Long userId, Pageable pageable);
 	
 	Page<User> findByUserKycDocumentStatusIn(DocumentStatus documentStatus, Pageable pageable);
 
