@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.exceptions.InvalidPasswordException;
@@ -44,14 +45,12 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private LocaleService localService;
-	
+
 	@Autowired
 	private AuthenticationTokenService authenticationTokenService;
-	
-	
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
@@ -62,25 +61,28 @@ public class UserController {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
 				String requestObj = mapper.writeValueAsString(signupForm);
-				logger.debug("Requested Object:"+requestObj);
+				logger.debug("Requested Object:" + requestObj);
 				User isUserExist = userService.findByEmail(signupForm.getEmailId());
 				if (isUserExist == null) {
 					User user = signupForm.copy(new User());
 					userService.registerUser(user);
-					return ResponseHandler.response(HttpStatus.OK, false,localService.getMessage("user.registarion.success"), user.getEmailId());
+					return ResponseHandler.response(HttpStatus.OK, false,
+							localService.getMessage("user.registarion.success"), user.getEmailId());
 				} else if (isUserExist != null && isUserExist.getIsEnabled()) {
-					return ResponseHandler.response(HttpStatus.CONFLICT, false,localService.getMessage("email.already.exist"),
-							isUserExist.getEmailId());
+					return ResponseHandler.response(HttpStatus.CONFLICT, false,
+							localService.getMessage("email.already.exist"), isUserExist.getEmailId());
 				} else {
 					User user = signupForm.copy(new User());
 					user.setUserId(isUserExist.getUserId());
 					requestObj = mapper.writeValueAsString(user);
 					logger.debug("Requested Object for Re Register", user);
 					userService.reRegister(user);
-					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("user.registarion.success"), user.getEmailId());
+					return ResponseHandler.response(HttpStatus.OK, false,
+							localService.getMessage("user.registarion.success"), user.getEmailId());
 				}
 			} catch (JsonProcessingException e) {
-				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true, localService.getMessage("message.error"), null);
+				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+						localService.getMessage("message.error"), null);
 			}
 		}
 	}
@@ -90,10 +92,10 @@ public class UserController {
 
 		boolean isVerified = authenticationTokenService.verifyUserToken(token);
 		if (isVerified) {
-			return ResponseHandler.response(HttpStatus.OK, false,localService.getMessage("message.success"), null);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
 		}
 
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,localService.getMessage("token.invalid"), null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"), null);
 	}
 
 	// @PreAuthorize("hasRole('USER')")
@@ -104,15 +106,32 @@ public class UserController {
 		try {
 			response = userService.changePassword(user, passwordForm);
 		} catch (InvalidPasswordException e) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,localService.getMessage("invalid.request"), null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.request"),
+					null);
 		}
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("user.password.change.success"),
-					null);
+			return ResponseHandler.response(HttpStatus.OK, false,
+					localService.getMessage("user.password.change.success"), null);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localService.getMessage("user.password.change.failure"), null);
 		}
+	}
+
+	@RequestMapping(value = UrlConstant.UPDATE_USER_PROFILE, method = RequestMethod.PUT)
+	public ResponseEntity<Object> updateUserProfile(@Valid @RequestBody EditUserForm editUserForm,
+			BindingResult result) {
+      
+		User user = GenericUtils.getLoggedInUser();
+
+		if (!result.hasErrors() && user!=null) {
+			userService.updateUserProfile(editUserForm, user);
+			return ResponseHandler.response(HttpStatus.OK, false,
+					localService.getMessage("user.profile.update.success"), null);
+
+		}
+		else
+		return ResponseHandler.response(HttpStatus.CONFLICT, true, localService.getMessage("invalid.email"), null);
 	}
 
 }

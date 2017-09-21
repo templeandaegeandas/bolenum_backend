@@ -24,6 +24,8 @@ public class UrlConstant {
 	public static final String USER_LOGOUT = BASE_URI_V1 + "logout";
 	public static final String FORGET_PASS = BASE_URI_V1 + "forgetpassword";
 	public static final String FORGET_PASS_VERIFY = FORGET_PASS + "/verify";
+	public static final String UPDATE_USER_PROFILE = "update";
+	
 
 	public static final String LIST_USERS = "list/users";
 	public static final String GET_USER_BY_ID = "user/{userId}";

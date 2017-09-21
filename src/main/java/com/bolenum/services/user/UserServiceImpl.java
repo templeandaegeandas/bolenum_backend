@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.TokenType;
+import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private RoleRepo roleRepo;
-	
+
 	@Autowired
 	private LocaleService localService;
 
@@ -77,11 +78,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void reRegister(User isUserExist) {
-		
-		List<AuthenticationToken> verificationToken= authenticationTokenRepo.findByUserAndTokentype(isUserExist, TokenType.REGISTRATION);
-		
-		for(AuthenticationToken token:verificationToken) {
-			if(token.getTokentype() == TokenType.REGISTRATION) {
+
+		List<AuthenticationToken> verificationToken = authenticationTokenRepo.findByUserAndTokentype(isUserExist,
+				TokenType.REGISTRATION);
+
+		for (AuthenticationToken token : verificationToken) {
+			if (token.getTokentype() == TokenType.REGISTRATION) {
 				authenticationTokenRepo.delete(token);
 			}
 		}
@@ -98,6 +100,53 @@ public class UserServiceImpl implements UserService {
 		} else {
 			throw new InvalidPasswordException(localService.getMessage("invalid.credential"));
 		}
+	}
+
+	@Override
+	public void updateUserProfile(EditUserForm editUserForm, User user) {
+
+		if (editUserForm.getFirstName() != null) {
+			user.setFirstName(editUserForm.getFirstName());
+		}
+
+		if (editUserForm.getMiddleName() != null) {
+			user.setMiddleName(editUserForm.getMiddleName());
+		}
+
+		if (editUserForm.getLastName() != null) {
+			user.setLastName(editUserForm.getLastName());
+		}
+
+		if (editUserForm.getAddress() != null) {
+			user.setAddress(editUserForm.getAddress());
+		}
+
+		if (editUserForm.getCity() != null) {
+			user.setCity(editUserForm.getCity());
+		}
+
+		if (editUserForm.getState() != null) {
+			user.setState(editUserForm.getState());
+		}
+
+		if (editUserForm.getCountry() != null) {
+			user.setCountry(editUserForm.getCountry());
+		}
+
+		if (editUserForm.getMobileNumber() != null) {
+			user.setMobileNumber(editUserForm.getMobileNumber());
+		}
+
+		if (editUserForm.getGender() != null) {
+			user.setGender(editUserForm.getGender());
+		}
+
+		if (editUserForm.getDob() != null) {
+			user.setDob(editUserForm.getDob());
+		}
+
+		userRepository.saveAndFlush(user);
+
 	}
 
 }

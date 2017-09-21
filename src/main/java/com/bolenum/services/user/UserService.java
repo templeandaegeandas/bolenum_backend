@@ -1,5 +1,6 @@
 package com.bolenum.services.user;
 
+import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.User;
@@ -16,4 +17,5 @@ public interface UserService {
 	public User findByEmail(String email);
 	public void reRegister(User isUserExist);
 	boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException;
+	void updateUserProfile(EditUserForm EditUserForm, User user);
 }

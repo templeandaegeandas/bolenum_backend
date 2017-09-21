@@ -2,14 +2,9 @@ package com.bolenum.dto.common;
 
 import java.util.Date;
 
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
-import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
-
-import com.bolenum.model.User;
 
 /**
  * 
@@ -30,22 +25,6 @@ public class EditUserForm {
 
 	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
 	private String lastName;
-
-	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message = "please enter valid email")
-	@NotNull
-	private String emailId;
-
-	@NotNull
-	@Length(min = 8, max = 64, message = "password length must be between 8 and 64 character")
-	@Pattern.List({ @Pattern(regexp = "(?=.*[0-9]).+", message = "Password must contain one digit."),
-			@Pattern(regexp = "(?=.*[a-z]).+", message = "Password must contain one lowercase letter."),
-			@Pattern(regexp = "(?=.*[A-Z]).+", message = "Password must contain one upper letter."),
-			@Pattern(regexp = "(?=.*[!@#$%^&*+=?-_()/\"\\.,<>~`;:]).+", message = "Password must contain one special character."),
-			@Pattern(regexp = "(?=\\S+$).+", message = "Password must contain no whitespace.") })
-	private String password;
-
-	@NotNull
-	public String repassword = "";
 
 	private String address;
 
@@ -119,36 +98,6 @@ public class EditUserForm {
 	 */
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
-	}
-
-	/**
-	 * @return the emailId
-	 */
-	public String getEmailId() {
-		return emailId;
-	}
-
-	/**
-	 * @param emailId
-	 *            the emailId to set
-	 */
-	public void setEmailId(String emailId) {
-		this.emailId = emailId;
-	}
-
-	/**
-	 * @return the password
-	 */
-	public String getPassword() {
-		return password;
-	}
-
-	/**
-	 * @param password
-	 *            the password to set
-	 */
-	public void setPassword(String password) {
-		this.password = password;
 	}
 
 	/**
@@ -256,18 +205,10 @@ public class EditUserForm {
 		this.dob = dob;
 	}
 
-	@AssertTrue(message = "password did not match")
-	private boolean isValid() {
-		boolean check = this.password.equals(this.repassword);
-		return check;
-	}
-
-	public User copy(User user) {
+	/*public User copy(User user) {
 		user.setFirstName(this.firstName);
 		user.setMiddleName(this.middleName);
 		user.setLastName(this.lastName);
-		user.setEmailId(this.emailId);
-		user.setPassword(this.password);
 		user.setAddress(this.address);
 		user.setCity(this.city);
 		user.setState(this.state);
@@ -276,5 +217,5 @@ public class EditUserForm {
 		user.setGender(this.gender);
 		user.setDob(this.dob);
 		return user;
-	}
+	}*/
 }
