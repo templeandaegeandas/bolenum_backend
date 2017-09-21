@@ -25,7 +25,7 @@ public class AdminServiceImpl implements AdminService{
 	
 	@Override
 	public Page<User> getUsersList(int pageNumber, int pageSize, User user) {
-		Pageable pageRequest = new PageRequest(0, 10, Direction.DESC, "createdOn");
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "createdOn");
 		Page<User> userList = userRepository.findByUserIdIsNotIn(user.getUserId(), pageRequest);
 		return userList;
 	}

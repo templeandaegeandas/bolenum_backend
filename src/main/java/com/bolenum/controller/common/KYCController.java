@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
+import com.bolenum.model.UserKyc;
 import com.bolenum.services.common.KYCService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.GenericUtils;
@@ -65,6 +67,12 @@ public class KYCController {
 		else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("user.document.approve.failed"), null);
 		}
+	}
+	
+	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize) {
+		Page<UserKyc> kycList = kycService.getSubmitedKycList(pageNumber, pageSize);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("submitted.kyc.list"), kycList);
 	}
 	
 }

@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void reRegister(User isUserExist) {
 		
-		List<AuthenticationToken> verificationToken= authenticationTokenRepo.findByUser(isUserExist);
+		List<AuthenticationToken> verificationToken= authenticationTokenRepo.findByUserAndTokentype(isUserExist, TokenType.REGISTRATION);
 		
 		for(AuthenticationToken token:verificationToken) {
 			if(token.getTokentype() == TokenType.REGISTRATION) {

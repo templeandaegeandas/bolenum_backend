@@ -67,7 +67,7 @@ public class UserSignupForm {
 
 	private Date dob;
 	
-	private Boolean termsConditions = false;
+	private Boolean termsConditions;
 
 	/**
 	 * @return the userId

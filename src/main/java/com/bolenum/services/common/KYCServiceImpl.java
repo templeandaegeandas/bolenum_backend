@@ -10,6 +10,10 @@ import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,6 +61,10 @@ public class KYCServiceImpl implements KYCService {
 			} else {
 				UserKyc userKyc = user.getUserKyc();
 				userKyc.setDocument(updatedFileName);
+				userKyc.setIsVerified(false);
+				userKyc.setDocumentStatus(DocumentStatus.SUBMITTED);
+				userKyc.setVerifiedDate(null);
+				userKyc.setRejectionMessage(null);
 				userKyc = kycRepo.save(userKyc);
 				user.setUserKyc(userKyc);
 			}
@@ -88,6 +96,12 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setRejectionMessage(rejectionMessage);
 		user.setUserKyc(userKyc);
 		return userRepository.save(user);
+	}
+	
+	@Override
+	public Page<UserKyc> getSubmitedKycList(int pageNumber, int pageSize) {
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "uploadedDate");
+		return kycRepo.findByDocumentStatusIn(DocumentStatus.SUBMITTED, pageRequest);
 	}
 	
 }
