@@ -30,10 +30,10 @@ public class MailService {
 		mailSender.send(message);
 	}
 
-	public void mailSend(String to, String token) {
+	public void mailSend(String to, String token,String subject,String text) {
 		SimpleMailMessage message = new SimpleMailMessage();
-		message.setSubject("verification link for reset password");
-		message.setText("please verify by clicking on link http://" + serverUrl + "/#/resetpassword?token=" + token);
+		message.setSubject(subject);
+		message.setText(text + token);
 		message.setTo(to);
 		mailSender.send(message);
 	}

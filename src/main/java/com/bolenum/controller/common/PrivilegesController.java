@@ -1,5 +1,6 @@
 package com.bolenum.controller.common;
 
+import java.util.List;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -36,11 +37,10 @@ public class PrivilegesController {
 
 	@Autowired
 	private PrivilegeService privilegeService;
-	
 
 	@Autowired
 	private LocaleService localService;
-	
+
 	/**
 	 * to add privileges
 	 * 
@@ -52,11 +52,13 @@ public class PrivilegesController {
 	public ResponseEntity<Object> addPrivileges(@Valid @RequestBody Privilege privilege, BindingResult result) {
 		if (result.hasErrors()) {
 			logger.error("message logged at error level");
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("message.error"), null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("message.error"),
+					null);
 		} else {
 
 			privilegeService.savePrivilege(privilege);
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("privilege.add.success"), null);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("privilege.add.success"),
+					null);
 		}
 	}
 
@@ -71,11 +73,11 @@ public class PrivilegesController {
 	public ResponseEntity<Object> deletePrivileges(Long id) {
 		Boolean response = privilegeService.deletePrivilege(id);
 		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false,localService.getMessage("privilege.remove.success"),
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("privilege.remove.success"),
 					"requested privileges removed successfully");
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("privilege.not.found"),
-					"please request valid privilege");
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localService.getMessage("privilege.not.found"), "please request valid privilege");
 		}
 	}
 
@@ -88,13 +90,14 @@ public class PrivilegesController {
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.GET)
-	public ResponseEntity<Object> getPrivileges(Long id) {
-		Privilege privilege = privilegeService.findPrivilegeById(id);
-		if (privilege != null) {
-			return ResponseHandler.response(HttpStatus.ACCEPTED, false, localService.getMessage("privilege.found.success"), privilege.getName());
+	public ResponseEntity<Object> getPrivileges() {
+		List<Privilege> listOfPrivilege = privilegeService.findAllPrevileges();
+		if (listOfPrivilege != null) {
+			return ResponseHandler.response(HttpStatus.ACCEPTED, false,
+					localService.getMessage("privilege.found.success"), listOfPrivilege);
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,localService.getMessage("privilege.not.found"),
-					"please request valid privilege");
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localService.getMessage("privilege.not.found"), "please request valid privilege");
 		}
 	}
 

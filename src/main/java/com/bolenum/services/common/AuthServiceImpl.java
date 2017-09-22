@@ -6,6 +6,7 @@ import java.util.List;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.TokenType;
@@ -48,6 +49,13 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private LocaleService localeService;
+	
+	@Value("${bolenum.url}")
+	private String serverUrl;
+	
+	@Value("${bolenum.api.reset}")
+	private String urlForResetPassword;
+	
 
 	@Override
 	public AuthenticationToken login(String password, User user, String ipAddress, String browserName)
@@ -103,7 +111,8 @@ public class AuthServiceImpl implements AuthService {
 		}
 		String token = TokenGenerator.generateToken();
 		AuthenticationToken authenticationToken = new AuthenticationToken(token, existingUser);
-		emailService.mailSend(email, token);
+		
+		emailService.mailSend(email, token ,localeService.getMessage("message.subject.forget.password"),serverUrl+urlForResetPassword );
 		authenticationToken.setTokentype(TokenType.FORGOT_PASSWORD);
 		authenticationTokenRepo.saveAndFlush(authenticationToken);
 

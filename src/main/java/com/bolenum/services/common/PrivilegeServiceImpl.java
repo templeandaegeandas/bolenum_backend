@@ -1,6 +1,7 @@
 package com.bolenum.services.common;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -63,10 +64,11 @@ public class PrivilegeServiceImpl implements PrivilegeService {
 		return privilegeRepo.findByNameIgnoreCase(name);
 	}
 
+	
 	@Override
-	public Set<Privilege> findAll() {
-		// TODO Auto-generated method stub
-		return  new HashSet<Privilege>(privilegeRepo.findAll());
+	public List<Privilege> findAllPrevileges() {
+		
+	       return privilegeRepo.findAll();
 	}
 
 }

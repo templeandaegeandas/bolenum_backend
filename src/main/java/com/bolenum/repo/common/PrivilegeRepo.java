@@ -9,5 +9,4 @@ public interface PrivilegeRepo extends JpaRepository<Privilege, Long>{
 	Privilege findById(Long id);
 
 	Privilege findByNameIgnoreCase(String name);
-
 }
