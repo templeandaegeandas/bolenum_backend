@@ -30,16 +30,16 @@ public class FileUploadServiceImpl implements FileUploadService {
 			throw new MaxSizeExceedException(localeService.getMessage("max.file.size.exceeds"));
 		}
 		String originalFileName = multipartFile.getOriginalFilename();
-		int dot = originalFileName.lastIndexOf(".");
+		int dot = originalFileName.lastIndexOf('.');
 		String extension = (dot == -1) ? "" : originalFileName.substring(dot + 1);
 		if (!Arrays.asList(validExtentions).contains(extension.toLowerCase())) {
 			throw new PersistenceException(localeService.getMessage("valid.image.extention.error"));
 		}
 		String updatedFileName = user.getFirstName() + "_" + user.getUserId() + "." + extension;
 		InputStream inputStream = multipartFile.getInputStream();
-		BufferedImage ImageFromConvert = ImageIO.read(inputStream);
+		BufferedImage imageFromConvert = ImageIO.read(inputStream);
 		File userKycFile = new File(storageLocation + updatedFileName);
-		ImageIO.write(ImageFromConvert, extension, userKycFile);
+		ImageIO.write(imageFromConvert, extension, userKycFile);
 		return updatedFileName;
 	}
 }

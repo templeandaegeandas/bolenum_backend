@@ -20,20 +20,20 @@ public class UrlConstant {
 	public static final String USER_MAIL_VERIFY = "verify";
 	public static final String USER_LOGIN = BASE_URI_V1 + "login";
 	public static final String USER_LOOUT = BASE_URI_V1 + "logout";
-	public static final String CHANGE_PASSWORD = "change/password";
+	public static final String CHANGE_PASS = "change/pass";
 	public static final String USER_LOGOUT = BASE_URI_V1 + "logout";
 	public static final String FORGET_PASS = BASE_URI_V1 + "forgetpassword";
 	public static final String FORGET_PASS_VERIFY = FORGET_PASS + "/verify";
 	public static final String UPDATE_USER_PROFILE = "update";
+	public static final String GET_LOGGEDIN_USER = "get/loggedin";
 	public static final String EDIT_USER_BANK_DETAILS = "edit/bankdetails";
 	public static final String ADD_USER_BANK_DETAILS = "add/bankdetails";
 	public static final String VIEW_USER_BANK_DETAILS = "view/bankdetails";
 	
-	
 	/********************** ADMIN API ***********************/
-public static final String LIST_USERS = "list/users";
+	public static final String LIST_USERS = "list/users";
 	public static final String GET_USER_BY_ID = "user/{userId}";
-	
+
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "/kyc/upload";
 	public static final String APPROVE_DOCUMENT = BASE_URI_V1 + "/kyc/approve/{userId}";

@@ -44,7 +44,7 @@ public class KYCServiceImpl implements KYCService {
 	@Override
 	public User uploadKycDocument(MultipartFile file, Long userId)
 			throws IOException, PersistenceException, MaxSizeExceedException {
-		long sizeLimit = 1024 * 1024 * 10;
+		long sizeLimit = 1024 * 1024 * 10L;
 		User user = userRepository.findOne(userId);
 		if (file != null) {
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
@@ -105,9 +105,8 @@ public class KYCServiceImpl implements KYCService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		Page<User> userList = userRepository.getNewlySubmittedKycListWIthSearch(searchData, DocumentStatus.SUBMITTED,
+		return userRepository.getNewlySubmittedKycListWIthSearch(searchData, DocumentStatus.SUBMITTED,
 				pageRequest);
-		return userList;
 	}
 
 	@Override

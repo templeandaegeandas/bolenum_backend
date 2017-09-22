@@ -17,5 +17,5 @@ public interface UserService {
 	public User findByEmail(String email);
 	public void reRegister(User isUserExist);
 	boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException;
-	void updateUserProfile(EditUserForm EditUserForm, User user);
+	User updateUserProfile(EditUserForm EditUserForm, User user);
 }
