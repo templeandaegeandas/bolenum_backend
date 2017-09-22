@@ -47,7 +47,7 @@ public class User {
 	private String gender;
 
 	private Date dob;
-
+	
 	private Boolean termsConditions = false;
 
 	@ApiModelProperty(hidden = true)

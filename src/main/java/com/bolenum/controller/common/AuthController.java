@@ -112,8 +112,7 @@ public class AuthController {
 	
 		if (isValid) {
 			boolean isValidUser = authService.validateUser(email);
-			System.out.println("isValidUser isValidUser::?"+isValidUser);
-
+			
 			if (isValidUser) {
 				authService.sendTokenToResetPassword(email);
 				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("mail.sent.success"),

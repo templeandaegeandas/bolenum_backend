@@ -25,8 +25,10 @@ public class UrlConstant {
 	public static final String FORGET_PASS = BASE_URI_V1 + "forgetpassword";
 	public static final String FORGET_PASS_VERIFY = FORGET_PASS + "/verify";
 	public static final String UPDATE_USER_PROFILE = "update";
+	public static final String EDIT_USER_BANK_DETAILS = "edit/bankdetails";
+	public static final String ADD_USER_BANK_DETAILS = "add/bankdetails";
+	public static final String VIEW_USER_BANK_DETAILS = "view/bankdetails";
 	
-
 	
 	/********************** ADMIN API ***********************/
 public static final String LIST_USERS = "list/users";
@@ -38,5 +40,6 @@ public static final String LIST_USERS = "list/users";
 	public static final String APPROVE_DOCUMENT = "/kyc/approve/{userId}";
 	public static final String DISAPPROVE_DOCUMENT = "/kyc/disapprove";
 	public static final String GET_KYC_BY_ID = "/kyc/{kycId}";
+
 
 }
