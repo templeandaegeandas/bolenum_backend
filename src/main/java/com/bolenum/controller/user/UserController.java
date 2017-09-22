@@ -100,38 +100,42 @@ public class UserController {
 
 	// @PreAuthorize("hasRole('USER')")
 	@RequestMapping(value = UrlConstant.CHANGE_PASSWORD, method = RequestMethod.PUT)
-	public ResponseEntity<Object> changePassword(@Valid @RequestBody PasswordForm passwordForm) {
-		User user = GenericUtils.getLoggedInUser();
-		boolean response;
-		try {
-			response = userService.changePassword(user, passwordForm);
-		} catch (InvalidPasswordException e) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.request"),
-					null);
-		}
-		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false,
-					localService.getMessage("user.password.change.success"), null);
+	public ResponseEntity<Object> changePassword(@Valid @RequestBody PasswordForm passwordForm, BindingResult result) {
+		if (result.hasErrors()) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(result),
+					ErrorCollectionUtil.getErrorMap(result));
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localService.getMessage("user.password.change.failure"), null);
+			User user = GenericUtils.getLoggedInUser();
+			boolean response;
+			try {
+				response = userService.changePassword(user, passwordForm);
+			} catch (InvalidPasswordException e) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localService.getMessage("invalid.request"), null);
+			}
+			if (response) {
+				return ResponseHandler.response(HttpStatus.OK, false,
+						localService.getMessage("user.password.change.success"), null);
+			} else {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localService.getMessage("user.password.change.failure"), null);
+			}
 		}
 	}
 
 	@RequestMapping(value = UrlConstant.UPDATE_USER_PROFILE, method = RequestMethod.PUT)
 	public ResponseEntity<Object> updateUserProfile(@Valid @RequestBody EditUserForm editUserForm,
 			BindingResult result) {
-      
+
 		User user = GenericUtils.getLoggedInUser();
 
-		if (!result.hasErrors() && user!=null) {
+		if (!result.hasErrors() && user != null) {
 			userService.updateUserProfile(editUserForm, user);
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localService.getMessage("user.profile.update.success"), null);
 
-		}
-		else
-		return ResponseHandler.response(HttpStatus.CONFLICT, true, localService.getMessage("invalid.email"), null);
+		} else
+			return ResponseHandler.response(HttpStatus.CONFLICT, true, localService.getMessage("invalid.email"), null);
 	}
 
 }

@@ -1,12 +1,7 @@
 package com.bolenum.services.common;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
-
-import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.DocumentStatus;
+import com.bolenum.exceptions.MaxSizeExceedException;
+import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
 import com.bolenum.repo.common.KYCRepo;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.services.user.FileUploadService;
 
 /**
  * 
@@ -37,22 +35,21 @@ public class KYCServiceImpl implements KYCService {
 	private UserRepository userRepository;
 	@Autowired
 	private KYCRepo kycRepo;
-	
+	@Autowired
+	private FileUploadService fileUploadService;
+
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
 
 	@Override
-	public User uploadKycDocument(MultipartFile multipartFile, Long userId) throws IOException {
+	public User uploadKycDocument(MultipartFile file, Long userId)
+			throws IOException, PersistenceException, MaxSizeExceedException {
+		long sizeLimit = 1024 * 1024 * 10;
 		User user = userRepository.findOne(userId);
-		if (multipartFile != null) {
-			String originalFileName = multipartFile.getOriginalFilename();
-			int dot = originalFileName.lastIndexOf(".");
-			String extension = (dot == -1) ? "" : originalFileName.substring(dot + 1);
-			String updatedFileName = user.getFirstName() + "_" + userId + "." + extension;
-			InputStream inputStream = multipartFile.getInputStream();
-			BufferedImage ImageFromConvert = ImageIO.read(inputStream);
-			File userKycFile = new File(uploadedFileLocation + updatedFileName);
-			ImageIO.write(ImageFromConvert, extension, userKycFile);
+		if (file != null) {
+			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
+			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, validExtentions,
+					sizeLimit);
 			if (user.getUserKyc() == null) {
 				UserKyc kyc = new UserKyc();
 				kyc.setDocument(updatedFileName);
@@ -73,7 +70,7 @@ public class KYCServiceImpl implements KYCService {
 			return null;
 		}
 	}
-	
+
 	@Override
 	public User approveKycDocument(Long userId) {
 		User user = userRepository.findOne(userId);
@@ -85,7 +82,7 @@ public class KYCServiceImpl implements KYCService {
 		user.setUserKyc(userKyc);
 		return userRepository.save(user);
 	}
-	
+
 	@Override
 	public User disApprovedKycDocument(Long userId, String rejectionMessage) {
 		User user = userRepository.findOne(userId);
@@ -97,18 +94,19 @@ public class KYCServiceImpl implements KYCService {
 		user.setUserKyc(userKyc);
 		return userRepository.save(user);
 	}
-	
+
 	@Override
-	public Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData) {
+	public Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder,
+			String searchData) {
 		Direction sort;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;
-		}
-		else {
+		} else {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		Page<User> userList = userRepository.getNewlySubmittedKycListWIthSearch(searchData, DocumentStatus.SUBMITTED, pageRequest);
+		Page<User> userList = userRepository.getNewlySubmittedKycListWIthSearch(searchData, DocumentStatus.SUBMITTED,
+				pageRequest);
 		return userList;
 	}
 
@@ -116,5 +114,5 @@ public class KYCServiceImpl implements KYCService {
 	public UserKyc getUserKycById(Long kycId) {
 		return kycRepo.findOne(kycId);
 	}
-	
+
 }

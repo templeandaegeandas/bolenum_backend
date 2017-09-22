@@ -45,15 +45,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = UrlConstant.LIST_USERS, method = RequestMethod.GET)
-	public ResponseEntity<Object> getUsersList(@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy, 
-			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
+	public ResponseEntity<Object> getUsersList(@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize,
+			@RequestParam("sortBy") String sortBy, @RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
 		User user = GenericUtils.getLoggedInUser();
 		Page<User> userList = adminService.getUsersList(pageNumber, pageSize, sortBy, sortOrder, searchData, user);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.list"), userList);
 	}
 	
 	@RequestMapping(value = UrlConstant.GET_USER_BY_ID, method = RequestMethod.GET)
-	public ResponseEntity<Object> getUsersById(@PathVariable Long userId) {
+	public ResponseEntity<Object> getUsersById(@PathVariable("userId") Long userId) {
 		User user = adminService.getUserById(userId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.get.by.id"), user);
 	}
