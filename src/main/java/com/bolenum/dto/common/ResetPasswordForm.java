@@ -15,10 +15,10 @@ public class ResetPasswordForm {
 			@Pattern(regexp = "(?=.*[A-Z]).+", message = "Password must contain one upper letter."),
 			@Pattern(regexp = "(?=.*[!@#$%^&*+=?-_()/\"\\.,<>~`;:]).+", message = "Password must contain one special character."),
 			@Pattern(regexp = "(?=\\S+$).+", message = "Password must contain no whitespace.") })
-	
 	private String newPassword;
+	
 	@NotNull
-	private String confirmPassword = "";
+	private String confirmPassword;
 
 	public String getNewPassword() {
 		return newPassword;
@@ -38,8 +38,7 @@ public class ResetPasswordForm {
 
 	@AssertTrue(message = "password did not match")
 	private boolean isValid() {
-		boolean check = this.newPassword.equals(this.confirmPassword);
-		return check;
+		return this.newPassword.equals(this.confirmPassword);
 	}
 
 }

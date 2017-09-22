@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void updateUserProfile(EditUserForm editUserForm, User user) {
+	public User updateUserProfile(EditUserForm editUserForm, User user) {
 
 		if (editUserForm.getFirstName() != null) {
 			user.setFirstName(editUserForm.getFirstName());
@@ -145,7 +145,7 @@ public class UserServiceImpl implements UserService {
 			user.setDob(editUserForm.getDob());
 		}
 
-		userRepository.saveAndFlush(user);
+		return userRepository.saveAndFlush(user);
 
 	}
 
