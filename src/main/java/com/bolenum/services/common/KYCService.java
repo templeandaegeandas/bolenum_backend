@@ -2,8 +2,11 @@ package com.bolenum.services.common;
 
 import java.io.IOException;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bolenum.exceptions.MaxSizeExceedException;
+import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
 
@@ -22,8 +25,10 @@ public interface KYCService {
 	 * @param userId
 	 * @return User
 	 * @throws IOException
+	 * @throws MaxSizeExceedException
 	 */
-	User uploadKycDocument(MultipartFile multipartFile, Long userId) throws IOException;
+	User uploadKycDocument(MultipartFile multipartFile, Long userId)
+			throws IOException, PersistenceException, MaxSizeExceedException;
 
 	/**
 	 * 
@@ -39,6 +44,14 @@ public interface KYCService {
 	 * @return User
 	 */
 	User disApprovedKycDocument(Long userId, String rejectionMessage);
+
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @return Page<User>
+	 */
+	Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 	/**
 	 * 
