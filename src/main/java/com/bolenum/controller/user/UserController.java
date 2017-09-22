@@ -2,6 +2,7 @@ package com.bolenum.controller.user;
 
 import javax.validation.Valid;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,11 @@ import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.exceptions.InvalidPasswordException;
+import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.AuthenticationTokenService;
+import com.bolenum.services.user.BTCWalletService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
@@ -52,6 +55,8 @@ public class UserController {
 	@Autowired
 	private AuthenticationTokenService authenticationTokenService;
 
+	@Autowired BTCWalletService btcWalletService;
+	
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -88,14 +93,31 @@ public class UserController {
 	}
 
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
-	public ResponseEntity<Object> userMailVerfy(@RequestParam String token) {
-
-		boolean isVerified = authenticationTokenService.verifyUserToken(token);
-		if (isVerified) {
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
+	public ResponseEntity<Object> userMailVerfy(@RequestParam("token") String token) {
+		logger.debug("user mail verify token: {}", token);
+		if (token == null || token.isEmpty()) {
+			throw new IllegalArgumentException(localService.getMessage("token.invalid"));
 		}
 
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"), null);
+		AuthenticationToken authenticationToken = authenticationTokenService.verifyUserToken(token);
+		if(authenticationToken == null){
+			logger.debug("user mail verify authenticationToken is null");
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"), null);
+		}
+		boolean isVerified = authenticationTokenService.isTokenExpired(authenticationToken);
+		logger.debug("user mail verify token expired: {}",isVerified);
+		if (!isVerified) {
+			User user = authenticationToken.getUser();
+			JSONObject obj = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
+			logger.debug("uJSONObject: {}",obj);
+			user.setIsEnabled(true);
+			User newUser = userService.saveUser(user);
+			if(newUser != null){
+				
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
+			}
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"), null);
 	}
 
 	// @PreAuthorize("hasRole('USER')")

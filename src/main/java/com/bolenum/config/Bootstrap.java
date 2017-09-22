@@ -49,7 +49,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	 * @description addRole @param @return void @exception
 	 */
 	private void addRole() {
-		Role role = new Role("ROLE_USER", "user role", privilegeService.findAll());
+		Role role = new Role("ROLE_USER", "user role", privilegeService.findAllPrevileges());
 		roleService.findOrCreate(role);
 	}
 
