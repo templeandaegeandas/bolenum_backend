@@ -28,7 +28,7 @@ public class BankDetailsServiceImpl implements BankDetailsService {
 	@Override
 	public BankAccountDetails saveBankDetails(BankAccountDetails bankAccountDetails) {
 		
-		return null;
+		return bankAccountDetailsRepo.saveAndFlush(bankAccountDetails);
 	}
 
 }

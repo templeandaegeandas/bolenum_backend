@@ -24,6 +24,8 @@ import com.bolenum.util.ResponseHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swagger.annotations.Api;
+
 /**
  * 
  * @Author himanshu
@@ -31,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @RestController
 @RequestMapping(value = UrlConstant.BASE_USER_URI_V1)
+@Api(value="Bank Details Controller")
 public class BankDetailsController {
 
 	@Autowired
@@ -45,14 +48,14 @@ public class BankDetailsController {
 	public ResponseEntity<Object> addUserBankDetails(@Valid @RequestBody AddUserBankDetailsForm addUserBankDetailsForm,
 			BindingResult result) {
 		User user = GenericUtils.getLoggedInUser();
-		if (result.hasErrors() && user == null) {
+		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(result),
 					ErrorCollectionUtil.getErrorMap(result));
 		} else {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
 				String requestObj = mapper.writeValueAsString(addUserBankDetailsForm);
-				logger.debug("Requested Object:" + requestObj);
+				logger.debug("Requested Object: {}", requestObj);
 
 				BankAccountDetails isUserBankDetailsExist = bankDetailsService
 						.findByAccountNumber(addUserBankDetailsForm.getAccountNumber());
@@ -81,13 +84,13 @@ public class BankDetailsController {
 
 	}
 
-	@RequestMapping(value = UrlConstant.EDIT_USER_BANK_DETAILS, method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstant.EDIT_USER_BANK_DETAILS, method = RequestMethod.PUT)
 	public ResponseEntity<Object> editUserBankDetails() {
 		User user = GenericUtils.getLoggedInUser();
 		return null;
 	}
 
-	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS, method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS, method = RequestMethod.GET)
 	public ResponseEntity<Object> viewUserBankDetails() {
 		User user = GenericUtils.getLoggedInUser();
 		return null;
