@@ -1,6 +1,7 @@
 package com.bolenum.services.common;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.bolenum.model.BankAccountDetails;
 import com.bolenum.repo.common.BankAccountDetailsRepo;
@@ -11,7 +12,7 @@ import com.bolenum.repo.common.BankAccountDetailsRepo;
  * @Date 22-Sep-2017
  */
 
-
+@Service
 public class BankDetailsServiceImpl implements BankDetailsService {
 
 	@Autowired

@@ -1,6 +1,7 @@
 package com.bolenum.controller.common;
 
-import java.util.List;
+import java.util.Set;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -91,10 +92,10 @@ public class PrivilegesController {
 	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.GET)
 	public ResponseEntity<Object> getPrivileges() {
-		List<Privilege> listOfPrivilege = privilegeService.findAllPrevileges();
-		if (listOfPrivilege != null) {
+		Set<Privilege> setOfPrivilege = privilegeService.findAllPrevileges();
+		if (setOfPrivilege != null) {
 			return ResponseHandler.response(HttpStatus.ACCEPTED, false,
-					localService.getMessage("privilege.found.success"), listOfPrivilege);
+					localService.getMessage("privilege.found.success"), setOfPrivilege);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localService.getMessage("privilege.not.found"), "please request valid privilege");

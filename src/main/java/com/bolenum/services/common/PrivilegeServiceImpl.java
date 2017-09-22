@@ -66,9 +66,10 @@ public class PrivilegeServiceImpl implements PrivilegeService {
 
 	
 	@Override
-	public List<Privilege> findAllPrevileges() {
-		
-	       return privilegeRepo.findAll();
+	public Set<Privilege> findAllPrevileges() {
+		List<Privilege> listOfPrivilege=privilegeRepo.findAll();
+		Set<Privilege> setOfPrivileges = new HashSet<Privilege>(listOfPrivilege);
+		return setOfPrivileges;
 	}
 
 }

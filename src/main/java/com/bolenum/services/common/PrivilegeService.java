@@ -1,6 +1,7 @@
 package com.bolenum.services.common;
 
-import java.util.List;
+import java.util.Set;
+
 import com.bolenum.model.Privilege;
 
 /**
@@ -17,7 +18,6 @@ public interface PrivilegeService {
 	public Privilege findByName(String name);
 	public Privilege findOrCreate(Privilege privilege);
 	
-
-	public List<Privilege> findAllPrevileges();
+	public Set<Privilege> findAllPrevileges();
 
 }

@@ -49,7 +49,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	 * @description addRole @param @return void @exception
 	 */
 	private void addRole() {
-		Role role = new Role("ROLE_USER", "user role", privilegeService.findAll());
+		Role role = new Role("ROLE_USER", "user role", privilegeService.findAllPrevileges());
 		roleService.findOrCreate(role);
 	}
 
@@ -72,7 +72,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	 * @description createAdmin @param @return void @exception
 	 */
 	private void createAdmin() {
-		Role r = new Role("ROLE_ADMIN", "Admin role", privilegeService.findAll());
+		Role r = new Role("ROLE_ADMIN", "Admin role", privilegeService.findAllPrevileges());
 		Role roleAdmin = roleService.findOrCreate(r);
 		User admin = userService.findByEmail("admin@bolenum.com");
 		if (admin == null) {
