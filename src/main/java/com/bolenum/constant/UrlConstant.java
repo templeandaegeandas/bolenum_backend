@@ -26,9 +26,9 @@ public class UrlConstant {
 	public static final String FORGET_PASS_VERIFY = FORGET_PASS + "/verify";
 	public static final String UPDATE_USER_PROFILE = "update";
 	public static final String GET_LOGGEDIN_USER = "get/loggedin";
-	public static final String EDIT_USER_BANK_DETAILS = "edit/bankdetails";
-	public static final String ADD_USER_BANK_DETAILS = "add/bankdetails";
-	public static final String VIEW_USER_BANK_DETAILS = "view/bankdetails";
+	public static final String EDIT_USER_BANK_DETAILS = "bankdetails";
+	public static final String ADD_USER_BANK_DETAILS = "bankdetails";
+	public static final String VIEW_USER_BANK_DETAILS = "bankdetails";
 	
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";
