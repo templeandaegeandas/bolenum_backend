@@ -2,6 +2,7 @@ package com.bolenum.model;
 
 import java.util.Date;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,6 +15,7 @@ import org.hibernate.validator.constraints.NotBlank;
  * @Author himanshu
  * @Date 22-Sep-2017
  */
+@Entity
 public class BankAccountDetails {
 
 	@Id
