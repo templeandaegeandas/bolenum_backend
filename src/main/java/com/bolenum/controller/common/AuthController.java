@@ -72,7 +72,7 @@ public class AuthController {
 				AuthenticationToken token;
 				try {
 					token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
-							loginForm.getBrowserName());
+							loginForm.getBrowserName(), loginForm.getClientOsName());
 				} catch (UsernameNotFoundException | InvalidPasswordException e) {
 					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
 				}

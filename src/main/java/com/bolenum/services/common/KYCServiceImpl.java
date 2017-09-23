@@ -20,6 +20,7 @@ import com.bolenum.model.UserKyc;
 import com.bolenum.repo.common.KYCRepo;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.user.FileUploadService;
+import com.bolenum.util.MailService;
 
 /**
  * 
@@ -37,6 +38,10 @@ public class KYCServiceImpl implements KYCService {
 	private KYCRepo kycRepo;
 	@Autowired
 	private FileUploadService fileUploadService;
+	@Autowired
+	private MailService mailService;
+	@Autowired
+	private LocaleService localeService;
 
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
@@ -80,7 +85,9 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.APPROVED);
 		userKyc.setRejectionMessage(null);
 		user.setUserKyc(userKyc);
-		return userRepository.save(user);
+		user = userRepository.save(user);
+		mailService.mailSend(user.getEmailId(), null,localeService.getMessage("email.subject.approve.user.kyc"), localeService.getMessage("email.text.approve.user.kyc"));
+		return user;
 	}
 
 	@Override
@@ -91,8 +98,9 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setIsVerified(false);
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
-		user.setUserKyc(userKyc);
-		return userRepository.save(user);
+		user = userRepository.save(user);
+		mailService.mailSend(user.getEmailId(), null,localeService.getMessage("email.subject.disapprove.user.kyc"), localeService.getMessage("email.text.disapprove.user.kyc"));
+		return user;
 	}
 
 	@Override
@@ -105,8 +113,7 @@ public class KYCServiceImpl implements KYCService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		return userRepository.getNewlySubmittedKycListWIthSearch(searchData, DocumentStatus.SUBMITTED,
-				pageRequest);
+		return userRepository.getNewlySubmittedKycListWIthSearch(searchData, DocumentStatus.SUBMITTED, pageRequest);
 	}
 
 	@Override

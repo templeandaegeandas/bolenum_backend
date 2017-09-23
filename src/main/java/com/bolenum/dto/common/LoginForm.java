@@ -26,6 +26,8 @@ public class LoginForm {
 	
 	//@NotBlank(message = "browser name is invalid")
 	private String browserName;
+	
+	private String clientOsName;
 
 	public LoginForm() {
 	}
@@ -88,6 +90,24 @@ public class LoginForm {
 	 */
 	public void setBrowserName(String browserName) {
 		this.browserName = browserName;
+	}
+
+	/**
+	 * 
+	 * @return operating system
+	 */
+	public String getClientOsName() {
+		return clientOsName;
+	}
+
+	
+	/**
+	 * 
+	 * @param clientOSName
+	 * 		Operating system to set
+	 */
+	public void setClientOsName(String clientOsName) {
+		this.clientOsName = clientOsName;
 	}
 
 	@AssertTrue(message = "Please enter valid email")

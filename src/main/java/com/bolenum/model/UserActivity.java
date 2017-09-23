@@ -23,13 +23,15 @@ public class UserActivity {
 	private Date logoutTime;
 	private String ipAddress;
 	private String browserName;
+	private String clientOsName;
 	private Boolean isDeleted = false;
 	@OneToOne
 	private AuthenticationToken authenticationToken;
 
-	public UserActivity(String ipAddress, String browserName, AuthenticationToken authenticationToken) {
+	public UserActivity(String ipAddress, String browserName, String clientOsName, AuthenticationToken authenticationToken) {
 		this.ipAddress = ipAddress;
 		this.browserName = browserName;
+		this.clientOsName = clientOsName;
 		this.authenticationToken = authenticationToken;
 	}
 
@@ -75,6 +77,14 @@ public class UserActivity {
 
 	public void setBrowserName(String browserName) {
 		this.browserName = browserName;
+	}
+
+	public String getClientOsName() {
+		return clientOsName;
+	}
+
+	public void setClientOsName(String clientOsName) {
+		this.clientOsName = clientOsName;
 	}
 
 	public Boolean getIsDeleted() {
