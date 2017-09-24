@@ -70,14 +70,19 @@ public class AuthController {
 						localService.getMessage("user.mail.verify.error"), null);
 			} else {
 				AuthenticationToken token;
-				try {
-					token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
-							loginForm.getBrowserName(), loginForm.getClientOsName());
-				} catch (UsernameNotFoundException | InvalidPasswordException e) {
-					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+				if (user.getRole().getName().equals(loginForm.getRole())) {
+					try {
+						token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
+								loginForm.getBrowserName(), loginForm.getClientOsName());
+					} catch (UsernameNotFoundException | InvalidPasswordException e) {
+						return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+					}
+					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("login.success"),
+							loginResponse(token));
+				} else {
+					return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
+							localService.getMessage("user.not.authorized.error"), null);
 				}
-				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("login.success"),
-						loginResponse(token));
 			}
 		}
 	}
@@ -109,10 +114,10 @@ public class AuthController {
 	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
 		boolean isValid = GenericUtils.isValidMail(email);
-	
+
 		if (isValid) {
 			boolean isValidUser = authService.validateUser(email);
-			
+
 			if (isValidUser) {
 				authService.sendTokenToResetPassword(email);
 				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("mail.sent.success"),

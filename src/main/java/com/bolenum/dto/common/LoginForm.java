@@ -7,6 +7,7 @@ import javax.validation.constraints.AssertTrue;
 
 import org.hibernate.validator.constraints.NotBlank;
 
+import com.bolenum.model.Role;
 import com.bolenum.util.GenericUtils;
 
 /**
@@ -20,6 +21,9 @@ public class LoginForm {
 
 	@NotBlank(message = "Please enter password")
 	private String password;
+	
+	@NotBlank
+	private String role;
 
 	//@NotBlank(message = "Your ip address is not present")
 	private String ipAddress;
@@ -60,6 +64,23 @@ public class LoginForm {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	/**
+	 * 
+	 * @return Role
+	 */
+	public String getRole() {
+		return role;
+	}
+
+	/**
+	 * 
+	 * @param role
+	 * 		the role to set
+	 */
+	public void setRole(String role) {
+		this.role = role;
 	}
 
 	/**
@@ -112,8 +133,7 @@ public class LoginForm {
 
 	@AssertTrue(message = "Please enter valid email")
 	private boolean isMailValid() {
-		boolean check = GenericUtils.isValidMail(this.emailId);
-		return check;
+		return GenericUtils.isValidMail(this.emailId);
 	}
 
 }
