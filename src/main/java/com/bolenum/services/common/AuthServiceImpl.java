@@ -141,11 +141,10 @@ public class AuthServiceImpl implements AuthService {
 		if (authenticationToken != null) {
 			User user = authenticationToken.getUser();
 			boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
-			if (user != null && user.getIsEnabled() == true && isExpired == false) {
+			if (user != null && user.getIsEnabled() && !isExpired) {
 				return user;
 			}
 		}
-
 		return null;
 	}
 

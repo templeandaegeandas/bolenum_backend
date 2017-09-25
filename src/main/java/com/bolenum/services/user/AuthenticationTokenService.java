@@ -4,7 +4,7 @@ import com.bolenum.model.AuthenticationToken;
 
 public interface AuthenticationTokenService {
 
-	AuthenticationToken verifyUserToken(String token);
+	AuthenticationToken findByToken(String token);
 
 	boolean isTokenExpired(AuthenticationToken verificationTokenToCheck);
 	
