@@ -16,7 +16,11 @@ import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.services.common.LocaleService;
-
+/**
+ * 
+ * @Author Vishal Kumar
+ * @Date 25-Sep-2017
+ */
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
 

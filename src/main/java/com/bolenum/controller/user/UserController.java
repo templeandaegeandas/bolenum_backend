@@ -203,7 +203,16 @@ public class UserController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), user);
 	}
 
-	@RequestMapping(value = UrlConstant.UPLOAD_PROFILE_IMAGE, method = RequestMethod.POST)
+	/**
+	 * to upload user profile image
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 * @throws PersistenceException
+	 * @throws MaxSizeExceedException
+	 */
+	@RequestMapping(value = UrlConstant.UPLOAD_PROFILE_IMAGE, method = RequestMethod.PUT)
 	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file)
 			throws IOException, PersistenceException, MaxSizeExceedException {
 		User user = GenericUtils.getLoggedInUser();

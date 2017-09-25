@@ -196,6 +196,9 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	/**
+	 * to upload profile image with all validation of image file
+	 */
 	@Override
 	public User uploadImage(MultipartFile file, Long userId)
 			throws IOException, PersistenceException, MaxSizeExceedException {
@@ -206,9 +209,9 @@ public class UserServiceImpl implements UserService {
 			String[] validExtentions = { "jpg", "jpeg", "png" };
 			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, validExtentions,
 					sizeLimit);
-            	user.setProfileImage(updatedFileName);
-            	return userRepository.save(user);
-            
+			user.setProfileImage(updatedFileName);
+			return userRepository.save(user);
+
 		}
 		return null;
 	}
