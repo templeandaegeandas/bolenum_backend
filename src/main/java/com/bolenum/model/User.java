@@ -77,7 +77,14 @@ public class User {
 
 	@OneToOne
 	private UserKyc userKyc;
-
+	
+	private String btcWalletUuid;
+	
+	private String ethWalletaddress;
+	
+	private String ethWalletPwd;
+	
+	
 	public Long getUserId() {
 		return userId;
 	}
@@ -228,7 +235,7 @@ public class User {
 
 	/**
 	 * @param createdOn
-	 *            the createdOn to set
+	 *  the createdOn to set
 	 */
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
@@ -243,7 +250,7 @@ public class User {
 
 	/**
 	 * @param updatedOn
-	 *            the updatedOn to set
+	 * the updatedOn to set
 	 */
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
@@ -258,7 +265,7 @@ public class User {
 
 	/**
 	 * @param deletedOn
-	 *            the deletedOn to set
+	 * the deletedOn to set
 	 */
 	public void setDeletedOn(Date deletedOn) {
 		this.deletedOn = deletedOn;
@@ -273,7 +280,7 @@ public class User {
 
 	/**
 	 * @param role
-	 *            the role to set
+	 * the role to set
 	 */
 	public void setRole(Role role) {
 		this.role = role;
@@ -295,4 +302,49 @@ public class User {
 		this.profileImage = profileImage;
 	}
 
+	/**
+	 * @return the btcWalletUuid
+	 */
+	public String getBtcWalletUuid() {
+		return btcWalletUuid;
+	}
+
+	/**
+	 * @param btcWalletUuid 
+	 * the btcWalletUuid to set
+	 */
+	public void setBtcWalletUuid(String btcWalletUuid) {
+		this.btcWalletUuid = btcWalletUuid;
+	}
+
+	/**
+	 * @return the ethWalletaddress
+	 */
+	public String getEthWalletaddress() {
+		return ethWalletaddress;
+	}
+
+	/**
+	 * @param ethWalletaddress 
+	 * the ethWalletaddress to set
+	 */
+	public void setEthWalletaddress(String ethWalletaddress) {
+		this.ethWalletaddress = ethWalletaddress;
+	}
+
+	/**
+	 * @return the ethWalletPwd
+	 */
+	public String getEthWalletPwd() {
+		return ethWalletPwd;
+	}
+
+	/**
+	 * @param ethWalletPwd 
+	 * the ethWalletPwd to set
+	 */
+	public void setEthWalletPwd(String ethWalletPwd) {
+		this.ethWalletPwd = ethWalletPwd;
+	}
+	
 }
