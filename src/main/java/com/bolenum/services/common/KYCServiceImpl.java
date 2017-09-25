@@ -34,12 +34,16 @@ public class KYCServiceImpl implements KYCService {
 
 	@Autowired
 	private UserRepository userRepository;
+
 	@Autowired
 	private KYCRepo kycRepo;
+
 	@Autowired
 	private FileUploadService fileUploadService;
+
 	@Autowired
 	private MailService mailService;
+
 	@Autowired
 	private LocaleService localeService;
 
@@ -86,7 +90,8 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setRejectionMessage(null);
 		user.setUserKyc(userKyc);
 		user = userRepository.save(user);
-		mailService.mailSend(user.getEmailId(), null,localeService.getMessage("email.subject.approve.user.kyc"), localeService.getMessage("email.text.approve.user.kyc"));
+		mailService.mailSend(user.getEmailId(), null, localeService.getMessage("email.subject.approve.user.kyc"),
+				localeService.getMessage("email.text.approve.user.kyc"));
 		return user;
 	}
 
@@ -99,7 +104,8 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
 		user = userRepository.save(user);
-		mailService.mailSend(user.getEmailId(), null,localeService.getMessage("email.subject.disapprove.user.kyc"), localeService.getMessage("email.text.disapprove.user.kyc"));
+		mailService.mailSend(user.getEmailId(), null, localeService.getMessage("email.subject.disapprove.user.kyc"),
+				localeService.getMessage("email.text.disapprove.user.kyc"));
 		return user;
 	}
 

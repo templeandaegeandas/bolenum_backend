@@ -1,5 +1,7 @@
 package com.bolenum.controller.user;
 
+import java.io.IOException;
+
 import javax.validation.Valid;
 
 import org.json.JSONObject;
@@ -14,12 +16,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.exceptions.InvalidPasswordException;
+import com.bolenum.exceptions.MaxSizeExceedException;
+import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.services.common.LocaleService;
@@ -198,4 +203,17 @@ public class UserController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), user);
 	}
 
+	@RequestMapping(value = UrlConstant.UPLOAD_PROFILE_IMAGE, method = RequestMethod.POST)
+	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file)
+			throws IOException, PersistenceException, MaxSizeExceedException {
+		User user = GenericUtils.getLoggedInUser();
+		User response = userService.uploadImage(file, user.getUserId());
+		if (response != null) {
+			return ResponseHandler.response(HttpStatus.OK, false,
+					localService.getMessage("user.image.uploaded.success"), response);
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localService.getMessage("user.image.uploaded.failed"), null);
+		}
+	}
 }

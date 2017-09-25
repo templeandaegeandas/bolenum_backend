@@ -1,16 +1,21 @@
 package com.bolenum.services.user;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.TokenType;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.exceptions.InvalidPasswordException;
+import com.bolenum.exceptions.MaxSizeExceedException;
+import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
@@ -47,6 +52,12 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private LocaleService localService;
+
+	@Autowired
+	private FileUploadService fileUploadService;
+
+	@Value("${bolenum.profile.image.location}")
+	private String uploadedFileLocation;
 
 	/**
 	 * to register user if and only if when user details not present in database
@@ -185,4 +196,20 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	@Override
+	public User uploadImage(MultipartFile file, Long userId)
+			throws IOException, PersistenceException, MaxSizeExceedException {
+
+		long sizeLimit = 1024 * 1024 * 5L;
+		User user = userRepository.findOne(userId);
+		if (file != null) {
+			String[] validExtentions = { "jpg", "jpeg", "png" };
+			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, validExtentions,
+					sizeLimit);
+            	user.setProfileImage(updatedFileName);
+            	return userRepository.save(user);
+            
+		}
+		return null;
+	}
 }

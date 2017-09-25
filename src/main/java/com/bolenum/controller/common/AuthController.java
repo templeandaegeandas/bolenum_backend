@@ -22,11 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.LoginForm;
 import com.bolenum.dto.common.ResetPasswordForm;
 import com.bolenum.exceptions.InvalidPasswordException;
+import com.bolenum.exceptions.MaxSizeExceedException;
+import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.services.common.AuthService;
@@ -177,6 +180,7 @@ public class AuthController {
 			return ResponseHandler.response(HttpStatus.CONFLICT, true,
 					localService.getMessage("user.password.not.matched"), null);
 		}
-
 	}
+
+	
 }

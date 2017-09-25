@@ -47,7 +47,9 @@ public class User {
 	private String gender;
 
 	private Date dob;
-	
+
+	private String profileImage;
+
 	private Boolean termsConditions = false;
 
 	@ApiModelProperty(hidden = true)
@@ -283,6 +285,14 @@ public class User {
 
 	public void setUserKyc(UserKyc userKyc) {
 		this.userKyc = userKyc;
+	}
+
+	public String getProfileImage() {
+		return profileImage;
+	}
+
+	public void setProfileImage(String profileImage) {
+		this.profileImage = profileImage;
 	}
 
 }
