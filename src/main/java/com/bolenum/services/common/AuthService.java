@@ -22,7 +22,7 @@ public interface AuthService {
 
 	boolean logOut(String token);
 
-	AuthenticationToken login(String email, User user, String ipAddress, String browserName)
+	AuthenticationToken login(String email, User user, String ipAddress, String browserName, String clientOSName)
 			throws InvalidPasswordException;
 
 	public boolean validateUser(String email);

@@ -25,7 +25,7 @@ public class MailService {
 	public void registrationMailSend(String to, String token) {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setSubject("verification link for Reistration");
-		message.setText("please verify by clicking on link http://" + serverUrl + "/api/v1/user/verify?token=" + token);
+		message.setText("please verify by clicking on link " + serverUrl + "/#/login?token=" + token);
 		message.setTo(to);
 		mailSender.send(message);
 	}

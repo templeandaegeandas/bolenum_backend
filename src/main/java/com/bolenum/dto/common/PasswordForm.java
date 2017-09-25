@@ -54,8 +54,7 @@ public class PasswordForm {
 
 	@AssertTrue(message = "password did not match")
 	private boolean isValid() {
-		boolean check = this.newPassword.equals(this.confirmPassword);
-		return check;
+		return this.newPassword.equals(this.confirmPassword);
 	}
 
 }

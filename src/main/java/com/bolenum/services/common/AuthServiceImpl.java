@@ -59,14 +59,14 @@ public class AuthServiceImpl implements AuthService {
 	 * For login activity of user
 	 */
 	@Override
-	public AuthenticationToken login(String password, User user, String ipAddress, String browserName)
+	public AuthenticationToken login(String password, User user, String ipAddress, String browserName, String clientOSName)
 			throws InvalidPasswordException {
 		if (passwordEncoder.matches(password, user.getPassword())) {
 			// Generate Token and Save it for the logged in user
 			AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
 			authToken.setTokentype(TokenType.AUTHENTICATION);
 			AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
-			UserActivity userActivity = new UserActivity(ipAddress, browserName, savedAuthToken);
+			UserActivity userActivity = new UserActivity(ipAddress, browserName, clientOSName, savedAuthToken);
 			userActivityRepository.save(userActivity);
 			return savedAuthToken;
 		} else {
