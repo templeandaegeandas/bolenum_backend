@@ -3,8 +3,6 @@
  */
 package com.bolenum.services.user;
 
-import org.json.JSONObject;
-
 /**
  * @author chandan kumar singh
  * @date 22-Sep-2017
@@ -18,5 +16,5 @@ public interface BTCWalletService {
 	 * @exception 
 	 * 
 	 */
-	JSONObject createHotWallet(String uuid);
+	String createHotWallet(String uuid);
 }
