@@ -55,8 +55,9 @@ public class UserController {
 	@Autowired
 	private AuthenticationTokenService authenticationTokenService;
 
-	@Autowired BTCWalletService btcWalletService;
-	
+	@Autowired
+	BTCWalletService btcWalletService;
+
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -92,33 +93,49 @@ public class UserController {
 		}
 	}
 
+	/**
+	 * for mail verify at the time of sign up user as well as re register
+	 * 
+	 * @param token
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
 	public ResponseEntity<Object> userMailVerfy(@RequestParam("token") String token) {
 		logger.debug("user mail verify token: {}", token);
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localService.getMessage("token.invalid"));
-		}
+		} else {
+			AuthenticationToken authenticationToken = authenticationTokenService.verifyUserToken(token);
+			if (authenticationToken == null) {
+				logger.debug("user mail verify authenticationToken is null");
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"),
+						null);
+			}
+			boolean isVerified = authenticationTokenService.isTokenExpired(authenticationToken);
+			logger.debug("user mail verify token expired: {}", isVerified);
+			if (!isVerified) {
+				User user = authenticationToken.getUser();
+				JSONObject obj = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
+				logger.debug("uJSONObject: {}", obj);
+				user.setIsEnabled(true);
+				User newUser = userService.saveUser(user);
+				if (newUser != null) {
 
-		AuthenticationToken authenticationToken = authenticationTokenService.verifyUserToken(token);
-		if(authenticationToken == null){
-			logger.debug("user mail verify authenticationToken is null");
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"), null);
-		}
-		boolean isVerified = authenticationTokenService.isTokenExpired(authenticationToken);
-		logger.debug("user mail verify token expired: {}",isVerified);
-		if (!isVerified) {
-			User user = authenticationToken.getUser();
-			JSONObject obj = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
-			logger.debug("uJSONObject: {}",obj);
-			user.setIsEnabled(true);
-			User newUser = userService.saveUser(user);
-			if(newUser != null){
-				
-				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
+					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
+							null);
+				}
 			}
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"), null);
 	}
+
+	/**
+	 * for change password
+	 * 
+	 * @param passwordForm
+	 * @param result
+	 * @return
+	 */
 
 	// @PreAuthorize("hasRole('USER')")
 	@RequestMapping(value = UrlConstant.CHANGE_PASS, method = RequestMethod.PUT)
@@ -145,21 +162,36 @@ public class UserController {
 		}
 	}
 
+	/**
+	 * used to update user profile
+	 * 
+	 * @param editUserForm
+	 * @param result
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.UPDATE_USER_PROFILE, method = RequestMethod.PUT)
-	public ResponseEntity<Object> updateUserProfile(@Valid @RequestBody EditUserForm editUserForm, BindingResult result) {
+	public ResponseEntity<Object> updateUserProfile(@Valid @RequestBody EditUserForm editUserForm,
+			BindingResult result) {
 		User user = GenericUtils.getLoggedInUser();
-		if (!result.hasErrors() && user != null) {
+		if (result.hasErrors()) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(result),
+					ErrorCollectionUtil.getErrorMap(result));
+		} else {
 			User response = userService.updateUserProfile(editUserForm, user);
 			if (response != null) {
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localService.getMessage("user.profile.update.success"), response);
 			} else {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("user.profile.update.failure"), null);
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localService.getMessage("user.profile.update.failure"), null);
 			}
-		} else
-			return ResponseHandler.response(HttpStatus.CONFLICT, true, localService.getMessage("invalid.email"), null);
+		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.GET_LOGGEDIN_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getLoggedinUser() {
 		User user = GenericUtils.getLoggedInUser();

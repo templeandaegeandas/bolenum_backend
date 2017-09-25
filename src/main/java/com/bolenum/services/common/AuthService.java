@@ -29,8 +29,9 @@ public interface AuthService {
 	
 	public void sendTokenToResetPassword(String email);
 
-	User verifyToken(String token);
 
 	void resetPassword(User verifiedUser, ResetPasswordForm resetPasswordForm);
+
+	User verifyTokenForResetPassword(String token);
 
 }

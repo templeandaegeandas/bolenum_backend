@@ -18,4 +18,5 @@ public interface UserService {
 	public void reRegister(User isUserExist);
 	boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException;
 	User updateUserProfile(EditUserForm EditUserForm, User user);
+	public User findByUserId(Long id);
 }

@@ -48,6 +48,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private LocaleService localService;
 
+	/**
+	 * to register user if and only if when user details not present in database
+	 */
 	@Override
 	public void registerUser(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -59,6 +62,12 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	/**
+	 * to send mail which contains verification link and Authentication token
+	 * 
+	 * @param user
+	 * @return
+	 */
 	private AuthenticationToken mailVerification(User user) {
 		String token = TokenGenerator.generateToken();
 		AuthenticationToken authenticationToken = new AuthenticationToken(token, user);
@@ -66,16 +75,27 @@ public class UserServiceImpl implements UserService {
 		return authenticationToken;
 	}
 
+	/**
+	 * find user with respect to email id
+	 */
 	@Override
 	public User findByEmail(String email) {
 		return userRepository.findByEmailIdIgnoreCase(email);
 	}
 
+	/**
+	 * to save user details
+	 */
 	@Override
 	public User saveUser(User user) {
 		return userRepository.saveAndFlush(user);
 	}
 
+	/**
+	 * 
+	 * to re register user if already details present in user table
+	 * 
+	 */
 	@Override
 	public void reRegister(User isUserExist) {
 
@@ -91,6 +111,9 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	/**
+	 * to change password
+	 */
 	@Override
 	public boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException {
 		if (passwordEncoder.matches(passwordForm.getOldPassword(), user.getPassword())) {
@@ -101,6 +124,10 @@ public class UserServiceImpl implements UserService {
 			throw new InvalidPasswordException(localService.getMessage("invalid.credential"));
 		}
 	}
+
+	/**
+	 * to update user profile
+	 */
 
 	@Override
 	public User updateUserProfile(EditUserForm editUserForm, User user) {
@@ -146,6 +173,15 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return userRepository.saveAndFlush(user);
+
+	}
+
+	/**
+	 * find user with respect to id
+	 */
+	@Override
+	public User findByUserId(Long id) {
+		return userRepository.findByUserId();
 
 	}
 

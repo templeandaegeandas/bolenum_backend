@@ -55,6 +55,12 @@ public class AuthController {
 	private LocaleService localService;
 	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
+	/**
+	 * 
+	 * @param loginForm
+	 * @param bindingResult
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.USER_LOGIN, method = RequestMethod.POST)
 	ResponseEntity<Object> login(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
@@ -82,6 +88,11 @@ public class AuthController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param token
+	 * @return
+	 */
 	private Map<String, Object> loginResponse(AuthenticationToken token) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("fName", token.getUser().getFirstName());
@@ -94,6 +105,12 @@ public class AuthController {
 		return map;
 	}
 
+	/**
+	 * controller that respond when hit comes for logout activity of user
+	 * 
+	 * @param token
+	 * @return
+	 */
 	// @PreAuthorize("hasRole('USER')")
 	@RequestMapping(value = UrlConstant.USER_LOOUT, method = RequestMethod.DELETE)
 	ResponseEntity<Object> logout(@RequestHeader("Authorization") String token) {
@@ -106,13 +123,19 @@ public class AuthController {
 		}
 	}
 
+	/**
+	 * for forget password
+	 * 
+	 * @param email
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
 		boolean isValid = GenericUtils.isValidMail(email);
-	
+
 		if (isValid) {
 			boolean isValidUser = authService.validateUser(email);
-			
+
 			if (isValidUser) {
 				authService.sendTokenToResetPassword(email);
 				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("mail.sent.success"),
@@ -122,10 +145,22 @@ public class AuthController {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.email"), null);
 	}
 
+	/**
+	 * to verify authentication link send at the time of forget password
+	 * 
+	 * @param token
+	 * @param resetPasswordForm
+	 * @param result
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS_VERIFY, method = RequestMethod.PUT)
 	public ResponseEntity<Object> resetPassword(@RequestParam String token,
 			@Valid @RequestBody ResetPasswordForm resetPasswordForm, BindingResult result) {
-		User verifiedUser = authService.verifyToken(token);
+		logger.debug("user mail verify token: {}", token);
+		if (token == null || token.isEmpty()) {
+			throw new IllegalArgumentException(localService.getMessage("token.invalid"));
+		}
+		User verifiedUser = authService.verifyTokenForResetPassword(token);
 		if (verifiedUser == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("token.invalid"),
 					null);

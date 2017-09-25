@@ -4,7 +4,6 @@ import java.util.Date;
 
 import java.util.List;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -49,14 +48,16 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private LocaleService localeService;
-	
+
 	@Value("${bolenum.url}")
 	private String serverUrl;
-	
+
 	@Value("${bolenum.api.reset}")
 	private String urlForResetPassword;
-	
 
+	/**
+	 * For login activity of user
+	 */
 	@Override
 	public AuthenticationToken login(String password, User user, String ipAddress, String browserName)
 			throws InvalidPasswordException {
@@ -73,6 +74,10 @@ public class AuthServiceImpl implements AuthService {
 		}
 	}
 
+	/**
+	 * used to validate user for the presence of valid user according to requested
+	 * email
+	 */
 	@Override
 	public boolean validateUser(String email) {
 		User user = userRepository.findByEmailIdIgnoreCase(email);
@@ -83,6 +88,9 @@ public class AuthServiceImpl implements AuthService {
 		return false;
 	}
 
+	/**
+	 * for logout activity of user
+	 */
 	@Override
 	public boolean logOut(String token) {
 		AuthenticationToken authToken = authenticationTokenRepo.findByToken(token);
@@ -98,41 +106,52 @@ public class AuthServiceImpl implements AuthService {
 		}
 	}
 
+	/**
+	 * to send token as verification link at the time of reset password
+	 */
+
 	public void sendTokenToResetPassword(String email) {
 
 		User existingUser = userRepository.findByEmailIdIgnoreCase(email);
-	
-		List<AuthenticationToken> previousToken= authenticationTokenRepo.findByUserAndTokentype(existingUser,TokenType.FORGOT_PASSWORD);
-		
-		for(AuthenticationToken token:previousToken) {
-			if(token.getTokentype() == TokenType.FORGOT_PASSWORD) {
+
+		List<AuthenticationToken> previousToken = authenticationTokenRepo.findByUserAndTokentype(existingUser,
+				TokenType.FORGOT_PASSWORD);
+
+		for (AuthenticationToken token : previousToken) {
+			if (token.getTokentype() == TokenType.FORGOT_PASSWORD) {
 				authenticationTokenRepo.delete(token);
 			}
 		}
 		String token = TokenGenerator.generateToken();
 		AuthenticationToken authenticationToken = new AuthenticationToken(token, existingUser);
-		
-		emailService.mailSend(email, token ,localeService.getMessage("message.subject.forget.password"),serverUrl+urlForResetPassword );
+
+		emailService.mailSend(email, token, localeService.getMessage("message.subject.forget.password"),
+				serverUrl + urlForResetPassword);
 		authenticationToken.setTokentype(TokenType.FORGOT_PASSWORD);
 		authenticationTokenRepo.saveAndFlush(authenticationToken);
 
 	}
 
+	/**
+	 * method used for verification of token at the time of reset password
+	 */
 	@Override
-	public User verifyToken(String token) {
-		if (token != null && !token.isEmpty()) {
-			AuthenticationToken authenticationToken = authenticationTokenRepo.findByToken(token);
-			if (authenticationToken != null) {
-				User user = authenticationToken.getUser();
-				boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
-				if (user != null && user.getIsEnabled() == true && isExpired == false) {
-					return user;
-				}
+	public User verifyTokenForResetPassword(String token) {
+		AuthenticationToken authenticationToken = authenticationTokenRepo.findByToken(token);
+		if (authenticationToken != null) {
+			User user = authenticationToken.getUser();
+			boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
+			if (user != null && user.getIsEnabled() == true && isExpired == false) {
+				return user;
 			}
 		}
+
 		return null;
 	}
 
+	/**
+	 * for Reset password
+	 */
 	@Override
 	public void resetPassword(User user, ResetPasswordForm resetPasswordForm) {
 		user.setPassword(passwordEncoder.encode(resetPasswordForm.getNewPassword()));
