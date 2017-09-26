@@ -2,7 +2,9 @@ package com.bolenum.services.user;
 
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
+import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
+import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 
 /**
@@ -12,10 +14,45 @@ import com.bolenum.model.User;
  */
 
 public interface UserService {
-	public void registerUser(User user) ;
+	public void registerUser(User user);
+
 	public User saveUser(User user);
+
 	public User findByEmail(String email);
+
 	public void reRegister(User isUserExist);
-	boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException;
+
+	/**
+	 * 
+	 * @param user
+	 * @param passwordForm
+	 * @return Boolean
+	 * @throws InvalidPasswordException
+	 */
+	Boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException;
+
 	User updateUserProfile(EditUserForm EditUserForm, User user);
+
+	/**
+	 * @param mobileNumber
+	 * @param user
+	 * @return User
+	 */
+	User addMobileNumber(String mobileNumber, User user) throws PersistenceException;
+
+	/**
+	 * 
+	 * @param otp
+	 * @param user
+	 * @return Boolean
+	 * @throws InvalidOtpException
+	 */
+	Boolean verifyOTP(Integer otp, User user) throws InvalidOtpException;
+
+	/**
+	 * 
+	 * @param user
+	 * @throws Exception
+	 */
+	void resendOTP(User user);
 }

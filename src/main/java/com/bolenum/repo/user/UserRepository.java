@@ -33,4 +33,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query("select u from User u where (u.firstName like %:searchData% or u.lastName like %:searchData% or u.emailId like %:searchData%) and u.userKyc.documentStatus = :documentStatus and u.isDeleted = false")
 	Page<User> getNewlySubmittedKycListWIthSearch(@Param("searchData") String searchData, @Param("documentStatus") DocumentStatus documentStatus, Pageable pageable);
 
+	User findByMobileNumber(String mobileNumber);
 }

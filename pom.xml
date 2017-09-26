@@ -143,6 +143,13 @@
 			<artifactId>json</artifactId>
 		</dependency>
 
+		<!-- Twilio for sms -->
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>(7.11.0,7.12.0]</version>
+		</dependency>
+
 	</dependencies>
 	<profiles>
 		<profile>

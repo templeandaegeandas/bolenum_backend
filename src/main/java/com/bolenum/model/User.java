@@ -43,6 +43,8 @@ public class User {
 	private String country;
 
 	private String mobileNumber;
+	
+	private Boolean isMobileVerified = false;
 
 	private String gender;
 
@@ -167,6 +169,14 @@ public class User {
 
 	public void setMobileNumber(String mobileNumber) {
 		this.mobileNumber = mobileNumber;
+	}
+
+	public Boolean getIsMobileVerified() {
+		return isMobileVerified;
+	}
+
+	public void setIsMobileVerified(Boolean isMobileVerified) {
+		this.isMobileVerified = isMobileVerified;
 	}
 
 	public String getGender() {

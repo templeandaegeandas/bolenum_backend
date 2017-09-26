@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.exceptions.MaxSizeExceedException;
+import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
@@ -39,7 +40,7 @@ public class KYCController {
 
 	@RequestMapping(value = UrlConstant.UPLOAD_DOCUMENT, method = RequestMethod.POST)
 	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file)
-			throws IOException, PersistenceException, MaxSizeExceedException {
+			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		User user = GenericUtils.getLoggedInUser();
 		User response = kycService.uploadKycDocument(file, user.getUserId());
 		if (response != null) {

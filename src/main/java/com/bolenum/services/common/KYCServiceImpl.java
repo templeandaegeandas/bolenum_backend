@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.DocumentStatus;
 import com.bolenum.exceptions.MaxSizeExceedException;
+import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
@@ -21,6 +22,7 @@ import com.bolenum.repo.common.KYCRepo;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.user.FileUploadService;
 import com.bolenum.util.MailService;
+import com.bolenum.util.SMSServiceUtil;
 
 /**
  * 
@@ -42,15 +44,20 @@ public class KYCServiceImpl implements KYCService {
 	private MailService mailService;
 	@Autowired
 	private LocaleService localeService;
+	@Autowired
+	private SMSServiceUtil smsServiceUtil;
 
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
 
 	@Override
 	public User uploadKycDocument(MultipartFile file, Long userId)
-			throws IOException, PersistenceException, MaxSizeExceedException {
+			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		long sizeLimit = 1024 * 1024 * 10L;
 		User user = userRepository.findOne(userId);
+		if (user.getMobileNumber() == null || !user.getIsMobileVerified()) {
+			throw new MobileNotVerifiedException("mobile.number.not.verified");
+		}
 		if (file != null) {
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
 			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, validExtentions,
@@ -86,6 +93,7 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setRejectionMessage(null);
 		user.setUserKyc(userKyc);
 		user = userRepository.save(user);
+		smsServiceUtil.sendMessage(user.getMobileNumber(), localeService.getMessage("email.text.approve.user.kyc"));
 		mailService.mailSend(user.getEmailId(), null,localeService.getMessage("email.subject.approve.user.kyc"), localeService.getMessage("email.text.approve.user.kyc"));
 		return user;
 	}
@@ -99,6 +107,7 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
 		user = userRepository.save(user);
+		smsServiceUtil.sendMessage(user.getMobileNumber(), localeService.getMessage("email.text.disapprove.user.kyc"));
 		mailService.mailSend(user.getEmailId(), null,localeService.getMessage("email.subject.disapprove.user.kyc"), localeService.getMessage("email.text.disapprove.user.kyc"));
 		return user;
 	}

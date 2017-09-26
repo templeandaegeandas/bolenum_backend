@@ -29,6 +29,9 @@ public class UrlConstant {
 	public static final String EDIT_USER_BANK_DETAILS = "bankdetails";
 	public static final String ADD_USER_BANK_DETAILS = "bankdetails";
 	public static final String VIEW_USER_BANK_DETAILS = "bankdetails";
+	public static final String ADD_MOBILE_NUMBER = "add/mobile/number";
+	public static final String VERIFY_OTP = "verify/otp";
+	public static final String RESEND_OTP = "resend/otp";
 	
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";
