@@ -1,6 +1,7 @@
 package com.bolenum.model;
 
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,6 +12,8 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.bolenum.constant.TwoFactorAuthOption;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -85,6 +88,10 @@ public class User {
 	private String ethWalletaddress;
 	
 	private String ethWalletPwd;
+	
+	private TwoFactorAuthOption twoFactorAuthOption = TwoFactorAuthOption.NONE;
+	
+	private String google2FaAuthKey;
 	
 	
 	public Long getUserId() {
@@ -355,6 +362,22 @@ public class User {
 	 */
 	public void setEthWalletPwd(String ethWalletPwd) {
 		this.ethWalletPwd = ethWalletPwd;
+	}
+
+	public TwoFactorAuthOption getTwoFactorAuthOption() {
+		return twoFactorAuthOption;
+	}
+
+	public void setTwoFactorAuthOption(TwoFactorAuthOption twoFactorAuthOption) {
+		this.twoFactorAuthOption = twoFactorAuthOption;
+	}
+
+	public String getGoogle2FaAuthKey() {
+		return google2FaAuthKey;
+	}
+
+	public void setGoogle2FaAuthKey(String google2FaAuthKey) {
+		this.google2FaAuthKey = google2FaAuthKey;
 	}
 	
 }
