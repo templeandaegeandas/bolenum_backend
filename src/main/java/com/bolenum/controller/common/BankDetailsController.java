@@ -136,11 +136,11 @@ public class BankDetailsController {
 	 * @return
 	 */
 
-	@SuppressWarnings("unlikely-arg-type")
 	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS, method = RequestMethod.GET)
 	public ResponseEntity<Object> viewUserBankDetails() {
 		User user = GenericUtils.getLoggedInUser();
-		if (user.getRole().equals("ROLE_USER")) {
+		if (user.getRole().getName().equals("ROLE_USER")) {
+			System.out.println(user.getEmailId());
 			List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(user);
 			if (listOfBankAccountDetails != null) {
 				return ResponseHandler.response(HttpStatus.OK, false,
@@ -154,11 +154,17 @@ public class BankDetailsController {
 
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
+	/**
+	 * to view user bank details by admin
+	 * 
+	 * @param id
+	 * @return
+	 * 
+	 */
 	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS_BY_ADMIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> viewUserBankDetailsByAdmin(@RequestParam Long id) {
 		User user = GenericUtils.getLoggedInUser();
-		if (user.getRole().equals("ROLE_ADMIN")) {
+		if (user.getRole().getName().equals("ROLE_ADMIN")) {
 			User userBankDetails = userService.findByUserId(id);
 			List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(userBankDetails);
 			if (listOfBankAccountDetails != null) {
