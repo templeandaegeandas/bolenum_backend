@@ -43,5 +43,20 @@
     "name": "bolenum.ethwallet.location",
     "type": "java.lang.String",
     "description": "A description for 'bolenum.ethwallet.location'"
+  },
+  {
+    "name": "ethereum.daemon.url",
+    "type": "java.lang.String",
+    "description": "A description for 'ethereum.daemon.url'"
+  },
+  {
+    "name": "ethereum.daemon.url",
+    "type": "java.lang.String",
+    "description": "A description for 'ethereum.daemon.url'"
+  },
+  {
+    "name": "ethereum.daemon.url",
+    "type": "java.lang.String",
+    "description": "A description for 'ethereum.daemon.url'"
   }
 ]}

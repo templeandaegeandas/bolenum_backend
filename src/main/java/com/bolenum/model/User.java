@@ -89,6 +89,10 @@ public class User {
 	
 	private String ethWalletPwd;
 	
+	private String ethWalletPwdKey;
+	
+	private String ethWalletJsonFileName;
+	
 	private TwoFactorAuthOption twoFactorAuthOption = TwoFactorAuthOption.NONE;
 	
 	private String google2FaAuthKey;
@@ -378,6 +382,36 @@ public class User {
 
 	public void setGoogle2FaAuthKey(String google2FaAuthKey) {
 		this.google2FaAuthKey = google2FaAuthKey;
+	}
+
+	/**
+	 * @return the ethWalletPwdKey
+	 */
+	public String getEthWalletPwdKey() {
+		return ethWalletPwdKey;
+	}
+
+	/**
+	 * @param ethWalletPwdKey 
+	 * the ethWalletPwdKey to set
+	 */
+	public void setEthWalletPwdKey(String ethWalletPwdKey) {
+		this.ethWalletPwdKey = ethWalletPwdKey;
+	}
+
+	/**
+	 * @return the ethWalletJsonFileName
+	 */
+	public String getEthWalletJsonFileName() {
+		return ethWalletJsonFileName;
+	}
+
+	/**
+	 * @param ethWalletJsonFileName 
+	 * the ethWalletJsonFileName to set
+	 */
+	public void setEthWalletJsonFileName(String ethWalletJsonFileName) {
+		this.ethWalletJsonFileName = ethWalletJsonFileName;
 	}
 	
 }

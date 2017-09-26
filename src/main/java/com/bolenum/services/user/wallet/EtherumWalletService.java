@@ -3,6 +3,10 @@
  */
 package com.bolenum.services.user.wallet;
 
+import org.springframework.scheduling.annotation.Async;
+
+import com.bolenum.model.User;
+
 /**
  * @author chandan kumar singh
  * @date 26-Sep-2017
@@ -16,5 +20,8 @@ public interface EtherumWalletService {
 	 * @exception 
 	 *
 	 */
-	String createWallet(String uuid);
+	@Async
+	void createWallet(User user);
+	
+	String cleintVersion();
 }
