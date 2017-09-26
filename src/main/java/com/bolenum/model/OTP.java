@@ -2,19 +2,27 @@ package com.bolenum.model;
 
 import java.util.Date;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
+import org.hibernate.validator.constraints.NotBlank;
+
+@Entity
 public class OTP {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	@NotBlank
 	private String mobileNumber;
+	@NotBlank
 	private Integer otp;
 	private Boolean isDeleted = false;
 	private Date createdDate = new Date();
+	@OneToOne
 	private User user;
 	
 	public OTP(String mobileNumber, Integer otp, User user) {
