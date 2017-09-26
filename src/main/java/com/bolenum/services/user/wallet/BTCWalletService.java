@@ -1,9 +1,7 @@
 /**
  * 
  */
-package com.bolenum.services.user;
-
-import org.json.JSONObject;
+package com.bolenum.services.user.wallet;
 
 /**
  * @author chandan kumar singh
@@ -18,5 +16,5 @@ public interface BTCWalletService {
 	 * @exception 
 	 * 
 	 */
-	JSONObject createHotWallet(String uuid);
+	String createHotWallet(String uuid);
 }

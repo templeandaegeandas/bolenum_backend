@@ -1,9 +1,14 @@
 package com.bolenum.services.user;
 
+import java.io.IOException;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
+import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 
@@ -55,4 +60,7 @@ public interface UserService {
 	 * @throws Exception
 	 */
 	void resendOTP(User user);
+	public User findByUserId(Long id);
+	public User uploadImage(MultipartFile file, Long userId) throws IOException, PersistenceException, MaxSizeExceedException;
+
 }

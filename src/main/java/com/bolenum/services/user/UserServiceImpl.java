@@ -1,19 +1,23 @@
 package com.bolenum.services.user;
 
 import java.util.Date;
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.TokenType;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
+import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.OTP;
@@ -61,6 +65,14 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private OTPRepository otpRepository;
 
+	private FileUploadService fileUploadService;
+
+	@Value("${bolenum.profile.image.location}")
+	private String uploadedFileLocation;
+
+	/**
+	 * to register user if and only if when user details not present in database
+	 */
 	@Override
 	public void registerUser(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -72,6 +84,12 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	/**
+	 * to send mail which contains verification link and Authentication token
+	 * 
+	 * @param user
+	 * @return
+	 */
 	private AuthenticationToken mailVerification(User user) {
 		String token = TokenGenerator.generateToken();
 		AuthenticationToken authenticationToken = new AuthenticationToken(token, user);
@@ -79,16 +97,27 @@ public class UserServiceImpl implements UserService {
 		return authenticationToken;
 	}
 
+	/**
+	 * find user with respect to email id
+	 */
 	@Override
 	public User findByEmail(String email) {
 		return userRepository.findByEmailIdIgnoreCase(email);
 	}
 
+	/**
+	 * to save user details
+	 */
 	@Override
 	public User saveUser(User user) {
 		return userRepository.saveAndFlush(user);
 	}
 
+	/**
+	 * 
+	 * to re register user if already details present in user table
+	 * 
+	 */
 	@Override
 	public void reRegister(User isUserExist) {
 
@@ -104,6 +133,9 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	/**
+	 * to change password
+	 */
 	@Override
 	public Boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException {
 		if (passwordEncoder.matches(passwordForm.getOldPassword(), user.getPassword())) {
@@ -114,6 +146,10 @@ public class UserServiceImpl implements UserService {
 			throw new InvalidPasswordException(localService.getMessage("invalid.credential"));
 		}
 	}
+
+	/**
+	 * to update user profile
+	 */
 
 	@Override
 	public User updateUserProfile(EditUserForm editUserForm, User user) {
@@ -222,5 +258,33 @@ public class UserServiceImpl implements UserService {
 		smsServiceUtil.sendMessage(mobileNumber, message);
 		OTP otp = new OTP(mobileNumber, code, user);
 		otpRepository.save(otp);
+	}
+	/**
+	 * find user with respect to id
+	 */
+	@Override
+	public User findByUserId(Long id) {
+		return userRepository.findByUserId(id);
+
+	}
+
+	/**
+	 * to upload profile image with all validation of image file
+	 */
+	@Override
+	public User uploadImage(MultipartFile file, Long userId)
+			throws IOException, PersistenceException, MaxSizeExceedException {
+
+		long sizeLimit = 1024 * 1024 * 5L;
+		User user = userRepository.findOne(userId);
+		if (file != null) {
+			String[] validExtentions = { "jpg", "jpeg", "png" };
+			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, validExtentions,
+					sizeLimit);
+			user.setProfileImage(updatedFileName);
+			return userRepository.save(user);
+
+		}
+		return null;
 	}
 }

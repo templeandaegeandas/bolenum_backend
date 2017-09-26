@@ -32,6 +32,7 @@ public class UrlConstant {
 	public static final String ADD_MOBILE_NUMBER = "add/mobile/number";
 	public static final String VERIFY_OTP = "verify/otp";
 	public static final String RESEND_OTP = "resend/otp";
+	public static final String UPLOAD_PROFILE_IMAGE = "upload/image";
 	
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";
@@ -43,6 +44,7 @@ public class UrlConstant {
 	public static final String DISAPPROVE_DOCUMENT = BASE_URI_V1 + "/kyc/disapprove";
 	public static final String GET_KYC_BY_ID = BASE_URI_V1 + "/kyc/{kycId}";
 	public static final String SUBMITTED_KYC_LIST = BASE_URI_V1 + "list/kyc";
+	
 
 
 }

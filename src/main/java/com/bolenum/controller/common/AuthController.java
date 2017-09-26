@@ -22,11 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.LoginForm;
 import com.bolenum.dto.common.ResetPasswordForm;
 import com.bolenum.exceptions.InvalidPasswordException;
+import com.bolenum.exceptions.MaxSizeExceedException;
+import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.services.common.AuthService;
@@ -55,6 +58,12 @@ public class AuthController {
 	private LocaleService localService;
 	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
+	/**
+	 * 
+	 * @param loginForm
+	 * @param bindingResult
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.USER_LOGIN, method = RequestMethod.POST)
 	ResponseEntity<Object> login(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
@@ -87,6 +96,11 @@ public class AuthController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param token
+	 * @return
+	 */
 	private Map<String, Object> loginResponse(AuthenticationToken token) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("fName", token.getUser().getFirstName());
@@ -99,6 +113,12 @@ public class AuthController {
 		return map;
 	}
 
+	/**
+	 * controller that respond when hit comes for logout activity of user
+	 * 
+	 * @param token
+	 * @return
+	 */
 	// @PreAuthorize("hasRole('USER')")
 	@RequestMapping(value = UrlConstant.USER_LOOUT, method = RequestMethod.DELETE)
 	ResponseEntity<Object> logout(@RequestHeader("Authorization") String token) {
@@ -111,6 +131,12 @@ public class AuthController {
 		}
 	}
 
+	/**
+	 * for forget password
+	 * 
+	 * @param email
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
 		boolean isValid = GenericUtils.isValidMail(email);
@@ -127,10 +153,22 @@ public class AuthController {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.email"), null);
 	}
 
+	/**
+	 * to verify authentication link send at the time of forget password
+	 * 
+	 * @param token
+	 * @param resetPasswordForm
+	 * @param result
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS_VERIFY, method = RequestMethod.PUT)
 	public ResponseEntity<Object> resetPassword(@RequestParam String token,
 			@Valid @RequestBody ResetPasswordForm resetPasswordForm, BindingResult result) {
-		User verifiedUser = authService.verifyToken(token);
+		logger.debug("user mail verify token: {}", token);
+		if (token == null || token.isEmpty()) {
+			throw new IllegalArgumentException(localService.getMessage("token.invalid"));
+		}
+		User verifiedUser = authService.verifyTokenForResetPassword(token);
 		if (verifiedUser == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("token.invalid"),
 					null);
@@ -142,6 +180,7 @@ public class AuthController {
 			return ResponseHandler.response(HttpStatus.CONFLICT, true,
 					localService.getMessage("user.password.not.matched"), null);
 		}
-
 	}
+
+	
 }
