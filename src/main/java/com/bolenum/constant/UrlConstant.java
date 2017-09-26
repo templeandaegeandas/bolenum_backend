@@ -26,14 +26,15 @@ public class UrlConstant {
 	public static final String FORGET_PASS_VERIFY = FORGET_PASS + "/verify";
 	public static final String UPDATE_USER_PROFILE = "update";
 	public static final String GET_LOGGEDIN_USER = "get/loggedin";
-	public static final String EDIT_USER_BANK_DETAILS = "/bankdetails";
-	public static final String ADD_USER_BANK_DETAILS = "/bankdetails";
-	public static final String VIEW_USER_BANK_DETAILS = "/bankdetails";
-	public static final String UPLOAD_PROFILE_IMAGE = "/upload/image";
-	
+	public static final String EDIT_USER_BANK_DETAILS = "bankdetails";
+	public static final String ADD_USER_BANK_DETAILS = "bankdetails";
+	public static final String VIEW_USER_BANK_DETAILS = "bankdetails";
+	public static final String UPLOAD_PROFILE_IMAGE = "upload/image";
+
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";
 	public static final String GET_USER_BY_ID = "user/{userId}";
+	public static final String VIEW_USER_BANK_DETAILS_BY_ADMIN = "admin/bankdetails";
 
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "/kyc/upload";
@@ -41,7 +42,5 @@ public class UrlConstant {
 	public static final String DISAPPROVE_DOCUMENT = BASE_URI_V1 + "/kyc/disapprove";
 	public static final String GET_KYC_BY_ID = BASE_URI_V1 + "/kyc/{kycId}";
 	public static final String SUBMITTED_KYC_LIST = BASE_URI_V1 + "list/kyc";
-	
-
 
 }

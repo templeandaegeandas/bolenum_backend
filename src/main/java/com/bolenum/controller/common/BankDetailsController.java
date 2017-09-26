@@ -138,9 +138,9 @@ public class BankDetailsController {
 
 	@SuppressWarnings("unlikely-arg-type")
 	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS, method = RequestMethod.GET)
-	public ResponseEntity<Object> viewUserBankDetails(@RequestParam Long id) {
+	public ResponseEntity<Object> viewUserBankDetails() {
 		User user = GenericUtils.getLoggedInUser();
-		if (user.getRole().equals("ROLE_USER") && user.getUserId() == id) {
+		if (user.getRole().equals("ROLE_USER")) {
 			List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(user);
 			if (listOfBankAccountDetails != null) {
 				return ResponseHandler.response(HttpStatus.OK, false,
@@ -149,7 +149,16 @@ public class BankDetailsController {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 						localService.getMessage("message.bank.details.not.found"), null);
 			}
-		} else if (user.getRole().equals("ROLE_ADMIN")) {
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("user.not.found"), null);
+
+	}
+
+	@SuppressWarnings("unlikely-arg-type")
+	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS_BY_ADMIN, method = RequestMethod.GET)
+	public ResponseEntity<Object> viewUserBankDetailsByAdmin(@RequestParam Long id) {
+		User user = GenericUtils.getLoggedInUser();
+		if (user.getRole().equals("ROLE_ADMIN")) {
 			User userBankDetails = userService.findByUserId(id);
 			List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(userBankDetails);
 			if (listOfBankAccountDetails != null) {
@@ -161,6 +170,5 @@ public class BankDetailsController {
 			}
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("user.not.found"), null);
-
 	}
 }
