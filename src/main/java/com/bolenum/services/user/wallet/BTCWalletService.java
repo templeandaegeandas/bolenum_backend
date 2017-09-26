@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bolenum.services.user;
+package com.bolenum.services.user.wallet;
 
 /**
  * @author chandan kumar singh
