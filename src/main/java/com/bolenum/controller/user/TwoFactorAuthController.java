@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +19,7 @@ import com.bolenum.model.OTP;
 import com.bolenum.model.User;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.TwoFactorAuthService;
+import com.bolenum.services.user.UserService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 import com.google.zxing.WriterException;
@@ -37,6 +37,8 @@ public class TwoFactorAuthController {
 	@Autowired
 	private TwoFactorAuthService twoFactorAuthService;
 	@Autowired
+	private UserService userService;
+	@Autowired
 	private LocaleService localeService;
 	
 	@RequestMapping(value = UrlConstant.GEN_GOOGLE_AUTH_QR, method = RequestMethod.POST)
@@ -53,7 +55,7 @@ public class TwoFactorAuthController {
 	}
 
 	@RequestMapping(value = UrlConstant.VERIFY_GOOGLE_AUTH_KEY, method = RequestMethod.PUT)
-	ResponseEntity<Object> authenticateGoogleAuthKey(@RequestParam String secret) {
+	ResponseEntity<Object> authenticateGoogleAuthKey(@RequestParam("secret") String secret) {
 		User user = GenericUtils.getLoggedInUser();
 		boolean authResponse = twoFactorAuthService.performAuthentication(secret, user);
 		if (authResponse) {
@@ -69,6 +71,19 @@ public class TwoFactorAuthController {
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("tfa.set.to.google.authenticator.failure"), null);
+		}
+	}
+	
+	@RequestMapping(value = UrlConstant.VERIFY_GOOGLE_AUTH_KEY_OPEN, method = RequestMethod.GET)
+	ResponseEntity<Object> authenticateGoogleAuthKey(@RequestParam("secret") String secret, @RequestParam("userId") long userId) {
+		User user = userService.findByUserId(userId);
+		boolean authResponse = twoFactorAuthService.performAuthentication(secret, user);
+		if (authResponse) {
+			return ResponseHandler.response(HttpStatus.OK, false,
+					localeService.getMessage("tfa.successfull"), null);
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("tfa.unsuccessfull"), null);
 		}
 	}
 

@@ -16,7 +16,6 @@ public class AddUserBankDetailsForm {
 	private Long id;
 
 	@NotBlank
-	//@Pattern(regexp = "([a-zA-Z]+)", message = "account holder name must be valid")
 	@Length(min = 3, message = "First name length must be 3 characters and above")
 	private String accountHolderName;
 
@@ -25,7 +24,6 @@ public class AddUserBankDetailsForm {
 	private String accountNumber;
 
 	@NotBlank
-	//@Pattern(regexp = "([a-zA-Z]+)", message = "Bank name must be valid")
 	private String bankName;
 
 	@NotBlank

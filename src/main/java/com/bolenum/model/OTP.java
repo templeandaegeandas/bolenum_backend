@@ -18,7 +18,6 @@ public class OTP {
 	private Long id;
 	@NotBlank
 	private String mobileNumber;
-	@NotBlank
 	private Integer otp;
 	private Boolean isDeleted = false;
 	private Date createdDate = new Date();

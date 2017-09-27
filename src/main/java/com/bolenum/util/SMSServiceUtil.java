@@ -28,9 +28,10 @@ public class SMSServiceUtil {
 	public void sendMessage(String mobileNumber, String msg) {
 		Twilio.init(twilioAccountSid, twilioAuthToken);
 		try {
-			Message.creator(new PhoneNumber(mobileNumber.toString()), // to
+			Message.creator(new PhoneNumber("+" + mobileNumber.toString()), // to
 					new PhoneNumber(twilioMobileNumber), // from
 					msg).create();
+			logger.info("Message Sent successfully");
 		} catch (ApiException e) {
 			logger.error(e.getMessage());
 		}
