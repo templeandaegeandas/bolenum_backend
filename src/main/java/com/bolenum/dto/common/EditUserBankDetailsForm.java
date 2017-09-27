@@ -17,14 +17,12 @@ public class EditUserBankDetailsForm {
 	@ApiModelProperty(hidden = true)
 	private Long id;
 
-	@Pattern(regexp = "([a-zA-Z]+)", message = "account holder name must be valid")
 	@Length(min = 3, message = "account holder name length must be 3 characters and above")
 	private String accountHolderName;
 
 	@Pattern(regexp = "([A-Za-z0-9]+)", message = "Account number must be valid")
 	private String accountNumber;
-
-	@Pattern(regexp = "([a-zA-Z]+)", message = "Bank name must be valid")
+	
 	private String bankName;
 
 	@Pattern(regexp = "([A-Za-z0-9]+)", message = "IFSCCode must be valid")

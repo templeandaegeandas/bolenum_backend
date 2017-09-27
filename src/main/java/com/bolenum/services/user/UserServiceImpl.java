@@ -205,14 +205,15 @@ public class UserServiceImpl implements UserService {
 			OTP otp = new OTP(mobileNumber, code, user);
 			if (otpRepository.save(otp) != null) {
 				user.setMobileNumber(mobileNumber);
+				user.setIsMobileVerified(false);
 				return userRepository.save(user);
 			} else {
 				return null;
 			}
 		} else {
-			if (existinguser.equals(user) && existinguser.getIsMobileVerified()) {
+			if (existinguser.getUserId().equals(user.getUserId()) && existinguser.getIsMobileVerified()) {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.verified.by.you"));
-			} else if (existinguser.equals(user) && !existinguser.getIsMobileVerified()) {
+			} else if (existinguser.getUserId().equals(user.getUserId()) && !existinguser.getIsMobileVerified()) {
 				smsServiceUtil.sendMessage(mobileNumber, message);
 				OTP otp = new OTP(mobileNumber, code, user);
 				otpRepository.save(otp);
