@@ -35,6 +35,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
+	 * to handle Illegal Argument Exception
+	 * @param ex
+	 * @param request
+	 * @return ResponseEntity
+	 */
+
+	@ExceptionHandler({ IllegalArgumentException.class })
+	public ResponseEntity<Object> handleIllegalArgumentException(final IllegalArgumentException ex, final WebRequest request) {
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+	}
+	
+	/**
 	 * 
 	 * @param ex
 	 * @param request

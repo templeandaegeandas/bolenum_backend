@@ -54,5 +54,8 @@ public class UrlConstant {
 	public static final String SEND_2FA_OTP = "/twofactor/auth/send/otp";
 	public static final String VERIFY_2FA_OTP = "/twofactor/auth/mobile/verify";
 	public static final String REMOVE_TWO_FACTOR_AUTH = "/twofactor/auth/remove";
-
+	
+	/******************** USER Wallet API ******/
+	public static final String DEPOSIT = "deposit";
+	
 }
