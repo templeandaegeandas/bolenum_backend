@@ -1,6 +1,8 @@
 package com.bolenum.util;
 
-import org.apache.commons.validator.routines.EmailValidator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.bolenum.model.User;
@@ -22,7 +24,11 @@ public class GenericUtils {
 	}
 
 	public static boolean isValidMail(String email) {
-		EmailValidator ev = EmailValidator.getInstance();
-		return ev.isValid(email);
+		//EmailValidator ev = EmailValidator.getInstance();
+		//return ev.isValid(email);
+		String emailPattern = "^(.+)@(.+)$";
+		Pattern p = Pattern.compile(emailPattern);
+		Matcher m = p.matcher(email);
+		return m.matches();
 	}
 }

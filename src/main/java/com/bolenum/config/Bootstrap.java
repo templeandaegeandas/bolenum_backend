@@ -1,11 +1,16 @@
 package com.bolenum.config;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -34,6 +39,12 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
 
+	@Value("${bolenum.ethwallet.location}")
+	private String ethWalletLocation; // ethereum wallet file location
+
+	@Value("${bolenum.profile.image.location}")
+	private String userProfileImageLocation;
+	
 	private Set<Privilege> privileges = new HashSet<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
@@ -43,8 +54,48 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		addPrivileges();
 		addRole();
 		createAdmin();
+
+		// create initial directories
+		createInitDirectories();
+		createProfilePicDirectories();
 	}
 
+	/**
+	 * this will create ethereum wallet location at the time of application start
+	 * @description createInitDirectories
+	 * @param 
+	 * @return void
+	 * @exception 
+	 * 
+	 */
+	private void createInitDirectories() {
+		Path ethWallet = Paths.get(ethWalletLocation);
+		if (!Files.exists(ethWallet)) {
+			if (new File((ethWalletLocation)).mkdirs()) {
+				logger.debug("ethereum wallet location created");
+			} else {
+				logger.debug("ethereum wallet location creation failed");
+			}
+		} else {
+			logger.debug("ethereum wallet location exists");
+		}
+		
+	}
+
+	private void createProfilePicDirectories()
+	{
+		Path profileImg=Paths.get(userProfileImageLocation);
+		
+		if (!Files.exists(profileImg)) {
+			if (new File((userProfileImageLocation)).mkdirs()) {
+				logger.debug("User Profile Image location created");
+			} else {
+				logger.debug("User Profile Image location creation failed");
+			}
+		} else {
+			logger.debug("User Profile Image location exists");
+		}
+	}
 	/**
 	 * @description addRole @param @return void @exception
 	 */

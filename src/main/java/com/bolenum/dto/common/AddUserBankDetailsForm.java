@@ -20,7 +20,7 @@ public class AddUserBankDetailsForm {
 	private String accountHolderName;
 
 	@NotBlank
-	@Pattern(regexp = "([A-Za-z0-9]+)", message = "Account number must be valid")
+	//@Pattern(regexp = "([A-Za-z0-9]+)", message = "Account number must be valid")
 	private String accountNumber;
 
 	@NotBlank

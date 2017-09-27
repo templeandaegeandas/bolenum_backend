@@ -171,6 +171,19 @@
 			<version>3.2.1</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.web3j/core -->
+		<dependency>
+			<groupId>org.web3j</groupId>
+			<artifactId>core</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+		</dependency>
+		
 	</dependencies>
 	<profiles>
 		<profile>

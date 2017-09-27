@@ -60,41 +60,44 @@ public class BankDetailsController {
 	@RequestMapping(value = UrlConstant.ADD_USER_BANK_DETAILS, method = RequestMethod.POST)
 	public ResponseEntity<Object> addUserBankDetails(@Valid @RequestBody AddUserBankDetailsForm addUserBankDetailsForm,
 			BindingResult result) {
-		User user = GenericUtils.getLoggedInUser();
+
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(result),
 					ErrorCollectionUtil.getErrorMap(result));
-		} else {
-			try {
-				ObjectMapper mapper = new ObjectMapper();
-				String requestObj = mapper.writeValueAsString(addUserBankDetailsForm);
-				logger.debug("Requested Object: {}", requestObj);
-
-				BankAccountDetails isUserBankDetailsExist = bankDetailsService
-						.findByAccountNumber(addUserBankDetailsForm.getAccountNumber());
-				if (isUserBankDetailsExist == null) {
-					BankAccountDetails bankAccountDetails = addUserBankDetailsForm.copy(new BankAccountDetails());
-					bankAccountDetails.setUser(user);
-					BankAccountDetails responseBankAccountDetails = bankDetailsService
-							.saveBankDetails(bankAccountDetails);
-					if (responseBankAccountDetails != null) {
-						return ResponseHandler.response(HttpStatus.OK, false,
-								localService.getMessage("message.bank.details.add.success"),
-								bankAccountDetails.getAccountNumber());
-					} else {
-						return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-								localService.getMessage("message.bank.details.add.error"), null);
-					}
-				} else {
-					return ResponseHandler.response(HttpStatus.CONFLICT, true,
-							localService.getMessage("bank details of user already exist"), null);
-				}
-			} catch (JsonProcessingException e) {
-				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-						localService.getMessage("message.error"), null);
-			}
 		}
 
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			String requestObj = mapper.writeValueAsString(addUserBankDetailsForm);
+			logger.debug("Requested Object: {}", requestObj);
+		} catch (JsonProcessingException e) {
+			return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+					localService.getMessage("message.error"), null);
+		}
+		User user = GenericUtils.getLoggedInUser();
+		List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(user);
+		if (listOfBankAccountDetails.size() == 2) {
+			return ResponseHandler.response(HttpStatus.CONFLICT, true,
+					localService.getMessage("message.bank.details.add.limit.reached"), null);
+		}
+		BankAccountDetails isUserBankDetailsExist = bankDetailsService
+				.findByAccountNumber(addUserBankDetailsForm.getAccountNumber());
+		if (isUserBankDetailsExist == null && listOfBankAccountDetails.size() <= 2) {
+			BankAccountDetails bankAccountDetails = addUserBankDetailsForm.copy(new BankAccountDetails());
+			bankAccountDetails.setUser(user);
+			BankAccountDetails responseBankAccountDetails = bankDetailsService.saveBankDetails(bankAccountDetails);
+			if (responseBankAccountDetails != null) {
+				return ResponseHandler.response(HttpStatus.OK, false,
+						localService.getMessage("message.bank.details.add.success"),
+						bankAccountDetails.getAccountNumber());
+			} else {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localService.getMessage("message.bank.details.add.error"), null);
+			}
+		} else {
+			return ResponseHandler.response(HttpStatus.CONFLICT, true,
+					localService.getMessage("bank details of user already exist"), null);
+		}
 	}
 
 	/**
@@ -136,22 +139,12 @@ public class BankDetailsController {
 	 * @return
 	 */
 
-	@SuppressWarnings("unlikely-arg-type")
 	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS, method = RequestMethod.GET)
-	public ResponseEntity<Object> viewUserBankDetails(@RequestParam Long id) {
+	public ResponseEntity<Object> viewUserBankDetails() {
 		User user = GenericUtils.getLoggedInUser();
-		if (user.getRole().equals("ROLE_USER") && user.getUserId() == id) {
+		if (user.getRole().getName().equals("ROLE_USER")) {
+			System.out.println(user.getEmailId());
 			List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(user);
-			if (listOfBankAccountDetails != null) {
-				return ResponseHandler.response(HttpStatus.OK, false,
-						localService.getMessage("message.bank.details.found"), listOfBankAccountDetails);
-			} else {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-						localService.getMessage("message.bank.details.not.found"), null);
-			}
-		} else if (user.getRole().equals("ROLE_ADMIN")) {
-			User userBankDetails = userService.findByUserId(id);
-			List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(userBankDetails);
 			if (listOfBankAccountDetails != null) {
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localService.getMessage("message.bank.details.found"), listOfBankAccountDetails);
@@ -162,5 +155,29 @@ public class BankDetailsController {
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("user.not.found"), null);
 
+	}
+
+	/**
+	 * to view user bank details by admin
+	 * 
+	 * @param id
+	 * @return
+	 * 
+	 */
+	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS_BY_ADMIN, method = RequestMethod.GET)
+	public ResponseEntity<Object> viewUserBankDetailsByAdmin(@RequestParam Long userId) {
+		User user = GenericUtils.getLoggedInUser();
+		if (user.getRole().getName().equals("ROLE_ADMIN")) {
+			User userBankDetails = userService.findByUserId(userId);
+			List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(userBankDetails);
+			if (listOfBankAccountDetails != null) {
+				return ResponseHandler.response(HttpStatus.OK, false,
+						localService.getMessage("message.bank.details.found"), listOfBankAccountDetails);
+			} else {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localService.getMessage("message.bank.details.not.found"), null);
+			}
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("user.not.found"), null);
 	}
 }

@@ -31,6 +31,7 @@ import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.wallet.BTCWalletService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
@@ -62,6 +63,9 @@ public class UserController {
 
 	@Autowired
 	BTCWalletService btcWalletService;
+	
+	@Autowired
+	EtherumWalletService etherumWalletService;
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
@@ -122,6 +126,7 @@ public class UserController {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"), null);
 			}
 		    User user = authenticationToken.getUser();
+		    etherumWalletService.createWallet(user);
 		    String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 		    if (!uuid.isEmpty()) {
@@ -139,7 +144,7 @@ public class UserController {
 			}
 		}
 	}
-
+	
 	/**
 	 * for change password
 	 * 
