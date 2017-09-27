@@ -49,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring().antMatchers("/api/v1/user/verify");
 		web.ignoring().antMatchers("/monitoring");
 		web.ignoring().antMatchers("/refresh");
-		web.ignoring().antMatchers("/api/v1/forgetpassword");
+		web.ignoring().antMatchers("/api/v1/forgetpassword/{email}");
 		web.ignoring().antMatchers("/api/v1/forgetpassword/verify");
 		
 		

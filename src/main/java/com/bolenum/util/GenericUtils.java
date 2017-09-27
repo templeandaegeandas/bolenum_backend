@@ -29,6 +29,7 @@ public class GenericUtils {
 		String emailPattern = "^(.+)@(.+)$";
 		Pattern p = Pattern.compile(emailPattern);
 		Matcher m = p.matcher(email);
+	
 		return m.matches();
 	}
 }

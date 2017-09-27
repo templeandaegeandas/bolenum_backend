@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -134,12 +135,13 @@ public class AuthController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
-	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
+	public ResponseEntity<Object> forgetPassword(@PathVariable String email) {
+		System.out.println(email);
 		boolean isValid = GenericUtils.isValidMail(email);
 
 		if (isValid) {
 			boolean isValidUser = authService.validateUser(email);
-
+           
 			if (isValidUser) {
 				authService.sendTokenToResetPassword(email);
 				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("mail.sent.success"),
