@@ -140,7 +140,6 @@ public class BankDetailsController {
 	public ResponseEntity<Object> viewUserBankDetails() {
 		User user = GenericUtils.getLoggedInUser();
 		if (user.getRole().getName().equals("ROLE_USER")) {
-			System.out.println(user.getEmailId());
 			List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(user);
 			if (listOfBankAccountDetails != null) {
 				return ResponseHandler.response(HttpStatus.OK, false,
