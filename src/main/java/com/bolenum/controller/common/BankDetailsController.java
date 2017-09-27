@@ -162,10 +162,10 @@ public class BankDetailsController {
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS_BY_ADMIN, method = RequestMethod.GET)
-	public ResponseEntity<Object> viewUserBankDetailsByAdmin(@RequestParam Long id) {
+	public ResponseEntity<Object> viewUserBankDetailsByAdmin(@RequestParam Long userId) {
 		User user = GenericUtils.getLoggedInUser();
 		if (user.getRole().getName().equals("ROLE_ADMIN")) {
-			User userBankDetails = userService.findByUserId(id);
+			User userBankDetails = userService.findByUserId(userId);
 			List<BankAccountDetails> listOfBankAccountDetails = bankDetailsService.findByUser(userBankDetails);
 			if (listOfBankAccountDetails != null) {
 				return ResponseHandler.response(HttpStatus.OK, false,
