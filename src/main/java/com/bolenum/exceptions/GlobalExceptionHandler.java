@@ -90,6 +90,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleBadRequest(final MaxSizeExceedException ex, final WebRequest request) {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
+	
+	/**
+	 * 
+	 * @param ex
+	 * @param request
+	 * @return ResponseEntity
+	 */
+	@ExceptionHandler({ MobileNotVerifiedException.class })
+	public ResponseEntity<Object> handleBadRequest(final MobileNotVerifiedException ex, final WebRequest request) {
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+	}
 
 	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex,

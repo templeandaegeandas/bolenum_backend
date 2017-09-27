@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bolenum.services.user;
+package com.bolenum.services.user.wallet;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,6 +15,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.bolenum.constant.BTCUrlConstant;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -34,7 +35,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@Override
 	public String createHotWallet(String uuid) {
-		String url = "http://127.0.0.1:8081/api/v1/hotwallet/create";
+		String url = BTCUrlConstant.HOT_WALLET;
 		RestTemplate restTemplate = new RestTemplate();
 		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<String, String>();
 		logger.debug("create wallet uuid:  {}", uuid);

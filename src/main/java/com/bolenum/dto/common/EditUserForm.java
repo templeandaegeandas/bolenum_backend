@@ -34,8 +34,6 @@ public class EditUserForm {
 
 	private String country;
 
-	private String mobileNumber;
-
 	private String gender;
 
 	private Date dob;
@@ -158,21 +156,6 @@ public class EditUserForm {
 	 */
 	public void setCountry(String country) {
 		this.country = country;
-	}
-
-	/**
-	 * @return the mobileNumber
-	 */
-	public String getMobileNumber() {
-		return mobileNumber;
-	}
-
-	/**
-	 * @param mobileNumber
-	 *            the mobileNumber to set
-	 */
-	public void setMobileNumber(String mobileNumber) {
-		this.mobileNumber = mobileNumber;
 	}
 
 	/**

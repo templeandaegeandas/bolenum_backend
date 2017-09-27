@@ -1,7 +1,9 @@
 package com.bolenum.services.user;
 
+import java.util.Date;
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 import javax.transaction.Transactional;
 
@@ -13,17 +15,21 @@ import org.springframework.web.multipart.MultipartFile;
 import com.bolenum.constant.TokenType;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
+import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
+import com.bolenum.model.OTP;
 import com.bolenum.model.User;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.common.RoleRepo;
+import com.bolenum.repo.user.OTPRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
+import com.bolenum.util.SMSServiceUtil;
 import com.bolenum.util.TokenGenerator;
 
 /**
@@ -54,6 +60,11 @@ public class UserServiceImpl implements UserService {
 	private LocaleService localService;
 
 	@Autowired
+	private SMSServiceUtil smsServiceUtil;
+
+	@Autowired
+	private OTPRepository otpRepository;
+
 	private FileUploadService fileUploadService;
 
 	@Value("${bolenum.profile.image.location}")
@@ -126,7 +137,7 @@ public class UserServiceImpl implements UserService {
 	 * to change password
 	 */
 	@Override
-	public boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException {
+	public Boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException {
 		if (passwordEncoder.matches(passwordForm.getOldPassword(), user.getPassword())) {
 			user.setPassword(passwordEncoder.encode(passwordForm.getNewPassword()));
 			userRepository.save(user);
@@ -171,10 +182,6 @@ public class UserServiceImpl implements UserService {
 			user.setCountry(editUserForm.getCountry());
 		}
 
-		if (editUserForm.getMobileNumber() != null) {
-			user.setMobileNumber(editUserForm.getMobileNumber());
-		}
-
 		if (editUserForm.getGender() != null) {
 			user.setGender(editUserForm.getGender());
 		}
@@ -187,6 +194,71 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	@Override
+	public User addMobileNumber(String mobileNumber, User user) throws PersistenceException {
+		User existinguser = userRepository.findByMobileNumber(mobileNumber);
+		Random r = new Random();
+		int code = (100000 + r.nextInt(900000));
+		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
+		if (existinguser == null) {
+			smsServiceUtil.sendMessage(mobileNumber, message);
+			OTP otp = new OTP(mobileNumber, code, user);
+			if (otpRepository.save(otp) != null) {
+				user.setMobileNumber(mobileNumber);
+				return userRepository.save(user);
+			} else {
+				return null;
+			}
+		} else {
+			if (existinguser.equals(user) && existinguser.getIsMobileVerified()) {
+				throw new PersistenceException(localService.getMessage("mobile.number.already.verified.by.you"));
+			} else if (existinguser.equals(user) && !existinguser.getIsMobileVerified()) {
+				smsServiceUtil.sendMessage(mobileNumber, message);
+				OTP otp = new OTP(mobileNumber, code, user);
+				otpRepository.save(otp);
+				return existinguser;
+			} else {
+				throw new PersistenceException(localService.getMessage("mobile.number.already.added"));
+			}
+		}
+	}
+
+	@Override
+	public Boolean verifyOTP(Integer otp, User user) throws InvalidOtpException {
+		OTP existingOtp = otpRepository.findByOtp(otp);
+		if (existingOtp != null) {
+			if (existingOtp.getIsDeleted() == false && existingOtp.getMobileNumber().equals(user.getMobileNumber())) {
+				long timeDiffInSec = (new Date().getTime() - existingOtp.getCreatedDate().getTime()) / 1000;
+				if (timeDiffInSec <= 300) {
+					user.setIsMobileVerified(true);
+					if (userRepository.save(user) != null) {
+						existingOtp.setIsDeleted(true);
+						otpRepository.save(existingOtp);
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					throw new InvalidOtpException(localService.getMessage("otp.expired"));
+				}
+			} else {
+				throw new InvalidOtpException(localService.getMessage("otp.invalid"));
+			}
+		} else {
+			throw new InvalidOtpException(localService.getMessage("otp.invalid"));
+		}
+	}
+
+	@Override
+	public void resendOTP(User user) {
+		String mobileNumber = user.getMobileNumber();
+		Random r = new Random();
+		int code = (100000 + r.nextInt(900000));
+		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
+		smsServiceUtil.sendMessage(mobileNumber, message);
+		OTP otp = new OTP(mobileNumber, code, user);
+		otpRepository.save(otp);
+	}
 	/**
 	 * find user with respect to id
 	 */

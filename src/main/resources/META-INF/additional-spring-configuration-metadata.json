@@ -13,5 +13,50 @@
     "name": "bolenum.api.reset",
     "type": "java.lang.String",
     "description": "A description for 'bolenum.api.reset'"
+  },
+  {
+    "name": "bolenum.document.location",
+    "type": "java.lang.String",
+    "description": "A description for 'bolenum.document.location'"
+  },
+  {
+    "name": "bolenum.profile.image.location",
+    "type": "java.lang.String",
+    "description": "A description for 'bolenum.profile.image.location'"
+  },
+  {
+    "name": "bolenum.twilio.account.SID",
+    "type": "java.lang.String",
+    "description": "A description for 'bolenum.twilio.account.SID'"
+  },
+  {
+    "name": "bolenum.twilio.auth.token",
+    "type": "java.lang.String",
+    "description": "A description for 'bolenum.twilio.auth.token'"
+  },
+  {
+    "name": "bolenum.twilio.phone.number",
+    "type": "java.lang.String",
+    "description": "A description for 'bolenum.twilio.phone.number'"
+  },
+  {
+    "name": "bolenum.ethwallet.location",
+    "type": "java.lang.String",
+    "description": "A description for 'bolenum.ethwallet.location'"
+  },
+  {
+    "name": "ethereum.daemon.url",
+    "type": "java.lang.String",
+    "description": "A description for 'ethereum.daemon.url'"
+  },
+  {
+    "name": "ethereum.daemon.url",
+    "type": "java.lang.String",
+    "description": "A description for 'ethereum.daemon.url'"
+  },
+  {
+    "name": "ethereum.daemon.url",
+    "type": "java.lang.String",
+    "description": "A description for 'ethereum.daemon.url'"
   }
 ]}

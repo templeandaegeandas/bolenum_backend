@@ -21,6 +21,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
+import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
@@ -28,8 +29,9 @@ import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.AuthenticationTokenService;
-import com.bolenum.services.user.BTCWalletService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.wallet.BTCWalletService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
@@ -61,6 +63,9 @@ public class UserController {
 
 	@Autowired
 	BTCWalletService btcWalletService;
+	
+	@Autowired
+	EtherumWalletService etherumWalletService;
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
@@ -121,6 +126,7 @@ public class UserController {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"), null);
 			}
 		    User user = authenticationToken.getUser();
+		    etherumWalletService.createWallet(user);
 		    String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 		    if (!uuid.isEmpty()) {
@@ -138,7 +144,7 @@ public class UserController {
 			}
 		}
 	}
-
+	
 	/**
 	 * for change password
 	 * 
@@ -208,6 +214,40 @@ public class UserController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), user);
 	}
 
+	@RequestMapping(value = UrlConstant.ADD_MOBILE_NUMBER, method = RequestMethod.PUT)
+	public ResponseEntity<Object> addMobileNumber(@RequestParam("mobileNumber") String mobileNumber)
+			throws PersistenceException {
+		User user = GenericUtils.getLoggedInUser();
+		User response = userService.addMobileNumber(mobileNumber, user);
+		if (response != null) {
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.sent.success"),
+					response);
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("otp.sent.failure"),
+					null);
+		}
+	}
+
+	@RequestMapping(value = UrlConstant.VERIFY_OTP, method = RequestMethod.PUT)
+	public ResponseEntity<Object> verify(@RequestParam("otp") Integer otp)
+			throws PersistenceException, InvalidOtpException {
+		User user = GenericUtils.getLoggedInUser();
+		Boolean response = userService.verifyOTP(otp, user);
+		if (response) {
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.verified"), null);
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("otp.not.verified"),
+					response);
+		}
+	}
+
+	@RequestMapping(value = UrlConstant.RESEND_OTP, method = RequestMethod.POST)
+	public ResponseEntity<Object> resendOtp() throws PersistenceException, InvalidOtpException {
+		User user = GenericUtils.getLoggedInUser();
+		userService.resendOTP(user);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.resend"), null);
+	}
+	
 	/**
 	 * to upload user profile image
 	 * 
