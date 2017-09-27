@@ -42,6 +42,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Value("${bolenum.ethwallet.location}")
 	private String ethWalletLocation; // ethereum wallet file location
 
+	@Value("${bolenum.profile.image.location}")
+	private String userProfileImageLocation;
+	
 	private Set<Privilege> privileges = new HashSet<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
@@ -54,6 +57,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 		// create initial directories
 		createInitDirectories();
+		createProfilePicDirectories();
 	}
 
 	/**
@@ -78,6 +82,20 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		
 	}
 
+	private void createProfilePicDirectories()
+	{
+		Path profileImg=Paths.get(userProfileImageLocation);
+		
+		if (!Files.exists(profileImg)) {
+			if (new File((userProfileImageLocation)).mkdirs()) {
+				logger.debug("User Profile Image location created");
+			} else {
+				logger.debug("User Profile Image location creation failed");
+			}
+		} else {
+			logger.debug("User Profile Image location exists");
+		}
+	}
 	/**
 	 * @description addRole @param @return void @exception
 	 */
