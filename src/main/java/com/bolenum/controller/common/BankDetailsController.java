@@ -180,4 +180,6 @@ public class BankDetailsController {
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("user.not.found"), null);
 	}
+	
+	
 }
