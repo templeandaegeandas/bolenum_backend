@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,9 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	long lastVerifiedTime = 0; // time of last success
 	final GoogleAuthenticator gAuth = new GoogleAuthenticator();
 	AtomicInteger windowSize = new AtomicInteger(3);
+	
+	@Value("${bolenum.google.qr.code.location}")
+	private String qrCodeLocation;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -63,7 +67,6 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	@Override
 	public Map<String, String> qrCodeGeneration(User user) throws URISyntaxException, WriterException, IOException {
 		String key = getTwoFactorKey(user);
-		String qrCodeLocation = "";
 		String filePath = qrCodeLocation + "/" + user.getUserId() + ".png";
 		String charset = "UTF-8"; // or "ISO-8859-1"
 		Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<EncodeHintType, ErrorCorrectionLevel>();

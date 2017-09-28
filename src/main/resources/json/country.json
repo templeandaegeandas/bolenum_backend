@@ -1,0 +1,2532 @@
+[
+    {
+      "countryId": "1",
+      "name": "Afghanistan",
+      "isoCode2": "AF",
+      "isoCode3": "AFG",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "93"
+    },
+    {
+      "countryId": "2",
+      "name": "Albania",
+      "isoCode2": "AL",
+      "isoCode3": "ALB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "355"
+    },
+    {
+      "countryId": "3",
+      "name": "Algeria",
+      "isoCode2": "DZ",
+      "isoCode3": "DZA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "213"
+    },
+    {
+      "countryId": "4",
+      "name": "American Samoa",
+      "isoCode2": "AS",
+      "isoCode3": "ASM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1684"
+    },
+    {
+      "countryId": "5",
+      "name": "Andorra",
+      "isoCode2": "AD",
+      "isoCode3": "AND",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "376"
+    },
+    {
+      "countryId": "6",
+      "name": "Angola",
+      "isoCode2": "AO",
+      "isoCode3": "AGO",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "244"
+    },
+    {
+      "countryId": "7",
+      "name": "Anguilla",
+      "isoCode2": "AI",
+      "isoCode3": "AIA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1264"
+    },
+    {
+      "countryId": "8",
+      "name": "Antarctica",
+      "isoCode2": "AQ",
+      "isoCode3": "ATA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "672"
+    },
+    {
+      "countryId": "9",
+      "name": "Antigua and Barbuda",
+      "isoCode2": "AG",
+      "isoCode3": "ATG",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1268"
+    },
+    {
+      "countryId": "10",
+      "name": "Argentina",
+      "isoCode2": "AR",
+      "isoCode3": "ARG",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "54"
+    },
+    {
+      "countryId": "11",
+      "name": "Armenia",
+      "isoCode2": "AM",
+      "isoCode3": "ARM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "374"
+    },
+    {
+      "countryId": "12",
+      "name": "Aruba",
+      "isoCode2": "AW",
+      "isoCode3": "ABW",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "297"
+    },
+    {
+      "countryId": "13",
+      "name": "Australia",
+      "isoCode2": "AU",
+      "isoCode3": "AUS",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "61"
+    },
+    {
+      "countryId": "14",
+      "name": "Austria",
+      "isoCode2": "AT",
+      "isoCode3": "AUT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "43"
+    },
+    {
+      "countryId": "15",
+      "name": "Azerbaijan",
+      "isoCode2": "AZ",
+      "isoCode3": "AZE",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "994"
+    },
+    {
+      "countryId": "16",
+      "name": "Bahamas",
+      "isoCode2": "BS",
+      "isoCode3": "BHS",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1242"
+    },
+    {
+      "countryId": "17",
+      "name": "Bahrain",
+      "isoCode2": "BH",
+      "isoCode3": "BHR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "973"
+    },
+    {
+      "countryId": "18",
+      "name": "Bangladesh",
+      "isoCode2": "BD",
+      "isoCode3": "BGD",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "880"
+    },
+    {
+      "countryId": "19",
+      "name": "Barbados",
+      "isoCode2": "BB",
+      "isoCode3": "BRB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1246"
+    },
+    {
+      "countryId": "20",
+      "name": "Belarus",
+      "isoCode2": "BY",
+      "isoCode3": "BLR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "375"
+    },
+    {
+      "countryId": "21",
+      "name": "Belgium",
+      "isoCode2": "BE",
+      "isoCode3": "BEL",
+      "addressFormat": "{firstname} {lastname}\\r\\n{company}\\r\\n{address_1}\\r\\n{address_2}\\r\\n{postcode} {city}\\r\\n{country}",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "32"
+    },
+    {
+      "countryId": "22",
+      "name": "Belize",
+      "isoCode2": "BZ",
+      "isoCode3": "BLZ",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "501"
+    },
+    {
+      "countryId": "23",
+      "name": "Benin",
+      "isoCode2": "BJ",
+      "isoCode3": "BEN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "229"
+    },
+    {
+      "countryId": "24",
+      "name": "Bermuda",
+      "isoCode2": "BM",
+      "isoCode3": "BMU",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1441"
+    },
+    {
+      "countryId": "25",
+      "name": "Bhutan",
+      "isoCode2": "BT",
+      "isoCode3": "BTN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "975"
+    },
+    {
+      "countryId": "26",
+      "name": "Bolivia",
+      "isoCode2": "BO",
+      "isoCode3": "BOL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "591"
+    },
+    {
+      "countryId": "27",
+      "name": "Bosnia and Herzegovina",
+      "isoCode2": "BA",
+      "isoCode3": "BIH",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "387"
+    },
+    {
+      "countryId": "28",
+      "name": "Botswana",
+      "isoCode2": "BW",
+      "isoCode3": "BWA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "267"
+    },
+    {
+      "countryId": "29",
+      "name": "Bouvet Island",
+      "isoCode2": "BV",
+      "isoCode3": "BVT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "47"
+    },
+    {
+      "countryId": "30",
+      "name": "Brazil",
+      "isoCode2": "BR",
+      "isoCode3": "BRA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "55"
+    },
+    {
+      "countryId": "31",
+      "name": "British Indian Ocean Territory",
+      "isoCode2": "IO",
+      "isoCode3": "IOT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "246"
+    },
+    {
+      "countryId": "32",
+      "name": "Brunei Darussalam",
+      "isoCode2": "BN",
+      "isoCode3": "BRN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "673"
+    },
+    {
+      "countryId": "33",
+      "name": "Bulgaria",
+      "isoCode2": "BG",
+      "isoCode3": "BGR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "359"
+    },
+    {
+      "countryId": "34",
+      "name": "Burkina Faso",
+      "isoCode2": "BF",
+      "isoCode3": "BFA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "226"
+    },
+    {
+      "countryId": "35",
+      "name": "Burundi",
+      "isoCode2": "BI",
+      "isoCode3": "BDI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "257"
+    },
+    {
+      "countryId": "36",
+      "name": "Cambodia",
+      "isoCode2": "KH",
+      "isoCode3": "KHM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "855"
+    },
+    {
+      "countryId": "37",
+      "name": "Cameroon",
+      "isoCode2": "CM",
+      "isoCode3": "CMR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "237"
+    },
+    {
+      "countryId": "38",
+      "name": "Canada",
+      "isoCode2": "CA",
+      "isoCode3": "CAN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "39",
+      "name": "Cape Verde",
+      "isoCode2": "CV",
+      "isoCode3": "CPV",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "238"
+    },
+    {
+      "countryId": "40",
+      "name": "Cayman Islands",
+      "isoCode2": "KY",
+      "isoCode3": "CYM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1345"
+    },
+    {
+      "countryId": "41",
+      "name": "Central African Republic",
+      "isoCode2": "CF",
+      "isoCode3": "CAF",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "236"
+    },
+    {
+      "countryId": "42",
+      "name": "Chad",
+      "isoCode2": "TD",
+      "isoCode3": "TCD",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "235"
+    },
+    {
+      "countryId": "43",
+      "name": "Chile",
+      "isoCode2": "CL",
+      "isoCode3": "CHL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "56"
+    },
+    {
+      "countryId": "44",
+      "name": "China",
+      "isoCode2": "CN",
+      "isoCode3": "CHN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "86"
+    },
+    {
+      "countryId": "45",
+      "name": "Christmas Island",
+      "isoCode2": "CX",
+      "isoCode3": "CXR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "61"
+    },
+    {
+      "countryId": "46",
+      "name": "Cocos (Keeling) Islands",
+      "isoCode2": "CC",
+      "isoCode3": "CCK",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "672"
+    },
+    {
+      "countryId": "47",
+      "name": "Colombia",
+      "isoCode2": "CO",
+      "isoCode3": "COL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "57"
+    },
+    {
+      "countryId": "48",
+      "name": "Comoros",
+      "isoCode2": "KM",
+      "isoCode3": "COM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "269"
+    },
+    {
+      "countryId": "49",
+      "name": "Congo",
+      "isoCode2": "CG",
+      "isoCode3": "COG",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "242"
+    },
+    {
+      "countryId": "50",
+      "name": "Cook Islands",
+      "isoCode2": "CK",
+      "isoCode3": "COK",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "682"
+    },
+    {
+      "countryId": "51",
+      "name": "Costa Rica",
+      "isoCode2": "CR",
+      "isoCode3": "CRI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "506"
+    },
+    {
+      "countryId": "52",
+      "name": "Cote D\\'Ivoire",
+      "isoCode2": "CI",
+      "isoCode3": "CIV",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "225"
+    },
+    {
+      "countryId": "53",
+      "name": "Croatia",
+      "isoCode2": "HR",
+      "isoCode3": "HRV",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "385"
+    },
+    {
+      "countryId": "54",
+      "name": "Cuba",
+      "isoCode2": "CU",
+      "isoCode3": "CUB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "53"
+    },
+    {
+      "countryId": "55",
+      "name": "Cyprus",
+      "isoCode2": "CY",
+      "isoCode3": "CYP",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "357"
+    },
+    {
+      "countryId": "56",
+      "name": "Czech Republic",
+      "isoCode2": "CZ",
+      "isoCode3": "CZE",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "420"
+    },
+    {
+      "countryId": "57",
+      "name": "Denmark",
+      "isoCode2": "DK",
+      "isoCode3": "DNK",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "45"
+    },
+    {
+      "countryId": "58",
+      "name": "Djibouti",
+      "isoCode2": "DJ",
+      "isoCode3": "DJI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "253"
+    },
+    {
+      "countryId": "59",
+      "name": "Dominica",
+      "isoCode2": "DM",
+      "isoCode3": "DMA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1767"
+    },
+    {
+      "countryId": "60",
+      "name": "Dominican Republic",
+      "isoCode2": "DO",
+      "isoCode3": "DOM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1809"
+    },
+    {
+      "countryId": "61",
+      "name": "East Timor",
+      "isoCode2": "TL",
+      "isoCode3": "TLS",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "670"
+    },
+    {
+      "countryId": "62",
+      "name": "Ecuador",
+      "isoCode2": "EC",
+      "isoCode3": "ECU",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "593"
+    },
+    {
+      "countryId": "63",
+      "name": "Egypt",
+      "isoCode2": "EG",
+      "isoCode3": "EGY",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "20"
+    },
+    {
+      "countryId": "64",
+      "name": "El Salvador",
+      "isoCode2": "SV",
+      "isoCode3": "SLV",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "503"
+    },
+    {
+      "countryId": "65",
+      "name": "Equatorial Guinea",
+      "isoCode2": "GQ",
+      "isoCode3": "GNQ",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "240"
+    },
+    {
+      "countryId": "66",
+      "name": "Eritrea",
+      "isoCode2": "ER",
+      "isoCode3": "ERI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "291"
+    },
+    {
+      "countryId": "67",
+      "name": "Estonia",
+      "isoCode2": "EE",
+      "isoCode3": "EST",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "372"
+    },
+    {
+      "countryId": "68",
+      "name": "Ethiopia",
+      "isoCode2": "ET",
+      "isoCode3": "ETH",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "251"
+    },
+    {
+      "countryId": "69",
+      "name": "Falkland Islands (Malvinas)",
+      "isoCode2": "FK",
+      "isoCode3": "FLK",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "500"
+    },
+    {
+      "countryId": "70",
+      "name": "Faroe Islands",
+      "isoCode2": "FO",
+      "isoCode3": "FRO",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "298"
+    },
+    {
+      "countryId": "71",
+      "name": "Fiji",
+      "isoCode2": "FJ",
+      "isoCode3": "FJI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "679"
+    },
+    {
+      "countryId": "72",
+      "name": "Finland",
+      "isoCode2": "FI",
+      "isoCode3": "FIN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "358"
+    },
+    {
+      "countryId": "74",
+      "name": "France",
+      "isoCode2": "Metropolitan",
+      "isoCode3": "FR",
+      "addressFormat": "FRA",
+      "postCodeRequired": "{firstname} {lastname}\\r\\n{company}\\r\\n{address_1}\\r\\n{address_2}\\r\\n{postcode} {city}\\r\\n{country}",
+      "status": "1",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "75",
+      "name": "French Guiana",
+      "isoCode2": "GF",
+      "isoCode3": "GUF",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "594"
+    },
+    {
+      "countryId": "76",
+      "name": "French Polynesia",
+      "isoCode2": "PF",
+      "isoCode3": "PYF",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "689"
+    },
+    {
+      "countryId": "77",
+      "name": "French Southern Territories",
+      "isoCode2": "TF",
+      "isoCode3": "ATF",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "262"
+    },
+    {
+      "countryId": "78",
+      "name": "Gabon",
+      "isoCode2": "GA",
+      "isoCode3": "GAB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "241"
+    },
+    {
+      "countryId": "79",
+      "name": "Gambia",
+      "isoCode2": "GM",
+      "isoCode3": "GMB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "220"
+    },
+    {
+      "countryId": "80",
+      "name": "Georgia",
+      "isoCode2": "GE",
+      "isoCode3": "GEO",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "995"
+    },
+    {
+      "countryId": "81",
+      "name": "Germany",
+      "isoCode2": "DE",
+      "isoCode3": "DEU",
+      "addressFormat": "{company}\\r\\n{firstname} {lastname}\\r\\n{address_1}\\r\\n{address_2}\\r\\n{postcode} {city}\\r\\n{country}",
+      "postCodeRequired": "1",
+      "status": "1",
+      "phoneCode": "49"
+    },
+    {
+      "countryId": "82",
+      "name": "Ghana",
+      "isoCode2": "GH",
+      "isoCode3": "GHA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "233"
+    },
+    {
+      "countryId": "83",
+      "name": "Gibraltar",
+      "isoCode2": "GI",
+      "isoCode3": "GIB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "350"
+    },
+    {
+      "countryId": "84",
+      "name": "Greece",
+      "isoCode2": "GR",
+      "isoCode3": "GRC",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "30"
+    },
+    {
+      "countryId": "85",
+      "name": "Greenland",
+      "isoCode2": "GL",
+      "isoCode3": "GRL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "299"
+    },
+    {
+      "countryId": "86",
+      "name": "Grenada",
+      "isoCode2": "GD",
+      "isoCode3": "GRD",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1473"
+    },
+    {
+      "countryId": "87",
+      "name": "Guadeloupe",
+      "isoCode2": "GP",
+      "isoCode3": "GLP",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "590"
+    },
+    {
+      "countryId": "88",
+      "name": "Guam",
+      "isoCode2": "GU",
+      "isoCode3": "GUM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1671"
+    },
+    {
+      "countryId": "89",
+      "name": "Guatemala",
+      "isoCode2": "GT",
+      "isoCode3": "GTM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "502"
+    },
+    {
+      "countryId": "90",
+      "name": "Guinea",
+      "isoCode2": "GN",
+      "isoCode3": "GIN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "224"
+    },
+    {
+      "countryId": "91",
+      "name": "Guinea-Bissau",
+      "isoCode2": "GW",
+      "isoCode3": "GNB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "245"
+    },
+    {
+      "countryId": "92",
+      "name": "Guyana",
+      "isoCode2": "GY",
+      "isoCode3": "GUY",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "592"
+    },
+    {
+      "countryId": "93",
+      "name": "Haiti",
+      "isoCode2": "HT",
+      "isoCode3": "HTI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "509"
+    },
+    {
+      "countryId": "94",
+      "name": "Heard and Mc Donald Islands",
+      "isoCode2": "HM",
+      "isoCode3": "HMD",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "672"
+    },
+    {
+      "countryId": "95",
+      "name": "Honduras",
+      "isoCode2": "HN",
+      "isoCode3": "HND",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "504"
+    },
+    {
+      "countryId": "96",
+      "name": "Hong Kong",
+      "isoCode2": "HK",
+      "isoCode3": "HKG",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "852"
+    },
+    {
+      "countryId": "97",
+      "name": "Hungary",
+      "isoCode2": "HU",
+      "isoCode3": "HUN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "36"
+    },
+    {
+      "countryId": "98",
+      "name": "Iceland",
+      "isoCode2": "IS",
+      "isoCode3": "ISL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "354"
+    },
+    {
+      "countryId": "99",
+      "name": "India",
+      "isoCode2": "IN",
+      "isoCode3": "IND",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "91"
+    },
+    {
+      "countryId": "100",
+      "name": "Indonesia",
+      "isoCode2": "ID",
+      "isoCode3": "IDN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "62"
+    },
+    {
+      "countryId": "101",
+      "name": "Iran (Islamic Republic of)",
+      "isoCode2": "IR",
+      "isoCode3": "IRN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "98"
+    },
+    {
+      "countryId": "102",
+      "name": "Iraq",
+      "isoCode2": "IQ",
+      "isoCode3": "IRQ",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "964"
+    },
+    {
+      "countryId": "103",
+      "name": "Ireland",
+      "isoCode2": "IE",
+      "isoCode3": "IRL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "353"
+    },
+    {
+      "countryId": "104",
+      "name": "Israel",
+      "isoCode2": "IL",
+      "isoCode3": "ISR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "972"
+    },
+    {
+      "countryId": "105",
+      "name": "Italy",
+      "isoCode2": "IT",
+      "isoCode3": "ITA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "39"
+    },
+    {
+      "countryId": "106",
+      "name": "Jamaica",
+      "isoCode2": "JM",
+      "isoCode3": "JAM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1876"
+    },
+    {
+      "countryId": "107",
+      "name": "Japan",
+      "isoCode2": "JP",
+      "isoCode3": "JPN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "81"
+    },
+    {
+      "countryId": "108",
+      "name": "Jordan",
+      "isoCode2": "JO",
+      "isoCode3": "JOR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "962"
+    },
+    {
+      "countryId": "109",
+      "name": "Kazakhstan",
+      "isoCode2": "KZ",
+      "isoCode3": "KAZ",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "7"
+    },
+    {
+      "countryId": "110",
+      "name": "Kenya",
+      "isoCode2": "KE",
+      "isoCode3": "KEN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "254"
+    },
+    {
+      "countryId": "111",
+      "name": "Kiribati",
+      "isoCode2": "KI",
+      "isoCode3": "KIR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "686"
+    },
+    {
+      "countryId": "112",
+      "name": "North Korea",
+      "isoCode2": "KP",
+      "isoCode3": "PRK",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "850"
+    },
+    {
+      "countryId": "113",
+      "name": "Korea",
+      "isoCode2": "Republic of",
+      "isoCode3": "KR",
+      "addressFormat": "KOR",
+      "postCodeRequired": "",
+      "status": "0",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "114",
+      "name": "Kuwait",
+      "isoCode2": "KW",
+      "isoCode3": "KWT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "965"
+    },
+    {
+      "countryId": "115",
+      "name": "Kyrgyzstan",
+      "isoCode2": "KG",
+      "isoCode3": "KGZ",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "996"
+    },
+    {
+      "countryId": "116",
+      "name": "Lao People\\'s Democratic Republic",
+      "isoCode2": "LA",
+      "isoCode3": "LAO",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "856"
+    },
+    {
+      "countryId": "117",
+      "name": "Latvia",
+      "isoCode2": "LV",
+      "isoCode3": "LVA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "371"
+    },
+    {
+      "countryId": "118",
+      "name": "Lebanon",
+      "isoCode2": "LB",
+      "isoCode3": "LBN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "961"
+    },
+    {
+      "countryId": "119",
+      "name": "Lesotho",
+      "isoCode2": "LS",
+      "isoCode3": "LSO",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "266"
+    },
+    {
+      "countryId": "120",
+      "name": "Liberia",
+      "isoCode2": "LR",
+      "isoCode3": "LBR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "231"
+    },
+    {
+      "countryId": "121",
+      "name": "Libyan Arab Jamahiriya",
+      "isoCode2": "LY",
+      "isoCode3": "LBY",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "218"
+    },
+    {
+      "countryId": "122",
+      "name": "Liechtenstein",
+      "isoCode2": "LI",
+      "isoCode3": "LIE",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "423"
+    },
+    {
+      "countryId": "123",
+      "name": "Lithuania",
+      "isoCode2": "LT",
+      "isoCode3": "LTU",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "370"
+    },
+    {
+      "countryId": "124",
+      "name": "Luxembourg",
+      "isoCode2": "LU",
+      "isoCode3": "LUX",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "352"
+    },
+    {
+      "countryId": "125",
+      "name": "Macau",
+      "isoCode2": "MO",
+      "isoCode3": "MAC",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "853"
+    },
+    {
+      "countryId": "126",
+      "name": "FYROM",
+      "isoCode2": "MK",
+      "isoCode3": "MKD",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "389"
+    },
+    {
+      "countryId": "127",
+      "name": "Madagascar",
+      "isoCode2": "MG",
+      "isoCode3": "MDG",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "261"
+    },
+    {
+      "countryId": "128",
+      "name": "Malawi",
+      "isoCode2": "MW",
+      "isoCode3": "MWI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "265"
+    },
+    {
+      "countryId": "129",
+      "name": "Malaysia",
+      "isoCode2": "MY",
+      "isoCode3": "MYS",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "60"
+    },
+    {
+      "countryId": "130",
+      "name": "Maldives",
+      "isoCode2": "MV",
+      "isoCode3": "MDV",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "960"
+    },
+    {
+      "countryId": "131",
+      "name": "Mali",
+      "isoCode2": "ML",
+      "isoCode3": "MLI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "223"
+    },
+    {
+      "countryId": "132",
+      "name": "Malta",
+      "isoCode2": "MT",
+      "isoCode3": "MLT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "356"
+    },
+    {
+      "countryId": "133",
+      "name": "Marshall Islands",
+      "isoCode2": "MH",
+      "isoCode3": "MHL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "692"
+    },
+    {
+      "countryId": "134",
+      "name": "Martinique",
+      "isoCode2": "MQ",
+      "isoCode3": "MTQ",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "596"
+    },
+    {
+      "countryId": "135",
+      "name": "Mauritania",
+      "isoCode2": "MR",
+      "isoCode3": "MRT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "222"
+    },
+    {
+      "countryId": "136",
+      "name": "Mauritius",
+      "isoCode2": "MU",
+      "isoCode3": "MUS",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "230"
+    },
+    {
+      "countryId": "137",
+      "name": "Mayotte",
+      "isoCode2": "YT",
+      "isoCode3": "MYT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "269"
+    },
+    {
+      "countryId": "138",
+      "name": "Mexico",
+      "isoCode2": "MX",
+      "isoCode3": "MEX",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "52"
+    },
+    {
+      "countryId": "139",
+      "name": "Micronesia",
+      "isoCode2": "Federated States of",
+      "isoCode3": "FM",
+      "addressFormat": "FSM",
+      "postCodeRequired": "",
+      "status": "0",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "140",
+      "name": "Moldova",
+      "isoCode2": "Republic of",
+      "isoCode3": "MD",
+      "addressFormat": "MDA",
+      "postCodeRequired": "",
+      "status": "0",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "141",
+      "name": "Monaco",
+      "isoCode2": "MC",
+      "isoCode3": "MCO",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "377"
+    },
+    {
+      "countryId": "142",
+      "name": "Mongolia",
+      "isoCode2": "MN",
+      "isoCode3": "MNG",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "976"
+    },
+    {
+      "countryId": "143",
+      "name": "Montserrat",
+      "isoCode2": "MS",
+      "isoCode3": "MSR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1664"
+    },
+    {
+      "countryId": "144",
+      "name": "Morocco",
+      "isoCode2": "MA",
+      "isoCode3": "MAR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "212"
+    },
+    {
+      "countryId": "145",
+      "name": "Mozambique",
+      "isoCode2": "MZ",
+      "isoCode3": "MOZ",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "258"
+    },
+    {
+      "countryId": "146",
+      "name": "Myanmar",
+      "isoCode2": "MM",
+      "isoCode3": "MMR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "95"
+    },
+    {
+      "countryId": "147",
+      "name": "Namibia",
+      "isoCode2": "NA",
+      "isoCode3": "NAM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "264"
+    },
+    {
+      "countryId": "148",
+      "name": "Nauru",
+      "isoCode2": "NR",
+      "isoCode3": "NRU",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "674"
+    },
+    {
+      "countryId": "149",
+      "name": "Nepal",
+      "isoCode2": "NP",
+      "isoCode3": "NPL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "977"
+    },
+    {
+      "countryId": "150",
+      "name": "Netherlands",
+      "isoCode2": "NL",
+      "isoCode3": "NLD",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "31"
+    },
+    {
+      "countryId": "151",
+      "name": "Netherlands Antilles",
+      "isoCode2": "AN",
+      "isoCode3": "ANT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "599"
+    },
+    {
+      "countryId": "152",
+      "name": "New Caledonia",
+      "isoCode2": "NC",
+      "isoCode3": "NCL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "687"
+    },
+    {
+      "countryId": "153",
+      "name": "New Zealand",
+      "isoCode2": "NZ",
+      "isoCode3": "NZL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "64"
+    },
+    {
+      "countryId": "154",
+      "name": "Nicaragua",
+      "isoCode2": "NI",
+      "isoCode3": "NIC",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "505"
+    },
+    {
+      "countryId": "155",
+      "name": "Niger",
+      "isoCode2": "NE",
+      "isoCode3": "NER",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "227"
+    },
+    {
+      "countryId": "156",
+      "name": "Nigeria",
+      "isoCode2": "NG",
+      "isoCode3": "NGA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "234"
+    },
+    {
+      "countryId": "157",
+      "name": "Niue",
+      "isoCode2": "NU",
+      "isoCode3": "NIU",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "683"
+    },
+    {
+      "countryId": "158",
+      "name": "Norfolk Island",
+      "isoCode2": "NF",
+      "isoCode3": "NFK",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "672"
+    },
+    {
+      "countryId": "159",
+      "name": "Northern Mariana Islands",
+      "isoCode2": "MP",
+      "isoCode3": "MNP",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1670"
+    },
+    {
+      "countryId": "160",
+      "name": "Norway",
+      "isoCode2": "NO",
+      "isoCode3": "NOR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "47"
+    },
+    {
+      "countryId": "161",
+      "name": "Oman",
+      "isoCode2": "OM",
+      "isoCode3": "OMN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "968"
+    },
+    {
+      "countryId": "162",
+      "name": "Pakistan",
+      "isoCode2": "PK",
+      "isoCode3": "PAK",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "92"
+    },
+    {
+      "countryId": "163",
+      "name": "Palau",
+      "isoCode2": "PW",
+      "isoCode3": "PLW",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "680"
+    },
+    {
+      "countryId": "164",
+      "name": "Panama",
+      "isoCode2": "PA",
+      "isoCode3": "PAN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "507"
+    },
+    {
+      "countryId": "165",
+      "name": "Papua New Guinea",
+      "isoCode2": "PG",
+      "isoCode3": "PNG",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "675"
+    },
+    {
+      "countryId": "166",
+      "name": "Paraguay",
+      "isoCode2": "PY",
+      "isoCode3": "PRY",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "595"
+    },
+    {
+      "countryId": "167",
+      "name": "Peru",
+      "isoCode2": "PE",
+      "isoCode3": "PER",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "51"
+    },
+    {
+      "countryId": "168",
+      "name": "Philippines",
+      "isoCode2": "PH",
+      "isoCode3": "PHL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "63"
+    },
+    {
+      "countryId": "169",
+      "name": "Pitcairn",
+      "isoCode2": "PN",
+      "isoCode3": "PCN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "872"
+    },
+    {
+      "countryId": "170",
+      "name": "Poland",
+      "isoCode2": "PL",
+      "isoCode3": "POL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "48"
+    },
+    {
+      "countryId": "171",
+      "name": "Portugal",
+      "isoCode2": "PT",
+      "isoCode3": "PRT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "351"
+    },
+    {
+      "countryId": "172",
+      "name": "Puerto Rico",
+      "isoCode2": "PR",
+      "isoCode3": "PRI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1787"
+    },
+    {
+      "countryId": "173",
+      "name": "Qatar",
+      "isoCode2": "QA",
+      "isoCode3": "QAT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "974"
+    },
+    {
+      "countryId": "174",
+      "name": "Reunion",
+      "isoCode2": "RE",
+      "isoCode3": "REU",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "262"
+    },
+    {
+      "countryId": "175",
+      "name": "Romania",
+      "isoCode2": "RO",
+      "isoCode3": "ROM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "40"
+    },
+    {
+      "countryId": "176",
+      "name": "Russian Federation",
+      "isoCode2": "RU",
+      "isoCode3": "RUS",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "70"
+    },
+    {
+      "countryId": "177",
+      "name": "Rwanda",
+      "isoCode2": "RW",
+      "isoCode3": "RWA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "250"
+    },
+    {
+      "countryId": "178",
+      "name": "Saint Kitts and Nevis",
+      "isoCode2": "KN",
+      "isoCode3": "KNA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1869"
+    },
+    {
+      "countryId": "179",
+      "name": "Saint Lucia",
+      "isoCode2": "LC",
+      "isoCode3": "LCA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1758"
+    },
+    {
+      "countryId": "180",
+      "name": "Saint Vincent and the Grenadines",
+      "isoCode2": "VC",
+      "isoCode3": "VCT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1784"
+    },
+    {
+      "countryId": "181",
+      "name": "Samoa",
+      "isoCode2": "WS",
+      "isoCode3": "WSM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "684"
+    },
+    {
+      "countryId": "182",
+      "name": "San Marino",
+      "isoCode2": "SM",
+      "isoCode3": "SMR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "378"
+    },
+    {
+      "countryId": "183",
+      "name": "Sao Tome and Principe",
+      "isoCode2": "ST",
+      "isoCode3": "STP",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "239"
+    },
+    {
+      "countryId": "184",
+      "name": "Saudi Arabia",
+      "isoCode2": "SA",
+      "isoCode3": "SAU",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "966"
+    },
+    {
+      "countryId": "185",
+      "name": "Senegal",
+      "isoCode2": "SN",
+      "isoCode3": "SEN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "221"
+    },
+    {
+      "countryId": "186",
+      "name": "Seychelles",
+      "isoCode2": "SC",
+      "isoCode3": "SYC",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "248"
+    },
+    {
+      "countryId": "187",
+      "name": "Sierra Leone",
+      "isoCode2": "SL",
+      "isoCode3": "SLE",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "232"
+    },
+    {
+      "countryId": "188",
+      "name": "Singapore",
+      "isoCode2": "SG",
+      "isoCode3": "SGP",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "65"
+    },
+    {
+      "countryId": "189",
+      "name": "Slovak Republic",
+      "isoCode2": "SK",
+      "isoCode3": "SVK",
+      "addressFormat": "{firstname} {lastname}\\r\\n{company}\\r\\n{address_1}\\r\\n{address_2}\\r\\n{city} {postcode}\\r\\n{zone}\\r\\n{country}",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "421"
+    },
+    {
+      "countryId": "190",
+      "name": "Slovenia",
+      "isoCode2": "SI",
+      "isoCode3": "SVN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "386"
+    },
+    {
+      "countryId": "191",
+      "name": "Solomon Islands",
+      "isoCode2": "SB",
+      "isoCode3": "SLB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "677"
+    },
+    {
+      "countryId": "192",
+      "name": "Somalia",
+      "isoCode2": "SO",
+      "isoCode3": "SOM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "252"
+    },
+    {
+      "countryId": "193",
+      "name": "South Africa",
+      "isoCode2": "ZA",
+      "isoCode3": "ZAF",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "27"
+    },
+    {
+      "countryId": "194",
+      "name": "South Georgia &amp; South Sandwich Islands",
+      "isoCode2": "GS",
+      "isoCode3": "SGS",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "500"
+    },
+    {
+      "countryId": "195",
+      "name": "Spain",
+      "isoCode2": "ES",
+      "isoCode3": "ESP",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "34"
+    },
+    {
+      "countryId": "196",
+      "name": "Sri Lanka",
+      "isoCode2": "LK",
+      "isoCode3": "LKA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "94"
+    },
+    {
+      "countryId": "197",
+      "name": "St. Helena",
+      "isoCode2": "SH",
+      "isoCode3": "SHN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "290"
+    },
+    {
+      "countryId": "198",
+      "name": "St. Pierre and Miquelon",
+      "isoCode2": "PM",
+      "isoCode3": "SPM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "508"
+    },
+    {
+      "countryId": "199",
+      "name": "Sudan",
+      "isoCode2": "SD",
+      "isoCode3": "SDN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "249"
+    },
+    {
+      "countryId": "200",
+      "name": "Suriname",
+      "isoCode2": "SR",
+      "isoCode3": "SUR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "597"
+    },
+    {
+      "countryId": "201",
+      "name": "Svalbard and Jan Mayen Islands",
+      "isoCode2": "SJ",
+      "isoCode3": "SJM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "47"
+    },
+    {
+      "countryId": "202",
+      "name": "Swaziland",
+      "isoCode2": "SZ",
+      "isoCode3": "SWZ",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "268"
+    },
+    {
+      "countryId": "203",
+      "name": "Sweden",
+      "isoCode2": "SE",
+      "isoCode3": "SWE",
+      "addressFormat": "{company}\\r\\n{firstname} {lastname}\\r\\n{address_1}\\r\\n{address_2}\\r\\n{postcode} {city}\\r\\n{country}",
+      "postCodeRequired": "1",
+      "status": "1",
+      "phoneCode": "46"
+    },
+    {
+      "countryId": "204",
+      "name": "Switzerland",
+      "isoCode2": "CH",
+      "isoCode3": "CHE",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "41"
+    },
+    {
+      "countryId": "205",
+      "name": "Syrian Arab Republic",
+      "isoCode2": "SY",
+      "isoCode3": "SYR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "963"
+    },
+    {
+      "countryId": "206",
+      "name": "Taiwan",
+      "isoCode2": "TW",
+      "isoCode3": "TWN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "886"
+    },
+    {
+      "countryId": "207",
+      "name": "Tajikistan",
+      "isoCode2": "TJ",
+      "isoCode3": "TJK",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "992"
+    },
+    {
+      "countryId": "208",
+      "name": "Tanzania",
+      "isoCode2": "United Republic of",
+      "isoCode3": "TZ",
+      "addressFormat": "TZA",
+      "postCodeRequired": "",
+      "status": "0",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "209",
+      "name": "Thailand",
+      "isoCode2": "TH",
+      "isoCode3": "THA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "66"
+    },
+    {
+      "countryId": "210",
+      "name": "Togo",
+      "isoCode2": "TG",
+      "isoCode3": "TGO",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "228"
+    },
+    {
+      "countryId": "211",
+      "name": "Tokelau",
+      "isoCode2": "TK",
+      "isoCode3": "TKL",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "690"
+    },
+    {
+      "countryId": "212",
+      "name": "Tonga",
+      "isoCode2": "TO",
+      "isoCode3": "TON",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "676"
+    },
+    {
+      "countryId": "213",
+      "name": "Trinidad and Tobago",
+      "isoCode2": "TT",
+      "isoCode3": "TTO",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1868"
+    },
+    {
+      "countryId": "214",
+      "name": "Tunisia",
+      "isoCode2": "TN",
+      "isoCode3": "TUN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "216"
+    },
+    {
+      "countryId": "215",
+      "name": "Turkey",
+      "isoCode2": "TR",
+      "isoCode3": "TUR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "90"
+    },
+    {
+      "countryId": "216",
+      "name": "Turkmenistan",
+      "isoCode2": "TM",
+      "isoCode3": "TKM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "7370"
+    },
+    {
+      "countryId": "217",
+      "name": "Turks and Caicos Islands",
+      "isoCode2": "TC",
+      "isoCode3": "TCA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1649"
+    },
+    {
+      "countryId": "218",
+      "name": "Tuvalu",
+      "isoCode2": "TV",
+      "isoCode3": "TUV",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "688"
+    },
+    {
+      "countryId": "219",
+      "name": "Uganda",
+      "isoCode2": "UG",
+      "isoCode3": "UGA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "256"
+    },
+    {
+      "countryId": "220",
+      "name": "Ukraine",
+      "isoCode2": "UA",
+      "isoCode3": "UKR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "380"
+    },
+    {
+      "countryId": "221",
+      "name": "United Arab Emirates",
+      "isoCode2": "AE",
+      "isoCode3": "ARE",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "971"
+    },
+    {
+      "countryId": "222",
+      "name": "United Kingdom",
+      "isoCode2": "GB",
+      "isoCode3": "GBR",
+      "addressFormat": "",
+      "postCodeRequired": "1",
+      "status": "1",
+      "phoneCode": "44"
+    },
+    {
+      "countryId": "223",
+      "name": "United States",
+      "isoCode2": "US",
+      "isoCode3": "USA",
+      "addressFormat": "{firstname} {lastname}\\r\\n{company}\\r\\n{address_1}\\r\\n{address_2}\\r\\n{city}",
+      "postCodeRequired": "{zone} {postcode}\\r\\n{country}",
+      "status": "0",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "224",
+      "name": "United States Minor Outlying Islands",
+      "isoCode2": "UM",
+      "isoCode3": "UMI",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "225",
+      "name": "Uruguay",
+      "isoCode2": "UY",
+      "isoCode3": "URY",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "598"
+    },
+    {
+      "countryId": "226",
+      "name": "Uzbekistan",
+      "isoCode2": "UZ",
+      "isoCode3": "UZB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "998"
+    },
+    {
+      "countryId": "227",
+      "name": "Vanuatu",
+      "isoCode2": "VU",
+      "isoCode3": "VUT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "678"
+    },
+    {
+      "countryId": "228",
+      "name": "Vatican City State (Holy See)",
+      "isoCode2": "VA",
+      "isoCode3": "VAT",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "39"
+    },
+    {
+      "countryId": "229",
+      "name": "Venezuela",
+      "isoCode2": "VE",
+      "isoCode3": "VEN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "58"
+    },
+    {
+      "countryId": "230",
+      "name": "Viet Nam",
+      "isoCode2": "VN",
+      "isoCode3": "VNM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "84"
+    },
+    {
+      "countryId": "231",
+      "name": "Virgin Islands (British)",
+      "isoCode2": "VG",
+      "isoCode3": "VGB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1284"
+    },
+    {
+      "countryId": "232",
+      "name": "Virgin Islands (U.S.)",
+      "isoCode2": "VI",
+      "isoCode3": "VIR",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "1340"
+    },
+    {
+      "countryId": "233",
+      "name": "Wallis and Futuna Islands",
+      "isoCode2": "WF",
+      "isoCode3": "WLF",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "681"
+    },
+    {
+      "countryId": "234",
+      "name": "Western Sahara",
+      "isoCode2": "EH",
+      "isoCode3": "ESH",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "212"
+    },
+    {
+      "countryId": "235",
+      "name": "Yemen",
+      "isoCode2": "YE",
+      "isoCode3": "YEM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "967"
+    },
+    {
+      "countryId": "237",
+      "name": "Democratic Republic of Congo",
+      "isoCode2": "CD",
+      "isoCode3": "COD",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "242"
+    },
+    {
+      "countryId": "238",
+      "name": "Zambia",
+      "isoCode2": "ZM",
+      "isoCode3": "ZMB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "260"
+    },
+    {
+      "countryId": "239",
+      "name": "Zimbabwe",
+      "isoCode2": "ZW",
+      "isoCode3": "ZWE",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "263"
+    },
+    {
+      "countryId": "242",
+      "name": "Montenegro",
+      "isoCode2": "ME",
+      "isoCode3": "MNE",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "382"
+    },
+    {
+      "countryId": "243",
+      "name": "Serbia",
+      "isoCode2": "RS",
+      "isoCode3": "SRB",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "381"
+    },
+    {
+      "countryId": "244",
+      "name": "Aaland Islands",
+      "isoCode2": "AX",
+      "isoCode3": "ALA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "358"
+    },
+    {
+      "countryId": "245",
+      "name": "Bonaire",
+      "isoCode2": "Sint Eustatius and Saba",
+      "isoCode3": "BQ",
+      "addressFormat": "BES",
+      "postCodeRequired": "",
+      "status": "0",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "246",
+      "name": "Curacao",
+      "isoCode2": "CW",
+      "isoCode3": "CUW",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "599"
+    },
+    {
+      "countryId": "247",
+      "name": "Palestinian Territory",
+      "isoCode2": "Occupied",
+      "isoCode3": "PS",
+      "addressFormat": "PSE",
+      "postCodeRequired": "",
+      "status": "0",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "248",
+      "name": "South Sudan",
+      "isoCode2": "SS",
+      "isoCode3": "SSD",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "211"
+    },
+    {
+      "countryId": "249",
+      "name": "St. Barthelemy",
+      "isoCode2": "BL",
+      "isoCode3": "BLM",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "590"
+    },
+    {
+      "countryId": "250",
+      "name": "St. Martin (French part)",
+      "isoCode2": "MF",
+      "isoCode3": "MAF",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "590"
+    },
+    {
+      "countryId": "251",
+      "name": "Canary Islands",
+      "isoCode2": "IC",
+      "isoCode3": "ICA",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "0"
+    },
+    {
+      "countryId": "252",
+      "name": "Ascension Island (British)",
+      "isoCode2": "AC",
+      "isoCode3": "ASC",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "0"
+    },
+    {
+      "countryId": "253",
+      "name": "Kosovo",
+      "isoCode2": "Republic of",
+      "isoCode3": "XK",
+      "addressFormat": "UNK",
+      "postCodeRequired": "",
+      "status": "0",
+      "phoneCode": "1"
+    },
+    {
+      "countryId": "254",
+      "name": "Isle of Man",
+      "isoCode2": "IM",
+      "isoCode3": "IMN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "44"
+    },
+    {
+      "countryId": "255",
+      "name": "Tristan da Cunha",
+      "isoCode2": "TA",
+      "isoCode3": "SHN",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "0"
+    },
+    {
+      "countryId": "256",
+      "name": "Guernsey",
+      "isoCode2": "GG",
+      "isoCode3": "GGY",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "44"
+    },
+    {
+      "countryId": "257",
+      "name": "Jersey",
+      "isoCode2": "JE",
+      "isoCode3": "JEY",
+      "addressFormat": "",
+      "postCodeRequired": "0",
+      "status": "1",
+      "phoneCode": "44"
+    }
+  ]

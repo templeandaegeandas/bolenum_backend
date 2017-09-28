@@ -33,6 +33,8 @@ public class UrlConstant {
 	public static final String ADD_MOBILE_NUMBER = "add/mobile/number";
 	public static final String VERIFY_OTP = "verify/otp";
 	public static final String RESEND_OTP = "resend/otp";
+	public static final String GET_COUNTRIES_LIST = "countries/list";
+	public static final String GET_STATE_BY_COUNTRY_ID = "states";
 	
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";

@@ -187,7 +187,8 @@ public class UserServiceImpl implements UserService {
 		}
 
 		if (editUserForm.getDob() != null) {
-			user.setDob(editUserForm.getDob());
+			System.out.println(new Date(editUserForm.getDob()));
+			user.setDob(new Date(editUserForm.getDob()));
 		}
 
 		return userRepository.saveAndFlush(user);
