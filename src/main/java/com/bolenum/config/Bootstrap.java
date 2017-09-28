@@ -1,10 +1,13 @@
 package com.bolenum.config;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -15,13 +18,18 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import com.bolenum.model.Countries;
 import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
+import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.PasswordEncoderUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author chandan kumar singh
@@ -39,12 +47,21 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
 
+	@Autowired
+	private CountryAndStateService countriesAndStateService;
+
 	@Value("${bolenum.ethwallet.location}")
 	private String ethWalletLocation; // ethereum wallet file location
 
 	@Value("${bolenum.profile.image.location}")
 	private String userProfileImageLocation;
 	
+	@Value("${bolenum.document.location}")
+	private String userDocumetsLocation;
+	
+	@Value("${bolenum.google.qr.code.location}")
+	private String googleQrCodeLocation;
+
 	private Set<Privilege> privileges = new HashSet<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
@@ -54,18 +71,19 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		addPrivileges();
 		addRole();
 		createAdmin();
+		saveCountries();
+		saveStates();
 
 		// create initial directories
 		createInitDirectories();
 		createProfilePicDirectories();
+		createDocumentsDirectories();
+		createGoogleAuthQrCodeDirectories();
 	}
 
 	/**
-	 * this will create ethereum wallet location at the time of application start
-	 * @description createInitDirectories
-	 * @param 
-	 * @return void
-	 * @exception 
+	 * this will create ethereum wallet location at the time of application
+	 * start @description createInitDirectories @param @return void @exception
 	 * 
 	 */
 	private void createInitDirectories() {
@@ -79,13 +97,12 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		} else {
 			logger.debug("ethereum wallet location exists");
 		}
-		
+
 	}
 
-	private void createProfilePicDirectories()
-	{
-		Path profileImg=Paths.get(userProfileImageLocation);
-		
+	private void createProfilePicDirectories() {
+		Path profileImg = Paths.get(userProfileImageLocation);
+
 		if (!Files.exists(profileImg)) {
 			if (new File((userProfileImageLocation)).mkdirs()) {
 				logger.debug("User Profile Image location created");
@@ -96,6 +113,35 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			logger.debug("User Profile Image location exists");
 		}
 	}
+
+	private void createDocumentsDirectories() {
+		Path profileImg = Paths.get(userDocumetsLocation);
+
+		if (!Files.exists(profileImg)) {
+			if (new File((userDocumetsLocation)).mkdirs()) {
+				logger.debug("Documents location created");
+			} else {
+				logger.debug("Documents location creation failed");
+			}
+		} else {
+			logger.debug("Documents location exists");
+		}
+	}
+	
+	private void createGoogleAuthQrCodeDirectories() {
+		Path profileImg = Paths.get(googleQrCodeLocation);
+
+		if (!Files.exists(profileImg)) {
+			if (new File((googleQrCodeLocation)).mkdirs()) {
+				logger.debug("Documents location created");
+			} else {
+				logger.debug("Documents location creation failed");
+			}
+		} else {
+			logger.debug("Documents location exists");
+		}
+	}
+
 	/**
 	 * @description addRole @param @return void @exception
 	 */
@@ -136,6 +182,44 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			userService.saveUser(form);
 		} else {
 			logger.debug("admin exist");
+		}
+	}
+
+	void saveCountries() {
+		long count = countriesAndStateService.countCountries();
+		if (count == 0) {
+			ObjectMapper mapper = new ObjectMapper();
+			TypeReference<List<Countries>> mapType = new TypeReference<List<Countries>>() {
+			};
+			InputStream is = TypeReference.class.getResourceAsStream("/json/country.json");
+			try {
+				List<Countries> countriesList = mapper.readValue(is, mapType);
+				countriesAndStateService.saveCountries(countriesList);
+				logger.info("Countries list saved successfully");
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+			}
+		} else {
+			logger.info("Countries list already saved");
+		}
+	}
+
+	void saveStates() {
+		long count = countriesAndStateService.countStates();
+		if (count == 0) {
+			ObjectMapper mapper = new ObjectMapper();
+			TypeReference<List<States>> mapType = new TypeReference<List<States>>() {
+			};
+			InputStream is = TypeReference.class.getResourceAsStream("/json/state.json");
+			try {
+				List<States> stateList = mapper.readValue(is, mapType);
+				countriesAndStateService.saveStates(stateList);
+				logger.info("States list saved successfully");
+			} catch (IOException e) {
+				logger.error(e.getMessage());
+			}
+		} else {
+			logger.info("States list already saved");
 		}
 	}
 

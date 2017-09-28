@@ -1,6 +1,7 @@
 package com.bolenum.controller.user;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -26,7 +27,10 @@ import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
+import com.bolenum.model.Countries;
+import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.UserService;
@@ -66,6 +70,9 @@ public class UserController {
 	
 	@Autowired
 	EtherumWalletService etherumWalletService;
+	
+	@Autowired
+	private CountryAndStateService countryAndStateService;
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
@@ -269,5 +276,17 @@ public class UserController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localService.getMessage("user.image.uploaded.failed"), null);
 		}
+	}
+	
+	@RequestMapping(value = UrlConstant.GET_COUNTRIES_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getCountriesList() {
+		List<Countries> list = countryAndStateService.getCountriesList();
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"), list);
+	}
+	
+	@RequestMapping(value = UrlConstant.GET_STATE_BY_COUNTRY_ID, method = RequestMethod.GET)
+	public ResponseEntity<Object> getStatesByCountryId(@RequestParam("countryId") Long countryId) {
+		List<States> list = countryAndStateService.getStatesByCountry(countryId);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("states.list.by.country.id"), list);
 	}
 }

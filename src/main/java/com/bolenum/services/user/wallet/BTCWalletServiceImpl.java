@@ -14,6 +14,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.bolenum.constant.BTCUrlConstant;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -65,5 +66,27 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			e.printStackTrace();
 		}
 		return "";
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getWalletAddressAndQrCode(String walletUuid) {
+		String url = BTCUrlConstant.WALLET_ADDR;
+		RestTemplate restTemplate = new RestTemplate();
+		logger.debug("get Wallet Address And QrCode uuid:  {}", walletUuid);
+		Map<String, Object> map = new HashMap<String, Object>();
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url).queryParam("walletUuid", walletUuid);
+		try {
+			Map<String, Object> res = restTemplate.getForObject(builder.toUriString(), Map.class);
+			logger.debug("get Wallet Address And QrCode res map: {}", res);
+			boolean isError = (boolean) res.get("error");
+			if (!isError) {
+				map.put("data", res.get("data"));
+			}
+		} catch (RestClientException e) {
+			logger.error("get Wallet Address And QrCode exception RCE:  {}", e.getMessage());
+			e.printStackTrace();
+		}
+		return map;
 	}
 }

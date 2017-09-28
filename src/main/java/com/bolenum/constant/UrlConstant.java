@@ -33,6 +33,8 @@ public class UrlConstant {
 	public static final String ADD_MOBILE_NUMBER = "add/mobile/number";
 	public static final String VERIFY_OTP = "verify/otp";
 	public static final String RESEND_OTP = "resend/otp";
+	public static final String GET_COUNTRIES_LIST = "countries/list";
+	public static final String GET_STATE_BY_COUNTRY_ID = "states";
 	
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";
@@ -54,5 +56,8 @@ public class UrlConstant {
 	public static final String SEND_2FA_OTP = "/twofactor/auth/send/otp";
 	public static final String VERIFY_2FA_OTP = "/twofactor/auth/mobile/verify";
 	public static final String REMOVE_TWO_FACTOR_AUTH = "/twofactor/auth/remove";
-
+	
+	/******************** USER Wallet API ******/
+	public static final String DEPOSIT = "deposit";
+	
 }

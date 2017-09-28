@@ -1,7 +1,5 @@
 package com.bolenum.dto.common;
 
-import java.util.Date;
-
 import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -36,7 +34,7 @@ public class EditUserForm {
 
 	private String gender;
 
-	private Date dob;
+	private Long dob;
 
 	/**
 	 * @return the userId
@@ -176,7 +174,7 @@ public class EditUserForm {
 	/**
 	 * @return the dob
 	 */
-	public Date getDob() {
+	public Long getDob() {
 		return dob;
 	}
 
@@ -184,7 +182,7 @@ public class EditUserForm {
 	 * @param dob
 	 *            the dob to set
 	 */
-	public void setDob(Date dob) {
+	public void setDob(Long dob) {
 		this.dob = dob;
 	}
 
