@@ -3,6 +3,7 @@
  */
 package com.bolenum.model;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -45,6 +46,24 @@ public class Transaction {
 	private String txDescription;
 	private CurrencyType currencyType;
 	private TransactionType transactionType;
+	private BigInteger gas;
+
+	public Transaction() {
+
+	}
+
+	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
+			String txDescription, CurrencyType currencyType, TransactionType transactionType, BigInteger gas) {
+		this.txHash = txHash;
+		this.fromAddress = fromAddress;
+		this.toAddress = toAddress;
+		this.txFee = txFee;
+		this.txAmmount = txAmmount;
+		this.txDescription = txDescription;
+		this.currencyType = currencyType;
+		this.transactionType = transactionType;
+		this.gas = gas;
+	}
 
 	/**
 	 * @return the id
@@ -119,6 +138,7 @@ public class Transaction {
 
 	/**
 	 * the fromAddress to set
+	 * 
 	 * @param fromAddress
 	 */
 	public void setFromAddress(String fromAddress) {
@@ -134,7 +154,7 @@ public class Transaction {
 
 	/**
 	 * @param toAddress
-	 * the toAddress to set
+	 *            the toAddress to set
 	 */
 	public void setToAddress(String toAddress) {
 		this.toAddress = toAddress;
@@ -149,7 +169,7 @@ public class Transaction {
 
 	/**
 	 * @param txFee
-	 * the txFee to set
+	 *            the txFee to set
 	 */
 	public void setTxFee(Double txFee) {
 		this.txFee = txFee;
@@ -164,7 +184,7 @@ public class Transaction {
 
 	/**
 	 * @param txAmmount
-	 * the txAmmount to set
+	 *            the txAmmount to set
 	 */
 	public void setTxAmmount(Double txAmmount) {
 		this.txAmmount = txAmmount;
@@ -179,7 +199,7 @@ public class Transaction {
 
 	/**
 	 * @param txDescription
-	 * the txDescription to set
+	 *            the txDescription to set
 	 */
 	public void setTxDescription(String txDescription) {
 		this.txDescription = txDescription;
@@ -194,7 +214,7 @@ public class Transaction {
 
 	/**
 	 * @param currencyType
-	 * the currencyType to set
+	 *            the currencyType to set
 	 */
 	public void setCurrencyType(CurrencyType currencyType) {
 		this.currencyType = currencyType;
@@ -209,10 +229,25 @@ public class Transaction {
 
 	/**
 	 * @param transactionType
-	 *  the transactionType to set
+	 *            the transactionType to set
 	 */
 	public void setTransactionType(TransactionType transactionType) {
 		this.transactionType = transactionType;
+	}
+
+	/**
+	 * @return the gas which is ethereum tx fee
+	 */
+	public BigInteger getGas() {
+		return gas;
+	}
+
+	/**
+	 * @param gas
+	 *            the gas to set
+	 */
+	public void setGas(BigInteger gas) {
+		this.gas = gas;
 	}
 
 }
