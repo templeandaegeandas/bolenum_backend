@@ -64,7 +64,8 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private OTPRepository otpRepository;
-
+	
+	@Autowired
 	private FileUploadService fileUploadService;
 
 	@Value("${bolenum.profile.image.location}")

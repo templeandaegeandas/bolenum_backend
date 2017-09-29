@@ -43,8 +43,9 @@ public class FileUploadServiceImpl implements FileUploadService {
 		InputStream inputStream = multipartFile.getInputStream();
 		BufferedImage imageFromConvert = ImageIO.read(inputStream);
 		File file = new File(storageLocation + updatedFileName);
-		file.setReadable(true, false);
-		file.setExecutable(true, false);
+		file.setReadable(true);
+		file.setWritable(true);
+		file.setExecutable(true);
 		ImageIO.write(imageFromConvert, extension, file);
 		return updatedFileName;
 	}

@@ -66,6 +66,7 @@ public class AuthController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(bindingResult),
 					null);
 		} else {
+			logger.debug("login email id: {}", loginForm.getEmailId());
 			User user = userService.findByEmail(loginForm.getEmailId());
 			if (user == null) {
 				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
@@ -178,5 +179,4 @@ public class AuthController {
 		}
 	}
 
-	
 }
