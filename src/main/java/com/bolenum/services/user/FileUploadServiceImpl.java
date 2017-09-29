@@ -4,7 +4,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -49,10 +54,23 @@ public class FileUploadServiceImpl implements FileUploadService {
 		BufferedImage imageFromConvert = ImageIO.read(inputStream);
 		File file = new File(storageLocation + updatedFileName);
 		ImageIO.write(imageFromConvert, extension, file);
-		boolean read = file.setReadable(true);
-		boolean write = file.setWritable(true);
-		boolean exe = file.setExecutable(true);
-		logger.debug("file permission read: {} , write: {}, exec: {}", read, write, exe);
+		logger.debug("user uploaded file name: {}",String.valueOf(file));
+		//using PosixFilePermission to set file permissions 777
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        //add owners permission
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        //perms.add(PosixFilePermission.OWNER_EXECUTE);
+        //add group permissions
+        perms.add(PosixFilePermission.GROUP_READ);
+        perms.add(PosixFilePermission.GROUP_WRITE);
+        //perms.add(PosixFilePermission.GROUP_EXECUTE);
+        //add others permissions
+        perms.add(PosixFilePermission.OTHERS_READ);
+        //perms.add(PosixFilePermission.OTHERS_WRITE);
+        //perms.add(PosixFilePermission.OTHERS_EXECUTE);
+        
+        Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
 		return updatedFileName;
 	}
 }
