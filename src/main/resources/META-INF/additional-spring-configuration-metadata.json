@@ -58,5 +58,10 @@
     "name": "ethereum.daemon.url",
     "type": "java.lang.String",
     "description": "A description for 'ethereum.daemon.url'"
+  },
+  {
+    "name": "bolenum.google.qr.code.location",
+    "type": "java.lang.String",
+    "description": "A description for 'bolenum.google.qr.code.location'"
   }
 ]}
