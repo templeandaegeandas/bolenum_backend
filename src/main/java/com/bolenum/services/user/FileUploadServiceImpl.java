@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +18,7 @@ import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.services.common.LocaleService;
+
 /**
  * 
  * @Author Vishal Kumar
@@ -26,6 +29,8 @@ public class FileUploadServiceImpl implements FileUploadService {
 
 	@Autowired
 	private LocaleService localeService;
+
+	private static final Logger logger = LoggerFactory.getLogger(FileUploadServiceImpl.class);
 
 	@Override
 	public String uploadFile(MultipartFile multipartFile, String storageLocation, User user, String[] validExtentions,
@@ -44,9 +49,10 @@ public class FileUploadServiceImpl implements FileUploadService {
 		BufferedImage imageFromConvert = ImageIO.read(inputStream);
 		File file = new File(storageLocation + updatedFileName);
 		ImageIO.write(imageFromConvert, extension, file);
-		file.setReadable(true);
-		file.setWritable(true);
-		file.setExecutable(true);
+		boolean read = file.setReadable(true);
+		boolean write = file.setWritable(true);
+		boolean exe = file.setExecutable(true);
+		logger.debug("file permission read: {} , write: {}, exec: {}", read, write, exe);
 		return updatedFileName;
 	}
 }
