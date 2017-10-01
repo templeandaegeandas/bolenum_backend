@@ -1,13 +1,16 @@
 package com.bolenum.services.user;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -72,5 +75,50 @@ public class FileUploadServiceImpl implements FileUploadService {
         
         Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
 		return updatedFileName;
+	}
+	
+	@Override
+	public String updateUserImage(String imageBase64, String storageLocation, User user, String[] validExtentions,
+			long maxSize) throws IOException, MaxSizeExceedException, PersistenceException {
+		logger.debug("Profile pic size: {}",imageBase64.length());
+		logger.debug("Allowed maximum size: {}", maxSize);
+		if (imageBase64.length() > maxSize) {
+			throw new MaxSizeExceedException(localeService.getMessage("max.file.size.exceeds"));
+		}
+		String partSeparator = ",";
+		if (imageBase64.contains(partSeparator)) {
+			String encodedImg = imageBase64.split(partSeparator)[1];
+			String extension = imageBase64.split(partSeparator)[0].split(";")[0].split("/")[1];
+			if (!Arrays.asList(validExtentions).contains(extension.toLowerCase())) {
+				throw new PersistenceException(localeService.getMessage("valid.image.extention.error"));
+			}
+			byte[] decodedImg = Base64.getDecoder().decode(encodedImg.getBytes(StandardCharsets.UTF_8));
+			System.out.println(decodedImg);
+			InputStream in = new ByteArrayInputStream(decodedImg);
+			String updatedFileName = user.getFirstName() + "_" + user.getUserId() + "." + extension;
+			BufferedImage ImageFromConvert = ImageIO.read(in);
+			File file = new File(storageLocation + updatedFileName);
+			ImageIO.write(ImageFromConvert, extension, file);
+			System.out.println("uploaded");
+			logger.debug("user uploaded file name: {}",String.valueOf(file));
+			//using PosixFilePermission to set file permissions 777
+	        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+	        //add owners permission
+	        perms.add(PosixFilePermission.OWNER_READ);
+	        perms.add(PosixFilePermission.OWNER_WRITE);
+	        //perms.add(PosixFilePermission.OWNER_EXECUTE);
+	        //add group permissions
+	        perms.add(PosixFilePermission.GROUP_READ);
+	        perms.add(PosixFilePermission.GROUP_WRITE);
+	        //perms.add(PosixFilePermission.GROUP_EXECUTE);
+	        //add others permissions
+	        perms.add(PosixFilePermission.OTHERS_READ);
+	        //perms.add(PosixFilePermission.OTHERS_WRITE);
+	        //perms.add(PosixFilePermission.OTHERS_EXECUTE);
+	        
+	        Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
+			return updatedFileName;
+		}
+		return null;
 	}
 }

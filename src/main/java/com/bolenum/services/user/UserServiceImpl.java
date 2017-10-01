@@ -1,7 +1,7 @@
 package com.bolenum.services.user;
 
-import java.util.Date;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -10,7 +10,6 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.TokenType;
 import com.bolenum.dto.common.EditUserForm;
@@ -275,14 +274,14 @@ public class UserServiceImpl implements UserService {
 	 * to upload profile image with all validation of image file
 	 */
 	@Override
-	public User uploadImage(MultipartFile file, Long userId)
+	public User uploadImage(String imageBase64, Long userId)
 			throws IOException, PersistenceException, MaxSizeExceedException {
 
 		long sizeLimit = 1024 * 1024 * 5L;
 		User user = userRepository.findOne(userId);
-		if (file != null) {
+		if (imageBase64 != null) {
 			String[] validExtentions = { "jpg", "jpeg", "png" };
-			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, validExtentions,
+			String updatedFileName = fileUploadService.updateUserImage(imageBase64, uploadedFileLocation, user, validExtentions,
 					sizeLimit);
 			user.setProfileImage(updatedFileName);
 			return userRepository.save(user);
