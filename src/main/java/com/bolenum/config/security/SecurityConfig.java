@@ -18,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import com.bolenum.config.security.filter.TokenAuthenticationFilter;
+import com.bolenum.constant.UrlConstant;
 
 /**
  * @author chandan kumar singh
@@ -51,6 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring().antMatchers("/refresh");
 		web.ignoring().antMatchers("/api/v1/forgetpassword");
 		web.ignoring().antMatchers("/api/v1/forgetpassword/verify");
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.VERIFY_2FA_OTP);
 		
 		
 		// Check if Active profiles contains "dev" or "stag"

@@ -3,9 +3,6 @@
  */
 package com.bolenum.controller.common;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -22,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bolenum.constant.TwoFactorAuthOption;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.LoginForm;
 import com.bolenum.dto.common.ResetPasswordForm;
@@ -77,14 +75,20 @@ public class AuthController {
 			} else {
 				AuthenticationToken token;
 				if (user.getRole().getName().equals(loginForm.getRole())) {
-					try {
-						token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
-								loginForm.getBrowserName(), loginForm.getClientOsName());
-					} catch (UsernameNotFoundException | InvalidPasswordException e) {
-						return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+					if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.NONE)) {
+						try {
+							token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
+									loginForm.getBrowserName(), loginForm.getClientOsName());
+						} catch (UsernameNotFoundException | InvalidPasswordException e) {
+							return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+						}
+						return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("login.success"),
+								authService.loginResponse(token));
 					}
-					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("login.success"),
-							loginResponse(token));
+					else {
+						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localService.getMessage("login.success"),
+								null);
+					}
 				} else {
 					return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
 							localService.getMessage("user.not.authorized.error"), null);
@@ -93,22 +97,6 @@ public class AuthController {
 		}
 	}
 
-	/**
-	 * 
-	 * @param token
-	 * @return
-	 */
-	private Map<String, Object> loginResponse(AuthenticationToken token) {
-		Map<String, Object> map = new HashMap<>();
-		map.put("fName", token.getUser().getFirstName());
-		map.put("mName", token.getUser().getMiddleName());
-		map.put("lName", token.getUser().getLastName());
-		map.put("name", token.getUser().getFullName());
-		map.put("email", token.getUser().getEmailId());
-		map.put("role", token.getUser().getRole().getName());
-		map.put("token", token.getToken());
-		return map;
-	}
 
 	/**
 	 * controller that respond when hit comes for logout activity of user

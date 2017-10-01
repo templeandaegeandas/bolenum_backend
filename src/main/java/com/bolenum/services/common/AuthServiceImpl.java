@@ -1,8 +1,9 @@
 package com.bolenum.services.common;
 
 import java.util.Date;
-
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,6 +73,24 @@ public class AuthServiceImpl implements AuthService {
 		} else {
 			throw new InvalidPasswordException(localeService.getMessage("invalid.credential"));
 		}
+	}
+	
+	/**
+	 * 
+	 * @param token
+	 * @return
+	 */
+	@Override
+	public Map<String, Object> loginResponse(AuthenticationToken token) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("fName", token.getUser().getFirstName());
+		map.put("mName", token.getUser().getMiddleName());
+		map.put("lName", token.getUser().getLastName());
+		map.put("name", token.getUser().getFullName());
+		map.put("email", token.getUser().getEmailId());
+		map.put("role", token.getUser().getRole().getName());
+		map.put("token", token.getToken());
+		return map;
 	}
 
 	/**

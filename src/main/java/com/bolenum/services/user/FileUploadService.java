@@ -31,4 +31,19 @@ public interface FileUploadService {
 	String uploadFile(MultipartFile multipartFile, String storageLocation, User user, String[] validExtentions,
 			long maxSize) throws IOException, PersistenceException, MaxSizeExceedException;
 
+	/**
+	 * 
+	 * @param imageBase64
+	 * @param storageLocation
+	 * @param user
+	 * @param validExtentions
+	 * @param maxSize
+	 * @return String
+	 * @throws IOException
+	 * @throws PersistenceException
+	 * @throws MaxSizeExceedException
+	 */
+	String updateUserImage(String imageBase64, String storageLocation, User user, String[] validExtentions,
+			long maxSize) throws IOException, PersistenceException, MaxSizeExceedException;
+
 }
