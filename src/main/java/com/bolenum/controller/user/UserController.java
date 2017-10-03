@@ -268,7 +268,6 @@ public class UserController {
 			throws IOException, PersistenceException, MaxSizeExceedException {
 		User user = GenericUtils.getLoggedInUser();
 		User response = userService.uploadImage(profilePic, user.getUserId());
-		System.out.println(response);
 		if (response != null) {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localService.getMessage("user.image.uploaded.success"), response);

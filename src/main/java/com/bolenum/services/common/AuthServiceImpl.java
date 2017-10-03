@@ -74,6 +74,24 @@ public class AuthServiceImpl implements AuthService {
 			throw new InvalidPasswordException(localeService.getMessage("invalid.credential"));
 		}
 	}
+	
+	/**
+	 * 
+	 * @param token
+	 * @return
+	 */
+	@Override
+	public Map<String, Object> loginResponse(AuthenticationToken token) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("fName", token.getUser().getFirstName());
+		map.put("mName", token.getUser().getMiddleName());
+		map.put("lName", token.getUser().getLastName());
+		map.put("name", token.getUser().getFullName());
+		map.put("email", token.getUser().getEmailId());
+		map.put("role", token.getUser().getRole().getName());
+		map.put("token", token.getToken());
+		return map;
+	}
 
 	/**
 	 * used to validate user for the presence of valid user according to requested
@@ -158,22 +176,4 @@ public class AuthServiceImpl implements AuthService {
 		userRepository.save(user);
 	}
 	
-	/**
-	 * 
-	 * @param token
-	 * @return
-	 */
-	@Override
-	public Map<String, Object> loginResponse(AuthenticationToken token) {
-		Map<String, Object> map = new HashMap<>();
-		map.put("fName", token.getUser().getFirstName());
-		map.put("mName", token.getUser().getMiddleName());
-		map.put("lName", token.getUser().getLastName());
-		map.put("name", token.getUser().getFullName());
-		map.put("email", token.getUser().getEmailId());
-		map.put("role", token.getUser().getRole().getName());
-		map.put("token", token.getToken());
-		return map;
-	}
-
 }

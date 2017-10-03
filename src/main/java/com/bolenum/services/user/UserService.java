@@ -59,6 +59,8 @@ public interface UserService {
 	 */
 	void resendOTP(User user);
 	public User findByUserId(Long id);
+	
 	public User uploadImage(String imageBase64, Long userId) throws IOException, PersistenceException, MaxSizeExceedException;
+
 
 }

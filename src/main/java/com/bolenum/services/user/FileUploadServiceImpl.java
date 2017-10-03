@@ -74,6 +74,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         //perms.add(PosixFilePermission.OTHERS_EXECUTE);
         
         Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
+        logger.info("kyc doc uploaded success");
 		return updatedFileName;
 	}
 	
@@ -82,6 +83,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 			long maxSize) throws IOException, MaxSizeExceedException, PersistenceException {
 		logger.debug("Profile pic size: {}",imageBase64.length());
 		logger.debug("Allowed maximum size: {}", maxSize);
+
 		if (imageBase64.length() > maxSize) {
 			throw new MaxSizeExceedException(localeService.getMessage("max.file.size.exceeds"));
 		}
@@ -93,13 +95,11 @@ public class FileUploadServiceImpl implements FileUploadService {
 				throw new PersistenceException(localeService.getMessage("valid.image.extention.error"));
 			}
 			byte[] decodedImg = Base64.getDecoder().decode(encodedImg.getBytes(StandardCharsets.UTF_8));
-			System.out.println(decodedImg);
 			InputStream in = new ByteArrayInputStream(decodedImg);
 			String updatedFileName = user.getFirstName() + "_" + user.getUserId() + "." + extension;
-			BufferedImage ImageFromConvert = ImageIO.read(in);
+			BufferedImage imageFromConvert = ImageIO.read(in);
 			File file = new File(storageLocation + updatedFileName);
-			ImageIO.write(ImageFromConvert, extension, file);
-			System.out.println("uploaded");
+			ImageIO.write(imageFromConvert, extension, file);
 			logger.debug("user uploaded file name: {}",String.valueOf(file));
 			//using PosixFilePermission to set file permissions 777
 	        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
@@ -117,6 +117,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 	        //perms.add(PosixFilePermission.OTHERS_EXECUTE);
 	        
 	        Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
+	        logger.info("profile pic uploaded success");
 			return updatedFileName;
 		}
 		return null;

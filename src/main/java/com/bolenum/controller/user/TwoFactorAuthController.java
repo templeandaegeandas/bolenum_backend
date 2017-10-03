@@ -49,7 +49,7 @@ public class TwoFactorAuthController {
 	private LocaleService localeService;
 	@Autowired
 	private AuthService authService;
-
+	
 	@RequestMapping(value = UrlConstant.GEN_GOOGLE_AUTH_QR, method = RequestMethod.POST)
 	ResponseEntity<Object> generateGoogleAuthQr() throws URISyntaxException, WriterException, IOException {
 		User user = GenericUtils.getLoggedInUser();
@@ -82,21 +82,6 @@ public class TwoFactorAuthController {
 		}
 	}
 
-//	@RequestMapping(value = UrlConstant.VERIFY_GOOGLE_AUTH_KEY_OPEN, method = RequestMethod.GET)
-//	ResponseEntity<Object> authenticateGoogleAuthKey(@Valid @RequestBody LoginForm loginForm,
-//			BindingResult bindingResult, @RequestParam("secret") String secret) {
-//		User user = userService.findByEmail(loginForm.getEmailId());
-//		boolean authResponse = twoFactorAuthService.performAuthentication(secret, user);
-//		if (authResponse) {
-//			AuthenticationToken token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
-//					loginForm.getBrowserName(), loginForm.getClientOsName());
-//			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("tfa.successfull"),
-//					authService.loginResponse(token));
-//		} else {
-//			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("tfa.unsuccessfull"),
-//					null);
-//		}
-//	}
 
 	@RequestMapping(value = UrlConstant.TWO_FACTOR_AUTH_VIA_MOBILE, method = RequestMethod.PUT)
 	ResponseEntity<Object> setTwoFactorAuthViaMobile() {
@@ -122,8 +107,8 @@ public class TwoFactorAuthController {
 	}
 
 	@RequestMapping(value = UrlConstant.SEND_2FA_OTP, method = RequestMethod.PUT)
-	ResponseEntity<Object> sendOtpForTwoFactorAuth() {
-		User user = GenericUtils.getLoggedInUser();
+	ResponseEntity<Object> sendOtpForTwoFactorAuth(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult) {
+		User user = userService.findByEmail(loginForm.getEmailId());
 		OTP otp = twoFactorAuthService.sendOtpForTwoFactorAuth(user);
 		if (otp != null) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("tfa.otp.send.successfully"),
@@ -135,8 +120,7 @@ public class TwoFactorAuthController {
 	}
 
 	@RequestMapping(value = UrlConstant.VERIFY_2FA_OTP, method = RequestMethod.PUT)
-	ResponseEntity<Object> verify2faOtp(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult,
-			@RequestParam("otp") int otp) throws InvalidOtpException {
+	ResponseEntity<Object> verify2faOtp(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult, @RequestParam("otp") int otp) throws InvalidOtpException {
 		User user = userService.findByEmail(loginForm.getEmailId());
 		boolean response;
 		if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.GOOGLE_AUTHENTICATOR)) {
@@ -145,8 +129,6 @@ public class TwoFactorAuthController {
 		else {
 			response = twoFactorAuthService.verify2faOtp(otp);
 		}
-		
-		
 		if (response) {
 			AuthenticationToken token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
 					loginForm.getBrowserName(), loginForm.getClientOsName());

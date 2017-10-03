@@ -7,6 +7,8 @@ import java.util.Random;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -69,6 +71,8 @@ public class UserServiceImpl implements UserService {
 
 	@Value("${bolenum.profile.image.location}")
 	private String uploadedFileLocation;
+	
+	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	/**
 	 * to register user if and only if when user details not present in database
@@ -201,6 +205,7 @@ public class UserServiceImpl implements UserService {
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
 		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
+		logger.debug("Otp sent success: {}", code);
 		if (existinguser == null) {
 			smsServiceUtil.sendMessage(mobileNumber, message);
 			OTP otp = new OTP(mobileNumber, code, user);
@@ -257,6 +262,7 @@ public class UserServiceImpl implements UserService {
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
 		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
+		logger.debug("Otp sent success: {}", code);
 		smsServiceUtil.sendMessage(mobileNumber, message);
 		OTP otp = new OTP(mobileNumber, code, user);
 		otpRepository.save(otp);

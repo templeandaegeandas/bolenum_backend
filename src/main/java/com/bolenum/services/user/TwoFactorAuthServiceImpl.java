@@ -14,6 +14,8 @@ import java.util.Base64.Encoder;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -63,6 +65,8 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	private SMSServiceUtil smsServiceUtil;
 	@Autowired
 	private LocaleService localeService;
+	
+	private static final Logger logger = LoggerFactory.getLogger(TwoFactorAuthServiceImpl.class);
 
 	@Override
 	public Map<String, String> qrCodeGeneration(User user) throws URISyntaxException, WriterException, IOException {
@@ -106,7 +110,10 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		int code = (100000 + r.nextInt(900000));
 		if (user.getIsMobileVerified()) {
 			String mobileNumber = user.getMobileNumber();
-			smsServiceUtil.sendMessage(mobileNumber, localeService.getMessage("otp.for.twofa.verification"));
+			String message = localeService.getMessage("otp.for.twofa.verification") + "  " + code;
+			logger.debug("2 FA otp sent success: {}", code);
+			System.out.println(message);
+			smsServiceUtil.sendMessage(mobileNumber, message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			return otpRepository.save(otp);
 		} else {
