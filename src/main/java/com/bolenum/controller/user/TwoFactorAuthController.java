@@ -120,8 +120,8 @@ public class TwoFactorAuthController {
 	}
 
 	@RequestMapping(value = UrlConstant.SEND_2FA_OTP, method = RequestMethod.PUT)
-	ResponseEntity<Object> sendOtpForTwoFactorAuth() {
-		User user = GenericUtils.getLoggedInUser();
+	ResponseEntity<Object> sendOtpForTwoFactorAuth(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult) {
+		User user = userService.findByEmail(loginForm.getEmailId());
 		OTP otp = twoFactorAuthService.sendOtpForTwoFactorAuth(user);
 		if (otp != null) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("tfa.otp.send.successfully"),
