@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
+
 /**
  * 
  * @Author Himanshu
@@ -18,7 +19,7 @@ public class MailService {
 
 	@Autowired
 	private MailSender mailSender;
-	
+
 	@Value("${bolenum.url}")
 	private String serverUrl;
 
@@ -30,13 +31,19 @@ public class MailService {
 		mailSender.send(message);
 	}
 
-	public void mailSend(String to, String token,String subject,String text) {
+	public void mailSend(String to, String subject, String text) {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setSubject(subject);
-		message.setText(text + token);
+		message.setText(text);
 		message.setTo(to);
-		mailSender.send(message);
+		System.out.println(message);
+		try {
+			mailSender.send(message);
+			System.out.println("mmmmmmm");
+		} catch (Exception e) {
+			System.err.println("errrorororo");
+			e.printStackTrace();
+		}
 	}
-	
-	
+
 }

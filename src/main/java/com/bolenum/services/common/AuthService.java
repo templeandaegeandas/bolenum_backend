@@ -25,9 +25,9 @@ public interface AuthService {
 	AuthenticationToken login(String email, User user, String ipAddress, String browserName, String clientOSName)
 			throws InvalidPasswordException;
 
-	public boolean validateUser(String email);
+	public User validateUser(String email);
 	
-	public void sendTokenToResetPassword(String email);
+	public AuthenticationToken sendTokenToResetPassword(User validUser);
 
 
 	void resetPassword(User verifiedUser, ResetPasswordForm resetPasswordForm);

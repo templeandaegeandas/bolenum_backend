@@ -61,6 +61,8 @@ public class UserController {
 
 	@Autowired
 	BTCWalletService btcWalletService;
+	
+	
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {

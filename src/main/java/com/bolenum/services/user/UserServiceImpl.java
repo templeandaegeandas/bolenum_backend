@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -59,6 +61,8 @@ public class UserServiceImpl implements UserService {
 	@Value("${bolenum.profile.image.location}")
 	private String uploadedFileLocation;
 
+	public static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	
 	/**
 	 * to register user if and only if when user details not present in database
 	 */
@@ -91,7 +95,9 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public User findByEmail(String email) {
-		return userRepository.findByEmailIdIgnoreCase(email);
+		logger.debug("email in findByEmail = {}",email);
+		System.out.println(userRepository.findByEmailId(""+email));
+		return userRepository.findByEmailId(email);
 	}
 
 	/**

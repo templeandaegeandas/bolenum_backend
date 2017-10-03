@@ -17,7 +17,7 @@ public class EditUserForm {
 	private Long userId;
 
 	@NotEmpty
-	@Pattern(regexp = "([a-zA-Z]+)", message = "first Name must be valid")
+	@Pattern(regexp = "([a-zA-Z]+)", message = "First Name must be valid")
 	private String firstName;
 
 	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
