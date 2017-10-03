@@ -1,8 +1,11 @@
 package com.bolenum.config;
 
 import java.io.File;
+<<<<<<< HEAD
 import java.io.IOException;
 import java.io.InputStream;
+=======
+>>>>>>> feature_BOL52
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,6 +50,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
 
+
 	@Autowired
 	private CountryAndStateService countriesAndStateService;
 
@@ -55,12 +59,13 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Value("${bolenum.profile.image.location}")
 	private String userProfileImageLocation;
-	
+
 	@Value("${bolenum.document.location}")
 	private String userDocumetsLocation;
 	
 	@Value("${bolenum.google.qr.code.location}")
 	private String googleQrCodeLocation;
+
 
 	private Set<Privilege> privileges = new HashSet<>();
 
@@ -86,33 +91,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	 * start @description createInitDirectories @param @return void @exception
 	 * 
 	 */
-	private void createInitDirectories() {
-		Path ethWallet = Paths.get(ethWalletLocation);
-		if (!Files.exists(ethWallet)) {
-			if (new File((ethWalletLocation)).mkdirs()) {
-				logger.debug("ethereum wallet location created");
-			} else {
-				logger.debug("ethereum wallet location creation failed");
-			}
-		} else {
-			logger.debug("ethereum wallet location exists");
-		}
+	
 
-	}
-
-	private void createProfilePicDirectories() {
-		Path profileImg = Paths.get(userProfileImageLocation);
-
-		if (!Files.exists(profileImg)) {
-			if (new File((userProfileImageLocation)).mkdirs()) {
-				logger.debug("User Profile Image location created");
-			} else {
-				logger.debug("User Profile Image location creation failed");
-			}
-		} else {
-			logger.debug("User Profile Image location exists");
-		}
-	}
 
 	private void createDocumentsDirectories() {
 		Path profileImg = Paths.get(userDocumetsLocation);
@@ -140,8 +120,45 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		} else {
 			logger.debug("Documents location exists");
 		}
+
 	}
 
+	/**
+	 * this will create ethereum wallet location at the time of application start
+	 * @description createInitDirectories
+	 * @param 
+	 * @return void
+	 * @exception 
+	 * 
+	 */
+	private void createInitDirectories() {
+		Path ethWallet = Paths.get(ethWalletLocation);
+		if (!Files.exists(ethWallet)) {
+			if (new File((ethWalletLocation)).mkdirs()) {
+				logger.debug("ethereum wallet location created");
+			} else {
+				logger.debug("ethereum wallet location creation failed");
+			}
+		} else {
+			logger.debug("ethereum wallet location exists");
+		}
+		
+	}
+
+	private void createProfilePicDirectories()
+	{
+		Path profileImg=Paths.get(userProfileImageLocation);
+		
+		if (!Files.exists(profileImg)) {
+			if (new File((userProfileImageLocation)).mkdirs()) {
+				logger.debug("User Profile Image location created");
+			} else {
+				logger.debug("User Profile Image location creation failed");
+			}
+		} else {
+			logger.debug("User Profile Image location exists");
+		}
+	}
 	/**
 	 * @description addRole @param @return void @exception
 	 */

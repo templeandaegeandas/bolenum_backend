@@ -24,11 +24,12 @@ public class GenericUtils {
 	}
 
 	public static boolean isValidMail(String email) {
-		//EmailValidator ev = EmailValidator.getInstance();
-		//return ev.isValid(email);
+		// EmailValidator ev = EmailValidator.getInstance();
+		// return ev.isValid(email);
 		String emailPattern = "^(.+)@(.+)$";
-		Pattern p = Pattern.compile(emailPattern);
-		Matcher m = p.matcher(email);
-		return m.matches();
+		Pattern pattern = Pattern.compile(emailPattern);
+		Matcher matcher = pattern.matcher(email);
+
+		return matcher.matches();
 	}
 }

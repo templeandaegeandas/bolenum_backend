@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -56,12 +58,14 @@ public class AuthServiceImpl implements AuthService {
 	@Value("${bolenum.api.reset}")
 	private String urlForResetPassword;
 
+	public static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+
 	/**
 	 * For login activity of user
 	 */
 	@Override
-	public AuthenticationToken login(String password, User user, String ipAddress, String browserName, String clientOSName)
-			throws InvalidPasswordException {
+	public AuthenticationToken login(String password, User user, String ipAddress, String browserName,
+			String clientOSName) throws InvalidPasswordException {
 		if (passwordEncoder.matches(password, user.getPassword())) {
 			// Generate Token and Save it for the logged in user
 			AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
@@ -98,13 +102,9 @@ public class AuthServiceImpl implements AuthService {
 	 * email
 	 */
 	@Override
-	public boolean validateUser(String email) {
-		User user = userRepository.findByEmailIdIgnoreCase(email);
-		if (user != null) {
-			return true;
+	public User validateUser(String email) {
 
-		}
-		return false;
+		return userRepository.findByEmailId(email);
 	}
 
 	/**
@@ -129,11 +129,9 @@ public class AuthServiceImpl implements AuthService {
 	 * to send token as verification link at the time of reset password
 	 */
 
-	public void sendTokenToResetPassword(String email) {
+	public AuthenticationToken sendTokenToResetPassword(User user) {
 
-		User existingUser = userRepository.findByEmailIdIgnoreCase(email);
-
-		List<AuthenticationToken> previousToken = authenticationTokenRepo.findByUserAndTokentype(existingUser,
+		List<AuthenticationToken> previousToken = authenticationTokenRepo.findByUserAndTokentype(user,
 				TokenType.FORGOT_PASSWORD);
 
 		for (AuthenticationToken token : previousToken) {
@@ -141,13 +139,16 @@ public class AuthServiceImpl implements AuthService {
 				authenticationTokenRepo.delete(token);
 			}
 		}
-		String token = TokenGenerator.generateToken();
-		AuthenticationToken authenticationToken = new AuthenticationToken(token, existingUser);
 
-		emailService.mailSend(email, token, localeService.getMessage("message.subject.forget.password"),
-				serverUrl + urlForResetPassword);
+		String token = TokenGenerator.generateToken();
+
+		AuthenticationToken authenticationToken = new AuthenticationToken(token, user);
+
+		String url = serverUrl + urlForResetPassword + token;
+		emailService.mailSend(user.getEmailId(), localeService.getMessage("message.subject.forget.password"), url);
 		authenticationToken.setTokentype(TokenType.FORGOT_PASSWORD);
-		authenticationTokenRepo.saveAndFlush(authenticationToken);
+		AuthenticationToken savedToken = authenticationTokenRepo.saveAndFlush(authenticationToken);
+		return savedToken;
 
 	}
 

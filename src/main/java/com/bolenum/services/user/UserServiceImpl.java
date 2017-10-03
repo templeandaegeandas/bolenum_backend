@@ -74,6 +74,8 @@ public class UserServiceImpl implements UserService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
+	public static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	
 	/**
 	 * to register user if and only if when user details not present in database
 	 */
@@ -106,7 +108,9 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public User findByEmail(String email) {
-		return userRepository.findByEmailIdIgnoreCase(email);
+		logger.debug("email in findByEmail = {}",email);
+		System.out.println(userRepository.findByEmailId(""+email));
+		return userRepository.findByEmailId(email);
 	}
 
 	/**

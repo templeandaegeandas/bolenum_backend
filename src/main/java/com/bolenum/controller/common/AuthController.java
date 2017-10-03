@@ -134,17 +134,23 @@ public class AuthController {
 	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
+        email=email.trim();
+        email=email.replace(' ', '+');
+		logger.debug("email after concatenation= " + email);
 		boolean isValid = GenericUtils.isValidMail(email);
-
+		logger.debug("isValid = " + isValid);
 		if (isValid) {
-			boolean isValidUser = authService.validateUser(email);
+			User user = userService.findByEmail(email);
+			logger.debug("userService.findByEmail(email) = "+user.getEmailId());
 
-			if (isValidUser) {
-				authService.sendTokenToResetPassword(email);
-				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("mail.sent.success"),
-						email);
+				AuthenticationToken authenticationToken = authService.sendTokenToResetPassword(user);
+				logger.debug(authenticationToken.getToken());
+				if (authenticationToken != null) {
+					return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("mail.sent.success"),
+							email);
+				}
 			}
-		}
+		
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.email"), null);
 	}
 

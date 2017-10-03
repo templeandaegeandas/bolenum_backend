@@ -11,7 +11,7 @@ import com.bolenum.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	public User findByEmailIdIgnoreCase(String emailId);
+	public User findByEmailId(String emailId);
 	
 	/**
 	 * This query returns all users list that are not deleted and not admin with searching according to firstName, lastName and emailId 

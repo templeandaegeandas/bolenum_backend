@@ -28,6 +28,12 @@ import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
+/**
+ * 
+ * @Author Vishal Kumar
+ * @Date 03-Oct-2017
+ */
+
 @RestController
 public class KYCController {
 
@@ -38,6 +44,14 @@ public class KYCController {
 
 	public static final Logger logger = LoggerFactory.getLogger(KYCController.class);
 
+	/**
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 * @throws PersistenceException
+	 * @throws MaxSizeExceedException
+	 */
 	@RequestMapping(value = UrlConstant.UPLOAD_DOCUMENT, method = RequestMethod.POST)
 	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
@@ -52,6 +66,11 @@ public class KYCController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param userId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.APPROVE_DOCUMENT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> approveKycDocument(@PathVariable("userId") Long userId) {
 		User user = kycService.approveKycDocument(userId);
@@ -64,6 +83,11 @@ public class KYCController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param data
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.DISAPPROVE_DOCUMENT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> disApproveKycDocument(@RequestBody Map<String, String> data) {
 		User user = kycService.disApprovedKycDocument(Long.parseLong(data.get("userId")), data.get("rejectionMessage"));
@@ -76,6 +100,15 @@ public class KYCController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortOrder
+	 * @param searchData
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
@@ -84,6 +117,11 @@ public class KYCController {
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("submitted.kyc.list"), kycList);
 	}
 
+	/**
+	 * 
+	 * @param kycId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.GET_KYC_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getKycById(@PathVariable("kycId") Long kycId) {
 		UserKyc userKyc = kycService.getUserKycById(kycId);
