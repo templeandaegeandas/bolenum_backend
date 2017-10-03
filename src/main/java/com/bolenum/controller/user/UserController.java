@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.EditUserForm;
@@ -264,11 +263,11 @@ public class UserController {
 	 * @throws PersistenceException
 	 * @throws MaxSizeExceedException
 	 */
-	@RequestMapping(value = UrlConstant.UPLOAD_PROFILE_IMAGE, method = RequestMethod.PUT)
-	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file)
+	@RequestMapping(value = UrlConstant.UPLOAD_PROFILE_IMAGE, method = RequestMethod.POST)
+	public ResponseEntity<Object> uploadKycDocument(@RequestParam String profilePic)
 			throws IOException, PersistenceException, MaxSizeExceedException {
 		User user = GenericUtils.getLoggedInUser();
-		User response = userService.uploadImage(file, user.getUserId());
+		User response = userService.uploadImage(profilePic, user.getUserId());
 		if (response != null) {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localService.getMessage("user.image.uploaded.success"), response);
