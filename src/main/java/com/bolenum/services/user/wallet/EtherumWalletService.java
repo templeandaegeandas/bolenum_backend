@@ -21,7 +21,23 @@ public interface EtherumWalletService {
 	 *
 	 */
 	@Async
-	void createWallet(User user);
-	
-	String cleintVersion();
+	public void createWallet(User user);
+	/**
+	 * 
+	 * @description cleintVersion
+	 * @param 
+	 * @return String
+	 * @exception 
+	 *
+	 */
+	public String cleintVersion();
+	/**
+	 * 
+	 * @description getWalletBalance
+	 * @param 
+	 * @return Double
+	 * @exception 
+	 *
+	 */
+	public Double getWalletBalance(User user);
 }

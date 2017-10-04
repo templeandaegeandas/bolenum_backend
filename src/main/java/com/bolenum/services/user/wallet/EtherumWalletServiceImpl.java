@@ -5,6 +5,8 @@ package com.bolenum.services.user.wallet;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -26,6 +28,7 @@ import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 
 import com.bolenum.model.User;
@@ -107,4 +110,27 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 		return "";
 	}
 
+	@Override
+	public Double getWalletBalance(User user) {
+		BigInteger amount = BigInteger.valueOf(0);
+		if (user.getEthWalletaddress() != null) {
+			logger.debug("user does not have ethtereum wallet address: {}", user.getEmailId());
+			createWallet(user);
+			return amount.doubleValue();
+		}
+		try {
+			amount = EthereumServiceUtil.getWeb3jInstance()
+					.ethGetBalance(user.getEthWalletaddress(), DefaultBlockParameterName.fromString("latest")).send()
+					.getBalance();
+			BigDecimal balance = new BigDecimal(amount);
+			BigDecimal conversionRate = new BigDecimal(new BigInteger("1000000000000000000"));
+			BigDecimal amountInEther = balance.divide(conversionRate);
+			logger.debug("Ethtereum wallet balance: {} of user: {} ", amountInEther.doubleValue(), user.getEmailId());
+			return amountInEther.doubleValue();
+		} catch (IOException e) {
+			logger.error("get wallet balance error: {}", e.getMessage());
+			e.printStackTrace();
+		}
+		return amount.doubleValue();
+	}
 }
