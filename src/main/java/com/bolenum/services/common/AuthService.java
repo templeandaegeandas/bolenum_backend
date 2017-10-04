@@ -28,16 +28,13 @@ public interface AuthService {
 			throws InvalidPasswordException;
 
 	public User validateUser(String email);
-	
-	public AuthenticationToken sendTokenToResetPassword(User user);
 
+	public AuthenticationToken sendTokenToResetPassword(User user);
 
 	void resetPassword(User verifiedUser, ResetPasswordForm resetPasswordForm);
 
 	User verifyTokenForResetPassword(String token);
-	
-	Map<String, Object> loginResponse(AuthenticationToken token);
 
-	
+	Map<String, Object> loginResponse(AuthenticationToken token);
 
 }
