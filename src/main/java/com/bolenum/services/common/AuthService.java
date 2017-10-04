@@ -29,7 +29,7 @@ public interface AuthService {
 
 	public User validateUser(String email);
 	
-	public AuthenticationToken sendTokenToResetPassword(String email);
+	public AuthenticationToken sendTokenToResetPassword(User user);
 
 
 	void resetPassword(User verifiedUser, ResetPasswordForm resetPasswordForm);

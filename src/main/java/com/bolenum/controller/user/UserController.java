@@ -67,15 +67,12 @@ public class UserController {
 	@Autowired
 	BTCWalletService btcWalletService;
 	
-<<<<<<< HEAD
 	@Autowired
 	EtherumWalletService etherumWalletService;
 	
 	@Autowired
 	private CountryAndStateService countryAndStateService;
-=======
 	
->>>>>>> feature_BOL52
 
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {

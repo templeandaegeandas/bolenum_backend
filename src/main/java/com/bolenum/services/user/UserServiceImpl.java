@@ -74,7 +74,6 @@ public class UserServiceImpl implements UserService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-	public static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 	
 	/**
 	 * to register user if and only if when user details not present in database

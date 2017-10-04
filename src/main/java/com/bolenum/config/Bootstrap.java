@@ -1,11 +1,8 @@
 package com.bolenum.config;
 
 import java.io.File;
-<<<<<<< HEAD
 import java.io.IOException;
 import java.io.InputStream;
-=======
->>>>>>> feature_BOL52
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
