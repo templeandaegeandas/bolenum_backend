@@ -19,10 +19,12 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.bolenum.model.Countries;
+import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
@@ -43,6 +45,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private UserService userService;
 	@Autowired
 	private PrivilegeService privilegeService;
+	@Autowired
+	private Erc20TokenService erc20TokenService;
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
@@ -75,6 +79,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createAdmin();
 		saveCountries();
 		saveStates();
+		saveBolenumErc20Token();
 
 		// create initial directories
 		createInitDirectories();
@@ -234,6 +239,16 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			}
 		} else {
 			logger.info("States list already saved");
+		}
+	}
+	
+	void saveBolenumErc20Token() {
+		Erc20Token erc20Token = erc20TokenService.saveBolenumErc20Token();
+		if (erc20Token != null) {
+			logger.info("Bolenum token saved successfully!");
+		}
+		else {
+			logger.info("Bolenum token already saved!");
 		}
 	}
 
