@@ -18,6 +18,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.wallet.BTCWalletService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
@@ -37,6 +38,9 @@ public class BTCWalletController {
 	
 	@Autowired
 	private BTCWalletService btcWalletService;
+	
+	@Autowired
+	private EtherumWalletService etherumWalletService;
 	/**
 	 * to get the wallet address and QR code for get deposited in the
 	 * wallet @description getWalletAddressAndQrCode @param coin code @return
@@ -55,8 +59,10 @@ public class BTCWalletController {
 			map = btcWalletService.getWalletAddressAndQrCode(user.getBtcWalletUuid());
 			break;
 		case "ETH":
+			Double balance = etherumWalletService.getWalletBalance(user);
 			Map<String,Object> mapAddress = new HashMap<>();
 			mapAddress.put("address", user.getEthWalletaddress());
+			mapAddress.put("balance", balance);
 			map.put("data", mapAddress);
 			break;
 		default:

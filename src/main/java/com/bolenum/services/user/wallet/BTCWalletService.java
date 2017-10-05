@@ -28,4 +28,6 @@ public interface BTCWalletService {
 	 *
 	 */
 	Map<String, Object> getWalletAddressAndQrCode(String uuid);
+	
+	String getWalletBalnce(String uuid);
 }

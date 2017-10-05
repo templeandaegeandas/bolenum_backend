@@ -27,6 +27,7 @@ import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,6 +52,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private CountryAndStateService countriesAndStateService;
 
+	@Autowired
+	TransactionService transactionService;
+
 	@Value("${bolenum.ethwallet.location}")
 	private String ethWalletLocation; // ethereum wallet file location
 
@@ -59,7 +63,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Value("${bolenum.document.location}")
 	private String userDocumetsLocation;
-	
+
 	@Value("${bolenum.google.qr.code.location}")
 	private String googleQrCodeLocation;
 
@@ -75,12 +79,13 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createAdmin();
 		saveCountries();
 		saveStates();
-
 		// create initial directories
 		createInitDirectories();
 		createProfilePicDirectories();
 		createDocumentsDirectories();
 		createGoogleAuthQrCodeDirectories();
+		// to register new incoming transaction
+		registerIncomingTransaction();
 	}
 
 	/**
@@ -104,7 +109,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			logger.debug("Documents location exists");
 		}
 	}
-	
+
 	private void createGoogleAuthQrCodeDirectories() {
 		Path profileImg = Paths.get(googleQrCodeLocation);
 
@@ -235,6 +240,17 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		} else {
 			logger.info("States list already saved");
 		}
+	}
+
+	/**
+	 * @description to get the all the incoming transaction in application, it will continue
+	 *              listen for any new transaction in blockchain and emit an Object of new transaction  
+	 *@param 
+	 *@exception
+	 *
+	 */
+	private void registerIncomingTransaction() {
+		transactionService.saveEthereumIncomingTx();
 	}
 
 }
