@@ -6,6 +6,7 @@ package com.bolenum.model;
 import java.math.BigInteger;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -37,7 +38,7 @@ public class Transaction {
 	@ApiModelProperty(hidden = true)
 	@UpdateTimestamp
 	private Date updatedOn;
-
+	@Column(unique=true)
 	private String txHash;
 	private String fromAddress;
 	private String toAddress;
@@ -47,13 +48,14 @@ public class Transaction {
 	private CurrencyType currencyType;
 	private TransactionType transactionType;
 	private BigInteger gas;
+	private BigInteger gasPrice;
 
 	public Transaction() {
 
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, CurrencyType currencyType, TransactionType transactionType, BigInteger gas) {
+			String txDescription, CurrencyType currencyType, TransactionType transactionType, BigInteger gas,BigInteger gasPrice) {
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
@@ -63,6 +65,7 @@ public class Transaction {
 		this.currencyType = currencyType;
 		this.transactionType = transactionType;
 		this.gas = gas;
+		this.gasPrice = gasPrice;
 	}
 
 	/**
@@ -214,7 +217,7 @@ public class Transaction {
 
 	/**
 	 * @param currencyType
-	 *            the currencyType to set
+	 *  the currencyType to set
 	 */
 	public void setCurrencyType(CurrencyType currencyType) {
 		this.currencyType = currencyType;
@@ -229,7 +232,7 @@ public class Transaction {
 
 	/**
 	 * @param transactionType
-	 *            the transactionType to set
+	 * the transactionType to set
 	 */
 	public void setTransactionType(TransactionType transactionType) {
 		this.transactionType = transactionType;
@@ -248,6 +251,21 @@ public class Transaction {
 	 */
 	public void setGas(BigInteger gas) {
 		this.gas = gas;
+	}
+
+	/**
+	 * @return the gasPrice
+	 */
+	public BigInteger getGasPrice() {
+		return gasPrice;
+	}
+
+	/**
+	 * @param gasPrice 
+	 * the gasPrice to set
+	 */
+	public void setGasPrice(BigInteger gasPrice) {
+		this.gasPrice = gasPrice;
 	}
 
 }
