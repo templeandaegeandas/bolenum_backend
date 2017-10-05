@@ -13,7 +13,7 @@ public class ResetPasswordForm {
 	@Pattern.List({ @Pattern(regexp = "(?=.*[0-9]).+", message = "Password must contain one digit."),
 			@Pattern(regexp = "(?=.*[a-z]).+", message = "Password must contain one lowercase letter."),
 			@Pattern(regexp = "(?=.*[A-Z]).+", message = "Password must contain one upper letter."),
-			@Pattern(regexp = "(?=.*[!@#$%^&*+=?-_()/\"\\.,<>~`;:]).+", message = "Password must contain one special character."),
+			@Pattern(regexp = "^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$", message = "Password must contain one special character."),
 			@Pattern(regexp = "(?=\\S+$).+", message = "Password must contain no whitespace.") })
 	private String newPassword;
 	

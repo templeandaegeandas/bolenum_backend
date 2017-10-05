@@ -4,7 +4,6 @@
 package com.bolenum.controller.common;
 
 import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +53,8 @@ public class AuthController {
 
 	@Autowired
 	private LocaleService localeService;
+
+
 	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 	/**
@@ -62,6 +63,7 @@ public class AuthController {
 	 * @param bindingResult
 	 * @return
 	 */
+
 	@RequestMapping(value = UrlConstant.USER_LOGIN, method = RequestMethod.POST)
 	ResponseEntity<Object> login(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
@@ -98,6 +100,13 @@ public class AuthController {
 					else {
 						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
 								null);
+					} else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
+						twoFactorAuthService.sendOtpForTwoFactorAuth(user);
+						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
+								localeService.getMessage("login.success"), null);
+					} else {
+						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
+								localeService.getMessage("login.success"), null);
 					}
 				} else {
 					return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
@@ -134,17 +143,17 @@ public class AuthController {
 	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
-        email=email.trim();
-        email=email.replace(' ', '+');
+		email = email.trim();
+		email = email.replace(' ', '+');
 		logger.debug("email after concatenation= " + email);
 		boolean isValid = GenericUtils.isValidMail(email);
 		logger.debug("isValid = " + isValid);
 		if (isValid) {
 			logger.debug("email at time of fetching record= " + email);
 			User user = userService.findByEmail(email);
-			logger.debug("userService.findByEmail(email) = "+user.getEmailId());
+			logger.debug("userService.findByEmail(email) = " + user.getEmailId());
 
-			if (user != null && user.getIsEnabled()==true) {
+			if (user != null && user.getIsEnabled() == true) {
 				AuthenticationToken authenticationToken = authService.sendTokenToResetPassword(user);
 				logger.debug(authenticationToken.getToken());
 				if (authenticationToken != null) {
@@ -175,7 +184,13 @@ public class AuthController {
 		if (verifiedUser == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("token.invalid"),
 					null);
-		} else if (!result.hasErrors() && verifiedUser != null) {
+		}
+        if(result.hasErrors())
+        {
+        	return ResponseHandler.response(HttpStatus.CONFLICT,true,
+					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());        	
+        }
+		else if (!result.hasErrors() && verifiedUser != null) {
 			authService.resetPassword(verifiedUser, resetPasswordForm);
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("user.password.change.success"), verifiedUser.getEmailId());
