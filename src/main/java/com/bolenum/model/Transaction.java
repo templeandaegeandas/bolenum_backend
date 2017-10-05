@@ -3,7 +3,6 @@
  */
 package com.bolenum.model;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -47,15 +46,15 @@ public class Transaction {
 	private String txDescription;
 	private CurrencyType currencyType;
 	private TransactionType transactionType;
-	private BigInteger gas;
-	private BigInteger gasPrice;
+	private Double gas;
+	private Double gasPrice;
 
 	public Transaction() {
 
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, CurrencyType currencyType, TransactionType transactionType, BigInteger gas,BigInteger gasPrice) {
+			String txDescription, CurrencyType currencyType, TransactionType transactionType, Double gas,Double gasPrice) {
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
@@ -241,7 +240,7 @@ public class Transaction {
 	/**
 	 * @return the gas which is ethereum tx fee
 	 */
-	public BigInteger getGas() {
+	public Double getGas() {
 		return gas;
 	}
 
@@ -249,14 +248,14 @@ public class Transaction {
 	 * @param gas
 	 *            the gas to set
 	 */
-	public void setGas(BigInteger gas) {
+	public void setGas(Double gas) {
 		this.gas = gas;
 	}
 
 	/**
 	 * @return the gasPrice
 	 */
-	public BigInteger getGasPrice() {
+	public Double getGasPrice() {
 		return gasPrice;
 	}
 
@@ -264,7 +263,7 @@ public class Transaction {
 	 * @param gasPrice 
 	 * the gasPrice to set
 	 */
-	public void setGasPrice(BigInteger gasPrice) {
+	public void setGasPrice(Double gasPrice) {
 		this.gasPrice = gasPrice;
 	}
 

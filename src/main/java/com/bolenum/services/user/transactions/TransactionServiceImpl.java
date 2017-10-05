@@ -44,7 +44,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTxHash(Transaction.getBlockHash());
 				transaction.setFromAddress(Transaction.getFrom());
 				transaction.setToAddress(Transaction.getTo());
-				transaction.setGas(Transaction.getGas());
+				//transaction.setGas(Transaction.getGas());
 				transaction.setTxAmmount(Transaction.getValue().doubleValue());
 				transaction.setTransactionType(TransactionType.INCOMING);
 				transaction.setCurrencyType(CurrencyType.ETHEREUM);
