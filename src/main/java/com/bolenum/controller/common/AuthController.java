@@ -6,7 +6,6 @@ package com.bolenum.controller.common;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,12 +47,13 @@ public class AuthController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private TwoFactorAuthService twoFactorAuthService;
 
 	@Autowired
 	private LocaleService localeService;
 
-	@Autowired
-	private TwoFactorAuthService twoFactorAuthService;
 
 	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -91,13 +91,15 @@ public class AuthController {
 
 						return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("login.success"),
 								authService.loginResponse(token));
-					} else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
+					}
+					else if(user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)){
 						twoFactorAuthService.sendOtpForTwoFactorAuth(user);
-						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
-								localeService.getMessage("login.success"), null);
-					} else {
-						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
-								localeService.getMessage("login.success"), null);
+						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
+								null);
+					}
+					else {
+						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
+								null);
 					}
 				} else {
 					return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
@@ -106,6 +108,7 @@ public class AuthController {
 			}
 		}
 	}
+
 
 	/**
 	 * controller that respond when hit comes for logout activity of user
