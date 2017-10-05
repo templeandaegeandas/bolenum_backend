@@ -42,7 +42,7 @@ public class Transaction {
 	private String fromAddress;
 	private String toAddress;
 	private Double txFee;
-	private Double txAmmount;
+	private Double txAmount;
 	private String txDescription;
 	private CurrencyType currencyType;
 	private TransactionType transactionType;
@@ -59,7 +59,7 @@ public class Transaction {
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
 		this.txFee = txFee;
-		this.txAmmount = txAmmount;
+		this.txAmount = txAmmount;
 		this.txDescription = txDescription;
 		this.currencyType = currencyType;
 		this.transactionType = transactionType;
@@ -181,7 +181,7 @@ public class Transaction {
 	 * @return the txAmmount
 	 */
 	public Double getTxAmmount() {
-		return txAmmount;
+		return txAmount;
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class Transaction {
 	 *            the txAmmount to set
 	 */
 	public void setTxAmmount(Double txAmmount) {
-		this.txAmmount = txAmmount;
+		this.txAmount = txAmmount;
 	}
 
 	/**
