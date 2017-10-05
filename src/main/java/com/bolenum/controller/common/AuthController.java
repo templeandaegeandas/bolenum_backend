@@ -174,7 +174,13 @@ public class AuthController {
 		if (verifiedUser == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("token.invalid"),
 					null);
-		} else if (!result.hasErrors() && verifiedUser != null) {
+		}
+        if(result.hasErrors())
+        {
+        	return ResponseHandler.response(HttpStatus.CONFLICT,true,
+					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());        	
+        }
+		else if (!result.hasErrors() && verifiedUser != null) {
 			authService.resetPassword(verifiedUser, resetPasswordForm);
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("user.password.change.success"), verifiedUser.getEmailId());
