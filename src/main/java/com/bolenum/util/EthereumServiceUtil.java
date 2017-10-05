@@ -3,7 +3,6 @@
  */
 package com.bolenum.util;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
@@ -12,9 +11,6 @@ import org.web3j.protocol.http.HttpService;
  * @date 26-Sep-2017
  */
 public class EthereumServiceUtil implements Cloneable{
-	
-	@Value("${ethereum.daemon.url}")
-	private static String url;
 	
 	private static Web3j instance = null;
 
@@ -31,7 +27,7 @@ public class EthereumServiceUtil implements Cloneable{
 	 */
 	public static Web3j getWeb3jInstance() {
 		if (instance == null) {
-			HttpService httpService = new HttpService(url);
+			HttpService httpService = new HttpService("http://127.0.0.1:8000");
 			instance = Web3j.build(httpService);
 			return instance;
 		}

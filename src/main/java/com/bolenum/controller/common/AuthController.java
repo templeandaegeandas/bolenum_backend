@@ -92,7 +92,7 @@ public class AuthController {
 						return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("login.success"),
 								authService.loginResponse(token));
 					}
-					else if(user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)){
+					else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
 						twoFactorAuthService.sendOtpForTwoFactorAuth(user);
 						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
 								null);
