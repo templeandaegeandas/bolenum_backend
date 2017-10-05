@@ -113,7 +113,7 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 	@Override
 	public Double getWalletBalance(User user) {
 		BigInteger amount = BigInteger.valueOf(0);
-		if (user.getEthWalletaddress() != null) {
+		if (user.getEthWalletaddress() == null) {
 			logger.debug("user does not have ethtereum wallet address: {}", user.getEmailId());
 			createWallet(user);
 			return amount.doubleValue();

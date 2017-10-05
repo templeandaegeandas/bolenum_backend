@@ -81,12 +81,34 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			logger.debug("get Wallet Address And QrCode res map: {}", res);
 			boolean isError = (boolean) res.get("error");
 			if (!isError) {
-				map.put("data", res.get("data"));
+				String bal = getWalletBalnce(walletUuid);
+				Map<String,Object> data= (Map<String,Object>) res.get("data");
+				res.clear();
+				res.put("address", data.get("address"));
+				res.put("file_name", data.get("file_name"));
+				res.put("balance", bal);
+				map.put("data", res);
 			}
 		} catch (RestClientException e) {
 			logger.error("get Wallet Address And QrCode exception RCE:  {}", e.getMessage());
 			e.printStackTrace();
 		}
 		return map;
+	}
+	@SuppressWarnings("unchecked")
+	@Override
+	public String getWalletBalnce(String uuid) {
+		String url = BTCUrlConstant.WALLET_BAL;
+		RestTemplate restTemplate = new RestTemplate();
+		logger.debug("get Wallet balance:  {}", uuid);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url).queryParam("walletUuid", uuid);
+		try {
+			Map<String, Object> res = restTemplate.getForObject(builder.toUriString(), Map.class);
+			return (String) res.get("data");
+		} catch (RestClientException e) {
+			logger.error("get Wallet balance RCE:  {}", e.getMessage());
+			e.printStackTrace();
+		}
+		return "";
 	}
 }
