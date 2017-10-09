@@ -65,16 +65,15 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private OTPRepository otpRepository;
-	
+
 	@Autowired
 	private FileUploadService fileUploadService;
 
 	@Value("${bolenum.profile.image.location}")
 	private String uploadedFileLocation;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-	
 	/**
 	 * to register user if and only if when user details not present in database
 	 */
@@ -107,8 +106,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public User findByEmail(String email) {
-		logger.debug("email in findByEmail = {}",email);
-		System.out.println(userRepository.findByEmailId(""+email));
+		logger.debug("email in findByEmail = {}", email);
 		return userRepository.findByEmailId(email);
 	}
 
@@ -194,7 +192,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		if (editUserForm.getDob() != null) {
-			System.out.println(new Date(editUserForm.getDob()));
+
 			user.setDob(new Date(editUserForm.getDob()));
 		}
 
@@ -270,6 +268,7 @@ public class UserServiceImpl implements UserService {
 		OTP otp = new OTP(mobileNumber, code, user);
 		otpRepository.save(otp);
 	}
+
 	/**
 	 * find user with respect to id
 	 */
@@ -290,8 +289,8 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findOne(userId);
 		if (imageBase64 != null) {
 			String[] validExtentions = { "jpg", "jpeg", "png" };
-			String updatedFileName = fileUploadService.updateUserImage(imageBase64, uploadedFileLocation, user, validExtentions,
-					sizeLimit);
+			String updatedFileName = fileUploadService.updateUserImage(imageBase64, uploadedFileLocation, user,
+					validExtentions, sizeLimit);
 			user.setProfileImage(updatedFileName);
 			return userRepository.save(user);
 

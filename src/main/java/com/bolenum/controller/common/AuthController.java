@@ -95,11 +95,11 @@ public class AuthController {
 					else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
 						twoFactorAuthService.sendOtpForTwoFactorAuth(user);
 						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
-								null);
+								user.getTwoFactorAuthOption());
 					}
 					else {
 						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
-								null);
+								user.getTwoFactorAuthOption());
 					}
 				} else {
 					return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
@@ -138,14 +138,10 @@ public class AuthController {
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
 		email = email.trim();
 		email = email.replace(' ', '+');
-		logger.debug("email after concatenation= " + email);
 		boolean isValid = GenericUtils.isValidMail(email);
 		logger.debug("isValid = " + isValid);
 		if (isValid) {
-			logger.debug("email at time of fetching record= " + email);
 			User user = userService.findByEmail(email);
-			logger.debug("userService.findByEmail(email) = " + user.getEmailId());
-
 			if (user != null && user.getIsEnabled() == true) {
 				AuthenticationToken authenticationToken = authService.sendTokenToResetPassword(user);
 				logger.debug(authenticationToken.getToken());
