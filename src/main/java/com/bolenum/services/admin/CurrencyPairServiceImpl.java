@@ -2,6 +2,9 @@ package com.bolenum.services.admin;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.model.Currency;
@@ -19,10 +22,10 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 
 	@Autowired
 	private CurrencyPairRepo currencyPairRepo;
-	
+
 	@Autowired
 	private CurrencyRepo currencyRepo;
-	
+
 	@Override
 	public CurrencyPair findByCurrencyPairName(String currencyPairName) {
 		return currencyPairRepo.findByPairName(currencyPairName);
@@ -47,40 +50,55 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 	}
 
 	@Override
-	public Page<Currency> getCurrencyList(int pageNumber, int pageSize, String sortBy, String sortOrder,
-			String searchData) {
-		// TODO Auto-generated method stub
-		return null;
+	public Page<CurrencyPair> getCurrencyList(int pageNumber, int pageSize, String sortBy, String sortOrder) {
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		return currencyPairRepo.findByIsEnabled(true, pageRequest);
+
 	}
 
 	@Override
 	public Boolean validCurrencyPair(CurrencyPair currencyPair) {
-        Currency toCurrency=currencyRepo.findByCurrencyName(currencyPair.getToCurrency().get(0).getCurrencyName());
-        Currency pairedCurrency=currencyRepo.findByCurrencyName(currencyPair.getPairedCurrency().get(0).getCurrencyName());
-        Currency toCurrencyByAbbreviation=currencyRepo.findByCurrencyAbbreviation(currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
-        Currency pairedCurrencyByAbbreviation=currencyRepo.findByCurrencyAbbreviation(currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
-        
-        if(toCurrency!=null && pairedCurrency!=null && toCurrencyByAbbreviation!=null && pairedCurrencyByAbbreviation!=null)
-        {
-        	return true;
-        }
-        return false;
+		Currency toCurrency = currencyRepo.findByCurrencyName(currencyPair.getToCurrency().get(0).getCurrencyName());
+		Currency pairedCurrency = currencyRepo
+				.findByCurrencyName(currencyPair.getPairedCurrency().get(0).getCurrencyName());
+		Currency toCurrencyByAbbreviation = currencyRepo
+				.findByCurrencyAbbreviation(currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
+		Currency pairedCurrencyByAbbreviation = currencyRepo
+				.findByCurrencyAbbreviation(currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
+
+		if (toCurrency != null && pairedCurrency != null && toCurrencyByAbbreviation != null
+				&& pairedCurrencyByAbbreviation != null) {
+			return true;
+		}
+		return false;
 	}
 
-	// @Override
-	// public Page<CurrencyP> getCurrencyPairList(int pageNumber, int pageSize,
-	// String sortBy, String sortOrder,
-	// String searchData) {
-	// Direction sort;
-	// if (sortOrder.equals("desc")) {
-	// sort = Direction.DESC;
-	// } else {
-	// sort = Direction.ASC;
-	// }
-	// Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-	// return
-	// currencyPairRepo.findByCurrencyNameOrCurrencyAbbreviationLike(searchData,
-	// pageRequest);
-	// }
+	@Override
+	public CurrencyPair findCurrencypairByPairId(Long pairId) {
+		return currencyPairRepo.findByPairId(pairId);
+	}
+
+	@Override
+	public CurrencyPair changeStateOfCurrencyPair(CurrencyPair isCurrencyPairExist) {
+		if (isCurrencyPairExist.getIsEnabled()) {
+			isCurrencyPairExist.setIsEnabled(false);
+			return currencyPairRepo.saveAndFlush(isCurrencyPairExist);
+		} else {
+			isCurrencyPairExist.setIsEnabled(true);
+			return currencyPairRepo.saveAndFlush(isCurrencyPairExist);
+		}
+	}
+
+	@Override
+	public CurrencyPair findCurrencypairByPairName(String pairName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

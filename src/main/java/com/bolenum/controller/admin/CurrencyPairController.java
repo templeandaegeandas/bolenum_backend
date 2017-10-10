@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.CurrencyPairForm;
-import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.services.admin.CurrencyPairService;
@@ -94,14 +93,41 @@ public class CurrencyPairController {
 		}
 	}
 
-	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.GET)
-	public ResponseEntity<Object> getCurrencyList(@RequestParam("pageNumber") int pageNumber,
+	@RequestMapping(value = UrlConstant.CURRENCY_PAIR_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getCurrencyPairList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
-			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
-		Page<Currency> currencyPairList = currencyPairService.getCurrencyList(pageNumber, pageSize, sortBy, sortOrder,
-				searchData);
+			@RequestParam("sortOrder") String sortOrder) {
+		Page<CurrencyPair> currencyPairList = currencyPairService.getCurrencyList(pageNumber, pageSize, sortBy,
+				sortOrder);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("currency.pair.list.success"),
 				currencyPairList);
 	}
+
+	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.GET)
+	public ResponseEntity<Object> getCurrencyPair(@RequestParam Long pairID) {
+		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairID);
+		if (isCurrencyPairExist != null) {
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("currency.pair.found"),
+					isCurrencyPairExist);
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+				localeService.getMessage("currency.pair.not.found"), null);
+	}
+
+	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.PUT)
+	public ResponseEntity<Object> changeStateOfCurrencyPair(@RequestParam Long pairID) {
+		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairID);
+		if (isCurrencyPairExist != null) {
+			CurrencyPair currencyPair = currencyPairService.changeStateOfCurrencyPair(isCurrencyPairExist);
+			if (currencyPair != null) {
+				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("currency.pair.found"),
+						isCurrencyPairExist);
+			}
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+				localeService.getMessage("currency.pair.not.found"), null);
+
+	}
+	
 
 }
