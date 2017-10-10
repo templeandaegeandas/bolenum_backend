@@ -11,9 +11,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.constant.OrderStandard;
-import com.bolenum.constant.OrderStatus;
-import com.bolenum.constant.OrderType;
+import com.bolenum.enums.OrderStandard;
+import com.bolenum.enums.OrderStatus;
+import com.bolenum.enums.OrderType;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
@@ -72,11 +72,12 @@ public class OrdersServiceImpl implements OrdersService {
 	public Boolean processMarketOrder(Orders orders) {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
+		Long pairId = orders.getPairId();
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		if (orderType.equals(OrderType.BUY)) {
 			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, orders.getPairId());
-			logger.debug("getting best buy: {}", getBestBuy());
+			logger.debug("getting best buy: {}", getBestBuy(pairId));
 			while ((countOrderByOrderType(OrderType.SELL) > 0) && (remainingVolume > 0)) {
 				logger.debug("inner buy while");
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
@@ -89,7 +90,7 @@ public class OrdersServiceImpl implements OrdersService {
 			processed = true;
 		} else {
 			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, orders.getPairId());
-			logger.debug("getting best sell: {}", getBestSell());
+			logger.debug("getting best sell: {}", getBestSell(pairId));
 			while ((countOrderByOrderType(OrderType.BUY) > 0) && (remainingVolume > 0)) {
 				logger.debug("inner sell while");
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
@@ -111,11 +112,12 @@ public class OrdersServiceImpl implements OrdersService {
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		Double price = orders.getPrice();
+		Long pairId = orders.getPairId();
 		logger.debug("Order type is equal with buy: {}", orderType.equals(OrderType.BUY));
 		if (orderType.equals(OrderType.BUY)) {
-			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc("SELL", "SUBMITTED", orders.getPairId(), price);
-			logger.debug("getting best buy: {}", getBestBuy());
-			while ((countOrderByOrderTypeWithGreaterAndLesThan(OrderType.SELL, price) > 0) && (remainingVolume > 0) && (price >= getBestBuy())) {
+			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc(OrderType.BUY, OrderStatus.SUBMITTED, orders.getPairId(), price);
+			logger.debug("getting best buy: {}", getBestBuy(pairId));
+			while ((countOrderByOrderTypeWithGreaterAndLesThan(OrderType.SELL, pairId, price) > 0) && (remainingVolume > 0) && (price >= getBestBuy(pairId))) {
 				logger.debug("inner buy while");
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
 			}
@@ -126,9 +128,9 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			processed = true;
 		} else {
-			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdAndPriceGreaterThanEqualOrderByPriceDesc("BUY", "SUBMITTED", orders.getPairId(), price);
-			logger.debug("getting best sell: {}", getBestSell());
-			while ((countOrderByOrderTypeWithGreaterAndLesThan(OrderType.BUY, price) > 0) && (remainingVolume > 0) && (price <= getBestSell())) {
+			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, orders.getPairId(), price);
+			logger.debug("getting best sell: {}", getBestSell(pairId));
+			while ((countOrderByOrderTypeWithGreaterAndLesThan(OrderType.BUY, pairId, price) > 0) && (remainingVolume > 0) && (price <= getBestSell(pairId))) {
 				logger.debug("inner sell while");
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
 			}
@@ -195,32 +197,32 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public Double getBestBuy() {
-		return ordersRepository.getBestBuy();
+	public Double getBestBuy(Long pairId) {
+		return ordersRepository.getBestBuy(pairId);
 	}
 
 	@Override
-	public Double getWorstBuy() {
-		return ordersRepository.getWrostBuy();
+	public Double getWorstBuy(Long pairId) {
+		return ordersRepository.getWrostBuy(pairId);
 	}
 
 	@Override
-	public Double getBestSell() {
-		return ordersRepository.getBestSell();
+	public Double getBestSell(Long pairId) {
+		return ordersRepository.getBestSell(pairId);
 	}
 
 	@Override
-	public Double getWorstSell() {
-		return ordersRepository.getWrostSell();
+	public Double getWorstSell(Long pairId) {
+		return ordersRepository.getWrostSell(pairId);
 	}
 
 	@Override
-	public Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Double price) {
+	public Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price) {
 		if (orderType.equals("BUY")) {
-			return ordersRepository.countOrderByOrderTypeAndPriceGreaterThan(orderType, price);
+			return ordersRepository.countOrderByOrderTypeAndPriceGreaterThan(orderType, pairId, price);
 		}
 		else {
-			return ordersRepository.countOrderByOrderTypeAndPriceLessThan(orderType, price);
+			return ordersRepository.countOrderByOrderTypeAndPriceLessThan(orderType, pairId, price);
 
 		}
 	}

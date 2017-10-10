@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import com.bolenum.constant.TwoFactorAuthOption;
+import com.bolenum.enums.TwoFactorAuthOption;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.model.OTP;
 import com.bolenum.model.User;

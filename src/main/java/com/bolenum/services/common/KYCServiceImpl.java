@@ -12,7 +12,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.bolenum.constant.DocumentStatus;
+import com.bolenum.enums.DocumentStatus;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;

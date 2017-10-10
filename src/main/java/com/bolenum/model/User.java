@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.bolenum.constant.TwoFactorAuthOption;
+import com.bolenum.enums.TwoFactorAuthOption;
 
 import io.swagger.annotations.ApiModelProperty;
 

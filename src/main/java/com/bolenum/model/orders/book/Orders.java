@@ -7,9 +7,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.bolenum.constant.OrderStandard;
-import com.bolenum.constant.OrderStatus;
-import com.bolenum.constant.OrderType;
+import com.bolenum.enums.OrderStandard;
+import com.bolenum.enums.OrderStatus;
+import com.bolenum.enums.OrderType;
 
 /**
  * 

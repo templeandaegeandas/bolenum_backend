@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
-import com.bolenum.constant.OrderType;
+import com.bolenum.enums.OrderType;
 import com.bolenum.model.orders.book.Orders;
 
 /**
@@ -27,15 +27,15 @@ public interface OrdersService {
 
 	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders);
 
-	Double getBestBuy();
+	Double getBestBuy(Long pairId);
 
-	Double getWorstBuy();
+	Double getWorstBuy(Long pairId);
 
-	Double getBestSell();
+	Double getBestSell(Long pairId);
 
-	Double getWorstSell();
+	Double getWorstSell(Long pairId);
 
-	Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Double price);
+	Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price);
 
 	Long countOrderByOrderType(OrderType orderType);
 

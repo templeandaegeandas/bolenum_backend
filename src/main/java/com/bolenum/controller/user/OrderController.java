@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bolenum.constant.OrderType;
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.enums.OrderType;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
