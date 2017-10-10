@@ -2,10 +2,8 @@ package com.bolenum.dto.common;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
-
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -19,7 +17,7 @@ public class CurrencyPairForm {
 	private Long pairId;
 
 	private Currency toCurrency;
-
+	
 	private Currency pairedCurrency;
 
 	public Long getPairId() {
