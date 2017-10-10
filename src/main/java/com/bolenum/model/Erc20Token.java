@@ -7,6 +7,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotBlank;
+
 /**
  * 
  * @author Vishal Kumar
@@ -19,8 +22,11 @@ public class Erc20Token {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	@Length(max=100000000)
 	private String binaryKey;
+	@NotBlank
 	private String walletAddress;
+	@NotBlank
 	private String contractAddress;
 	private Boolean isDeleted = false;
 	private Date createdDate = new Date();
@@ -29,6 +35,10 @@ public class Erc20Token {
 		this.binaryKey = binaryKey;
 		this.walletAddress = walletAddress;
 		this.contractAddress = contractAddress;
+	}
+	
+	public Erc20Token() {
+		
 	}
 
 	public Long getId() {
