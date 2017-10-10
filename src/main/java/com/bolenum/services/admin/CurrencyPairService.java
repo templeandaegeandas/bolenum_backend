@@ -20,10 +20,14 @@ public interface CurrencyPairService {
 
 	public CurrencyPair findByCurrencyPairNameByReverse(String currencyPairName);
 
-	public Page<Currency> getCurrencyList(int pageNumber, int pageSize, String sortBy, String sortOrder,
-			String searchData);
-
 	public Boolean validCurrencyPair(CurrencyPair currencyPair);
-	
-	
+
+	public CurrencyPair findCurrencypairByPairId(Long pairID);
+
+	public CurrencyPair changeStateOfCurrencyPair(CurrencyPair isCurrencyPairExist);
+
+	CurrencyPair findCurrencypairByPairName(String pairName);
+
+	Page<CurrencyPair> getCurrencyList(int pageNumber, int pageSize, String sortBy, String sortOrder);
+
 }

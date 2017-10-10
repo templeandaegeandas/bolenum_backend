@@ -2,11 +2,15 @@ package com.bolenum.model;
 
 import java.util.Date;
 import java.util.List;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+
+import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * @Author Himanshu
@@ -18,7 +22,7 @@ public class CurrencyPair {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long pairID;
+	private Long pairId;
 
 	@OneToMany
 	private List<Currency> toCurrency;
@@ -26,6 +30,8 @@ public class CurrencyPair {
 	@OneToMany
 	private List<Currency> pairedCurrency;
 
+	@NotBlank
+	@Column(unique = true)
 	private String pairName;
 
 	private Date onCreated = new Date();
@@ -37,11 +43,11 @@ public class CurrencyPair {
 	private Boolean isDeleted;
 
 	public Long getPairID() {
-		return pairID;
+		return pairId;
 	}
 
 	public void setPairID(Long pairID) {
-		this.pairID = pairID;
+		this.pairId = pairID;
 	}
 
 	public List<Currency> getToCurrency() {

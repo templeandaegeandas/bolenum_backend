@@ -43,6 +43,7 @@ public class UrlConstant {
 	public static final String CURRENCY_FOR_TRADING	 = "currency";
 	public static final String CURRENCY_LIST_FOR_TRADING="currency/list";
 	public static final String CURRENCY_PAIR="currency/pair";
+	public static final String CURRENCY_PAIR_LIST="currency-pair/list";
 	
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "/kyc/upload";
