@@ -36,12 +36,12 @@ public class MailService {
 		message.setSubject(subject);
 		message.setText(text);
 		message.setTo(to);
-		System.out.println(message);
+
 		try {
 			mailSender.send(message);
-			System.out.println("mmmmmmm");
+
 		} catch (Exception e) {
-			System.err.println("errrorororo");
+
 			e.printStackTrace();
 		}
 	}

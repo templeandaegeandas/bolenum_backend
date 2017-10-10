@@ -40,7 +40,10 @@ public class UrlConstant {
 	public static final String LIST_USERS = "list/users";
 	public static final String GET_USER_BY_ID = "user/{userId}";
 	public static final String VIEW_USER_BANK_DETAILS_BY_ADMIN = "admin/bankdetails";
-
+	public static final String CURRENCY_FOR_TRADING	 = "currency";
+	public static final String CURRENCY_LIST_FOR_TRADING="currency/list";
+	public static final String CURRENCY_PAIR="currency/pair";
+	
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "/kyc/upload";
 	public static final String APPROVE_DOCUMENT = BASE_URI_V1 + "/kyc/approve/{userId}";
