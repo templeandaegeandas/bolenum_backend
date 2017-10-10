@@ -60,4 +60,8 @@ public class UrlConstant {
 	/******************** USER Wallet API ******/
 	public static final String DEPOSIT = "deposit";
 	
+	/******************** ORDER API ******/
+	public static final String CREATE_ORDER = "create/order";
+	public static final String LIST_ORDER = "get/orders";
+	
 }

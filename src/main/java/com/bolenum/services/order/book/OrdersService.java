@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
-import com.bolenum.constant.OrderStandard;
 import com.bolenum.constant.OrderType;
 import com.bolenum.model.orders.book.Orders;
 
@@ -22,17 +21,13 @@ public interface OrdersService {
 
 	Orders UpdateOrderVolume(Long ordersId, Double volume);
 
-	Orders processMarketOrder(Orders orders);
+	Boolean processMarketOrder(Orders orders);
 
-	Orders processLimitOrder(Orders orders);
+	Boolean processLimitOrder(Orders orders);
 
 	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders);
 
-	Page<Orders> getBuyOrdersListByPair(String pair, OrderStandard orderStandard);
-
 	Double getBestBuy();
-
-	Page<Orders> getSellOrdersListByPair(String pair, OrderStandard orderStandard);
 
 	Double getWorstBuy();
 
@@ -47,5 +42,9 @@ public interface OrdersService {
 	Orders matchedOrder(List<Orders> ordersList);
 
 	void removeOrderFromList(List<Orders> ordersList);
+
+	Boolean processOrder(Orders orders);
+
+	Page<Orders> getOrdersListByPair(Long pairId, OrderType orderType);
 
 }

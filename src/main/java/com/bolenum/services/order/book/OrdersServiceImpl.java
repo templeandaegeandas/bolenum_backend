@@ -40,6 +40,18 @@ public class OrdersServiceImpl implements OrdersService {
 	public Orders addNewOrder(Orders orders) {
 		return ordersRepository.save(orders);
 	}
+	
+	@Override
+	public Boolean processOrder(Orders orders) {
+		if (orders.equals(OrderStandard.MARKET)) {
+			logger.debug("Processing market order");
+			return processMarketOrder(orders);
+		}
+		else {
+			logger.debug("Processing limit order");
+			return processLimitOrder(orders);
+		}
+	}
 
 	@Override
 	public Orders deleteOrder(Long ordersId) {
@@ -57,12 +69,13 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public Orders processMarketOrder(Orders orders) {
+	public Boolean processMarketOrder(Orders orders) {
+		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		if (orderType.equals(OrderType.BUY)) {
-			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED);
+			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, orders.getPairId());
 			logger.debug("getting best buy: {}", getBestBuy());
 			while ((countOrderByOrderType(OrderType.SELL) > 0) && (remainingVolume > 0)) {
 				logger.debug("inner buy while");
@@ -73,8 +86,9 @@ public class OrdersServiceImpl implements OrdersService {
 				addNewOrder(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
+			processed = true;
 		} else {
-			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED);
+			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, orders.getPairId());
 			logger.debug("getting best sell: {}", getBestSell());
 			while ((countOrderByOrderType(OrderType.BUY) > 0) && (remainingVolume > 0)) {
 				logger.debug("inner sell while");
@@ -85,19 +99,21 @@ public class OrdersServiceImpl implements OrdersService {
 				addNewOrder(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
+			processed = true;
 		}
-		return null;
+		return processed;
 	}
 
 	@Override
-	public Orders processLimitOrder(Orders orders) {
+	public Boolean processLimitOrder(Orders orders) {
+		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		Double price = orders.getPrice();
 		logger.debug("Order type is equal with buy: {}", orderType.equals(OrderType.BUY));
 		if (orderType.equals(OrderType.BUY)) {
-			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPriceLessThanEqualOrderByPriceAsc("SELL", "SUBMITTED", price);
+			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc("SELL", "SUBMITTED", orders.getPairId(), price);
 			logger.debug("getting best buy: {}", getBestBuy());
 			while ((countOrderByOrderTypeWithGreaterAndLesThan(OrderType.SELL, price) > 0) && (remainingVolume > 0) && (price >= getBestBuy())) {
 				logger.debug("inner buy while");
@@ -108,8 +124,9 @@ public class OrdersServiceImpl implements OrdersService {
 				addNewOrder(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
+			processed = true;
 		} else {
-			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPriceGreaterThanEqualOrderByPriceDesc("BUY", "SUBMITTED", price);
+			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdAndPriceGreaterThanEqualOrderByPriceDesc("BUY", "SUBMITTED", orders.getPairId(), price);
 			logger.debug("getting best sell: {}", getBestSell());
 			while ((countOrderByOrderTypeWithGreaterAndLesThan(OrderType.BUY, price) > 0) && (remainingVolume > 0) && (price <= getBestSell())) {
 				logger.debug("inner sell while");
@@ -120,8 +137,9 @@ public class OrdersServiceImpl implements OrdersService {
 				addNewOrder(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
+			processed = true;
 		}
-		return null;
+		return processed;
 	}
 
 	@Override
@@ -170,16 +188,9 @@ public class OrdersServiceImpl implements OrdersService {
 //	}
 
 	@Override
-	public Page<Orders> getBuyOrdersListByPair(String pair, OrderStandard orderStandard) {
+	public Page<Orders> getOrdersListByPair(Long pairId, OrderType orderType) {
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findAll(pageRequest);
-		return orderBook;
-	}
-
-	@Override
-	public Page<Orders> getSellOrdersListByPair(String pair, OrderStandard orderStandard) {
-		PageRequest pageRequest = new PageRequest(0, 10, Direction.ASC, "price");
-		Page<Orders> orderBook = ordersRepository.findAll(pageRequest);
+		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderType(pairId, orderType, pageRequest);
 		return orderBook;
 	}
 

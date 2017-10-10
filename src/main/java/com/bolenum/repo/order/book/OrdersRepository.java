@@ -2,6 +2,8 @@ package com.bolenum.repo.order.book;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,15 +21,17 @@ import com.bolenum.model.orders.book.Orders;
 public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	// Double getSumVolumeByPairId(Long pairId);
 
-	List<Orders> findByOrderTypeAndOrderStatusAndPriceLessThanEqualOrderByPriceAsc(String ordertype, String orderStatus,
-			Double price);
+	List<Orders> findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc(String ordertype,
+			String orderStatus, Long pairId, Double price);
 
-	List<Orders> findByOrderTypeAndOrderStatusAndPriceGreaterThanEqualOrderByPriceDesc(String ordertype,
-			String orderStatus, Double price);
+	List<Orders> findByOrderTypeAndOrderStatusAndPairIdAndPriceGreaterThanEqualOrderByPriceDesc(String ordertype,
+			String orderStatus, Long pairId, Double price);
 
-	List<Orders> findByOrderTypeAndOrderStatusOrderByPriceAsc(OrderType ordertype, OrderStatus orderStatus);
+	List<Orders> findByOrderTypeAndOrderStatusAndPairIdOrderByPriceAsc(OrderType ordertype, OrderStatus orderStatus,
+			Long pairId);
 
-	List<Orders> findByOrderTypeAndOrderStatusOrderByPriceDesc(OrderType ordertype, OrderStatus orderStatus);
+	List<Orders> findByOrderTypeAndOrderStatusAndPairIdOrderByPriceDesc(OrderType ordertype, OrderStatus orderStatus,
+			Long pairId);
 
 	@Query("select min(o.price) from Orders o where o.orderType = 'SELL' and o.orderStatus = 'SUBMITTED'")
 	Double getBestBuy();
@@ -50,4 +54,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 
 	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED'")
 	Long countOrderByOrderType(@Param("orderType") OrderType orderType);
+	
+	Page<Orders> findByPairIdAndOrderType(Long pairId, OrderType orderType, Pageable pageable);
 }
