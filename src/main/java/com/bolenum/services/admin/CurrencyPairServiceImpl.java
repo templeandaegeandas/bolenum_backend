@@ -33,7 +33,6 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 
 	@Override
 	public CurrencyPair saveCurrencyPair(CurrencyPair currencyPair) {
-		currencyPair.setPairedCurrency(currencyPair.getToCurrency());
 		return currencyPairRepo.saveAndFlush(currencyPair);
 	}
 
