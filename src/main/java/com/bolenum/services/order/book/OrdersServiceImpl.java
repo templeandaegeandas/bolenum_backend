@@ -1,5 +1,6 @@
 package com.bolenum.services.order.book;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +18,6 @@ import com.bolenum.enums.OrderType;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
-import com.bolenum.repo.order.book.TradeRepository;
 
 /**
  * 
@@ -30,24 +30,22 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Autowired
 	private OrdersRepository ordersRepository;
-	
+
 	@Autowired
-	private TradeRepository tradeRepository;
-	
+	private OrderAsyncService orderAsyncServices;
+
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
-	
-	@Override
-	public Orders addNewOrder(Orders orders) {
-		return ordersRepository.save(orders);
-	}
-	
+
+	List<Orders> ordersList = new ArrayList<>();
+
+	List<Trade> tradeList = new ArrayList<>();
+
 	@Override
 	public Boolean processOrder(Orders orders) {
 		if (orders.equals(OrderStandard.MARKET)) {
 			logger.debug("Processing market order");
 			return processMarketOrder(orders);
-		}
-		else {
+		} else {
 			logger.debug("Processing limit order");
 			return processLimitOrder(orders);
 		}
@@ -62,13 +60,6 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public Orders UpdateOrderVolume(Long ordersId, Double volume) {
-		Orders orders = ordersRepository.findOne(ordersId);
-		orders.setVolume(volume);
-		return ordersRepository.save(orders);
-	}
-
-	@Override
 	public Boolean processMarketOrder(Orders orders) {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
@@ -76,32 +67,33 @@ public class OrdersServiceImpl implements OrdersService {
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		if (orderType.equals(OrderType.BUY)) {
-			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, orders.getPairId());
-			logger.debug("getting best buy: {}", getBestBuy(pairId));
-			while ((countOrderByOrderType(OrderType.SELL) > 0) && (remainingVolume > 0)) {
+			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceAsc(
+					OrderType.SELL, OrderStatus.SUBMITTED, pairId);
+			while (buyOrderList.size() > 0 && (remainingVolume > 0)) {
 				logger.debug("inner buy while");
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
-				addNewOrder(orders);
+				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
 			processed = true;
 		} else {
-			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, orders.getPairId());
-			logger.debug("getting best sell: {}", getBestSell(pairId));
-			while ((countOrderByOrderType(OrderType.BUY) > 0) && (remainingVolume > 0)) {
+			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceDesc(
+					OrderType.BUY, OrderStatus.SUBMITTED, pairId);
+			while (sellOrderList.size() > 0 && (remainingVolume > 0)) {
 				logger.debug("inner sell while");
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
-				addNewOrder(orders);
+				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
 			processed = true;
 		}
+		orderAsyncServices.saveOrder(ordersList);
 		return processed;
 	}
 
@@ -115,32 +107,35 @@ public class OrdersServiceImpl implements OrdersService {
 		Long pairId = orders.getPairId();
 		logger.debug("Order type is equal with buy: {}", orderType.equals(OrderType.BUY));
 		if (orderType.equals(OrderType.BUY)) {
-			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc(OrderType.BUY, OrderStatus.SUBMITTED, orders.getPairId(), price);
-			logger.debug("getting best buy: {}", getBestBuy(pairId));
-			while ((countOrderByOrderTypeWithGreaterAndLesThan(OrderType.SELL, pairId, price) > 0) && (remainingVolume > 0) && (price >= getBestBuy(pairId))) {
+			List<Orders> buyOrderList = ordersRepository
+					.findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc(OrderType.BUY,
+							OrderStatus.SUBMITTED, pairId, price);
+			while (buyOrderList.size() > 0 && (remainingVolume > 0) && (price >= getBestBuy(buyOrderList))) {
 				logger.debug("inner buy while");
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
-				addNewOrder(orders);
+				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
 			processed = true;
 		} else {
-			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, orders.getPairId(), price);
-			logger.debug("getting best sell: {}", getBestSell(pairId));
-			while ((countOrderByOrderTypeWithGreaterAndLesThan(OrderType.BUY, pairId, price) > 0) && (remainingVolume > 0) && (price <= getBestSell(pairId))) {
+			List<Orders> sellOrderList = ordersRepository
+					.findByOrderTypeAndOrderStatusAndPairIdAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
+							OrderStatus.SUBMITTED, pairId, price);
+			while (sellOrderList.size() > 0 && (remainingVolume > 0) && (price <= getBestSell(sellOrderList))) {
 				logger.debug("inner sell while");
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
-				addNewOrder(orders);
+				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
 			processed = true;
 		}
+		orderAsyncServices.saveOrder(ordersList);
 		return processed;
 	}
 
@@ -154,13 +149,8 @@ public class OrdersServiceImpl implements OrdersService {
 			Orders matchedOrder = matchedOrder(ordersList);
 			if (remainingVolume < matchedOrder.getVolume()) {
 				qtyTraded = remainingVolume;
-				if (orderType.equals(OrderType.BUY)) {
-					UpdateOrderVolume(matchedOrder.getId(), matchedOrder.getVolume() - remainingVolume);
-					logger.debug("matching sell not completed: {}", matchedOrder.getVolume() - remainingVolume);
-				} else {
-					UpdateOrderVolume(matchedOrder.getId(), matchedOrder.getVolume() - remainingVolume);
-					logger.debug("matching buy not completed: {}", matchedOrder.getVolume() - remainingVolume);
-				}
+				matchedOrder.setVolume(matchedOrder.getVolume() - remainingVolume);
+				ordersList.add(matchedOrder);
 				remainingVolume = 0.0;
 			} else {
 				qtyTraded = matchedOrder.getVolume();
@@ -168,7 +158,7 @@ public class OrdersServiceImpl implements OrdersService {
 				removeOrderFromList(ordersList);
 				matchedOrder.setVolume(0.0);
 				matchedOrder.setOrderStatus(OrderStatus.COMPLETED);
-				ordersRepository.save(matchedOrder);
+				ordersList.add(matchedOrder);
 				logger.debug("matching buy/sell completed");
 			}
 			if (orderType.equals(OrderType.BUY)) {
@@ -179,15 +169,16 @@ public class OrdersServiceImpl implements OrdersService {
 				sellerId = orders.getUserId();
 			}
 			Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyerId, sellerId, OrderStandard.LIMIT);
-			tradeRepository.save(trade);
+			tradeList.add(trade);
 			logger.debug("saving trade ompleted");
 		}
+		orderAsyncServices.saveTrade(tradeList);
 		return remainingVolume;
 	}
 
-//	public Double totalVolume(String pair) {
-//		return orderRepository.getSumVolumeByPair(pair);
-//	}
+	// public Double totalVolume(String pair) {
+	// return orderRepository.getSumVolumeByPair(pair);
+	// }
 
 	@Override
 	public Page<Orders> getOrdersListByPair(Long pairId, OrderType orderType) {
@@ -197,36 +188,60 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public Double getBestBuy(Long pairId) {
-		return ordersRepository.getBestBuy(pairId);
+	public Double getBestBuy(List<Orders> buyOrderList) {
+		Double bestBuy = buyOrderList.get(0).getPrice();
+		for (int i = 0; i < buyOrderList.size() - 1; i++) {
+			if (bestBuy > buyOrderList.get(i + 1).getPrice()) {
+				bestBuy = buyOrderList.get(i + 1).getPrice();
+			}
+		}
+		return bestBuy;
 	}
 
 	@Override
-	public Double getWorstBuy(Long pairId) {
-		return ordersRepository.getWrostBuy(pairId);
+	public Double getWorstBuy(List<Orders> buyOrderList) {
+		Double wrostBuy = buyOrderList.get(0).getPrice();
+		for (int i = 0; i < buyOrderList.size() - 1; i++) {
+			if (wrostBuy < buyOrderList.get(i + 1).getPrice()) {
+				wrostBuy = buyOrderList.get(i + 1).getPrice();
+			}
+		}
+		return wrostBuy;
 	}
 
 	@Override
-	public Double getBestSell(Long pairId) {
-		return ordersRepository.getBestSell(pairId);
+	public Double getBestSell(List<Orders> sellOrderList) {
+		Double bestSell = null;
+		for (int i = 0; i < sellOrderList.size() - 1; i++) {
+			bestSell = sellOrderList.get(0).getPrice();
+			if (bestSell < sellOrderList.get(i + 1).getPrice()) {
+				bestSell = sellOrderList.get(i + 1).getPrice();
+			}
+		}
+		return bestSell;
 	}
 
 	@Override
-	public Double getWorstSell(Long pairId) {
-		return ordersRepository.getWrostSell(pairId);
+	public Double getWorstSell(List<Orders> sellOrderList) {
+		Double wrostSell = sellOrderList.get(0).getPrice();
+		for (int i = 0; i < sellOrderList.size() - 1; i++) {
+			if (wrostSell > sellOrderList.get(i + 1).getPrice()) {
+				wrostSell = sellOrderList.get(i + 1).getPrice();
+			}
+		}
+		return wrostSell;
 	}
 
 	@Override
 	public Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price) {
 		if (orderType.equals("BUY")) {
 			return ordersRepository.countOrderByOrderTypeAndPriceGreaterThan(orderType, pairId, price);
-		}
-		else {
+		} else {
 			return ordersRepository.countOrderByOrderTypeAndPriceLessThan(orderType, pairId, price);
 
 		}
 	}
-	
+
 	@Override
 	public Long countOrderByOrderType(OrderType orderType) {
 		return ordersRepository.countOrderByOrderType(orderType);

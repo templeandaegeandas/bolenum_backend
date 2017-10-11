@@ -15,25 +15,13 @@ import com.bolenum.model.orders.book.Orders;
  */
 public interface OrdersService {
 
-	Orders addNewOrder(Orders orders);
-
 	Orders deleteOrder(Long ordersId);
-
-	Orders UpdateOrderVolume(Long ordersId, Double volume);
 
 	Boolean processMarketOrder(Orders orders);
 
 	Boolean processLimitOrder(Orders orders);
 
 	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders);
-
-	Double getBestBuy(Long pairId);
-
-	Double getWorstBuy(Long pairId);
-
-	Double getBestSell(Long pairId);
-
-	Double getWorstSell(Long pairId);
 
 	Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price);
 
@@ -46,5 +34,13 @@ public interface OrdersService {
 	Boolean processOrder(Orders orders);
 
 	Page<Orders> getOrdersListByPair(Long pairId, OrderType orderType);
+
+	Double getWorstBuy(List<Orders> buyOrderList);
+
+	Double getBestSell(List<Orders> sellOrderList);
+
+	Double getWorstSell(List<Orders> sellOrderList);
+
+	Double getBestBuy(List<Orders> buyOrderList);
 
 }
