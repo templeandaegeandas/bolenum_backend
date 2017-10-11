@@ -38,7 +38,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService{
 
 	@Override
 	public Erc20Token saveToken(Erc20Token erc20Token) {
-		Erc20Token existingToken = erc20TokenRepository.findByBinaryKey(erc20Token.getBinaryKey());
+		Erc20Token existingToken = erc20TokenRepository.findByContractAddress(erc20Token.getContractAddress());
 		if (existingToken==null) {
 			return erc20TokenRepository.save(erc20Token);
 		}
@@ -71,9 +71,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService{
 		logger.debug("Bolenum binary key is: {}",binaryKey);
 		logger.debug("Bolenum contract address is: {}",contractAddress);
 		logger.debug("Bolenum deployed wallet address is: {}",walletAddress);
-		Erc20Token token = erc20TokenRepository.findByBinaryKey(binaryKey);
+		Erc20Token token = erc20TokenRepository.findByContractAddress(contractAddress);
 		if (token == null) {
-			Erc20Token erc20Token = new Erc20Token(binaryKey, walletAddress, contractAddress);
+			Erc20Token erc20Token = new Erc20Token(null, walletAddress, contractAddress);
 			return erc20TokenRepository.save(erc20Token);
 		}
 		else {
