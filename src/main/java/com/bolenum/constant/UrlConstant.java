@@ -53,15 +53,19 @@ public class UrlConstant {
 	public static final String SUBMITTED_KYC_LIST = BASE_URI_V1 + "list/kyc";
 	
 	/******************** Two Factor Authentication API ******/
-	public static final String GEN_GOOGLE_AUTH_QR = "/twofactor/auth/google/authenticator";
-	public static final String VERIFY_GOOGLE_AUTH_KEY = "/twofactor/auth/google/authenticator/verify";
-	public static final String VERIFY_GOOGLE_AUTH_KEY_OPEN = "/twofactor/auth/open";
-	public static final String TWO_FACTOR_AUTH_VIA_MOBILE = "/twofactor/auth/mobile";
-	public static final String SEND_2FA_OTP = "/twofactor/auth/send/otp";
-	public static final String VERIFY_2FA_OTP = "/twofactor/auth/mobile/verify";
-	public static final String REMOVE_TWO_FACTOR_AUTH = "/twofactor/auth/remove";
+	public static final String GEN_GOOGLE_AUTH_QR = "twofactor/auth/google/authenticator";
+	public static final String VERIFY_GOOGLE_AUTH_KEY = "twofactor/auth/google/authenticator/verify";
+	public static final String VERIFY_GOOGLE_AUTH_KEY_OPEN = "twofactor/auth/open";
+	public static final String TWO_FACTOR_AUTH_VIA_MOBILE = "twofactor/auth/mobile";
+	public static final String SEND_2FA_OTP = "twofactor/auth/send/otp";
+	public static final String VERIFY_2FA_OTP = "twofactor/auth/mobile/verify";
+	public static final String REMOVE_TWO_FACTOR_AUTH = "twofactor/auth/remove";
 	
 	/******************** USER Wallet API ******/
 	public static final String DEPOSIT = "deposit";
+	
+	/******************** Erc20 API ******/
+	public static final String ADD_NEW_TOKEN = "add/new/token";
+	public static final String GET_TOKEN_LIST = "get/token/list";
 	
 }

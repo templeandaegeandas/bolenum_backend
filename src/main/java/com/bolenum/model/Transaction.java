@@ -3,7 +3,6 @@
  */
 package com.bolenum.model;
 
-import java.math.BigInteger;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -43,24 +42,24 @@ public class Transaction {
 	private String fromAddress;
 	private String toAddress;
 	private Double txFee;
-	private Double txAmmount;
+	private Double txAmount;
 	private String txDescription;
 	private CurrencyType currencyType;
 	private TransactionType transactionType;
-	private BigInteger gas;
-	private BigInteger gasPrice;
+	private Double gas;
+	private Double gasPrice;
 
 	public Transaction() {
 
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, CurrencyType currencyType, TransactionType transactionType, BigInteger gas,BigInteger gasPrice) {
+			String txDescription, CurrencyType currencyType, TransactionType transactionType, Double gas,Double gasPrice) {
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
 		this.txFee = txFee;
-		this.txAmmount = txAmmount;
+		this.txAmount = txAmmount;
 		this.txDescription = txDescription;
 		this.currencyType = currencyType;
 		this.transactionType = transactionType;
@@ -182,7 +181,7 @@ public class Transaction {
 	 * @return the txAmmount
 	 */
 	public Double getTxAmmount() {
-		return txAmmount;
+		return txAmount;
 	}
 
 	/**
@@ -190,7 +189,7 @@ public class Transaction {
 	 *            the txAmmount to set
 	 */
 	public void setTxAmmount(Double txAmmount) {
-		this.txAmmount = txAmmount;
+		this.txAmount = txAmmount;
 	}
 
 	/**
@@ -241,7 +240,7 @@ public class Transaction {
 	/**
 	 * @return the gas which is ethereum tx fee
 	 */
-	public BigInteger getGas() {
+	public Double getGas() {
 		return gas;
 	}
 
@@ -249,14 +248,14 @@ public class Transaction {
 	 * @param gas
 	 *            the gas to set
 	 */
-	public void setGas(BigInteger gas) {
+	public void setGas(Double gas) {
 		this.gas = gas;
 	}
 
 	/**
 	 * @return the gasPrice
 	 */
-	public BigInteger getGasPrice() {
+	public Double getGasPrice() {
 		return gasPrice;
 	}
 
@@ -264,7 +263,7 @@ public class Transaction {
 	 * @param gasPrice 
 	 * the gasPrice to set
 	 */
-	public void setGasPrice(BigInteger gasPrice) {
+	public void setGasPrice(Double gasPrice) {
 		this.gasPrice = gasPrice;
 	}
 

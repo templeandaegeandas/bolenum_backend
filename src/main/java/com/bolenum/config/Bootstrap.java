@@ -19,15 +19,16 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.bolenum.model.Countries;
+import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
 import com.bolenum.services.user.UserService;
-import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +45,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private UserService userService;
 	@Autowired
 	private PrivilegeService privilegeService;
+	@Autowired
+	private Erc20TokenService erc20TokenService;
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
@@ -51,9 +54,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired
 	private CountryAndStateService countriesAndStateService;
-
-	@Autowired
-	TransactionService transactionService;
 
 	@Value("${bolenum.ethwallet.location}")
 	private String ethWalletLocation; // ethereum wallet file location
@@ -79,13 +79,13 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createAdmin();
 		saveCountries();
 		saveStates();
+		saveBolenumErc20Token();
+
 		// create initial directories
 		createInitDirectories();
 		createProfilePicDirectories();
 		createDocumentsDirectories();
 		createGoogleAuthQrCodeDirectories();
-		// to register new incoming transaction
-		registerIncomingTransaction();
 	}
 
 	/**
@@ -241,16 +241,14 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			logger.info("States list already saved");
 		}
 	}
-
-	/**
-	 * @description to get the all the incoming transaction in application, it will continue
-	 *              listen for any new transaction in blockchain and emit an Object of new transaction  
-	 *@param 
-	 *@exception
-	 *
-	 */
-	private void registerIncomingTransaction() {
-		transactionService.saveEthereumIncomingTx();
+	
+	void saveBolenumErc20Token() {
+		Erc20Token erc20Token = erc20TokenService.saveBolenumErc20Token();
+		if (erc20Token != null) {
+			logger.info("Bolenum token saved successfully!");
+		}
+		else {
+			logger.info("Bolenum token already saved!");
+		}
 	}
-
 }
