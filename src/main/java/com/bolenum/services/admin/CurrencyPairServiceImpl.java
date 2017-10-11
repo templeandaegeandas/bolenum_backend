@@ -6,7 +6,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
-
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.repo.common.CurrencyPairRepo;
@@ -31,16 +30,25 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 		return currencyPairRepo.findByPairName(currencyPairName);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public CurrencyPair saveCurrencyPair(CurrencyPair currencyPair) {
 		return currencyPairRepo.saveAndFlush(currencyPair);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public String createCurrencyPairName(Currency toCurrency, Currency pairedCurrency) {
 		return toCurrency.getCurrencyAbbreviation() + "/" + pairedCurrency.getCurrencyAbbreviation();
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public CurrencyPair findByCurrencyPairNameByReverse(String currencyPairName) {
 		String[] pairNameArray = currencyPairName.split("/");
@@ -48,6 +56,9 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 		return currencyPairRepo.findByPairName(pairNameByReverse);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Page<CurrencyPair> getCurrencyList(int pageNumber, int pageSize, String sortBy, String sortOrder) {
 		Direction sort;
@@ -61,6 +72,9 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Boolean validCurrencyPair(CurrencyPair currencyPair) {
 		Currency toCurrency = currencyRepo.findByCurrencyName(currencyPair.getToCurrency().get(0).getCurrencyName());
@@ -78,11 +92,17 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 		return false;
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public CurrencyPair findCurrencypairByPairId(Long pairId) {
 		return currencyPairRepo.findByPairId(pairId);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public CurrencyPair changeStateOfCurrencyPair(CurrencyPair isCurrencyPairExist) {
 		if (isCurrencyPairExist.getIsEnabled()) {
@@ -94,6 +114,9 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public CurrencyPair findCurrencypairByPairName(String pairName) {
 		// TODO Auto-generated method stub

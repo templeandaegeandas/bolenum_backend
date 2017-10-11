@@ -104,8 +104,8 @@ public class CurrencyPairController {
 	}
 
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.GET)
-	public ResponseEntity<Object> getCurrencyPair(@RequestParam Long pairID) {
-		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairID);
+	public ResponseEntity<Object> getCurrencyPair(@RequestParam Long pairId) {
+		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairId);
 		if (isCurrencyPairExist != null) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("currency.pair.found"),
 					isCurrencyPairExist);
@@ -115,8 +115,8 @@ public class CurrencyPairController {
 	}
 
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.PUT)
-	public ResponseEntity<Object> changeStateOfCurrencyPair(@RequestParam Long pairID) {
-		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairID);
+	public ResponseEntity<Object> changeStateOfCurrencyPair(@RequestParam Long pairId) {
+		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairId);
 		if (isCurrencyPairExist != null) {
 			CurrencyPair currencyPair = currencyPairService.changeStateOfCurrencyPair(isCurrencyPairExist);
 			if (currencyPair != null) {
