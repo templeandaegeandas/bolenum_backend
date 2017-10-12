@@ -28,8 +28,7 @@ public interface Erc20TokenService {
 	 * @param searchData
 	 * @return Page
 	 */
-	Page<Erc20Token> listAllErc20Token(int pageNumber, int pageSize, String sortBy, String sortOrder,
-			String searchData);
+	Page<Erc20Token> listAllErc20Token(int pageNumber, int pageSize, String sortBy, String sortOrder);
 
 	/**
 	 * 

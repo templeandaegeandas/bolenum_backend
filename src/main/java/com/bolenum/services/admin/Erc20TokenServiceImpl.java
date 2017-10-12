@@ -48,7 +48,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService{
 	}
 	
 	@Override
-	public Page<Erc20Token> listAllErc20Token(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData) {
+	public Page<Erc20Token> listAllErc20Token(int pageNumber, int pageSize, String sortBy, String sortOrder) {
 		Direction sort;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;
@@ -57,7 +57,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService{
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		Page<Erc20Token> tokenList = erc20TokenRepository.findByContractAddressOrWalletAddressLike(searchData, pageRequest);
+		Page<Erc20Token> tokenList = erc20TokenRepository.findAll(pageRequest);
 		return tokenList;
 	}
 	

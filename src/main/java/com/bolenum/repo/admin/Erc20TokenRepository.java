@@ -20,15 +20,7 @@ public interface Erc20TokenRepository extends JpaRepository<Erc20Token, Long> {
 	 * @return Erc20Token
 	 */
 	Erc20Token findByBinaryKey(String binarykey);
-	
-	/**
-	 * 
-	 * @param searchDate
-	 * @param pageable
-	 * @return Page<Erc20Token>
-	 */
-	Page<Erc20Token> findByContractAddressOrWalletAddressLike(String searchDate, Pageable pageable);
-	
+
 	/**
 	 * 
 	 * @param contractaddress
