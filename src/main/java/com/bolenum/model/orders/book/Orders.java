@@ -23,11 +23,12 @@ public class Orders {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private Double volume;
-	private Double totalVolume;
-	private Double price;
-	private OrderStandard orderStandard;
-	private OrderType orderType;
+	private Double volume; // Quantity of buy/sell order
+	private Double totalVolume; // total quantity to keep track of initial
+								// quantity
+	private Double price; // price of 1 UNIT
+	private OrderStandard orderStandard; // Order is market or limit
+	private OrderType orderType; // buy or sell
 	private Date createdOn = new Date();
 	private Date deletedOn;
 	private Long pairId;
