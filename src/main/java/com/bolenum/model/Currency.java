@@ -8,7 +8,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 
@@ -30,10 +34,15 @@ public class Currency {
 	@Column(unique = true)
 	private String currencyAbbreviation;
 
+	@ApiModelProperty(hidden = true)
+	@CreationTimestamp
 	private Date createdOn = new Date();
 
+	@ApiModelProperty(hidden = true)
+	@UpdateTimestamp
 	private Date UpdatedOn;
 
+	@ApiModelProperty(hidden = true)
 	private Date deletedOn;
 
 	private boolean isDeleted;

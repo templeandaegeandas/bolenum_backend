@@ -64,7 +64,7 @@ public class CurrencyPairController {
 			return ResponseHandler.response(HttpStatus.CONFLICT, true,
 					localeService.getMessage("user.not.authorized.error"), null);
 		}
-		
+
 		String currencyPairName = currencyPairService.createCurrencyPairName(currencyPairForm.getToCurrency(),
 				currencyPairForm.getPairedCurrency());
 		CurrencyPair existingCurrencyPair = currencyPairService.findByCurrencyPairName(currencyPairName);
@@ -100,8 +100,13 @@ public class CurrencyPairController {
 			@RequestParam("sortOrder") String sortOrder) {
 		Page<CurrencyPair> currencyPairList = currencyPairService.getCurrencyList(pageNumber, pageSize, sortBy,
 				sortOrder);
-		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("currency.pair.list.success"),
-				currencyPairList);
+		if (currencyPairList != null) {
+			return ResponseHandler.response(HttpStatus.OK, false,
+					localeService.getMessage("currency.pair.list.success"), currencyPairList);
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+				localeService.getMessage("currency.pair.list.error"), currencyPairList);
+
 	}
 
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.GET)
@@ -129,6 +134,5 @@ public class CurrencyPairController {
 				localeService.getMessage("currency.pair.not.found"), null);
 
 	}
-	
 
 }
