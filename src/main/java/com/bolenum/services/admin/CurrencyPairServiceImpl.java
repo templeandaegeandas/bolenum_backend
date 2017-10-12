@@ -43,6 +43,7 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 	 */
 	@Override
 	public String createCurrencyPairName(Currency toCurrency, Currency pairedCurrency) {
+
 		return toCurrency.getCurrencyAbbreviation() + "/" + pairedCurrency.getCurrencyAbbreviation();
 	}
 
@@ -73,26 +74,28 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 	}
 
 	/**
-	 * 
+	 * check for valid currency pair to add
 	 */
 	@Override
 	public Boolean validCurrencyPair(CurrencyPair currencyPair) {
-		Currency toCurrency = currencyRepo.findByCurrencyName(currencyPair.getToCurrency().get(0).getCurrencyName());
+		Currency toCurrency = currencyRepo
+				.findByCurrencyNameInIgnoreCase(currencyPair.getToCurrency().get(0).getCurrencyName());
 		Currency pairedCurrency = currencyRepo
-				.findByCurrencyName(currencyPair.getPairedCurrency().get(0).getCurrencyName());
+				.findByCurrencyNameInIgnoreCase(currencyPair.getPairedCurrency().get(0).getCurrencyName());
 		Currency toCurrencyByAbbreviation = currencyRepo
 				.findByCurrencyAbbreviation(currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
 		Currency pairedCurrencyByAbbreviation = currencyRepo
 				.findByCurrencyAbbreviation(currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
 
 		if (toCurrency != null && pairedCurrency != null && toCurrencyByAbbreviation != null
-				&& pairedCurrencyByAbbreviation != null) {
+				&& pairedCurrencyByAbbreviation != null
+				&& toCurrency.getCurrencyId() != pairedCurrency.getCurrencyId()) {
 			return true;
 		}
 		return false;
 	}
 
-	/**
+	/** 
 	 * 
 	 */
 	@Override

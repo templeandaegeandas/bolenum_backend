@@ -1,5 +1,7 @@
 package com.bolenum.controller.admin;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -136,12 +138,9 @@ public class CurrencyController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_TRADING, method = RequestMethod.GET)
-	public ResponseEntity<Object> getCurrencyList(@RequestParam("pageNumber") int pageNumber,
-			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
-			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
-		Page<Currency> currencyList = currencyService.getCurrencyList(pageNumber, pageSize, sortBy, sortOrder,
-				searchData);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("submitted.kyc.list"),
+	public ResponseEntity<Object> getCurrencyList() {
+		List<Currency> currencyList = currencyService.getCurrencyList();
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
 				currencyList);
 	}
 

@@ -64,6 +64,7 @@ public class CurrencyPairController {
 			return ResponseHandler.response(HttpStatus.CONFLICT, true,
 					localeService.getMessage("user.not.authorized.error"), null);
 		}
+		
 		String currencyPairName = currencyPairService.createCurrencyPairName(currencyPairForm.getToCurrency(),
 				currencyPairForm.getPairedCurrency());
 		CurrencyPair existingCurrencyPair = currencyPairService.findByCurrencyPairName(currencyPairName);

@@ -19,11 +19,13 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.bolenum.model.Countries;
+import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
@@ -51,7 +53,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
 
-
 	@Autowired
 	private CountryAndStateService countriesAndStateService;
 
@@ -67,6 +68,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Value("${bolenum.google.qr.code.location}")
 	private String googleQrCodeLocation;
 
+	@Autowired
+	private CurrencyService currencyService;
 
 	private Set<Privilege> privileges = new HashSet<>();
 
@@ -80,12 +83,14 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		saveCountries();
 		saveStates();
 		saveBolenumErc20Token();
+		saveCurrency();
 
 		// create initial directories
 		createInitDirectories();
 		createProfilePicDirectories();
 		createDocumentsDirectories();
 		createGoogleAuthQrCodeDirectories();
+		
 	}
 
 	/**
@@ -93,8 +98,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	 * start @description createInitDirectories @param @return void @exception
 	 * 
 	 */
-	
-
 
 	private void createDocumentsDirectories() {
 		Path profileImg = Paths.get(userDocumetsLocation);
@@ -126,11 +129,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * this will create ethereum wallet location at the time of application start
-	 * @description createInitDirectories
-	 * @param 
-	 * @return void
-	 * @exception 
+	 * this will create ethereum wallet location at the time of application
+	 * start @description createInitDirectories @param @return void @exception
 	 * 
 	 */
 	private void createInitDirectories() {
@@ -144,13 +144,12 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		} else {
 			logger.debug("ethereum wallet location exists");
 		}
-		
+
 	}
 
-	private void createProfilePicDirectories()
-	{
-		Path profileImg=Paths.get(userProfileImageLocation);
-		
+	private void createProfilePicDirectories() {
+		Path profileImg = Paths.get(userProfileImageLocation);
+
 		if (!Files.exists(profileImg)) {
 			if (new File((userProfileImageLocation)).mkdirs()) {
 				logger.debug("User Profile Image location created");
@@ -161,6 +160,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			logger.debug("User Profile Image location exists");
 		}
 	}
+
 	/**
 	 * @description addRole @param @return void @exception
 	 */
@@ -241,14 +241,28 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			logger.info("States list already saved");
 		}
 	}
-	
+
 	void saveBolenumErc20Token() {
 		Erc20Token erc20Token = erc20TokenService.saveBolenumErc20Token();
 		if (erc20Token != null) {
 			logger.info("Bolenum token saved successfully!");
-		}
-		else {
+		} else {
 			logger.info("Bolenum token already saved!");
+		}
+	}
+
+	/**
+	 * to add currency
+	 */
+	void saveCurrency() {
+		long count = currencyService.countCourencies();
+		if (count == 0) {
+			Currency currency1 = new Currency("BITCOIN", "BTC");
+			Currency currency2 = new Currency("ETHEREUM", "ETH");
+			Currency currency3 = new Currency("BOLENUM", "BLN");
+			currencyService.saveCurrency(currency1);
+			currencyService.saveCurrency(currency2);
+			currencyService.saveCurrency(currency3);
 		}
 	}
 }

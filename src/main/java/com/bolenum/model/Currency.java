@@ -38,6 +38,15 @@ public class Currency {
 
 	private boolean isDeleted;
 
+	public Currency() {
+
+	}
+
+	public Currency(String currencyName, String currencyAbbreviation) {
+		this.currencyName = currencyName;
+		this.currencyAbbreviation = currencyAbbreviation;
+	}
+
 	public Long getCurrencyId() {
 		return currencyId;
 	}
