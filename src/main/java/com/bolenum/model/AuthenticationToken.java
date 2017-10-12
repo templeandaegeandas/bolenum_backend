@@ -11,7 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
 
-import com.bolenum.constant.TokenType;
+import com.bolenum.enums.TokenType;
 
 /**
  * 

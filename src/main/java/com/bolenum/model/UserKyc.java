@@ -7,8 +7,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.bolenum.constant.DocumentStatus;
-import com.bolenum.constant.DocumentType;
+import com.bolenum.enums.DocumentStatus;
+import com.bolenum.enums.DocumentType;
 
 /**
  * 

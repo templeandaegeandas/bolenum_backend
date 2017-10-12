@@ -1,4 +1,4 @@
-package com.bolenum.constant;
+package com.bolenum.enums;
 
 public enum TwoFactorAuthOption {
 	MOBILE,GOOGLE_AUTHENTICATOR,NONE

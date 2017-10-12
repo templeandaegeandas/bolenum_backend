@@ -12,8 +12,8 @@ import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 
 
-@Service
 @EnableAsync
+@Service
 public class SMSServiceUtil {
 	
 	@Value("${bolenum.twilio.account.SID}")

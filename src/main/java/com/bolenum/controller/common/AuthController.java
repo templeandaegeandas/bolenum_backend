@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bolenum.constant.TwoFactorAuthOption;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.LoginForm;
 import com.bolenum.dto.common.ResetPasswordForm;
+import com.bolenum.enums.TwoFactorAuthOption;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;

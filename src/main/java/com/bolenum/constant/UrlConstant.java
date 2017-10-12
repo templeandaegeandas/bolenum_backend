@@ -64,8 +64,14 @@ public class UrlConstant {
 	/******************** USER Wallet API ******/
 	public static final String DEPOSIT = "deposit";
 	
+
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";
 	public static final String GET_TOKEN_LIST = "get/token/list";
+
+	/******************** ORDER API ******/
+	public static final String CREATE_ORDER = "create/order";
+	public static final String LIST_ORDER = "get/orders";
+
 	
 }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.bolenum.constant.TokenType;
+import com.bolenum.enums.TokenType;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 
