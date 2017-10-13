@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 
 /**
@@ -42,5 +43,7 @@ public interface OrdersService {
 	Double getWorstSell(List<Orders> sellOrderList);
 
 	Double getBestBuy(List<Orders> buyOrderList);
+
+	String checkOrderEligibility(User user, Orders order);
 
 }

@@ -101,4 +101,9 @@ public class MarketPriceServiceImpl implements MarketPriceService {
 		marketPrice.setUpdatedOn(new Date());
 		savePrice(marketPrice);
 	}
+
+	@Override
+	public MarketPrice findByCurrency(Currency currency) {
+		return marketPriceRepo.findByCurrency(currency);
+	}
 }

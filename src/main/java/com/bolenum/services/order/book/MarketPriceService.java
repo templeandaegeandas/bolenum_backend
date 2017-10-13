@@ -3,6 +3,7 @@
  */
 package com.bolenum.services.order.book;
 
+import com.bolenum.model.Currency;
 import com.bolenum.model.orders.book.MarketPrice;
 
 /**
@@ -12,4 +13,5 @@ import com.bolenum.model.orders.book.MarketPrice;
 public interface MarketPriceService {
 	public MarketPrice savePrice(MarketPrice marketPrice);
 	public void priceFromCoinMarketCap();
+	public MarketPrice findByCurrency(Currency currency);
 }

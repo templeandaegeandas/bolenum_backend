@@ -15,15 +15,21 @@ import org.springframework.stereotype.Service;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.User;
+import com.bolenum.model.orders.book.MarketPrice;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
+import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.services.user.wallet.BTCWalletService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 
 /**
  * 
  * @author Vishal Kumar
  * @date 06-Oct-2017
- *
+ * @modified Chandan Kumar Singh
  */
 @Service
 public class OrdersServiceImpl implements OrdersService {
@@ -34,11 +40,97 @@ public class OrdersServiceImpl implements OrdersService {
 	@Autowired
 	private OrderAsyncService orderAsyncServices;
 
+	@Autowired
+	private CurrencyPairService currencyPairService;
+
+	@Autowired
+	private BTCWalletService bTCWalletService;
+
+	@Autowired
+	private EtherumWalletService etherumWalletService;
+
+	@Autowired
+	private MarketPriceService marketPriceService;
+
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
 	List<Orders> ordersList = new ArrayList<>();
 
 	List<Trade> tradeList = new ArrayList<>();
+
+	/**
+	 * this will check user wallet balance to get place an order
+	 */
+	@Override
+	public String checkOrderEligibility(User user, Orders orders) {
+		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPairId());
+		String tickter = null, minBalance = null;
+		/**
+		 * if order type is SELL then only checking, user have selling volume
+		 */
+		if (orders.getOrderType().equals(OrderType.SELL)) {
+			tickter = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+			minBalance = String.valueOf(orders.getVolume());
+		} else {
+			/**
+			 * if order type is BUY then for Market order, user should have
+			 * total market price, for Limit order user should have volume
+			 * (volume * price), price limit given by user
+			 */
+			if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
+				logger.debug("limit order buy");
+				/**
+				 * user must have this balance to give limit order Example user
+				 * want to BUY 3 BTC on 5 ETH per BTC unit, then user must have
+				 * 3 * 5 = 15 ETH to buy 3 BTC
+				 */
+				minBalance = String.valueOf(orders.getVolume() * orders.getPrice());
+			} else {
+				/**
+				 * fetching the market BTC price of buying currency
+				 */
+				MarketPrice marketPrice = marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
+				/**
+				 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
+				 * BTC, this will update according to order selling book
+				 */
+				Double buyingCurrencyValue = marketPrice.getPriceBTC();
+				logger.debug("order value : {}, buyingCurrencyValue: {}", orders.getVolume(), buyingCurrencyValue);
+				if (marketPrice != null && buyingCurrencyValue != null) {
+					/**
+					 * user must have this balance to give market order, Example
+					 * user want to BUY 3 BTC on market price, at this moment 1
+					 * ETH = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC,
+					 * then user must have 51.852876106 ETH to buy 3 BTC
+					 */
+					minBalance = String.valueOf((orders.getVolume()) / buyingCurrencyValue);
+				}
+			}
+			tickter = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		}
+		logger.debug("minimum balance required to buy: {}", minBalance);
+		// getting the user current wallet balance
+		String balance = getBalance(tickter, user);
+		balance = balance.replace("BTC", "");
+		if (!balance.equals("Synchronizing")) {
+			// user must have balance then user is eligible for placing order
+			if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
+				balance = "proceed";
+			}
+		}
+		return balance;
+	}
+
+	private String getBalance(String tickter, User user) {
+		switch (tickter) {
+		case "BTC":
+			tickter = bTCWalletService.getWalletBalnce(user.getBtcWalletUuid());
+			break;
+		case "ETH":
+			tickter = String.valueOf(etherumWalletService.getWalletBalance(user));
+		}
+		return tickter;
+	}
 
 	@Override
 	public Boolean processOrder(Orders orders) {
