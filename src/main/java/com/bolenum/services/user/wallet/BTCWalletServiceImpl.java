@@ -116,4 +116,26 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return "";
 	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public String getWalletAddress(String walletUuid) {
+		String url = BTCUrlConstant.WALLET_ADDR;
+		RestTemplate restTemplate = new RestTemplate();
+		logger.debug("get Wallet Address uuid:  {}", walletUuid);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url).queryParam("walletUuid", walletUuid);
+		try {
+			Map<String, Object> res = restTemplate.getForObject(builder.toUriString(), Map.class);
+			logger.debug("get Wallet Address res map: {}", res);
+			boolean isError = (boolean) res.get("error");
+			if (!isError) {
+				Map<String, Object> data = (Map<String, Object>) res.get("data");
+				return (String) data.get("address");
+			}
+		} catch (RestClientException e) {
+			logger.error("get Wallet Address And QrCode exception RCE:  {}", e.getMessage());
+			e.printStackTrace();
+		}
+		return "";
+	}
 }

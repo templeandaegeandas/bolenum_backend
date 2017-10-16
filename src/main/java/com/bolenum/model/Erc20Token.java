@@ -6,8 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
-import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
@@ -22,19 +22,18 @@ public class Erc20Token {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	@Length(max=100000000)
-	private String binaryKey;
-	@NotBlank
 	private String walletAddress;
 	@NotBlank
 	private String contractAddress;
+	@OneToOne
+	private Currency currency;
 	private Boolean isDeleted = false;
 	private Date createdDate = new Date();
 	
-	public Erc20Token(String binaryKey, String walletAddress, String contractAddress) {
-		this.binaryKey = binaryKey;
+	public Erc20Token(String walletAddress, String contractAddress, Currency currency) {
 		this.walletAddress = walletAddress;
 		this.contractAddress = contractAddress;
+		this.currency = currency;
 	}
 	
 	public Erc20Token() {
@@ -47,14 +46,6 @@ public class Erc20Token {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getBinaryKey() {
-		return binaryKey;
-	}
-
-	public void setBinaryKey(String binaryKey) {
-		this.binaryKey = binaryKey;
 	}
 
 	public String getWalletAddress() {
@@ -71,6 +62,14 @@ public class Erc20Token {
 
 	public void setContractAddress(String contractAddress) {
 		this.contractAddress = contractAddress;
+	}
+
+	public Currency getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(Currency currency) {
+		this.currency = currency;
 	}
 
 	public Boolean getIsDeleted() {

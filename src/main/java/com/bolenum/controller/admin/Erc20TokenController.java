@@ -38,14 +38,13 @@ public class Erc20TokenController {
 
 	@RequestMapping(value = UrlConstant.ADD_NEW_TOKEN, method = RequestMethod.POST)
 	public ResponseEntity<Object> addNewToken(@RequestBody Erc20Token erc20Token) {
-		// User user = adminService.getUserById(userId);
 		Erc20Token savedToken = erc20TokenService.saveToken(erc20Token);
 		if (savedToken != null) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("erc20.new.token.saved"),
 					savedToken);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localeService.getMessage("erc20.new.token.saved"), savedToken);
+					localeService.getMessage("erc20.new.token.notsaved"), savedToken);
 		}
 	}
 
@@ -54,17 +53,17 @@ public class Erc20TokenController {
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
 			@RequestParam("sortOrder") String sortOrder) {
 		Page<Erc20Token> erc20TokenList = erc20TokenService.listAllErc20Token(pageNumber, pageSize, sortBy, sortOrder);
-		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("erc20.new.token.saved"),
-				erc20TokenList);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("erc20.token.list"), erc20TokenList);
 	}
 
+	@RequestMapping(value = UrlConstant.GET_TOKEN_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTokenByTokenId(@RequestParam("id") Long id) {
 		Erc20Token erc20Token = erc20TokenService.getById(id);
 		if (erc20Token != null) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("erc20.token"), erc20Token);
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("erc20.token"),
-					null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("erc20.token.notfound"), null);
 		}
 	}
 

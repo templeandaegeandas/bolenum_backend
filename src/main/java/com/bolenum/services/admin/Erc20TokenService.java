@@ -1,8 +1,22 @@
 package com.bolenum.services.admin;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 import org.springframework.data.domain.Page;
+import org.web3j.crypto.CipherException;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import com.bolenum.model.Erc20Token;
+import com.bolenum.model.User;
 
 /**
  * 
@@ -39,8 +53,23 @@ public interface Erc20TokenService {
 
 	/**
 	 * 
-	 * @return Erc20Token
+	 * @param erc20Tokens
 	 */
+	void saveInitialErc20Token(List<Erc20Token> erc20Tokens);
+	
+	/**
+	 * 
+	 * @return Long
+	 */
+	Long countErc20Token();
+	
+	Double getErc20WalletBalance(User user, String tokenName) throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException, InterruptedException, ExecutionException;
+
+	Future<TransactionReceipt> transferErc20Token(User user, String tokenName, String toAddress, Long fund)
+			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
+			BadPaddingException, IOException, CipherException;
+
 	Erc20Token saveBolenumErc20Token();
 
 }

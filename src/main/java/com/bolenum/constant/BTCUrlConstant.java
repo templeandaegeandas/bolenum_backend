@@ -18,4 +18,6 @@ public class BTCUrlConstant {
 	public static final String WALLET_BAL = BASE_URI_V1 + "hotwallet/balance";
 	public static final String ADMIN_HOT_WALLET = BASE_URI_V1 + "hotwallet/create/adminwallet";
 
+
+	public static final String CREATE_TX = BASE_URI_V1+"hotwallet/transaction";
 }

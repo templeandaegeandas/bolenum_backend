@@ -1,5 +1,7 @@
 package com.bolenum.repo.admin;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.bolenum.model.Erc20Token;
@@ -14,15 +16,22 @@ public interface Erc20TokenRepository extends JpaRepository<Erc20Token, Long> {
 
 	/**
 	 * 
-	 * @param binarykey
-	 * @return Erc20Token
+	 * @param searchDate
+	 * @param pageable
+	 * @return Page<Erc20Token>
 	 */
-	Erc20Token findByBinaryKey(String binarykey);
-
+	Page<Erc20Token> findByIsDeleted(Boolean isDeleted, Pageable pageable);
 	/**
 	 * 
 	 * @param contractaddress
 	 * @return Erc20Token
 	 */
 	Erc20Token findByContractAddress(String contractaddress);
+	
+	/**
+	 * 
+	 * @param currency
+	 * @return Erc20Token
+	 */
+	Erc20Token findByCurrencyCurrencyAbbreviation(String currency);
 }

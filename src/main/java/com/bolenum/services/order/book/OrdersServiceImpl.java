@@ -15,15 +15,23 @@ import org.springframework.stereotype.Service;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.User;
+import com.bolenum.model.orders.book.MarketPrice;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
+import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.transactions.TransactionService;
+import com.bolenum.services.user.wallet.BTCWalletService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 
 /**
  * 
  * @author Vishal Kumar
  * @date 06-Oct-2017
- *
+ * @modified Chandan Kumar Singh
  */
 @Service
 public class OrdersServiceImpl implements OrdersService {
@@ -34,11 +42,103 @@ public class OrdersServiceImpl implements OrdersService {
 	@Autowired
 	private OrderAsyncService orderAsyncServices;
 
+	@Autowired
+	private CurrencyPairService currencyPairService;
+
+	@Autowired
+	private BTCWalletService bTCWalletService;
+
+	@Autowired
+	private EtherumWalletService etherumWalletService;
+
+	@Autowired
+	private MarketPriceService marketPriceService;
+
+	@Autowired
+	private TransactionService transactionService;
+
+	@Autowired
+	private UserService userService;
+
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
 	List<Orders> ordersList = new ArrayList<>();
 
 	List<Trade> tradeList = new ArrayList<>();
+
+	/**
+	 * this will check user wallet balance to get place an order
+	 */
+	@Override
+	public String checkOrderEligibility(User user, Orders orders) {
+		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPairId());
+		String tickter = null, minBalance = null;
+		/**
+		 * if order type is SELL then only checking, user have selling volume
+		 */
+		if (orders.getOrderType().equals(OrderType.SELL)) {
+			tickter = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+			minBalance = String.valueOf(orders.getVolume());
+		} else {
+			/**
+			 * if order type is BUY then for Market order, user should have
+			 * total market price, for Limit order user should have volume
+			 * (volume * price), price limit given by user
+			 */
+			if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
+				logger.debug("limit order buy on price: {}", orders.getPrice());
+				/**
+				 * user must have this balance to give limit order Example user
+				 * want to BUY 3 BTC on 5 ETH per BTC unit, then user must have
+				 * 3 * 5 = 15 ETH to buy 3 BTC
+				 */
+				minBalance = String.valueOf(orders.getVolume() * orders.getPrice());
+			} else {
+				/**
+				 * fetching the market BTC price of buying currency
+				 */
+				MarketPrice marketPrice = marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
+				/**
+				 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
+				 * BTC, this will update according to order selling book
+				 */
+				Double buyingCurrencyValue = marketPrice.getPriceBTC();
+				logger.debug("order value : {}, buyingCurrencyValue: {}", orders.getVolume(), buyingCurrencyValue);
+				if (marketPrice != null && buyingCurrencyValue != null) {
+					/**
+					 * user must have this balance to give market order, Example
+					 * user want to BUY 3 BTC on market price, at this moment 1
+					 * ETH = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC,
+					 * then user must have 51.852876106 ETH to buy 3 BTC
+					 */
+					minBalance = String.valueOf((orders.getVolume()) / buyingCurrencyValue);
+				}
+			}
+			tickter = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		}
+		logger.debug("minimum balance required to buy: {}", minBalance);
+		// getting the user current wallet balance
+		String balance = getBalance(tickter, user);
+		balance = balance.replace("BTC", "");
+		if (!balance.equals("Synchronizing")) {
+			// user must have balance then user is eligible for placing order
+			if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
+				balance = "proceed";
+			}
+		}
+		return balance;
+	}
+
+	private String getBalance(String tickter, User user) {
+		switch (tickter) {
+		case "BTC":
+			tickter = bTCWalletService.getWalletBalnce(user.getBtcWalletUuid());
+			break;
+		case "ETH":
+			tickter = String.valueOf(etherumWalletService.getWalletBalance(user));
+		}
+		return tickter;
+	}
 
 	@Override
 	public Boolean processOrder(Orders orders) {
@@ -59,6 +159,9 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.save(orders);
 	}
 
+	/**
+	 * process market order
+	 */
 	@Override
 	public Boolean processMarketOrder(Orders orders) {
 		Boolean processed = false;
@@ -67,11 +170,11 @@ public class OrdersServiceImpl implements OrdersService {
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		if (orderType.equals(OrderType.BUY)) {
-			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceAsc(
+			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceAsc(
 					OrderType.SELL, OrderStatus.SUBMITTED, pairId);
-			while (buyOrderList.size() > 0 && (remainingVolume > 0)) {
-				logger.debug("inner buy while");
-				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
+			while (sellOrderList.size() > 0 && remainingVolume > 0) {
+				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
+				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
@@ -80,11 +183,11 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			processed = true;
 		} else {
-			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceDesc(
+			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceDesc(
 					OrderType.BUY, OrderStatus.SUBMITTED, pairId);
-			while (sellOrderList.size() > 0 && (remainingVolume > 0)) {
-				logger.debug("inner sell while");
-				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
+			while (buyOrderList.size() > 0 && remainingVolume > 0) {
+				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
+				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
@@ -97,6 +200,9 @@ public class OrdersServiceImpl implements OrdersService {
 		return processed;
 	}
 
+	/**
+	 * process limit order
+	 */
 	@Override
 	public Boolean processLimitOrder(Orders orders) {
 		Boolean processed = false;
@@ -106,13 +212,20 @@ public class OrdersServiceImpl implements OrdersService {
 		Double price = orders.getPrice();
 		Long pairId = orders.getPairId();
 		logger.debug("Order type is equal with buy: {}", orderType.equals(OrderType.BUY));
+		// checking the order type is BUY
 		if (orderType.equals(OrderType.BUY)) {
-			List<Orders> buyOrderList = ordersRepository
-					.findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc(OrderType.BUY,
+			// fetching the seller list whose selling price is less than equal
+			// to buying price
+			List<Orders> sellOrderList = ordersRepository
+					.findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, pairId, price);
-			while (buyOrderList.size() > 0 && (remainingVolume > 0) && (price >= getBestBuy(buyOrderList))) {
-				logger.debug("inner buy while");
-				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
+			/**
+			 * fetch one best seller's price from list of sellers, order by
+			 * price in ASC then process the order
+			 */
+			while (sellOrderList.size() > 0 && (remainingVolume > 0) && (price >= getBestBuy(sellOrderList))) {
+				logger.debug("inner buy while loop for buyers and remaining volume: {}", remainingVolume);
+				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
@@ -121,12 +234,20 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			processed = true;
 		} else {
-			List<Orders> sellOrderList = ordersRepository
+			/**
+			 * fetching the list of BUYERS whose buy price is greater than sell
+			 * price
+			 */
+			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairIdAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, pairId, price);
-			while (sellOrderList.size() > 0 && (remainingVolume > 0) && (price <= getBestSell(sellOrderList))) {
-				logger.debug("inner sell while");
-				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
+			/**
+			 * fetch one best buyer's price from list of buyers, order by price
+			 * in desc then process the order
+			 */
+			while (buyOrderList.size() > 0 && (remainingVolume > 0) && (price <= buyOrderList.get(0).getPrice())) {
+				logger.debug("inner sell while loop for seller and remaining volume: {}", remainingVolume);
+				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
@@ -139,94 +260,164 @@ public class OrdersServiceImpl implements OrdersService {
 		return processed;
 	}
 
+	/**
+	 * process the buyers and sellers order
+	 * 
+	 */
 	@Override
 	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders) {
+		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
-		Long buyerId, sellerId;
+		long buyerId, sellerId;
+		// process till order size and remaining volume is > 0
 		while ((ordersList.size() > 0) && (remainingVolume > 0)) {
 			logger.debug("inner proccessing while");
-			Double qtyTraded;
+			Double qtyTraded; // total number quantity which is processed
+			// fetch matched order object
 			Orders matchedOrder = matchedOrder(ordersList);
+			// checking selling/buying volume less than matched order volume
 			if (remainingVolume < matchedOrder.getVolume()) {
+				// qtyTraded is total selling/buying volume
 				qtyTraded = remainingVolume;
+				// setting new required SELL/BUY volume is remaining order
+				// volume
 				matchedOrder.setVolume(matchedOrder.getVolume() - remainingVolume);
+				// adding matched order in list with remaining volume
 				ordersList.add(matchedOrder);
+				// now selling/buying volume is 0
 				remainingVolume = 0.0;
 			} else {
+				// selling/buying volume greater than matched order volume
+				// qtyTraded is total sellers/buyers volume
 				qtyTraded = matchedOrder.getVolume();
+				// new selling/buying volume is remainingVolume - qtyTraded
 				remainingVolume -= qtyTraded;
+				// removed processed order
 				removeOrderFromList(ordersList);
+				// new volume of processed order is 0
 				matchedOrder.setVolume(0.0);
+				// status of processed order is completed
 				matchedOrder.setOrderStatus(OrderStatus.COMPLETED);
+				// adding to order list by setting the new volume and status of
+				// processed order
 				ordersList.add(matchedOrder);
 				logger.debug("matching buy/sell completed");
 			}
+			// checking the order type BUY
 			if (orderType.equals(OrderType.BUY)) {
+				// buyer is coming order's user
 				buyerId = orders.getUserId();
+				// seller is matched order's user
 				sellerId = matchedOrder.getUserId();
 			} else {
+				// order type is SELL
+				// buyer is matched order's user
 				buyerId = matchedOrder.getUserId();
+				// seller is coming order's user
 				sellerId = orders.getUserId();
 			}
-			Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyerId, sellerId, OrderStandard.LIMIT);
-			tradeList.add(trade);
-			logger.debug("saving trade ompleted");
+			// buyer and seller must be different user
+			logger.debug("byuer id: {} seller id: {}", buyerId, sellerId);
+			if (buyerId != sellerId) {
+				// saving the processed BUY/SELL order in trade
+				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyerId, sellerId, OrderStandard.LIMIT);
+				tradeList.add(trade);
+				logger.debug("saving trade ompleted");
+			}
 		}
 		orderAsyncServices.saveTrade(tradeList);
 		return remainingVolume;
 	}
 
-	// public Double totalVolume(String pair) {
-	// return orderRepository.getSumVolumeByPair(pair);
-	// }
+	/**
+	 * @description processTransaction
+	 * @param orders,qtyTraded,buyerId,sellerId
+	 */
+	private void processTransaction(Orders orders, double qtyTraded, long buyerId, long sellerId) {
+		User buyer = userService.findByUserId(buyerId);
+		User seller = userService.findByUserId(sellerId);
+		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(), orders.getId());
+		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPairId());
+		String[] tickters = new String[2];
+		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		for (String tickter : tickters) {
+			process(tickter, orders, qtyTraded, buyer, seller);
+		}
+	}
+
+	private boolean process(String currencyAbr, Orders orders, double qtyTraded, User buyer, User seller) {
+		switch (currencyAbr) {
+		case "BTC":
+			transactionService.performBtcTransaction(buyer,
+					bTCWalletService.getWalletAddress(seller.getBtcWalletUuid()), qtyTraded);
+		}
+		return true;
+	}
 
 	@Override
 	public Page<Orders> getOrdersListByPair(Long pairId, OrderType orderType) {
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderType(pairId, orderType, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, orderType, OrderStatus.SUBMITTED, pageRequest);
 		return orderBook;
 	}
 
+	/**
+	 * this will calculate the lowest selling price, thats why it is best buy
+	 * for buyers
+	 */
 	@Override
-	public Double getBestBuy(List<Orders> buyOrderList) {
-		Double bestBuy = buyOrderList.get(0).getPrice();
-		for (int i = 0; i < buyOrderList.size() - 1; i++) {
-			if (bestBuy > buyOrderList.get(i + 1).getPrice()) {
-				bestBuy = buyOrderList.get(i + 1).getPrice();
+	public Double getBestBuy(List<Orders> sellOrderList) {
+		Double bestBuy = sellOrderList.get(0).getPrice();
+		for (int i = 0; i < sellOrderList.size() - 1; i++) {
+			if (bestBuy > sellOrderList.get(i + 1).getPrice()) {
+				bestBuy = sellOrderList.get(i + 1).getPrice();
 			}
 		}
 		return bestBuy;
 	}
 
+	/**
+	 * this will calculate the highest selling price, thats why it is worst buy
+	 * for buyers
+	 */
 	@Override
-	public Double getWorstBuy(List<Orders> buyOrderList) {
-		Double wrostBuy = buyOrderList.get(0).getPrice();
-		for (int i = 0; i < buyOrderList.size() - 1; i++) {
-			if (wrostBuy < buyOrderList.get(i + 1).getPrice()) {
-				wrostBuy = buyOrderList.get(i + 1).getPrice();
+	public Double getWorstBuy(List<Orders> sellOrderList) {
+		Double wrostBuy = sellOrderList.get(0).getPrice();
+		for (int i = 0; i < sellOrderList.size() - 1; i++) {
+			if (wrostBuy < sellOrderList.get(i + 1).getPrice()) {
+				wrostBuy = sellOrderList.get(i + 1).getPrice();
 			}
 		}
 		return wrostBuy;
 	}
 
+	/**
+	 * this will calculate the highest buying price, thats why it is best sell
+	 * for seller
+	 */
 	@Override
-	public Double getBestSell(List<Orders> sellOrderList) {
+	public Double getBestSell(List<Orders> buyOrderList) {
 		Double bestSell = null;
-		for (int i = 0; i < sellOrderList.size() - 1; i++) {
-			bestSell = sellOrderList.get(0).getPrice();
-			if (bestSell < sellOrderList.get(i + 1).getPrice()) {
-				bestSell = sellOrderList.get(i + 1).getPrice();
+		for (int i = 0; i < buyOrderList.size() - 1; i++) {
+			bestSell = buyOrderList.get(0).getPrice();
+			if (bestSell < buyOrderList.get(i + 1).getPrice()) {
+				bestSell = buyOrderList.get(i + 1).getPrice();
 			}
 		}
 		return bestSell;
 	}
 
+	/**
+	 * this will calculate the lowest buying price, thats why it is worst sell
+	 * for seller
+	 */
 	@Override
-	public Double getWorstSell(List<Orders> sellOrderList) {
-		Double wrostSell = sellOrderList.get(0).getPrice();
-		for (int i = 0; i < sellOrderList.size() - 1; i++) {
-			if (wrostSell > sellOrderList.get(i + 1).getPrice()) {
-				wrostSell = sellOrderList.get(i + 1).getPrice();
+	public Double getWorstSell(List<Orders> buyOrderList) {
+		Double wrostSell = buyOrderList.get(0).getPrice();
+		for (int i = 0; i < buyOrderList.size() - 1; i++) {
+			if (wrostSell > buyOrderList.get(i + 1).getPrice()) {
+				wrostSell = buyOrderList.get(i + 1).getPrice();
 			}
 		}
 		return wrostSell;

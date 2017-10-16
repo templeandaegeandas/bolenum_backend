@@ -180,7 +180,7 @@ public class Transaction {
 	/**
 	 * @return the txAmmount
 	 */
-	public Double getTxAmmount() {
+	public Double getTxAmount() {
 		return txAmount;
 	}
 
@@ -188,8 +188,8 @@ public class Transaction {
 	 * @param txAmmount
 	 *            the txAmmount to set
 	 */
-	public void setTxAmmount(Double txAmmount) {
-		this.txAmount = txAmmount;
+	public void setTxAmount(Double txAmount) {
+		this.txAmount = txAmount;
 	}
 
 	/**
