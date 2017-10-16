@@ -33,6 +33,7 @@ import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,6 +76,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired
 	private AdminService adminService;
+	
+	@Autowired
+	private EtherumWalletService etherumWalletService;
 
 	private Set<Privilege> privileges = new HashSet<>();
 
@@ -204,6 +208,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			form.setPassword(passwordEncoder.encode("12345"));
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
+			etherumWalletService.createWallet(user);
 			String uuid = adminService.createAdminHotWallet("adminWallet");
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 			if (!uuid.isEmpty()) {
