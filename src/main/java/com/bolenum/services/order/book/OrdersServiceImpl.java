@@ -80,40 +80,7 @@ public class OrdersServiceImpl implements OrdersService {
 			tickter = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
 			minBalance = String.valueOf(orders.getVolume());
 		} else {
-			/**
-			 * if order type is BUY then for Market order, user should have
-			 * total market price, for Limit order user should have volume
-			 * (volume * price), price limit given by user
-			 */
-			if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
-				logger.debug("limit order buy on price: {}", orders.getPrice());
-				/**
-				 * user must have this balance to give limit order Example user
-				 * want to BUY 3 BTC on 5 ETH per BTC unit, then user must have
-				 * 3 * 5 = 15 ETH to buy 3 BTC
-				 */
-				minBalance = String.valueOf(orders.getVolume() * orders.getPrice());
-			} else {
-				/**
-				 * fetching the market BTC price of buying currency
-				 */
-				MarketPrice marketPrice = marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
-				/**
-				 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
-				 * BTC, this will update according to order selling book
-				 */
-				Double buyingCurrencyValue = marketPrice.getPriceBTC();
-				logger.debug("order value : {}, buyingCurrencyValue: {}", orders.getVolume(), buyingCurrencyValue);
-				if (marketPrice != null && buyingCurrencyValue != null) {
-					/**
-					 * user must have this balance to give market order, Example
-					 * user want to BUY 3 BTC on market price, at this moment 1
-					 * ETH = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC,
-					 * then user must have 51.852876106 ETH to buy 3 BTC
-					 */
-					minBalance = String.valueOf((orders.getVolume()) / buyingCurrencyValue);
-				}
-			}
+			minBalance = getAmountForPair(orders, currencyPair);
 			tickter = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		}
 		logger.debug("minimum balance required to buy: {}", minBalance);
@@ -138,6 +105,45 @@ public class OrdersServiceImpl implements OrdersService {
 			tickter = String.valueOf(etherumWalletService.getWalletBalance(user));
 		}
 		return tickter;
+	}
+
+	private String getAmountForPair(Orders orders, CurrencyPair currencyPair) {
+		String minBalance = null;
+		/**
+		 * if order type is BUY then for Market order, user should have total
+		 * market price, for Limit order user should have volume (volume *
+		 * price), price limit given by user
+		 */
+		if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
+			logger.debug("limit order buy on price: {}", orders.getPrice());
+			/**
+			 * user must have this balance to give limit order Example user want
+			 * to BUY 3 BTC on 5 ETH per BTC unit, then user must have 3 * 5 =
+			 * 15 ETH to buy 3 BTC
+			 */
+			minBalance = String.valueOf(orders.getVolume() * orders.getPrice());
+		} else {
+			/**
+			 * fetching the market BTC price of buying currency
+			 */
+			MarketPrice marketPrice = marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
+			/**
+			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
+			 * BTC, this will update according to order selling book
+			 */
+			Double buyingCurrencyValue = marketPrice.getPriceBTC();
+			logger.debug("order value : {}, buyingCurrencyValue: {}", orders.getVolume(), buyingCurrencyValue);
+			if (marketPrice != null && buyingCurrencyValue != null) {
+				/**
+				 * user must have this balance to give market order, Example
+				 * user want to BUY 3 BTC on market price, at this moment 1 ETH
+				 * = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC, then user
+				 * must have 51.852876106 ETH to buy 3 BTC
+				 */
+				minBalance = String.valueOf((orders.getVolume()) / buyingCurrencyValue);
+			}
+		}
+		return minBalance;
 	}
 
 	@Override
@@ -322,7 +328,8 @@ public class OrdersServiceImpl implements OrdersService {
 				// saving the processed BUY/SELL order in trade
 				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyerId, sellerId, OrderStandard.LIMIT);
 				tradeList.add(trade);
-				logger.debug("saving trade ompleted");
+				logger.debug("saving trade completed");
+				processTransaction(matchedOrder, qtyTraded, buyerId, sellerId);
 			}
 		}
 		orderAsyncServices.saveTrade(tradeList);
@@ -334,25 +341,75 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @param orders,qtyTraded,buyerId,sellerId
 	 */
 	private void processTransaction(Orders orders, double qtyTraded, long buyerId, long sellerId) {
+		// finding buyer
 		User buyer = userService.findByUserId(buyerId);
+		// finding seller
 		User seller = userService.findByUserId(sellerId);
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(), orders.getId());
+		// finding currency pair
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPairId());
 		String[] tickters = new String[2];
+		// finding the currency abbreviations
 		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
 		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
-		for (String tickter : tickters) {
-			process(tickter, orders, qtyTraded, buyer, seller);
+		// fetching the limit price of order
+		String qtr = getAmountForPairC(orders, currencyPair, qtyTraded);
+		logger.debug("other qtr: {}", qtr);
+		if (qtr != null) {
+			// process tx buyers and sellers
+			process(tickters[0], qtyTraded, buyer, seller);
+			// process tx sellers and buyers
+			process(tickters[1], Double.valueOf(qtr), seller, buyer);
 		}
 	}
 
-	private boolean process(String currencyAbr, Orders orders, double qtyTraded, User buyer, User seller) {
+	private boolean process(String currencyAbr, double qtyTraded, User buyer, User seller) {
 		switch (currencyAbr) {
 		case "BTC":
-			transactionService.performBtcTransaction(buyer,
-					bTCWalletService.getWalletAddress(seller.getBtcWalletUuid()), qtyTraded);
+			boolean status = transactionService.performBtcTransaction(seller,
+					bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded);
+			logger.debug("is BTC transaction successed: {}", status);
+			break;
+		case "ETH":
+			status = transactionService.performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded);
+			logger.debug("is ETH transaction successed: {}", status);
+			break;
 		}
 		return true;
+	}
+
+	private String getAmountForPairC(Orders orders, CurrencyPair currencyPair, double qtyTraded) {
+		String minBalance = null;
+		/**
+		 * if order type is BUY then for Market order, user should have total
+		 * market price, for Limit order user should have volume (volume *
+		 * price), price limit given by user
+		 */
+		if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
+			logger.debug("limit order buy on price: {}", orders.getPrice());
+			minBalance = String.valueOf(qtyTraded * orders.getPrice());
+		} else {
+			/**
+			 * fetching the market BTC price of buying currency
+			 */
+			MarketPrice marketPrice = marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
+			/**
+			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
+			 * BTC, this will update according to order selling book
+			 */
+			Double buyingCurrencyValue = marketPrice.getPriceBTC();
+			logger.debug("order value : {}, buyingCurrencyValue: {}", qtyTraded, buyingCurrencyValue);
+			if (marketPrice != null && buyingCurrencyValue != null) {
+				/**
+				 * user must have this balance to give market order, Example
+				 * user want to BUY 3 BTC on market price, at this moment 1 ETH
+				 * = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC, then user
+				 * must have 51.852876106 ETH to buy 3 BTC
+				 */
+				minBalance = String.valueOf(qtyTraded / buyingCurrencyValue);
+			}
+		}
+		return minBalance;
 	}
 
 	@Override

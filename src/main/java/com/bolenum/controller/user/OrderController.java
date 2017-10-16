@@ -45,7 +45,8 @@ public class OrderController {
 	public ResponseEntity<Object> createOrder(@RequestBody Orders orders) {
 		// can not place order on 0 prize
 		if (orders.getOrderStandard().equals(OrderStandard.LIMIT) && orders.getPrice() <= 0) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"), null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"),
+					null);
 		}
 		User user = GenericUtils.getLoggedInUser();
 		String balance = ordersService.checkOrderEligibility(user, orders);
@@ -57,6 +58,7 @@ public class OrderController {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
+		orders.setUserId(user.getUserId());
 		Boolean result = ordersService.processOrder(orders);
 		if (result) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
