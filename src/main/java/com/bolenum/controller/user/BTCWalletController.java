@@ -75,7 +75,7 @@ public class BTCWalletController {
 			Double balance = etherumWalletService.getWalletBalance(user);
 			Map<String,Object> mapAddress = new HashMap<>();
 			mapAddress.put("address", user.getEthWalletaddress());
-			mapAddress.put("balance", balance);
+			mapAddress.put("balance", balance +" ETH");
 			map.put("data", mapAddress);
 			break;
 		default:
