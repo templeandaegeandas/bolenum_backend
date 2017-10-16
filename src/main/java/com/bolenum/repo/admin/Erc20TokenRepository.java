@@ -21,7 +21,6 @@ public interface Erc20TokenRepository extends JpaRepository<Erc20Token, Long> {
 	 * @return Page<Erc20Token>
 	 */
 	Page<Erc20Token> findByIsDeleted(Boolean isDeleted, Pageable pageable);
-	
 	/**
 	 * 
 	 * @param contractaddress

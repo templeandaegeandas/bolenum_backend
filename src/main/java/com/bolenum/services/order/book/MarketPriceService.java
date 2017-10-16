@@ -14,4 +14,5 @@ public interface MarketPriceService {
 	public MarketPrice savePrice(MarketPrice marketPrice);
 	public void priceFromCoinMarketCap();
 	public MarketPrice findByCurrency(Currency currency);
+	MarketPrice findByCurrencyId(String currencyAbbreviation);
 }

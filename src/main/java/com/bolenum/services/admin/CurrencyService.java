@@ -1,9 +1,10 @@
 package com.bolenum.services.admin;
 
-import org.springframework.data.domain.Page;
+import java.util.List;
 
 import com.bolenum.dto.common.CurrencyForm;
 import com.bolenum.model.Currency;
+
 /**
  * 
  * @Author Himanshu
@@ -17,8 +18,9 @@ public interface CurrencyService {
 
 	public Currency updateCurrency(CurrencyForm currencyForm, Currency isExistingCurrency);
 
-	public Page<Currency> getCurrencyList(int pageNumber, int pageSize, String sortBy, String sortOrder,
-			String searchData);
-
 	public Currency findCurrencyById(Long currencyId);
+
+	List<Currency> getCurrencyList();
+
+	public long countCourencies();
 }

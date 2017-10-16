@@ -15,13 +15,13 @@ public class EditUserForm {
 	private Long userId;
 
 	@NotEmpty
-	@Pattern(regexp = "([a-zA-Z]+)", message = "First Name must be valid")
+	@Pattern(regexp = "([a-zA-Z]+)", message = "First name must be valid")
 	private String firstName;
 
-	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
+	@Pattern(regexp = "([a-zA-Z]+)", message = "Middle name must be valid")
 	private String middleName;
 
-	@Pattern(regexp = "([a-zA-Z]+)", message = "Name must be valid")
+	@Pattern(regexp = "([a-zA-Z]+)", message = "Last name must be valid")
 	private String lastName;
 
 	private String address;
@@ -186,17 +186,4 @@ public class EditUserForm {
 		this.dob = dob;
 	}
 
-	/*public User copy(User user) {
-		user.setFirstName(this.firstName);
-		user.setMiddleName(this.middleName);
-		user.setLastName(this.lastName);
-		user.setAddress(this.address);
-		user.setCity(this.city);
-		user.setState(this.state);
-		user.setCountry(this.country);
-		user.setMobileNumber(this.mobileNumber);
-		user.setGender(this.gender);
-		user.setDob(this.dob);
-		return user;
-	}*/
 }

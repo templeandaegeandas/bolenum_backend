@@ -8,7 +8,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
+
+import com.bolenum.enums.CurrencyType;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 
@@ -30,21 +36,30 @@ public class Currency {
 	@Column(unique = true)
 	private String currencyAbbreviation;
 
+	@ApiModelProperty(hidden = true)
+	@CreationTimestamp
 	private Date createdOn = new Date();
 
+	@ApiModelProperty(hidden = true)
+	@UpdateTimestamp
 	private Date UpdatedOn;
+	
+	private CurrencyType currencyType;
 
+	@ApiModelProperty(hidden = true)
 	private Date deletedOn;
 
 	private boolean isDeleted = false;
 	
-	public Currency(String currencyName, String currencyAbbreviation) {
+
+	public Currency() {
+
+	}
+
+	public Currency(String currencyName, String currencyAbbreviation,CurrencyType currencyType) {
 		this.currencyName = currencyName;
 		this.currencyAbbreviation = currencyAbbreviation;
-	}
-	
-	public Currency() {
-		
+		this.currencyType=currencyType;
 	}
 
 	public Long getCurrencyId() {
@@ -101,6 +116,14 @@ public class Currency {
 
 	public void setDeleted(boolean isDeleted) {
 		this.isDeleted = isDeleted;
+	}
+
+	public CurrencyType getCurrencyType() {
+		return currencyType;
+	}
+
+	public void setCurrencyType(CurrencyType currencyType) {
+		this.currencyType = currencyType;
 	}
 
 }

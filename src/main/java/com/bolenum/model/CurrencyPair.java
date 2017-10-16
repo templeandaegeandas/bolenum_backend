@@ -9,7 +9,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @Author Himanshu
@@ -33,20 +38,29 @@ public class CurrencyPair {
 	@Column(unique = true)
 	private String pairName;
 
-	private Date onCreated = new Date();
+	@ApiModelProperty(hidden = true)
+	@CreationTimestamp
+	private Date onCreated;
 
+	@ApiModelProperty(hidden = true)
+	@UpdateTimestamp
 	private Date onUpdated;
 
+	@ApiModelProperty(hidden = true)
 	private Boolean isEnabled;
 
+	@ApiModelProperty(hidden = true)
 	private Boolean isDeleted;
 
-	public Long getPairID() {
+	@ApiModelProperty(hidden = true)
+	private Date deletedOn;
+
+	public Long getPairId() {
 		return pairId;
 	}
 
-	public void setPairID(Long pairID) {
-		this.pairId = pairID;
+	public void setPairId(Long pairId) {
+		this.pairId = pairId;
 	}
 
 	public List<Currency> getToCurrency() {
@@ -105,6 +119,12 @@ public class CurrencyPair {
 		this.isDeleted = isDeleted;
 	}
 
-	
+	public Date getDeletedOn() {
+		return deletedOn;
+	}
+
+	public void setDeletedOn(Date deletedOn) {
+		this.deletedOn = deletedOn;
+	}
 
 }

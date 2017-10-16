@@ -106,4 +106,9 @@ public class MarketPriceServiceImpl implements MarketPriceService {
 	public MarketPrice findByCurrency(Currency currency) {
 		return marketPriceRepo.findByCurrency(currency);
 	}
+	
+	@Override
+	public MarketPrice findByCurrencyId(String currencyAbbreviation) {
+		return marketPriceRepo.findByCurrencyCurrencyAbbreviation(currencyAbbreviation);
+	}
 }

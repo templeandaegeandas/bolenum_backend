@@ -105,9 +105,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	
 	private Credentials getCredentials(User user) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
 		File file = new File(ethWalletLocation);
-		File jsonFile = new File(file + user.getEthWalletJsonFileName());
+		File jsonFile = new File(file+ "/" + user.getEthWalletJsonFileName());
 		logger.debug("JSON file of the user is: {}", user.getEthWalletJsonFileName());
-		String passwordKey = CryptoUtil.getSecretKey();
+		String passwordKey = user.getEthWalletPwdKey();
 		String decPwd = CryptoUtil.decrypt(user.getEthWalletPwd(), passwordKey);
 		logger.debug("Decrypted password of the user is: {}", decPwd);
 		return WalletUtils.loadCredentials(decPwd, jsonFile);
