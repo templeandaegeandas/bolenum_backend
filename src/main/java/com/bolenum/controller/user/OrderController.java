@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
@@ -42,6 +43,10 @@ public class OrderController {
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestBody Orders orders) {
+		// can not place order on 0 prize
+		if (orders.getOrderStandard().equals(OrderStandard.LIMIT) && orders.getPrice() <= 0) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"), null);
+		}
 		User user = GenericUtils.getLoggedInUser();
 		String balance = ordersService.checkOrderEligibility(user, orders);
 		logger.debug("balance: {}", balance);

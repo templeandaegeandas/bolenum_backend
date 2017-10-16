@@ -22,6 +22,8 @@ import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
 
@@ -52,6 +54,12 @@ public class OrdersServiceImpl implements OrdersService {
 	@Autowired
 	private MarketPriceService marketPriceService;
 
+	@Autowired
+	private TransactionService transactionService;
+
+	@Autowired
+	private UserService userService;
+
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
 	List<Orders> ordersList = new ArrayList<>();
@@ -78,7 +86,7 @@ public class OrdersServiceImpl implements OrdersService {
 			 * (volume * price), price limit given by user
 			 */
 			if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
-				logger.debug("limit order buy");
+				logger.debug("limit order buy on price: {}", orders.getPrice());
 				/**
 				 * user must have this balance to give limit order Example user
 				 * want to BUY 3 BTC on 5 ETH per BTC unit, then user must have
@@ -260,7 +268,7 @@ public class OrdersServiceImpl implements OrdersService {
 	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders) {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
-		Long buyerId, sellerId;
+		long buyerId, sellerId;
 		// process till order size and remaining volume is > 0
 		while ((ordersList.size() > 0) && (remainingVolume > 0)) {
 			logger.debug("inner proccessing while");
@@ -308,18 +316,44 @@ public class OrdersServiceImpl implements OrdersService {
 				// seller is coming order's user
 				sellerId = orders.getUserId();
 			}
-			// saving the processed BUY/SELL order in trade
-			Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyerId, sellerId, OrderStandard.LIMIT);
-			tradeList.add(trade);
-			logger.debug("saving trade ompleted");
+			// buyer and seller must be different user
+			logger.debug("byuer id: {} seller id: {}", buyerId, sellerId);
+			if (buyerId != sellerId) {
+				// saving the processed BUY/SELL order in trade
+				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyerId, sellerId, OrderStandard.LIMIT);
+				tradeList.add(trade);
+				logger.debug("saving trade ompleted");
+			}
 		}
 		orderAsyncServices.saveTrade(tradeList);
 		return remainingVolume;
 	}
 
-	// public Double totalVolume(String pair) {
-	// return orderRepository.getSumVolumeByPair(pair);
-	// }
+	/**
+	 * @description processTransaction
+	 * @param orders,qtyTraded,buyerId,sellerId
+	 */
+	private void processTransaction(Orders orders, double qtyTraded, long buyerId, long sellerId) {
+		User buyer = userService.findByUserId(buyerId);
+		User seller = userService.findByUserId(sellerId);
+		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(), orders.getId());
+		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPairId());
+		String[] tickters = new String[2];
+		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		for (String tickter : tickters) {
+			process(tickter, orders, qtyTraded, buyer, seller);
+		}
+	}
+
+	private boolean process(String currencyAbr, Orders orders, double qtyTraded, User buyer, User seller) {
+		switch (currencyAbr) {
+		case "BTC":
+			transactionService.performBtcTransaction(buyer,
+					bTCWalletService.getWalletAddress(seller.getBtcWalletUuid()), qtyTraded);
+		}
+		return true;
+	}
 
 	@Override
 	public Page<Orders> getOrdersListByPair(Long pairId, OrderType orderType) {

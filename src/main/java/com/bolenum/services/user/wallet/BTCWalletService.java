@@ -30,4 +30,13 @@ public interface BTCWalletService {
 	Map<String, Object> getWalletAddressAndQrCode(String uuid);
 	
 	String getWalletBalnce(String uuid);
+
+	/**
+	 * @description getWalletAddress
+	 * @param 
+	 * @return Map<String,Object>
+	 * @exception 
+	 * 
+	 */
+	String getWalletAddress(String walletUuid);
 }
