@@ -8,12 +8,13 @@ import com.bolenum.model.Currency;
 
 public interface CurrencyRepo extends JpaRepository<Currency,Long>{
 
-	Currency findByCurrencyName(String currencyname);
 
 	Page<Currency> findByCurrencyNameOrCurrencyAbbreviationLike(String searchData, Pageable pageable );
 
 	Currency findByCurrencyId(Long currencyId);
 
 	Currency findByCurrencyAbbreviation(String currencyAbbreviation);
+
+	Currency findByCurrencyNameInIgnoreCase(String currencyName);
 	
 }
