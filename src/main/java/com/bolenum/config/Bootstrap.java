@@ -122,6 +122,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	private void createGoogleAuthQrCodeDirectories() {
 		Path profileImg = Paths.get(googleQrCodeLocation);
 
@@ -222,6 +225,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	void saveCountries() {
 		long count = countriesAndStateService.countCountries();
 		if (count == 0) {
@@ -241,6 +247,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	void saveStates() {
 		long count = countriesAndStateService.countStates();
 		if (count == 0) {
@@ -260,6 +269,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	void saveBolenumErc20Token() {
 		Erc20Token erc20Token = erc20TokenService.saveBolenumErc20Token();
 		if (erc20Token != null) {
