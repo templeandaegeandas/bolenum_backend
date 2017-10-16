@@ -14,7 +14,7 @@ import javax.persistence.Id;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.bolenum.enums.CurrencyType;
+import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionType;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -44,7 +44,7 @@ public class Transaction {
 	private Double txFee;
 	private Double txAmount;
 	private String txDescription;
-	private CurrencyType currencyType;
+	private CurrencyName currencyType;
 	private TransactionType transactionType;
 	private Double gas;
 	private Double gasPrice;
@@ -54,7 +54,7 @@ public class Transaction {
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, CurrencyType currencyType, TransactionType transactionType, Double gas,Double gasPrice) {
+			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,Double gasPrice) {
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
@@ -210,7 +210,7 @@ public class Transaction {
 	/**
 	 * @return the currencyType
 	 */
-	public CurrencyType getCurrencyType() {
+	public CurrencyName getCurrencyType() {
 		return currencyType;
 	}
 
@@ -218,7 +218,7 @@ public class Transaction {
 	 * @param currencyType
 	 *  the currencyType to set
 	 */
-	public void setCurrencyType(CurrencyType currencyType) {
+	public void setCurrencyType(CurrencyName currencyType) {
 		this.currencyType = currencyType;
 	}
 

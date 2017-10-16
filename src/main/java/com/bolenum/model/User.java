@@ -1,7 +1,6 @@
 package com.bolenum.model;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,13 +8,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import com.bolenum.enums.TwoFactorAuthOption;
-
 import io.swagger.annotations.ApiModelProperty;
+
+/**
+ * 
+ * @Author Himanshu
+ * @Date 13-Oct-2017
+ */
 
 @Entity
 public class User {
@@ -46,7 +48,7 @@ public class User {
 	private String country;
 
 	private String mobileNumber;
-	
+
 	private Boolean isMobileVerified = false;
 
 	private String gender;
@@ -82,22 +84,21 @@ public class User {
 
 	@OneToOne
 	private UserKyc userKyc;
-	
+
 	private String btcWalletUuid;
-	
+
 	private String ethWalletaddress;
-	
+
 	private String ethWalletPwd;
-	
+
 	private String ethWalletPwdKey;
-	
+
 	private String ethWalletJsonFileName;
-	
+
 	private TwoFactorAuthOption twoFactorAuthOption = TwoFactorAuthOption.NONE;
-	
+
 	private String google2FaAuthKey;
-	
-	
+
 	public Long getUserId() {
 		return userId;
 	}
@@ -256,7 +257,7 @@ public class User {
 
 	/**
 	 * @param createdOn
-	 *  the createdOn to set
+	 *            the createdOn to set
 	 */
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
@@ -271,7 +272,7 @@ public class User {
 
 	/**
 	 * @param updatedOn
-	 * the updatedOn to set
+	 *            the updatedOn to set
 	 */
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
@@ -286,7 +287,7 @@ public class User {
 
 	/**
 	 * @param deletedOn
-	 * the deletedOn to set
+	 *            the deletedOn to set
 	 */
 	public void setDeletedOn(Date deletedOn) {
 		this.deletedOn = deletedOn;
@@ -301,7 +302,7 @@ public class User {
 
 	/**
 	 * @param role
-	 * the role to set
+	 *            the role to set
 	 */
 	public void setRole(Role role) {
 		this.role = role;
@@ -331,8 +332,8 @@ public class User {
 	}
 
 	/**
-	 * @param btcWalletUuid 
-	 * the btcWalletUuid to set
+	 * @param btcWalletUuid
+	 *            the btcWalletUuid to set
 	 */
 	public void setBtcWalletUuid(String btcWalletUuid) {
 		this.btcWalletUuid = btcWalletUuid;
@@ -346,8 +347,8 @@ public class User {
 	}
 
 	/**
-	 * @param ethWalletaddress 
-	 * the ethWalletaddress to set
+	 * @param ethWalletaddress
+	 *            the ethWalletaddress to set
 	 */
 	public void setEthWalletaddress(String ethWalletaddress) {
 		this.ethWalletaddress = ethWalletaddress;
@@ -361,8 +362,8 @@ public class User {
 	}
 
 	/**
-	 * @param ethWalletPwd 
-	 * the ethWalletPwd to set
+	 * @param ethWalletPwd
+	 *            the ethWalletPwd to set
 	 */
 	public void setEthWalletPwd(String ethWalletPwd) {
 		this.ethWalletPwd = ethWalletPwd;
@@ -392,8 +393,8 @@ public class User {
 	}
 
 	/**
-	 * @param ethWalletPwdKey 
-	 * the ethWalletPwdKey to set
+	 * @param ethWalletPwdKey
+	 *            the ethWalletPwdKey to set
 	 */
 	public void setEthWalletPwdKey(String ethWalletPwdKey) {
 		this.ethWalletPwdKey = ethWalletPwdKey;
@@ -407,11 +408,11 @@ public class User {
 	}
 
 	/**
-	 * @param ethWalletJsonFileName 
-	 * the ethWalletJsonFileName to set
+	 * @param ethWalletJsonFileName
+	 *            the ethWalletJsonFileName to set
 	 */
 	public void setEthWalletJsonFileName(String ethWalletJsonFileName) {
 		this.ethWalletJsonFileName = ethWalletJsonFileName;
 	}
-	
+
 }

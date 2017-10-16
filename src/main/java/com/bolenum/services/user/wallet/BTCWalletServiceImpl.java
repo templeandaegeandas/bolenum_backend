@@ -34,6 +34,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	/**
 	 * creating BIP32 hierarchical deterministic (HD) wallets
 	 */
+	
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -95,7 +96,10 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return map;
 	}
-
+	
+	/**
+	 * 
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public String getWalletBalnce(String uuid) {
