@@ -358,7 +358,7 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public Page<Orders> getOrdersListByPair(Long pairId, OrderType orderType) {
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderType(pairId, orderType, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, orderType, OrderStatus.SUBMITTED, pageRequest);
 		return orderBook;
 	}
 

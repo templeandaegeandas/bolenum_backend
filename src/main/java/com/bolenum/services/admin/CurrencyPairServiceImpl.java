@@ -1,5 +1,7 @@
 package com.bolenum.services.admin;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -124,6 +126,10 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 	public CurrencyPair findCurrencypairByPairName(String pairName) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	public List<CurrencyPair> findCurrencyPairByCurrencyId(Long currencyId) {
+		return currencyPairRepo.findByToCurrencyCurrencyIdAndIsEnabled(currencyId, true);
 	}
 
 }

@@ -55,5 +55,5 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED'")
 	Long countOrderByOrderType(@Param("orderType") OrderType orderType);
 	
-	Page<Orders> findByPairIdAndOrderType(Long pairId, OrderType orderType, Pageable pageable);
+	Page<Orders> findByPairIdAndOrderTypeAndOrderStatus(Long pairId, OrderType orderType, OrderStatus orderStatus, Pageable pageable);
 }
