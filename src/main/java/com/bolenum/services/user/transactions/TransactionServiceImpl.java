@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.Web3j;
 
-import com.bolenum.enums.CurrencyType;
+import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
@@ -47,7 +47,7 @@ public class TransactionServiceImpl implements TransactionService {
 				//transaction.setGas(Transaction.getGas());
 				transaction.setTxAmmount(Transaction.getValue().doubleValue());
 				transaction.setTransactionType(TransactionType.INCOMING);
-				transaction.setCurrencyType(CurrencyType.ETHEREUM);
+				transaction.setCurrencyType(CurrencyName.ETHEREUM);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					logger.debug("new incoming transaction saved of user: {}", user.getEmailId());

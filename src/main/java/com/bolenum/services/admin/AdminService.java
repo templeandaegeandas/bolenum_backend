@@ -28,5 +28,9 @@ public interface AdminService {
 	 * @return User
 	 */
 	User getUserById(Long userId);
+	
+	String createAdminHotWallet(String uuid);
+
+	String getAdminWalletBalnce(String uuid);
 
 }

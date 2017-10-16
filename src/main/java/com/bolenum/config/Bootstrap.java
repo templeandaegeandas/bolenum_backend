@@ -18,6 +18,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Countries;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
@@ -25,6 +26,7 @@ import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.common.CountryAndStateService;
@@ -71,6 +73,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private CurrencyService currencyService;
 
+	@Autowired
+	private AdminService adminService;
+
 	private Set<Privilege> privileges = new HashSet<>();
 
 	private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
@@ -90,7 +95,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createProfilePicDirectories();
 		createDocumentsDirectories();
 		createGoogleAuthQrCodeDirectories();
-		
+
 	}
 
 	/**
@@ -198,9 +203,17 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			form.setEmailId("admin@bolenum.com");
 			form.setPassword(passwordEncoder.encode("12345"));
 			form.setRole(roleAdmin);
-			userService.saveUser(form);
-		} else {
-			logger.debug("admin exist");
+			User user = userService.saveUser(form);
+			String uuid = adminService.createAdminHotWallet("adminWallet");
+			logger.debug("user mail verify wallet uuid: {}", uuid);
+			if (!uuid.isEmpty()) {
+				user.setBtcWalletUuid(uuid);
+				user.setIsEnabled(true);
+				User savedUser = userService.saveUser(user);
+				logger.debug("savedUser as Admin: {}", savedUser.getEmailId());
+			} else {
+				logger.debug("admin exist");
+			}
 		}
 	}
 
@@ -257,12 +270,10 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	void saveCurrency() {
 		long count = currencyService.countCourencies();
 		if (count == 0) {
-			Currency currency1 = new Currency("BITCOIN", "BTC");
-			Currency currency2 = new Currency("ETHEREUM", "ETH");
-			Currency currency3 = new Currency("BOLENUM", "BLN");
+			Currency currency1 = new Currency("BITCOIN", "BTC",CurrencyType.CRYPTO);
+			Currency currency2 = new Currency("ETHEREUM", "ETH",CurrencyType.CRYPTO);
 			currencyService.saveCurrency(currency1);
 			currencyService.saveCurrency(currency2);
-			currencyService.saveCurrency(currency3);
 		}
 	}
 }
