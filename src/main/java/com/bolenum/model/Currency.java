@@ -36,7 +36,16 @@ public class Currency {
 
 	private Date deletedOn;
 
-	private boolean isDeleted;
+	private boolean isDeleted = false;
+	
+	public Currency(String currencyName, String currencyAbbreviation) {
+		this.currencyName = currencyName;
+		this.currencyAbbreviation = currencyAbbreviation;
+	}
+	
+	public Currency() {
+		
+	}
 
 	public Long getCurrencyId() {
 		return currencyId;

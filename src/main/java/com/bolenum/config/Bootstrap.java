@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,10 +20,14 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.bolenum.model.Countries;
+import com.bolenum.model.Currency;
+import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.services.admin.CurrencyService;
+import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
@@ -43,6 +48,10 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private UserService userService;
 	@Autowired
 	private PrivilegeService privilegeService;
+	@Autowired
+	private Erc20TokenService erc20TokenService;
+	@Autowired
+	private CurrencyService currencyService;
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
@@ -62,6 +71,18 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Value("${bolenum.google.qr.code.location}")
 	private String googleQrCodeLocation;
+	
+	@Value("${bolenum.deployed.contract.address}")
+	private String contractAddress;
+
+	@Value("${bolenum.deployed.contract.wallet.address}")
+	private String walletAddress;
+	
+	@Value("${bolenum.deployed.contract.currency.name}")
+	private String currencyName;
+	
+	@Value("${bolenum.deployed.contract.currency.abbreviation}")
+	private String currencyAbbreviation;
 
 
 	private Set<Privilege> privileges = new HashSet<>();
@@ -75,6 +96,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createAdmin();
 		saveCountries();
 		saveStates();
+		saveInitialErc20Tokens();
+
 		// create initial directories
 		createInitDirectories();
 		createProfilePicDirectories();
@@ -233,6 +256,20 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			}
 		} else {
 			logger.info("States list already saved");
+		}
+	}
+	
+	void saveInitialErc20Tokens() {
+		long count = erc20TokenService.countErc20Token();
+		if (count == 0) {
+			Currency currencyBLN = currencyService.saveCurrency(new Currency(currencyName, currencyAbbreviation));
+			Erc20Token erc20TokenBLN = new Erc20Token(walletAddress, contractAddress, currencyBLN);
+			List<Erc20Token> erc20Tokens = new ArrayList<>();
+			erc20Tokens.add(erc20TokenBLN);
+			erc20TokenService.saveInitialErc20Token(erc20Tokens);
+		}
+		else {
+			logger.info("Tokens already saved!");
 		}
 	}
 }

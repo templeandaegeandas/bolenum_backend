@@ -3,8 +3,16 @@
  */
 package com.bolenum.controller.user;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,9 +21,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.web3j.crypto.CipherException;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
+import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
@@ -41,6 +51,9 @@ public class BTCWalletController {
 	
 	@Autowired
 	private EtherumWalletService etherumWalletService;
+	
+	@Autowired
+	private Erc20TokenService erc20TokenService;
 	/**
 	 * to get the wallet address and QR code for get deposited in the
 	 * wallet @description getWalletAddressAndQrCode @param coin code @return
@@ -66,7 +79,12 @@ public class BTCWalletController {
 			map.put("data", mapAddress);
 			break;
 		default:
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),null);
+			try {
+				erc20TokenService.getErc20WalletBalance(user, coinCode);
+			} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+					| BadPaddingException | IOException | CipherException | InterruptedException | ExecutionException e) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),null);
+			}
 		}
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),map);
 	}
