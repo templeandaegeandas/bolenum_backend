@@ -56,4 +56,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Long countOrderByOrderType(@Param("orderType") OrderType orderType);
 	
 	Page<Orders> findByPairIdAndOrderTypeAndOrderStatus(Long pairId, OrderType orderType, OrderStatus orderStatus, Pageable pageable);
+	
+	List<Orders> findByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus);
 }
