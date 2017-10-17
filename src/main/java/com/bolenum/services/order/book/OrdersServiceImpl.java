@@ -275,6 +275,7 @@ public class OrdersServiceImpl implements OrdersService {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
 		long buyerId, sellerId;
+		logger.debug("process order list remainingVolume: {}", remainingVolume);
 		// process till order size and remaining volume is > 0
 		while ((ordersList.size() > 0) && (remainingVolume > 0)) {
 			logger.debug("inner proccessing while");
@@ -282,12 +283,17 @@ public class OrdersServiceImpl implements OrdersService {
 			// fetch matched order object
 			Orders matchedOrder = matchedOrder(ordersList);
 			// checking selling/buying volume less than matched order volume
+			logger.debug("matched order volume: {}", matchedOrder.getVolume());
 			if (remainingVolume < matchedOrder.getVolume()) {
 				// qtyTraded is total selling/buying volume
 				qtyTraded = remainingVolume;
+				logger.debug("qty traded: {}", qtyTraded);
 				// setting new required SELL/BUY volume is remaining order
 				// volume
-				matchedOrder.setVolume(matchedOrder.getVolume() - remainingVolume);
+				double remain = matchedOrder.getVolume() - remainingVolume;
+				logger.debug("reamining volume: {}", remain);
+				matchedOrder.setVolume(remain);
+				logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
 				// adding matched order in list with remaining volume
 				ordersList.add(matchedOrder);
 				// now selling/buying volume is 0
@@ -296,8 +302,10 @@ public class OrdersServiceImpl implements OrdersService {
 				// selling/buying volume greater than matched order volume
 				// qtyTraded is total sellers/buyers volume
 				qtyTraded = matchedOrder.getVolume();
+				logger.debug("qty traded else: ", qtyTraded);
 				// new selling/buying volume is remainingVolume - qtyTraded
-				remainingVolume -= qtyTraded;
+				remainingVolume = remainingVolume - qtyTraded;
+				logger.debug("remaining volume else: {}", remainingVolume);
 				// removed processed order
 				removeOrderFromList(ordersList);
 				// new volume of processed order is 0
@@ -415,7 +423,8 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public Page<Orders> getOrdersListByPair(Long pairId, OrderType orderType) {
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, orderType, OrderStatus.SUBMITTED, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, orderType,
+				OrderStatus.SUBMITTED, pageRequest);
 		return orderBook;
 	}
 

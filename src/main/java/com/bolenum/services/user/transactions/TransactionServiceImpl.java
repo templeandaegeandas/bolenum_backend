@@ -161,7 +161,10 @@ public class TransactionServiceImpl implements TransactionService {
 					}
 				}
 			}
-		} catch (JSONException | RestClientException e) {
+		} catch (JSONException e) {
+			logger.error("btc transaction JSON exception:  {}", e.getMessage());
+			e.printStackTrace();
+		} catch (RestClientException e) {
 			logger.error("btc transaction exception:  {}", e.getMessage());
 			e.printStackTrace();
 		}
