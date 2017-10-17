@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStandard;
-import com.bolenum.enums.OrderType;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.common.LocaleService;
@@ -69,10 +68,15 @@ public class OrderController {
 		}
 	}
 
-	@RequestMapping(value = UrlConstant.LIST_ORDER, method = RequestMethod.GET)
-	public ResponseEntity<Object> getOrderListWithPair(@RequestParam("pairId") Long pairId,
-			@RequestParam("orderType") OrderType orderType) {
-		Page<Orders> list = ordersService.getOrdersListByPair(pairId, orderType);
+	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("pairId") Long pairId) {
+		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
+	}
+	
+	@RequestMapping(value = UrlConstant.SELL_ORDER_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("pairId") Long pairId) {
+		Page<Orders> list = ordersService.getSellOrdersListByPair(pairId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 

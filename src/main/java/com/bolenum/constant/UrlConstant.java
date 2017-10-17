@@ -68,7 +68,8 @@ public class UrlConstant {
 	
 	/******************** ORDER API ******/
 	public static final String CREATE_ORDER = "create/order";
-	public static final String LIST_ORDER = "get/orders";
+	public static final String BUY_ORDER_LIST = "get/buy/orders";
+	public static final String SELL_ORDER_LIST = "get/sell/orders";
 	
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";

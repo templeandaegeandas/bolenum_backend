@@ -34,7 +34,9 @@ public interface OrdersService {
 
 	Boolean processOrder(Orders orders);
 
-	Page<Orders> getOrdersListByPair(Long pairId, OrderType orderType);
+	Page<Orders> getBuyOrdersListByPair(Long pairId);
+	
+	Page<Orders> getSellOrdersListByPair(Long pairId);
 
 	Double getWorstBuy(List<Orders> buyOrderList);
 
