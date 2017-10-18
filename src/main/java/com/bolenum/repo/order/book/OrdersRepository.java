@@ -55,5 +55,9 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED'")
 	Long countOrderByOrderType(@Param("orderType") OrderType orderType);
 	
-	Page<Orders> findByPairIdAndOrderTypeAndOrderStatus(Long pairId, OrderType orderType, OrderStatus orderStatus, Pageable pageable);
+	@Query("select o from Orders o where o.pairId = :pairId and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price asc")
+	Page<Orders> findBuyOrderList(@Param("pairId")Long pairId, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
+	
+	@Query("select o from Orders o where o.pairId = :pairId and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price desc")
+	Page<Orders> findSellOrderList(@Param("pairId")Long pairId, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 }
