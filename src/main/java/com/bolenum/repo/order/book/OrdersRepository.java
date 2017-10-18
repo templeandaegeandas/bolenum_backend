@@ -60,4 +60,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	
 	@Query("select o from Orders o where o.pairId = :pairId and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price desc")
 	Page<Orders> findSellOrderList(@Param("pairId")Long pairId, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
+
+	List<Orders> findByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus);
 }

@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
+import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 
@@ -35,7 +37,7 @@ public interface OrdersService {
 	Boolean processOrder(Orders orders);
 
 	Page<Orders> getBuyOrdersListByPair(Long pairId);
-	
+
 	Page<Orders> getSellOrdersListByPair(Long pairId);
 
 	Double getWorstBuy(List<Orders> buyOrderList);
@@ -48,4 +50,7 @@ public interface OrdersService {
 
 	String checkOrderEligibility(User user, Orders order);
 
+	String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded);
+
+	List<Orders> findOrdersListByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus);
 }
