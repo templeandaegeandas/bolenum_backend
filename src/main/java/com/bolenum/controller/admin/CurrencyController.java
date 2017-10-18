@@ -150,18 +150,15 @@ public class CurrencyController {
 	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyById(@RequestParam Long currencyId) {
-		Currency currency=currencyService.findCurrencyById(currencyId);
-		if(currency!=null)
-		{
-			return ResponseHandler.response(HttpStatus.OK, false,
-					localService.getMessage("currency.found.success"), currency);
+		Currency currency = currencyService.findCurrencyById(currencyId);
+		if (currency != null) {
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.found.success"),
+					currency);
+		} else {
+			return ResponseHandler.response(HttpStatus.CONFLICT, false, localService.getMessage("currency.not.found"),
+					null);
 		}
-		else
-		{
-			return ResponseHandler.response(HttpStatus.CONFLICT, false,
-					localService.getMessage("currency.not.found"),null);
-		}
-		
+
 	}
 
 }

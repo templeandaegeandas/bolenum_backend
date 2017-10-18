@@ -91,6 +91,7 @@ public class AuthServiceImpl implements AuthService {
 		map.put("mName", token.getUser().getMiddleName());
 		map.put("lName", token.getUser().getLastName());
 		map.put("name", token.getUser().getFullName());
+		map.put("profilePic", token.getUser().getProfileImage());
 		map.put("email", token.getUser().getEmailId());
 		map.put("role", token.getUser().getRole().getName());
 		map.put("token", token.getToken());

@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 
 /**
@@ -20,5 +22,7 @@ public interface CurrencyPairRepo extends JpaRepository<CurrencyPair, Long> {
 	Page<CurrencyPair> findByIsEnabled(Boolean isEnabled, Pageable page);
 	
 	List<CurrencyPair> findByToCurrencyCurrencyIdAndIsEnabled(Long currencyId, Boolean isEnabled);
+
+	List<CurrencyPair> findByToCurrency(Currency isCurrencyExist);
 
 }

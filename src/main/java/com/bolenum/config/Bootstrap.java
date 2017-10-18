@@ -34,6 +34,7 @@ import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,8 +53,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private PrivilegeService privilegeService;
 	@Autowired
 	private Erc20TokenService erc20TokenService;
-	@Autowired
-	private CurrencyService currencyService;
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
@@ -86,7 +85,13 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private String currencyAbbreviation;
 
 	@Autowired
+	private CurrencyService currencyService;
+
+	@Autowired
 	private AdminService adminService;
+	
+	@Autowired
+	private EtherumWalletService etherumWalletService;
 
 	private Set<Privilege> privileges = new HashSet<>();
 
@@ -130,6 +135,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	private void createGoogleAuthQrCodeDirectories() {
 		Path profileImg = Paths.get(googleQrCodeLocation);
 
@@ -216,6 +224,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			form.setPassword(passwordEncoder.encode("12345"));
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
+			etherumWalletService.createWallet(user);
 			String uuid = adminService.createAdminHotWallet("adminWallet");
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 			if (!uuid.isEmpty()) {
@@ -229,6 +238,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	void saveCountries() {
 		long count = countriesAndStateService.countCountries();
 		if (count == 0) {
@@ -248,6 +260,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	void saveStates() {
 		long count = countriesAndStateService.countStates();
 		if (count == 0) {

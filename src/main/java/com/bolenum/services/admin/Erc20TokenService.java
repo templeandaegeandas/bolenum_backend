@@ -70,4 +70,6 @@ public interface Erc20TokenService {
 			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
 			BadPaddingException, IOException, CipherException;
 
+	Erc20Token saveBolenumErc20Token();
+
 }
