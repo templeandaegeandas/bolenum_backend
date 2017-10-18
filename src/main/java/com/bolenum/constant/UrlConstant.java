@@ -44,7 +44,8 @@ public class UrlConstant {
 	public static final String CURRENCY_LIST_FOR_TRADING="currency/list";
 	public static final String CURRENCY_PAIR="currency/pair";
 	public static final String CURRENCY_PAIR_LIST="currency-pair/list";
-	public static final String ADD_TRANSACTION_FEES="transaction/fees";
+	public static final String TRANSACTION_FEES="transaction/fees";
+	public static final String PAIRED_CURRENCY="paired/currency/list";
 	
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "/kyc/upload";
@@ -73,5 +74,6 @@ public class UrlConstant {
 	public static final String ADD_NEW_TOKEN = "add/new/token";
 	public static final String GET_TOKEN_LIST = "get/token/list";
 	public static final String GET_TOKEN_BY_ID = "get/token";
+	
 	
 }

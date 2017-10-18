@@ -24,13 +24,18 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @Entity
 public class MarketPrice {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+
 	@OneToOne
 	private Currency currency;
+
 	private Double priceUSD;
+
 	private Double priceBTC;
+
 	@ApiModelProperty(hidden = true)
 	@CreationTimestamp
 	private Date createdOn;
@@ -38,6 +43,7 @@ public class MarketPrice {
 	@ApiModelProperty(hidden = true)
 	@UpdateTimestamp
 	private Date updatedOn;
+	
 	private boolean isDeleted;
 
 	/**
