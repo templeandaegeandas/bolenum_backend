@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStandard;
-import com.bolenum.enums.OrderType;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.common.LocaleService;
@@ -45,7 +44,8 @@ public class OrderController {
 	public ResponseEntity<Object> createOrder(@RequestBody Orders orders) {
 		// can not place order on 0 prize
 		if (orders.getOrderStandard().equals(OrderStandard.LIMIT) && orders.getPrice() <= 0) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"), null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"),
+					null);
 		}
 		User user = GenericUtils.getLoggedInUser();
 		String balance = ordersService.checkOrderEligibility(user, orders);
@@ -57,6 +57,7 @@ public class OrderController {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
+		orders.setUserId(user.getUserId());
 		Boolean result = ordersService.processOrder(orders);
 		if (result) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
@@ -67,10 +68,15 @@ public class OrderController {
 		}
 	}
 
-	@RequestMapping(value = UrlConstant.LIST_ORDER, method = RequestMethod.GET)
-	public ResponseEntity<Object> getOrderListWithPair(@RequestParam("pairId") Long pairId,
-			@RequestParam("orderType") OrderType orderType) {
-		Page<Orders> list = ordersService.getOrdersListByPair(pairId, orderType);
+	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("pairId") Long pairId) {
+		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
+	}
+	
+	@RequestMapping(value = UrlConstant.SELL_ORDER_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("pairId") Long pairId) {
+		Page<Orders> list = ordersService.getSellOrdersListByPair(pairId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 

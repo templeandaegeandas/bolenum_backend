@@ -24,5 +24,7 @@ public interface MarketPriceRepo extends JpaRepository<MarketPrice, Serializable
 	 * 
 	 */
 	MarketPrice findByCurrency(Currency currency);
+	
+	MarketPrice findByCurrencyCurrencyAbbreviation(String currencyAbbreviation);
 
 }

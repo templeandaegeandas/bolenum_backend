@@ -9,19 +9,24 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.transaction.Transactional;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.web3j.crypto.CipherException;
@@ -34,7 +39,6 @@ import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
 import com.bolenum.constant.BTCUrlConstant;
-
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
@@ -73,17 +77,22 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public boolean performEthTransaction(User fromUser, String toAddress, Double amount) {
 		String passwordKey = fromUser.getEthWalletPwdKey();
+		logger.debug("password key: {}", passwordKey);
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 		Credentials credentials = null;
-		File walletFile = new File(ethWalletLocation + fromUser.getEthWalletJsonFileName());
+		String fileName = ethWalletLocation + fromUser.getEthWalletJsonFileName();
+		logger.debug("user eth wallet file name: {}", fileName);
+		File walletFile = new File(fileName);
 		try {
-			String decrPwd = CryptoUtil.decrypt(fromUser.getPassword(), passwordKey);
+			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
+			logger.debug("decr password: {}", decrPwd);
 			credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
 			TransactionReceipt transactionReceipt = Transfer.sendFunds(web3j, credentials, toAddress,
 					BigDecimal.valueOf(amount), Convert.Unit.ETHER);
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("transaction hash:{} for user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
+			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
 				transaction = new Transaction();
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
@@ -118,40 +127,46 @@ public class TransactionServiceImpl implements TransactionService {
 	public boolean performBtcTransaction(User fromUser, String toAddress, Double amount) {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = BTCUrlConstant.CREATE_TX;
-		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<String, String>();
-		parametersMap.add("walletId", fromUser.getBtcWalletUuid());
-		parametersMap.add("transactionTradeAmount", String.valueOf(amount));
-		parametersMap.add("receiverAddress", toAddress);
-		parametersMap.add("transactionFee", null);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		JSONObject request = new JSONObject();
 		try {
-			@SuppressWarnings("unchecked")
-			Map<String, Object> map = restTemplate.postForObject(url, parametersMap, Map.class);
-			boolean isError = (boolean) map.get("error");
-			logger.debug("create transaction isError:  {}", isError);
-			if (isError) {
-				return false;
-			}
-			String txHash = (String) map.get("data");
-			logger.debug("transaction hash: {}", txHash);
-			Transaction transaction = transactionRepo.findByTxHash(txHash);
-			if (transaction == null) {
-				transaction = new Transaction();
-				transaction.setTxHash(txHash);
-				transaction.setFromAddress(fromUser.getBtcWalletUuid());
-				transaction.setToAddress(toAddress);
-				transaction.setTxAmount(amount);
-				transaction.setTransactionType(TransactionType.OUTGOING);
-				Transaction saved = transactionRepo.saveAndFlush(transaction);
-				if (saved != null) {
-					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-					return true;
+			request.put("walletId", fromUser.getBtcWalletUuid());
+			request.put("transactionTradeAmount", String.valueOf(amount));
+			request.put("receiverAddress", toAddress);
+		} catch (JSONException e1) {
+			logger.error("json parse error: {}", e1.getMessage());
+			e1.printStackTrace();
+		}
+		HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+		try {
+			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+			if (txRes.getStatusCode() == HttpStatus.OK) {
+				JSONObject Json = new JSONObject(txRes.getBody());
+				String txHash = (String) Json.get("data");
+				logger.debug("transaction hash: {}", txHash);
+				Transaction transaction = transactionRepo.findByTxHash(txHash);
+				if (transaction == null) {
+					transaction = new Transaction();
+					transaction.setTxHash(txHash);
+					transaction.setFromAddress(fromUser.getBtcWalletUuid());
+					transaction.setToAddress(toAddress);
+					transaction.setTxAmount(amount);
+					transaction.setTransactionType(TransactionType.OUTGOING);
+					Transaction saved = transactionRepo.saveAndFlush(transaction);
+					if (saved != null) {
+						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
+						return true;
+					}
 				}
 			}
+		} catch (JSONException e) {
+			logger.error("btc transaction JSON exception:  {}", e.getMessage());
+			e.printStackTrace();
 		} catch (RestClientException e) {
 			logger.error("btc transaction exception:  {}", e.getMessage());
 			e.printStackTrace();
 		}
-
 		return false;
 	}
 }

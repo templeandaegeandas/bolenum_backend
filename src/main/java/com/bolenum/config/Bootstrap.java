@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,12 +72,21 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Value("${bolenum.google.qr.code.location}")
 	private String googleQrCodeLocation;
 
+	@Value("${bolenum.deployed.contract.address}")
+	private String contractAddress;
+	@Value("${bolenum.deployed.contract.wallet.address}")
+	private String walletAddress;
+	@Value("${bolenum.deployed.contract.currency.name}")
+	private String currencyName;
+	@Value("${bolenum.deployed.contract.currency.abbreviation}")
+	private String currencyAbbreviation;
+
 	@Autowired
 	private CurrencyService currencyService;
 
 	@Autowired
 	private AdminService adminService;
-	
+
 	@Autowired
 	private EtherumWalletService etherumWalletService;
 
@@ -91,7 +101,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createAdmin();
 		saveCountries();
 		saveStates();
-		saveBolenumErc20Token();
+
+		saveInitialErc20Tokens();
 		saveCurrency();
 
 		// create initial directories
@@ -269,15 +280,17 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
-	/**
-	 * 
-	 */
-	void saveBolenumErc20Token() {
-		Erc20Token erc20Token = erc20TokenService.saveBolenumErc20Token();
-		if (erc20Token != null) {
-			logger.info("Bolenum token saved successfully!");
+	void saveInitialErc20Tokens() {
+		long count = erc20TokenService.countErc20Token();
+		if (count == 2) {
+			Currency currencyBLN = currencyService
+					.saveCurrency(new Currency(currencyName, currencyAbbreviation, CurrencyType.ERC20TOKEN));
+			Erc20Token erc20TokenBLN = new Erc20Token(walletAddress, contractAddress, currencyBLN);
+			List<Erc20Token> erc20Tokens = new ArrayList<>();
+			erc20Tokens.add(erc20TokenBLN);
+			erc20TokenService.saveInitialErc20Token(erc20Tokens);
 		} else {
-			logger.info("Bolenum token already saved!");
+			logger.info("Tokens already saved!");
 		}
 	}
 
@@ -287,8 +300,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	void saveCurrency() {
 		long count = currencyService.countCourencies();
 		if (count == 0) {
-			Currency currency1 = new Currency("BITCOIN", "BTC",CurrencyType.CRYPTO);
-			Currency currency2 = new Currency("ETHEREUM", "ETH",CurrencyType.CRYPTO);
+			Currency currency1 = new Currency("BITCOIN", "BTC", CurrencyType.CRYPTO);
+			Currency currency2 = new Currency("ETHEREUM", "ETH", CurrencyType.CRYPTO);
 			currencyService.saveCurrency(currency1);
 			currencyService.saveCurrency(currency2);
 		}

@@ -31,6 +31,8 @@ import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
+import com.bolenum.dto.common.CurrencyForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.User;
@@ -68,7 +70,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	public Erc20Token saveToken(Erc20Token erc20Token) {
 		Erc20Token existingToken = erc20TokenRepository.findByContractAddress(erc20Token.getContractAddress());
 		if (existingToken == null) {
-			Currency savedCurrency = currencyService.saveCurrency(erc20Token.getCurrency());
+			CurrencyForm currencyForm = new CurrencyForm(erc20Token.getCurrency().getCurrencyName(), erc20Token.getCurrency().getCurrencyAbbreviation(), CurrencyType.ERC20TOKEN);
+			Currency savedCurrency = currencyService.saveCurrency(currencyForm.copy(new Currency()));
 			erc20Token.setCurrency(savedCurrency);
 			return erc20TokenRepository.save(erc20Token);
 		} else {
@@ -105,9 +108,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	
 	private Credentials getCredentials(User user) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
 		File file = new File(ethWalletLocation);
-		File jsonFile = new File(file + user.getEthWalletJsonFileName());
+		File jsonFile = new File(file+ "/" + user.getEthWalletJsonFileName());
 		logger.debug("JSON file of the user is: {}", user.getEthWalletJsonFileName());
-		String passwordKey = CryptoUtil.getSecretKey();
+		String passwordKey = user.getEthWalletPwdKey();
 		String decPwd = CryptoUtil.decrypt(user.getEthWalletPwd(), passwordKey);
 		logger.debug("Decrypted password of the user is: {}", decPwd);
 		return WalletUtils.loadCredentials(decPwd, jsonFile);

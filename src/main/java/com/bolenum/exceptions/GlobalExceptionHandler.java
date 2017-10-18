@@ -3,6 +3,7 @@ package com.bolenum.exceptions;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolationException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.ResponseHandler;
 
 /**
@@ -29,6 +31,9 @@ import com.bolenum.util.ResponseHandler;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+	
+	@Autowired
+	private LocaleService localeService;
 
 	public GlobalExceptionHandler() {
 		super();
@@ -55,7 +60,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler({ ConstraintViolationException.class })
 	public ResponseEntity<Object> handleBadRequest(final ConstraintViolationException ex, final WebRequest request) {
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("constraint.violent"), null);
 	}
 
 	/**
@@ -67,7 +72,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler({ DataIntegrityViolationException.class })
 	public ResponseEntity<Object> handleBadRequest(final DataIntegrityViolationException ex, final WebRequest request) {
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("constraint.violent"), null);
 	}
 
 	/**

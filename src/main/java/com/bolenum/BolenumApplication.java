@@ -47,6 +47,6 @@ public class BolenumApplication {
 
 	@Scheduled(fixedRate = 20 * 1000)
 	public void fetchCoinPrice() {
-		// marketPriceService.priceFromCoinMarketCap();
+		 marketPriceService.priceFromCoinMarketCap();
 	}
 }

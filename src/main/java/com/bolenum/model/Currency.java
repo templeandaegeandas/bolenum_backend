@@ -49,8 +49,8 @@ public class Currency {
 	@ApiModelProperty(hidden = true)
 	private Date deletedOn;
 
-	private boolean isDeleted;
-	
+
+	private boolean isDeleted = false;
 
 	public Currency() {
 
