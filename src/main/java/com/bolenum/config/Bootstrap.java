@@ -71,15 +71,20 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Value("${bolenum.google.qr.code.location}")
 	private String googleQrCodeLocation;
-
+	
 	@Value("${bolenum.deployed.contract.address}")
 	private String contractAddress;
+
 	@Value("${bolenum.deployed.contract.wallet.address}")
 	private String walletAddress;
+	
 	@Value("${bolenum.deployed.contract.currency.name}")
 	private String currencyName;
+	
 	@Value("${bolenum.deployed.contract.currency.abbreviation}")
 	private String currencyAbbreviation;
+
+	
 
 	@Autowired
 	private CurrencyService currencyService;
@@ -289,7 +294,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			List<Erc20Token> erc20Tokens = new ArrayList<>();
 			erc20Tokens.add(erc20TokenBLN);
 			erc20TokenService.saveInitialErc20Token(erc20Tokens);
-		} else {
+
+		}
+		else {
 			logger.info("Tokens already saved!");
 		}
 	}

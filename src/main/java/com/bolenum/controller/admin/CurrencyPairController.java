@@ -177,7 +177,7 @@ public class CurrencyPairController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.PAIRED_CURRENCY, method = RequestMethod.GET)
-	public ResponseEntity<Object> getListOfPairedCurrency(@RequestParam Long pairId) {
+	public ResponseEntity<Object> getListOfPairedCurrency(@RequestParam("pairId") Long pairId) {
 		Currency isCurrencyExist = currencyService.findCurrencyById(pairId);
 		if (isCurrencyExist != null) {
 			List<CurrencyPair> listOfPairedCurrency = currencyPairService.getListOFPairedCurrency(isCurrencyExist);
