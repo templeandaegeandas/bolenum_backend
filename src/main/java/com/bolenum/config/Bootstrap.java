@@ -47,10 +47,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private RoleService roleService;
+	
 	@Autowired
 	private UserService userService;
+	
 	@Autowired
 	private PrivilegeService privilegeService;
+	
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
@@ -83,8 +86,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	
 	@Value("${bolenum.deployed.contract.currency.abbreviation}")
 	private String currencyAbbreviation;
-
-	
 
 	@Autowired
 	private CurrencyService currencyService;

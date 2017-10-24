@@ -1,5 +1,7 @@
 package com.bolenum.controller.admin;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -97,19 +99,33 @@ public class AdminController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("admin.transactionfee.add.error"), null);
 		} else {
-			TransactionFee savedTransactionFee = transactionFeeService.saveTransactionFee(transactionFee);
-			if (savedTransactionFee != null) {
-				return ResponseHandler.response(HttpStatus.OK, true,
-						localeService.getMessage("admin.trnsactionfee.add.success"), savedTransactionFee);
+			List<TransactionFee> listOfTransactionFee = transactionFeeService.getListOfTransactionFee();
+			if (listOfTransactionFee == null) {
+
+				TransactionFee savedTransactionFee = transactionFeeService.saveTransactionFee(transactionFee);
+				if (savedTransactionFee != null) {
+					return ResponseHandler.response(HttpStatus.OK, true,
+							localeService.getMessage("admin.trnsactionfee.add.success"), savedTransactionFee);
+				}
+				return ResponseHandler.response(HttpStatus.NOT_FOUND, true,
+						localeService.getMessage("admin.transactionfee.add.error"), null);
 			}
-			return ResponseHandler.response(HttpStatus.FORBIDDEN, true,
-					localeService.getMessage("admin.transactionfee.add.error"), null);
+			else
+			{
+				TransactionFee existingTransactionFee=listOfTransactionFee.get(0);
+				TransactionFee savedTransactionFee=transactionFeeService.updateTransactionFee(existingTransactionFee,transactionFee);
+				if (savedTransactionFee != null) {
+					return ResponseHandler.response(HttpStatus.OK, true,
+							localeService.getMessage("admin.trnsactionfee.add.success"), savedTransactionFee);
+				}
+				return ResponseHandler.response(HttpStatus.NOT_FOUND, true,
+						localeService.getMessage("admin.transactionfee.add.error"), null);
+			}
 		}
 	}
 
 	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTransactionFees() {
-		//List<TransactionFee> listOfTransactionFee=
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.transaction.fees.found.success"), null);
 	}

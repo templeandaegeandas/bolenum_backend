@@ -66,6 +66,7 @@ public class UrlConstant {
 	/******************** USER Wallet API ******/
 	public static final String DEPOSIT = "deposit";
 	public static final String MARKET_PRICE = "market/price";
+	public static final String WITHDRAW = "withdraw";
 	
 	/******************** ORDER API ******/
 	public static final String CREATE_ORDER = "create/order";
@@ -76,6 +77,7 @@ public class UrlConstant {
 	public static final String ADD_NEW_TOKEN = "add/new/token";
 	public static final String GET_TOKEN_LIST = "get/token/list";
 	public static final String GET_TOKEN_BY_ID = "get/token";
+	
 	
 	
 }

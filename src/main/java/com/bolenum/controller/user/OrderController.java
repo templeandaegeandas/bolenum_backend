@@ -40,6 +40,11 @@ public class OrderController {
 	@Autowired
 	private LocaleService localeService;
 
+	/**
+	 * 
+	 * @param orders
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestBody Orders orders) {
 		// can not place order on 0 prize
@@ -68,6 +73,11 @@ public class OrderController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param pairId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("pairId") Long pairId) {
 		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);

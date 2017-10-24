@@ -111,9 +111,15 @@ public class BTCWalletController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),map);
 	}
 	
+	/**
+	 * 
+	 * @param currencyAbbreviation
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.MARKET_PRICE, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBtcToEthPrice(@RequestParam("symbol") String currencyAbbreviation) {
 		MarketPrice marketPrice = marketPriceService.findByCurrencyId(currencyAbbreviation);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), marketPrice);
 	}
+	
 }

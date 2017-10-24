@@ -235,6 +235,13 @@ public class UserController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param otp
+	 * @return
+	 * @throws PersistenceException
+	 * @throws InvalidOtpException
+	 */
 	@RequestMapping(value = UrlConstant.VERIFY_OTP, method = RequestMethod.PUT)
 	public ResponseEntity<Object> verify(@RequestParam("otp") Integer otp)
 			throws PersistenceException, InvalidOtpException {
@@ -248,6 +255,12 @@ public class UserController {
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 * @throws PersistenceException
+	 * @throws InvalidOtpException
+	 */
 	@RequestMapping(value = UrlConstant.RESEND_OTP, method = RequestMethod.POST)
 	public ResponseEntity<Object> resendOtp() throws PersistenceException, InvalidOtpException {
 		User user = GenericUtils.getLoggedInUser();
@@ -278,12 +291,21 @@ public class UserController {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.GET_COUNTRIES_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCountriesList() {
 		List<Countries> list = countryAndStateService.getCountriesList();
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"), list);
 	}
 	
+	/**
+	 * 
+	 * @param countryId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.GET_STATE_BY_COUNTRY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getStatesByCountryId(@RequestParam("countryId") Long countryId) {
 		List<States> list = countryAndStateService.getStatesByCountry(countryId);
