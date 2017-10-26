@@ -30,6 +30,6 @@ public interface CurrencyPairService {
 
 	Page<CurrencyPair> getCurrencyList(int pageNumber, int pageSize, String sortBy, String sortOrder);
 
-	public List<CurrencyPair> getListOFPairedCurrency(Currency isCurrencyExist);
+	List<CurrencyPair> findCurrencyPairByCurrencyId(Long currencyId);
 
 }
