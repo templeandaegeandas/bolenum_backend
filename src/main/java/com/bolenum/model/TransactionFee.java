@@ -15,23 +15,23 @@ public class TransactionFee {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-    private double feeBTC;
+    private Double feeBTC;
      
-    private double feeOther;
+    private Double feeOther;
 
-	public double getFeeBTC() {
+	public Double getFeeBTC() {
 		return feeBTC;
 	}
 
-	public void setFeeBTC(double feeBTC) {
+	public void setFeeBTC(Double feeBTC) {
 		this.feeBTC = feeBTC;
 	}
 
-	public double getFeeOther() {
+	public Double getFeeOther() {
 		return feeOther;
 	}
 
-	public void setFeeOther(double feeOther) {
+	public void setFeeOther(Double feeOther) {
 		this.feeOther = feeOther;
 	}
      	
