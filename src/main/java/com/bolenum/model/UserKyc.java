@@ -23,13 +23,14 @@ public class UserKyc {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private DocumentType documentType = DocumentType.NATIONAL_ID;
+	private DocumentType documentType ;
 	private String document;
 	private DocumentStatus documentStatus = DocumentStatus.SUBMITTED;
 	private String rejectionMessage;
 	private Date uploadedDate = new Date();
 	private Date verifiedDate;
 	private Boolean isVerified = false;
+	
 
 	public Long getId() {
 		return id;
@@ -95,4 +96,25 @@ public class UserKyc {
 		this.isVerified = isVerified;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((documentType == null) ? 0 : documentType.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserKyc other = (UserKyc) obj;
+		if (documentType != other.documentType)
+			return false;
+		return true;
+	}
 }

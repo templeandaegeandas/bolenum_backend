@@ -5,11 +5,14 @@ import java.io.IOException;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bolenum.enums.DocumentType;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
+
+import springfox.documentation.spi.DocumentationType;
 
 /**
  * 
@@ -28,7 +31,7 @@ public interface KYCService {
 	 * @throws IOException
 	 * @throws MaxSizeExceedException
 	 */
-	User uploadKycDocument(MultipartFile multipartFile, Long userId)
+	User uploadKycDocument(MultipartFile multipartFile, Long userId ,DocumentType documentType)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException;
 
 	/**
@@ -36,7 +39,7 @@ public interface KYCService {
 	 * @param userId
 	 * @returnn User
 	 */
-	User approveKycDocument(Long userId);
+	UserKyc approveKycDocument(Long userId);
 
 	/**
 	 * 
@@ -44,7 +47,7 @@ public interface KYCService {
 	 * @param rejectionMessage
 	 * @return User
 	 */
-	User disApprovedKycDocument(Long userId, String rejectionMessage);
+	UserKyc disApprovedKycDocument(Long userId, String rejectionMessage);
 
 	/**
 	 * 
@@ -52,7 +55,7 @@ public interface KYCService {
 	 * @param pageSize
 	 * @return Page<User>
 	 */
-	Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
+	//Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 	/**
 	 * 
@@ -60,5 +63,7 @@ public interface KYCService {
 	 * @return UserKyc
 	 */
 	UserKyc getUserKycById(Long kycId);
+
+	DocumentType validateDocumentType(String documentType);
 
 }

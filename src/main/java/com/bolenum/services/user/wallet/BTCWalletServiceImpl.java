@@ -69,6 +69,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		return "";
 	}
 
+	/**
+	 *  to get wallet address and QR code 
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getWalletAddressAndQrCode(String walletUuid) {
@@ -98,7 +101,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 	
 	/**
-	 * 
+	 *  to get bitcoin wallet balance 
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -117,6 +120,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		return "";
 	}
 
+	/**
+	 *  to get bitcoin wallet address
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public String getWalletAddress(String walletUuid) {
