@@ -69,6 +69,6 @@ public interface KYCService {
 
 	DocumentType validateDocumentType(String documentType);
 	
-	public List<User> getListOfUser(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
+	public Page<User> getListOfUser(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 }

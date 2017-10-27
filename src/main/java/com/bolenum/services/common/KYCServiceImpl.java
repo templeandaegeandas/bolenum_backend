@@ -186,7 +186,7 @@ public class KYCServiceImpl implements KYCService {
 	}
 
 	@Override
-	public List<User> getListOfUser(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData) {
+	public Page<User> getListOfUser(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData) {
 		Direction sort;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;
@@ -194,8 +194,8 @@ public class KYCServiceImpl implements KYCService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		System.out.println(userRepository.getUserByKycStatus(DocumentStatus.SUBMITTED));
-		return userRepository.getUserByKycStatus(DocumentStatus.SUBMITTED);
+		System.out.println(userRepository.getUserByKycStatus(searchData, DocumentStatus.SUBMITTED, pageRequest));
+		return userRepository.getUserByKycStatus(searchData, DocumentStatus.SUBMITTED, pageRequest);
 	
 	}
 

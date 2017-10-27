@@ -175,7 +175,7 @@ public class KYCController {
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
 			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
 
-		List<User> listOfUser = kycService.getListOfUser(pageNumber, pageSize, sortBy, sortOrder, searchData);
+		Page<User> listOfUser = kycService.getListOfUser(pageNumber, pageSize, sortBy, sortOrder, searchData);
 		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("submitted.kyc.list"),
 				listOfUser);
 	}
