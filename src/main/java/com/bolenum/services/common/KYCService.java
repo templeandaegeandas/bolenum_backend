@@ -1,6 +1,7 @@
 package com.bolenum.services.common;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +23,8 @@ import springfox.documentation.spi.DocumentationType;
  */
 
 public interface KYCService {
+
+
 
 	/**
 	 * 
@@ -55,7 +58,7 @@ public interface KYCService {
 	 * @param pageSize
 	 * @return Page<User>
 	 */
-//	Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
+    //Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 	/**
 	 * 
@@ -65,5 +68,7 @@ public interface KYCService {
 	UserKyc getUserKycById(Long kycId);
 
 	DocumentType validateDocumentType(String documentType);
+	
+	public List<User> getListOfUser(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 }

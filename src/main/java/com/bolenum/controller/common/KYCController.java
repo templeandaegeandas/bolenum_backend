@@ -1,6 +1,7 @@
 package com.bolenum.controller.common;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
 import com.bolenum.services.common.KYCService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.user.UserService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
@@ -42,8 +44,12 @@ public class KYCController {
 
 	@Autowired
 	private KYCService kycService;
+
 	@Autowired
 	private LocaleService localeService;
+
+	@Autowired
+	private UserService userService;
 
 	public static final Logger logger = LoggerFactory.getLogger(KYCController.class);
 
@@ -121,15 +127,21 @@ public class KYCController {
 	 * @return
 	 */
 
-//	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
-//	public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber") int pageNumber,
-//
-//			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
-//
-//			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
-//		Page<User> kycList = kycService.getSubmitedKycList(pageNumber, pageSize, sortBy, sortOrder, searchData);
-//		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("submitted.kyc.list"), kycList);
-//	}
+	// @RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method =
+	// RequestMethod.GET)
+	// public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber")
+	// int pageNumber,
+	//
+	// @RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String
+	// sortBy,
+	//
+	// @RequestParam("sortOrder") String sortOrder, @RequestParam("searchData")
+	// String searchData) {
+	// Page<User> kycList = kycService.getSubmitedKycList(pageNumber, pageSize,
+	// sortBy, sortOrder, searchData);
+	// return ResponseHandler.response(HttpStatus.OK, false,
+	// localeService.getMessage("submitted.kyc.list"), kycList);
+	// }
 
 	/**
 	 * 
@@ -148,4 +160,24 @@ public class KYCController {
 					localeService.getMessage("user.kyc.get.by.id.failed"), null);
 		}
 	}
+
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortOrder
+	 * @param searchData
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getListOfUser(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
+			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
+
+		List<User> listOfUser = kycService.getListOfUser(pageNumber, pageSize, sortBy, sortOrder, searchData);
+		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("submitted.kyc.list"),
+				listOfUser);
+	}
+
 }

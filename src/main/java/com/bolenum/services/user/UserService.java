@@ -61,6 +61,6 @@ public interface UserService {
 	public User findByUserId(Long id);
 	
 	public User uploadImage(String imageBase64, Long userId) throws IOException, PersistenceException, MaxSizeExceedException;
-
-
+	
+	
 }
