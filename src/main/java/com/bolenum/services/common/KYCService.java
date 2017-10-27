@@ -55,7 +55,7 @@ public interface KYCService {
 	 * @param pageSize
 	 * @return Page<User>
 	 */
-	//Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
+//	Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 	/**
 	 * 

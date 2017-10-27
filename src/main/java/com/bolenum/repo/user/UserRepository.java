@@ -30,8 +30,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	 * @param pageable
 	 * @return List of users who have kyc documents status is submitted
 	 */
-	//@Query("select u from User u where (u.firstName like %:searchData% or u.lastName like %:searchData% or u.emailId like %:searchData%) and u.userKyc.documentStatus = :documentStatus and u.isDeleted = false")
-	//public Page<User> getNewlySubmittedKycListWIthSearch(@Param("searchData") String searchData, @Param("documentStatus") DocumentStatus documentStatus, Pageable pageable);
+//	@Query("select u from User u where (u.firstName like %:searchData% or u.lastName like %:searchData% or u.emailId like %:searchData%) and u.userKyc.documentStatus = :documentStatus and u.isDeleted = false")
+//	public Page<User> getNewlySubmittedKycListWIthSearch(@Param("searchData") String searchData, @Param("documentStatus") DocumentStatus documentStatus, Pageable pageable);
 
 	public User findByUserId(Long id);
 

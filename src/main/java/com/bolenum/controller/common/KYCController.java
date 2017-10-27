@@ -120,21 +120,18 @@ public class KYCController {
 	 * @param searchData
 	 * @return
 	 */
-	/*
-	 * @RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method =
-	 * RequestMethod.GET) public ResponseEntity<Object>
-	 * getSubmittedKycList(@RequestParam("pageNumber") int pageNumber,
-	 * 
-	 * @RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String
-	 * sortBy,
-	 * 
-	 * @RequestParam("sortOrder") String sortOrder, @RequestParam("searchData")
-	 * String searchData) { Page<User> kycList =
-	 * kycService.getSubmitedKycList(pageNumber, pageSize, sortBy, sortOrder,
-	 * searchData); return ResponseHandler.response(HttpStatus.OK, false,
-	 * localeService.getMessage("submitted.kyc.list"), kycList); }
-	 * 
-	 * /**
+
+//	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
+//	public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber") int pageNumber,
+//
+//			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
+//
+//			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
+//		Page<User> kycList = kycService.getSubmitedKycList(pageNumber, pageSize, sortBy, sortOrder, searchData);
+//		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("submitted.kyc.list"), kycList);
+//	}
+
+	/**
 	 * 
 	 * @param kycId
 	 * 

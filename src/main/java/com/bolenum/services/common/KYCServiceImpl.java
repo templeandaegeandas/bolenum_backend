@@ -156,15 +156,15 @@ public class KYCServiceImpl implements KYCService {
 		return userKyc;
 	}
 
-	/*
-	 * @Override public Page<User> getSubmitedKycList(int pageNumber, int pageSize,
-	 * String sortBy, String sortOrder, String searchData) { Direction sort; if
-	 * (sortOrder.equals("desc")) { sort = Direction.DESC; } else { sort =
-	 * Direction.ASC; } Pageable pageRequest = new PageRequest(pageNumber, pageSize,
-	 * sort, sortBy); return
-	 * userRepository.getNewlySubmittedKycListWIthSearch(searchData,
-	 * DocumentStatus.SUBMITTED, pageRequest); }
-	 */
+//	
+//	  @Override public Page<User> getSubmitedKycList(int pageNumber, int pageSize,
+//	  String sortBy, String sortOrder, String searchData) { Direction sort; if
+//	  (sortOrder.equals("desc")) { sort = Direction.DESC; } else { sort =
+//	  Direction.ASC; } Pageable pageRequest = new PageRequest(pageNumber, pageSize,
+//	  sort, sortBy); return
+//	  userRepository.getNewlySubmittedKycListWIthSearch(searchData,
+//	  DocumentStatus.SUBMITTED, pageRequest); }
+//	 
 	@Override
 	public UserKyc getUserKycById(Long kycId) {
 		return kycRepo.findOne(kycId);
