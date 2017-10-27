@@ -57,12 +57,13 @@ public class KYCController {
 	 */
 
 	@RequestMapping(value = UrlConstant.UPLOAD_DOCUMENT, method = RequestMethod.POST)
-	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file, String documentType)
+	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file,
+			@RequestParam String documentType)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		User user = GenericUtils.getLoggedInUser();
 		DocumentType isValidDocumentType = kycService.validateDocumentType(documentType);
 		if (isValidDocumentType != null) {
-			User response = kycService.uploadKycDocument(file, user.getUserId(),isValidDocumentType);
+			User response = kycService.uploadKycDocument(file, user.getUserId(), isValidDocumentType);
 			if (response != null) {
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localeService.getMessage("user.document.uploaded.success"), response);
@@ -81,8 +82,8 @@ public class KYCController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.APPROVE_DOCUMENT, method = RequestMethod.PUT)
-	public ResponseEntity<Object> approveKycDocument(@PathVariable("id") Long id) {
-		UserKyc userKyc = kycService.approveKycDocument(id);
+	public ResponseEntity<Object> approveKycDocument(@RequestParam Long id, @RequestParam Long userId) {
+		UserKyc userKyc = kycService.approveKycDocument(id, userId);
 		if (userKyc != null) {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("user.document.disapprove.success"), userKyc);
@@ -99,7 +100,8 @@ public class KYCController {
 	 */
 	@RequestMapping(value = UrlConstant.DISAPPROVE_DOCUMENT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> disApproveKycDocument(@RequestBody Map<String, String> data) {
-		UserKyc userKyc = kycService.disApprovedKycDocument(Long.parseLong(data.get("userId")), data.get("rejectionMessage"));
+		UserKyc userKyc = kycService.disApprovedKycDocument(Long.parseLong(data.get("id")),
+				data.get("rejectionMessage"), Long.parseLong(data.get("userId")));
 		if (userKyc != null) {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("user.document.approve.success"), userKyc);
@@ -118,17 +120,24 @@ public class KYCController {
 	 * @param searchData
 	 * @return
 	 */
-/*	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber") int pageNumber,
-			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
-			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
-		Page<User> kycList = kycService.getSubmitedKycList(pageNumber, pageSize, sortBy, sortOrder, searchData);
-		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("submitted.kyc.list"), kycList);
-	}
-
-	/**
+	/*
+	 * @RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method =
+	 * RequestMethod.GET) public ResponseEntity<Object>
+	 * getSubmittedKycList(@RequestParam("pageNumber") int pageNumber,
+	 * 
+	 * @RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String
+	 * sortBy,
+	 * 
+	 * @RequestParam("sortOrder") String sortOrder, @RequestParam("searchData")
+	 * String searchData) { Page<User> kycList =
+	 * kycService.getSubmitedKycList(pageNumber, pageSize, sortBy, sortOrder,
+	 * searchData); return ResponseHandler.response(HttpStatus.OK, false,
+	 * localeService.getMessage("submitted.kyc.list"), kycList); }
+	 * 
+	 * /**
 	 * 
 	 * @param kycId
+	 * 
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.GET_KYC_BY_ID, method = RequestMethod.GET)

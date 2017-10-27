@@ -57,6 +57,9 @@ public class KYCServiceImpl implements KYCService {
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
 
+	/**
+	 *  to upload kyc documents
+	 */
 	@Override
 	public User uploadKycDocument(MultipartFile file, Long userId, DocumentType documentType)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
@@ -114,35 +117,42 @@ public class KYCServiceImpl implements KYCService {
 		}
 	}
 
+	/**
+	 *  to approve kyc document
+	 */
 	@Override
-	public UserKyc approveKycDocument(Long id) {
-		UserKyc userKyc = kycRepo.findOne(id);
+	public UserKyc approveKycDocument(Long kycId,Long userId) {
+		UserKyc userKyc = kycRepo.findOne(kycId);
 		userKyc.setVerifiedDate(new Date());
 		userKyc.setIsVerified(true);
 		userKyc.setDocumentStatus(DocumentStatus.APPROVED);
 		userKyc.setRejectionMessage(null);
-		// smsServiceUtil.sendMessage(user.getMobileNumber(),
-		// localeService.getMessage("email.text.approve.user.kyc"));
-		// mailService.mailSend(user.getEmailId(),
-		// localeService.getMessage("email.subject.approve.user.kyc"),
-		// localeService.getMessage("email.text.approve.user.kyc"));
+		User user=userRepository.findOne(userId);
+		smsServiceUtil.sendMessage(user.getMobileNumber(),
+		localeService.getMessage("email.text.approve.user.kyc"));
+		mailService.mailSend(user.getEmailId(),
+		localeService.getMessage("email.subject.approve.user.kyc"),
+		localeService.getMessage("email.text.approve.user.kyc"));
 		return userKyc;
 	}
 
+	/**
+	 * to disapprove kyc document 
+	 */
 	@Override
-	public UserKyc disApprovedKycDocument(Long id, String rejectionMessage) {
+	public UserKyc disApprovedKycDocument(Long kycId, String rejectionMessage ,Long userId) {
 
-		UserKyc userKyc = kycRepo.findOne(id);
+		UserKyc userKyc = kycRepo.findOne(kycId);
 		userKyc.setVerifiedDate(null);
 		userKyc.setIsVerified(false);
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
-
-		// smsServiceUtil.sendMessage(user.getMobileNumber(),
-		// localeService.getMessage("email.text.disapprove.user.kyc"));
-		// mailService.mailSend(user.getEmailId(),
-		// localeService.getMessage("email.subject.disapprove.user.kyc"),
-		// localeService.getMessage("email.text.disapprove.user.kyc"));
+		User user=userRepository.findOne(userId);
+		smsServiceUtil.sendMessage(user.getMobileNumber(),
+		localeService.getMessage("email.text.disapprove.user.kyc"));
+		mailService.mailSend(user.getEmailId(),
+		localeService.getMessage("email.subject.disapprove.user.kyc"),
+		localeService.getMessage("email.text.disapprove.user.kyc"));
 		return userKyc;
 	}
 

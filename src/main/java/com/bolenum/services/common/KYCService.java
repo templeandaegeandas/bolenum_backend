@@ -39,7 +39,7 @@ public interface KYCService {
 	 * @param userId
 	 * @returnn User
 	 */
-	UserKyc approveKycDocument(Long userId);
+	UserKyc approveKycDocument(Long kycId,Long userId);
 
 	/**
 	 * 
@@ -47,7 +47,7 @@ public interface KYCService {
 	 * @param rejectionMessage
 	 * @return User
 	 */
-	UserKyc disApprovedKycDocument(Long userId, String rejectionMessage);
+	UserKyc disApprovedKycDocument(Long kycId, String rejectionMessage,Long userId);
 
 	/**
 	 * 
