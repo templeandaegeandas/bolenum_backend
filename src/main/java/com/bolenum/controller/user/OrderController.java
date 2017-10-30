@@ -16,8 +16,10 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
+import com.bolenum.model.orders.book.Trade;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
+import com.bolenum.services.order.book.TradeService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
@@ -36,6 +38,9 @@ public class OrderController {
 	private Logger logger = LoggerFactory.getLogger(OrderController.class);
 	@Autowired
 	private OrdersService ordersService;
+
+	@Autowired
+	private TradeService tradeService;
 
 	@Autowired
 	private LocaleService localeService;
@@ -73,11 +78,29 @@ public class OrderController {
 		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
-	
+
 	@RequestMapping(value = UrlConstant.SELL_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("pairId") Long pairId) {
 		Page<Orders> list = ordersService.getSellOrdersListByPair(pairId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
+	}
+
+	@RequestMapping(value = UrlConstant.TRADE_LIST_LOGGEDIN, method = RequestMethod.GET)
+	public ResponseEntity<Object> getTradedOrdersLoggedInUser(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
+		User user = GenericUtils.getLoggedInUser();
+		Page<Trade> list = tradeService.getTradedOrdersLoggedIn(user, pageNumber, pageSize, sortOrder, sortBy);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
+	}
+	
+	@RequestMapping(value = UrlConstant.TRADE_LIST_ALL, method = RequestMethod.GET)
+	public ResponseEntity<Object> getTradedOrders(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
+		User user = GenericUtils.getLoggedInUser();
+		Page<Trade> list = tradeService.getTradedOrders(user, pageNumber, pageSize, sortOrder, sortBy);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
 
 }
