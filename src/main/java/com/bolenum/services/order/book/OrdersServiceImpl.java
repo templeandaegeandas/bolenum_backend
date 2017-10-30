@@ -66,8 +66,9 @@ public class OrdersServiceImpl implements OrdersService {
 	 * this will check user wallet balance to get place an order
 	 */
 	@Override
-	public String checkOrderEligibility(User user, Orders orders) {
-		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPair().getPairId());
+	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
+		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
+		orders.setPair(currencyPair);
 		String tickter = null, minOrderVol = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume

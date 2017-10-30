@@ -46,7 +46,7 @@ public class OrderController {
 	private LocaleService localeService;
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
-	public ResponseEntity<Object> createOrder(@RequestBody Orders orders) {
+	public ResponseEntity<Object> createOrder(@RequestParam("pairId") Long pairId, @RequestBody Orders orders) {
 		// can not place order on 0 prize
 		if (orders.getOrderStandard().equals(OrderStandard.LIMIT) && orders.getPrice() <= 0) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"),
@@ -57,7 +57,7 @@ public class OrderController {
 		if(!isVerified){
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"), null);
 		}
-		String balance = ordersService.checkOrderEligibility(user, orders);
+		String balance = ordersService.checkOrderEligibility(user, orders, pairId);
 		logger.debug("balance: {}", balance);
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);

@@ -48,7 +48,7 @@ public interface OrdersService {
 
 	Double getBestBuy(List<Orders> buyOrderList);
 
-	String checkOrderEligibility(User user, Orders order);
+	String checkOrderEligibility(User user, Orders order, Long pairId);
 
 	String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded);
 
