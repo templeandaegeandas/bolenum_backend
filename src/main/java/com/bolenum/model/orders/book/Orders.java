@@ -6,10 +6,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.User;
 
 /**
  * 
@@ -31,9 +34,11 @@ public class Orders {
 	private OrderType orderType; // buy or sell
 	private Date createdOn = new Date();
 	private Date deletedOn;
-	private Long pairId;
+	@OneToOne
+	private CurrencyPair pair;
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
-	private Long userId;
+	@OneToOne
+	private User user;
 
 	public Long getId() {
 		return id;
@@ -99,12 +104,12 @@ public class Orders {
 		this.deletedOn = deletedOn;
 	}
 
-	public Long getPairId() {
-		return pairId;
+	public CurrencyPair getPair() {
+		return pair;
 	}
 
-	public void setPairId(Long pairId) {
-		this.pairId = pairId;
+	public void setPair(CurrencyPair pair) {
+		this.pair = pair;
 	}
 
 	public OrderStatus getOrderStatus() {
@@ -115,11 +120,11 @@ public class Orders {
 		this.orderStatus = orderStatus;
 	}
 
-	public Long getUserId() {
-		return userId;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setUser(User user) {
+		this.user = user;
 	}
 }

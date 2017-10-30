@@ -6,8 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 import com.bolenum.enums.OrderStandard;
+import com.bolenum.model.User;
 
 /**
  * 
@@ -23,17 +25,19 @@ public class Trade {
 	private Long id;
 	private Double price;
 	private Double volume;
-	private Long buyerId;
-	private Long sellerId;
+	@OneToOne
+	private User buyer;
+	@OneToOne
+	private User seller;
 	private OrderStandard orderStandard;
 	private Date createdOn = new Date();
 
-	public Trade(Double price, Double volume, Long buyerId, Long sellerId,
+	public Trade(Double price, Double volume, User buyer, User seller,
 			OrderStandard orderStandard) {
 		this.price = price;
 		this.volume = volume;
-		this.buyerId = buyerId;
-		this.sellerId = sellerId;
+		this.buyer = buyer;
+		this.seller = seller;
 		this.orderStandard = orderStandard;
 	}
 
@@ -65,20 +69,20 @@ public class Trade {
 		this.volume = volume;
 	}
 
-	public Long getBuyerId() {
-		return buyerId;
+	public User getBuyer() {
+		return buyer;
 	}
 
-	public void setBuyerId(Long buyerId) {
-		this.buyerId = buyerId;
+	public void setBuyer(User buyer) {
+		this.buyer = buyer;
 	}
 
-	public Long getSellerId() {
-		return sellerId;
+	public User getSeller() {
+		return seller;
 	}
 
-	public void setSellerId(Long sellerId) {
-		this.sellerId = sellerId;
+	public void setSellerId(User seller) {
+		this.seller = seller;
 	}
 
 	public OrderStandard getOrderStandard() {

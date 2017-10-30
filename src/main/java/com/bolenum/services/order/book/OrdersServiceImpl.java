@@ -22,7 +22,6 @@ import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
-import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.WalletService;
@@ -55,9 +54,6 @@ public class OrdersServiceImpl implements OrdersService {
 	private TransactionService transactionService;
 
 	@Autowired
-	private UserService userService;
-
-	@Autowired
 	private WalletService walletService;
 
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
@@ -71,7 +67,7 @@ public class OrdersServiceImpl implements OrdersService {
 	 */
 	@Override
 	public String checkOrderEligibility(User user, Orders orders) {
-		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPairId());
+		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPair().getPairId());
 		String tickter = null, minOrderVol = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
@@ -105,7 +101,7 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @return balance
 	 */
 	private double getPlacedOrderVolume(User user) {
-		List<Orders> orders = findOrdersListByUserIdAndOrderStatus(user.getUserId(), OrderStatus.SUBMITTED);
+		List<Orders> orders = findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
 		double total = 0.0;
 		for (Orders order : orders) {
 			total = total + order.getVolume();
@@ -139,12 +135,12 @@ public class OrdersServiceImpl implements OrdersService {
 	public Boolean processMarketOrder(Orders orders) {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
-		Long pairId = orders.getPairId();
+		CurrencyPair pair = orders.getPair();
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		if (orderType.equals(OrderType.BUY)) {
-			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceAsc(
-					OrderType.SELL, OrderStatus.SUBMITTED, pairId);
+			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(
+					OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
@@ -156,8 +152,8 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			processed = true;
 		} else {
-			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairIdOrderByPriceDesc(
-					OrderType.BUY, OrderStatus.SUBMITTED, pairId);
+			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(
+					OrderType.BUY, OrderStatus.SUBMITTED, pair);
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
@@ -183,15 +179,15 @@ public class OrdersServiceImpl implements OrdersService {
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		Double price = orders.getPrice();
-		Long pairId = orders.getPairId();
+		CurrencyPair pair = orders.getPair();
 		logger.debug("Order type is equal with buy: {}", orderType.equals(OrderType.BUY));
 		// checking the order type is BUY
 		if (orderType.equals(OrderType.BUY)) {
 			// fetching the seller list whose selling price is less than equal
 			// to buying price
 			List<Orders> sellOrderList = ordersRepository
-					.findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc(OrderType.SELL,
-							OrderStatus.SUBMITTED, pairId, price);
+					.findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType.SELL,
+							OrderStatus.SUBMITTED, pair, price);
 			/**
 			 * fetch one best seller's price from list of sellers, order by
 			 * price in ASC then process the order
@@ -212,8 +208,8 @@ public class OrdersServiceImpl implements OrdersService {
 			 * price
 			 */
 			List<Orders> buyOrderList = ordersRepository
-					.findByOrderTypeAndOrderStatusAndPairIdAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
-							OrderStatus.SUBMITTED, pairId, price);
+					.findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
+							OrderStatus.SUBMITTED, pair, price);
 			/**
 			 * fetch one best buyer's price from list of buyers, order by price
 			 * in desc then process the order
@@ -241,7 +237,7 @@ public class OrdersServiceImpl implements OrdersService {
 	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders) {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
-		long buyerId, sellerId;
+		User buyer, seller;
 		logger.debug("process order list remainingVolume: {}", remainingVolume);
 		// process till order size and remaining volume is > 0
 		while ((ordersList.size() > 0) && (remainingVolume > 0)) {
@@ -287,24 +283,24 @@ public class OrdersServiceImpl implements OrdersService {
 			// checking the order type BUY
 			if (orderType.equals(OrderType.BUY)) {
 				// buyer is coming order's user
-				buyerId = orders.getUserId();
+				buyer = orders.getUser();
 				// seller is matched order's user
-				sellerId = matchedOrder.getUserId();
+				seller = matchedOrder.getUser();
 			} else {
 				// order type is SELL
 				// buyer is matched order's user
-				buyerId = matchedOrder.getUserId();
+				buyer = matchedOrder.getUser();
 				// seller is coming order's user
-				sellerId = orders.getUserId();
+				seller = orders.getUser();
 			}
 			// buyer and seller must be different user
-			logger.debug("byuer id: {} seller id: {}", buyerId, sellerId);
-			if (buyerId != sellerId) {
+			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
+			if (buyer != seller) {
 				// saving the processed BUY/SELL order in trade
-				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyerId, sellerId, OrderStandard.LIMIT);
+				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, OrderStandard.LIMIT);
 				tradeList.add(trade);
 				logger.debug("saving trade completed");
-				processTransaction(matchedOrder, qtyTraded, buyerId, sellerId);
+				processTransaction(matchedOrder, qtyTraded, buyer, seller);
 			}
 		}
 		orderAsyncServices.saveTrade(tradeList);
@@ -315,14 +311,14 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @description processTransaction
 	 * @param orders,qtyTraded,buyerId,sellerId
 	 */
-	private void processTransaction(Orders orders, double qtyTraded, long buyerId, long sellerId) {
+	private void processTransaction(Orders orders, double qtyTraded, User buyer, User seller) {
 		// finding buyer
-		User buyer = userService.findByUserId(buyerId);
+//		User buyer = userService.findByUserId(buyerId);
 		// finding seller
-		User seller = userService.findByUserId(sellerId);
+//		User seller = userService.findByUserId(sellerId);
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(), orders.getId());
 		// finding currency pair
-		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPairId());
+		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPair().getPairId());
 		String[] tickters = new String[2];
 		// finding the currency abbreviations
 		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
@@ -390,15 +386,17 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Override
 	public Page<Orders> getBuyOrdersListByPair(Long pairId) {
+		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findBuyOrderList(pairId, OrderType.BUY, OrderStatus.SUBMITTED, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findBuyOrderList(pair, OrderType.BUY, OrderStatus.SUBMITTED, pageRequest);
 		return orderBook;
 	}
 
 	@Override
 	public Page<Orders> getSellOrdersListByPair(Long pairId) {
+		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findSellOrderList(pairId, OrderType.SELL, OrderStatus.SUBMITTED, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findSellOrderList(pair, OrderType.SELL, OrderStatus.SUBMITTED, pageRequest);
 		return orderBook;
 	}
 
@@ -465,10 +463,11 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Override
 	public Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price) {
+		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
 		if (orderType.equals("BUY")) {
-			return ordersRepository.countOrderByOrderTypeAndPriceGreaterThan(orderType, pairId, price);
+			return ordersRepository.countOrderByOrderTypeAndPriceGreaterThan(orderType, pair, price);
 		} else {
-			return ordersRepository.countOrderByOrderTypeAndPriceLessThan(orderType, pairId, price);
+			return ordersRepository.countOrderByOrderTypeAndPriceLessThan(orderType, pair, price);
 
 		}
 	}
@@ -490,7 +489,7 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public List<Orders> findOrdersListByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus) {
-		return ordersRepository.findByUserIdAndOrderStatus(userId, orderStatus);
+	public List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus) {
+		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
 	}
 }

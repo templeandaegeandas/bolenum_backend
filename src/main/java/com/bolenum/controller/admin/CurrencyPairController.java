@@ -19,11 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.CurrencyPairForm;
-import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.services.admin.CurrencyPairService;
-import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
@@ -50,9 +48,6 @@ public class CurrencyPairController {
 
 	@Autowired
 	private CurrencyPairService currencyPairService;
-
-	@Autowired
-	private CurrencyService currencyService;
 
 	/**
 	 * 

@@ -24,7 +24,7 @@ public interface CurrencyPairService {
 
 	public Boolean validCurrencyPair(CurrencyPair currencyPair);
 
-	public CurrencyPair findCurrencypairByPairId(Long pairID);
+	public CurrencyPair findCurrencypairByPairId(Long pairId);
 
 	public CurrencyPair changeStateOfCurrencyPair(CurrencyPair isCurrencyPairExist);
 

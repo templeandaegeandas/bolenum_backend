@@ -66,7 +66,7 @@ public class OrderController {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
-		orders.setUserId(user.getUserId());
+		orders.setUser(user);
 		Boolean result = ordersService.processOrder(orders);
 		if (result) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),

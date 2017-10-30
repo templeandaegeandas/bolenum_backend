@@ -52,5 +52,5 @@ public interface OrdersService {
 
 	String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded);
 
-	List<Orders> findOrdersListByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus);
+	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
 }
