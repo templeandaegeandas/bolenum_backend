@@ -53,6 +53,10 @@ public class OrderController {
 					null);
 		}
 		User user = GenericUtils.getLoggedInUser();
+		boolean isVerified = user.getUserKyc().getIsVerified();
+		if(!isVerified){
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"), null);
+		}
 		String balance = ordersService.checkOrderEligibility(user, orders);
 		logger.debug("balance: {}", balance);
 		if (balance.equals("Synchronizing")) {

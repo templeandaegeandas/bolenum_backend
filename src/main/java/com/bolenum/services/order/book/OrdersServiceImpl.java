@@ -25,7 +25,7 @@ import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
-import com.bolenum.services.user.wallet.EtherumWalletService;
+import com.bolenum.services.user.wallet.WalletService;
 
 /**
  * 
@@ -49,9 +49,6 @@ public class OrdersServiceImpl implements OrdersService {
 	private BTCWalletService bTCWalletService;
 
 	@Autowired
-	private EtherumWalletService etherumWalletService;
-
-	@Autowired
 	private MarketPriceService marketPriceService;
 
 	@Autowired
@@ -59,6 +56,9 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private WalletService walletService;
 
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
@@ -72,22 +72,25 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public String checkOrderEligibility(User user, Orders orders) {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPairId());
-		String tickter = null, minBalance = null;
+		String tickter = null, minOrderVol = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
 		 */
 		if (orders.getOrderType().equals(OrderType.SELL)) {
 			tickter = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
-			minBalance = String.valueOf(orders.getVolume());
+			minOrderVol = String.valueOf(orders.getVolume());
 		} else {
-			minBalance = getAmountForPair(orders, currencyPair);
+			minOrderVol = getPairedBalance(orders, currencyPair, orders.getVolume());
 			tickter = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		}
-		logger.debug("minimum balance required to buy: {}", minBalance);
+		double userPlacedOrderVolume = getPlacedOrderVolume(user);
+		logger.debug("user placed order volume: {} and order volume: {}", userPlacedOrderVolume, minOrderVol);
+		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
+		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
 		// getting the user current wallet balance
-		String balance = getBalance(tickter, user);
+		String balance = walletService.getBalance(tickter, user);
 		balance = balance.replace("BTC", "");
-		if (!balance.equals("Synchronizing")) {
+		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
 			// user must have balance then user is eligible for placing order
 			if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
 				balance = "proceed";
@@ -95,55 +98,19 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		return balance;
 	}
-
-	private String getBalance(String tickter, User user) {
-		switch (tickter) {
-		case "BTC":
-			tickter = bTCWalletService.getWalletBalnce(user.getBtcWalletUuid());
-			break;
-		case "ETH":
-			tickter = String.valueOf(etherumWalletService.getWalletBalance(user));
+	/**
+	 * 
+	 * @description get user order placed volume
+	 * @param user 
+	 * @return balance
+	 */
+	private double getPlacedOrderVolume(User user) {
+		List<Orders> orders = findOrdersListByUserIdAndOrderStatus(user.getUserId(), OrderStatus.SUBMITTED);
+		double total = 0.0;
+		for (Orders order : orders) {
+			total = total + order.getVolume();
 		}
-		return tickter;
-	}
-
-	private String getAmountForPair(Orders orders, CurrencyPair currencyPair) {
-		String minBalance = null;
-		/**
-		 * if order type is BUY then for Market order, user should have total
-		 * market price, for Limit order user should have volume (volume *
-		 * price), price limit given by user
-		 */
-		if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
-			logger.debug("limit order buy on price: {}", orders.getPrice());
-			/**
-			 * user must have this balance to give limit order Example user want
-			 * to BUY 3 BTC on 5 ETH per BTC unit, then user must have 3 * 5 =
-			 * 15 ETH to buy 3 BTC
-			 */
-			minBalance = String.valueOf(orders.getVolume() * orders.getPrice());
-		} else {
-			/**
-			 * fetching the market BTC price of buying currency
-			 */
-			MarketPrice marketPrice = marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
-			/**
-			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
-			 * BTC, this will update according to order selling book
-			 */
-			Double buyingCurrencyValue = marketPrice.getPriceBTC();
-			logger.debug("order value : {}, buyingCurrencyValue: {}", orders.getVolume(), buyingCurrencyValue);
-			if (marketPrice != null && buyingCurrencyValue != null) {
-				/**
-				 * user must have this balance to give market order, Example
-				 * user want to BUY 3 BTC on market price, at this moment 1 ETH
-				 * = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC, then user
-				 * must have 51.852876106 ETH to buy 3 BTC
-				 */
-				minBalance = String.valueOf((orders.getVolume()) / buyingCurrencyValue);
-			}
-		}
-		return minBalance;
+		return total;
 	}
 
 	@Override
@@ -275,6 +242,7 @@ public class OrdersServiceImpl implements OrdersService {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
 		long buyerId, sellerId;
+		logger.debug("process order list remainingVolume: {}", remainingVolume);
 		// process till order size and remaining volume is > 0
 		while ((ordersList.size() > 0) && (remainingVolume > 0)) {
 			logger.debug("inner proccessing while");
@@ -282,12 +250,17 @@ public class OrdersServiceImpl implements OrdersService {
 			// fetch matched order object
 			Orders matchedOrder = matchedOrder(ordersList);
 			// checking selling/buying volume less than matched order volume
+			logger.debug("matched order volume: {}", matchedOrder.getVolume());
 			if (remainingVolume < matchedOrder.getVolume()) {
 				// qtyTraded is total selling/buying volume
 				qtyTraded = remainingVolume;
+				logger.debug("qty traded: {}", qtyTraded);
 				// setting new required SELL/BUY volume is remaining order
 				// volume
-				matchedOrder.setVolume(matchedOrder.getVolume() - remainingVolume);
+				double remain = matchedOrder.getVolume() - remainingVolume;
+				logger.debug("reamining volume: {}", remain);
+				matchedOrder.setVolume(remain);
+				logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
 				// adding matched order in list with remaining volume
 				ordersList.add(matchedOrder);
 				// now selling/buying volume is 0
@@ -296,8 +269,10 @@ public class OrdersServiceImpl implements OrdersService {
 				// selling/buying volume greater than matched order volume
 				// qtyTraded is total sellers/buyers volume
 				qtyTraded = matchedOrder.getVolume();
+				logger.debug("qty traded else: ", qtyTraded);
 				// new selling/buying volume is remainingVolume - qtyTraded
-				remainingVolume -= qtyTraded;
+				remainingVolume = remainingVolume - qtyTraded;
+				logger.debug("remaining volume else: {}", remainingVolume);
 				// removed processed order
 				removeOrderFromList(ordersList);
 				// new volume of processed order is 0
@@ -353,7 +328,7 @@ public class OrdersServiceImpl implements OrdersService {
 		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
 		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		// fetching the limit price of order
-		String qtr = getAmountForPairC(orders, currencyPair, qtyTraded);
+		String qtr = getPairedBalance(orders, currencyPair, qtyTraded);
 		logger.debug("other qtr: {}", qtr);
 		if (qtr != null) {
 			// process tx buyers and sellers
@@ -378,7 +353,8 @@ public class OrdersServiceImpl implements OrdersService {
 		return true;
 	}
 
-	private String getAmountForPairC(Orders orders, CurrencyPair currencyPair, double qtyTraded) {
+	@Override
+	public String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded) {
 		String minBalance = null;
 		/**
 		 * if order type is BUY then for Market order, user should have total
@@ -415,14 +391,16 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public Page<Orders> getBuyOrdersListByPair(Long pairId) {
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, OrderType.BUY, OrderStatus.SUBMITTED, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, OrderType.BUY,
+				OrderStatus.SUBMITTED, pageRequest);
 		return orderBook;
 	}
-	
+
 	@Override
 	public Page<Orders> getSellOrdersListByPair(Long pairId) {
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, OrderType.SELL, OrderStatus.SUBMITTED, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, OrderType.SELL,
+				OrderStatus.SUBMITTED, pageRequest);
 		return orderBook;
 	}
 
@@ -511,5 +489,10 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public void removeOrderFromList(List<Orders> ordersList) {
 		ordersList.remove(0);
+	}
+
+	@Override
+	public List<Orders> findOrdersListByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus) {
+		return ordersRepository.findByUserIdAndOrderStatus(userId, orderStatus);
 	}
 }
