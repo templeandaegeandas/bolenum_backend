@@ -61,4 +61,23 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 		  return transactionFeeRepo.saveAndFlush(transactionFee);
 	}
 
+	/*@Override
+	public double getBTCFee(double amount) {
+		if (amount > 0) {
+			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
+			return (transactionFee.getFeeBTC() * amount);
+		}
+		return 0;
+	}*/
+	
+	/*
+	@Override
+	public double getOtherCryptoFee() {
+			if (amount > 0) {
+			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
+			return (transactionFee.getFeeOther() * amount);
+		}
+		return 0;
+	}
+	*/
 }

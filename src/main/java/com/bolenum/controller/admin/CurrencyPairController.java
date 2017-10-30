@@ -1,5 +1,7 @@
 package com.bolenum.controller.admin;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -17,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.CurrencyPairForm;
+import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
@@ -32,6 +36,11 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping(value = UrlConstant.BASE_ADMIN_URI_V1)
 @Api(value = "Currency Pair Controller")
+/**
+ * 
+ * @Author himanshu
+ * @Date 18-Oct-2017
+ */
 public class CurrencyPairController {
 
 	@Autowired
@@ -42,6 +51,15 @@ public class CurrencyPairController {
 	@Autowired
 	private CurrencyPairService currencyPairService;
 
+	@Autowired
+	private CurrencyService currencyService;
+
+	/**
+	 * 
+	 * @param currencyPairForm
+	 * @param result
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.POST)
 	public ResponseEntity<Object> createCurrencyPair(@Valid @RequestBody CurrencyPairForm currencyPairForm,
 			BindingResult result) {
@@ -94,6 +112,14 @@ public class CurrencyPairController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortOrder
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyPairList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
@@ -109,6 +135,11 @@ public class CurrencyPairController {
 
 	}
 
+	/**
+	 * 
+	 * @param pairId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyPair(@RequestParam Long pairId) {
 		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairId);
@@ -120,6 +151,11 @@ public class CurrencyPairController {
 				localeService.getMessage("currency.pair.not.found"), null);
 	}
 
+	/**
+	 * 
+	 * @param pairId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.PUT)
 	public ResponseEntity<Object> changeStateOfCurrencyPair(@RequestParam Long pairId) {
 		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairId);
@@ -135,4 +171,20 @@ public class CurrencyPairController {
 
 	}
 
+	/**
+	 * 
+	 * @param pairId
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.PAIRED_CURRENCY, method = RequestMethod.GET)
+	public ResponseEntity<Object> getListOfPairedCurrency(@RequestParam("currencyId") Long currencyId) {
+		List<CurrencyPair> listOfPairedCurrency = currencyPairService.findCurrencyPairByCurrencyId(currencyId);
+		if (listOfPairedCurrency != null) {
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("paired.currency.found.success"),
+					listOfPairedCurrency);
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+					localeService.getMessage("currency.not.found"), null);
+		}
+	}
 }

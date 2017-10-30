@@ -123,11 +123,6 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 	 * 
 	 */
 	@Override
-	public CurrencyPair findCurrencypairByPairName(String pairName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	public List<CurrencyPair> findCurrencyPairByCurrencyId(Long currencyId) {
 		return currencyPairRepo.findByToCurrencyCurrencyIdAndIsEnabled(currencyId, true);
 	}

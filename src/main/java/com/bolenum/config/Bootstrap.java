@@ -34,6 +34,7 @@ import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,8 +53,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private PrivilegeService privilegeService;
 	@Autowired
 	private Erc20TokenService erc20TokenService;
-	@Autowired
-	private CurrencyService currencyService;
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
@@ -85,8 +84,16 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Value("${bolenum.deployed.contract.currency.abbreviation}")
 	private String currencyAbbreviation;
 
+	
+
+	@Autowired
+	private CurrencyService currencyService;
+
 	@Autowired
 	private AdminService adminService;
+
+	@Autowired
+	private EtherumWalletService etherumWalletService;
 
 	private Set<Privilege> privileges = new HashSet<>();
 
@@ -99,6 +106,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createAdmin();
 		saveCountries();
 		saveStates();
+
 		saveInitialErc20Tokens();
 		saveCurrency();
 
@@ -130,6 +138,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	private void createGoogleAuthQrCodeDirectories() {
 		Path profileImg = Paths.get(googleQrCodeLocation);
 
@@ -216,6 +227,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			form.setPassword(passwordEncoder.encode("12345"));
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
+			etherumWalletService.createWallet(user);
 			String uuid = adminService.createAdminHotWallet("adminWallet");
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 			if (!uuid.isEmpty()) {
@@ -229,6 +241,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	void saveCountries() {
 		long count = countriesAndStateService.countCountries();
 		if (count == 0) {
@@ -248,6 +263,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	void saveStates() {
 		long count = countriesAndStateService.countStates();
 		if (count == 0) {
@@ -266,15 +284,17 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			logger.info("States list already saved");
 		}
 	}
-	
+
 	void saveInitialErc20Tokens() {
 		long count = erc20TokenService.countErc20Token();
-		if (count == 0) {
-			Currency currencyBLN = currencyService.saveCurrency(new Currency(currencyName, currencyAbbreviation, CurrencyType.ERC20TOKEN));
+		if (count == 2) {
+			Currency currencyBLN = currencyService
+					.saveCurrency(new Currency(currencyName, currencyAbbreviation, CurrencyType.ERC20TOKEN));
 			Erc20Token erc20TokenBLN = new Erc20Token(walletAddress, contractAddress, currencyBLN);
 			List<Erc20Token> erc20Tokens = new ArrayList<>();
 			erc20Tokens.add(erc20TokenBLN);
 			erc20TokenService.saveInitialErc20Token(erc20Tokens);
+
 		}
 		else {
 			logger.info("Tokens already saved!");
@@ -286,9 +306,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	 */
 	void saveCurrency() {
 		long count = currencyService.countCourencies();
-		if (count == 1) {
-			Currency currency1 = new Currency("BITCOIN", "BTC",CurrencyType.CRYPTO);
-			Currency currency2 = new Currency("ETHEREUM", "ETH",CurrencyType.CRYPTO);
+		if (count == 0) {
+			Currency currency1 = new Currency("BITCOIN", "BTC", CurrencyType.CRYPTO);
+			Currency currency2 = new Currency("ETHEREUM", "ETH", CurrencyType.CRYPTO);
 			currencyService.saveCurrency(currency1);
 			currencyService.saveCurrency(currency2);
 		}

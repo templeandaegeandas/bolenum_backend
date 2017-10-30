@@ -17,7 +17,6 @@ import javax.crypto.NoSuchPaddingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,7 +53,7 @@ public class BTCWalletController {
 	
 	@Autowired
 	private EtherumWalletService etherumWalletService;
-	
+
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 	
@@ -71,6 +70,7 @@ public class BTCWalletController {
 		if (coinCode == null || coinCode.isEmpty()) {
 			throw new IllegalArgumentException(localService.getMessage("invalid.coin.code"));
 		}
+
 		User user= GenericUtils.getLoggedInUser(); // logged in user
 		Map<String,Object> map = new HashMap<>();
 		switch (currencyType) {

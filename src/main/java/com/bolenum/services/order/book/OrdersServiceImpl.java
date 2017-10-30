@@ -391,16 +391,14 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public Page<Orders> getBuyOrdersListByPair(Long pairId) {
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, OrderType.BUY,
-				OrderStatus.SUBMITTED, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findBuyOrderList(pairId, OrderType.BUY, OrderStatus.SUBMITTED, pageRequest);
 		return orderBook;
 	}
 
 	@Override
 	public Page<Orders> getSellOrdersListByPair(Long pairId) {
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findByPairIdAndOrderTypeAndOrderStatus(pairId, OrderType.SELL,
-				OrderStatus.SUBMITTED, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findSellOrderList(pairId, OrderType.SELL, OrderStatus.SUBMITTED, pageRequest);
 		return orderBook;
 	}
 

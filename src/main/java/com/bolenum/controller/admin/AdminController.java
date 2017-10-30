@@ -1,5 +1,7 @@
 package com.bolenum.controller.admin;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,16 @@ public class AdminController {
 		return null;
 	}
 
+	/**
+	 * to get list of all the users enrolled in system
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortOrder
+	 * @param searchData
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.LIST_USERS, method = RequestMethod.GET)
 	public ResponseEntity<Object> getUsersList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
@@ -59,14 +71,27 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.list"), userList);
 	}
 
+	/**
+	 * 
+	 * @param userId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.GET_USER_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getUsersById(@PathVariable("userId") Long userId) {
 		User user = adminService.getUserById(userId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.get.by.id"), user);
 	}
 
-	@RequestMapping(value = UrlConstant.ADD_TRANSACTION_FEES, method = RequestMethod.POST)
-	public ResponseEntity<Object> addTransactionFees(@RequestParam TransactionFee transactionFee,
+	/**
+	 * to add transaction fees for transaction done by user and deducted fees will
+	 * be store in Admin wallet
+	 * 
+	 * @param transactionFee
+	 * @param result
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.POST)
+	public ResponseEntity<Object> addTransactionFees(@Valid @RequestParam TransactionFee transactionFee,
 			BindingResult result) {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
@@ -79,9 +104,13 @@ public class AdminController {
 			}
 			return ResponseHandler.response(HttpStatus.FORBIDDEN, true,
 					localeService.getMessage("admin.transactionfee.add.error"), null);
-
 		}
-
 	}
 
+	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.GET)
+	public ResponseEntity<Object> getTransactionFees() {
+		//List<TransactionFee> listOfTransactionFee=
+		return ResponseHandler.response(HttpStatus.OK, true,
+				localeService.getMessage("admin.transaction.fees.found.success"), null);
+	}
 }

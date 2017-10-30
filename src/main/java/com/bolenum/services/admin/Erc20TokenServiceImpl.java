@@ -31,6 +31,8 @@ import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
+import com.bolenum.dto.common.CurrencyForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.User;
@@ -68,7 +70,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	public Erc20Token saveToken(Erc20Token erc20Token) {
 		Erc20Token existingToken = erc20TokenRepository.findByContractAddress(erc20Token.getContractAddress());
 		if (existingToken == null) {
-			Currency savedCurrency = currencyService.saveCurrency(erc20Token.getCurrency());
+			CurrencyForm currencyForm = new CurrencyForm(erc20Token.getCurrency().getCurrencyName(), erc20Token.getCurrency().getCurrencyAbbreviation(), CurrencyType.ERC20TOKEN);
+			Currency savedCurrency = currencyService.saveCurrency(currencyForm.copy(new Currency()));
 			erc20Token.setCurrency(savedCurrency);
 			return erc20TokenRepository.save(erc20Token);
 		} else {
@@ -137,5 +140,11 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j,
 				credentials, BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
 		return token.transferFrom( new Address(user.getEthWalletaddress()), new Address(toAddress), transferFunds);
+	}
+
+	@Override
+	public Erc20Token saveBolenumErc20Token() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
