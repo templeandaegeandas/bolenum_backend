@@ -19,5 +19,4 @@ public interface NotificationService {
 
 	public Page<Notification> getNotification(User receiver, int pageNumber, int pageSize);
 
-	public Page<Notification> getNotification(int pageNumber, int pageSize);
 }

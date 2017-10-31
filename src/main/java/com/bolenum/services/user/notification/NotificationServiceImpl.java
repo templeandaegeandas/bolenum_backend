@@ -61,19 +61,6 @@ public class NotificationServiceImpl implements NotificationService {
 		return notificationRepositroy.findByBuyerAndIsDeleted(receiver, false, pageRequest);
 	}
 
-	/**
-	 * to get all the notification page wise
-	 * 
-	 * @param pagenumber
-	 * @param pagesize
-	 * @return page of notifications
-	 */
-	@Override
-	public Page<Notification> getNotification(int pageNumber, int pageSize) {
-		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "createdOn");
-		return notificationRepositroy.findAllNotification(false, pageRequest);
-	}
-
 	@Override
 	public Notification save(Notification notification) {
 		return notificationRepositroy.saveAndFlush(notification);

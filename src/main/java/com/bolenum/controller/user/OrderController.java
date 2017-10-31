@@ -1,5 +1,7 @@
 package com.bolenum.controller.user;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.model.User;
+import com.bolenum.model.UserKyc;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
+import com.bolenum.services.common.KYCService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.order.book.TradeService;
@@ -41,6 +45,9 @@ public class OrderController {
 
 	@Autowired
 	private TradeService tradeService;
+	
+	@Autowired
+	private KYCService kycService;
 
 	@Autowired
 	private LocaleService localeService;
@@ -53,10 +60,19 @@ public class OrderController {
 					null);
 		}
 		User user = GenericUtils.getLoggedInUser();
-		boolean isVerified = user.getUserKyc().getIsVerified();
-		if(!isVerified){
+		List<UserKyc> kycList = kycService.getListOfKycByUser(user);
+		if (kycList==null || kycList.size()<2) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"), null);
 		}
+		else {
+			for(int i = 0; i < kycList.size(); i++) {
+				UserKyc userKyc = kycList.get(i);
+				if (!userKyc.getIsVerified()) {
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"), null);
+				}
+			}
+		}
+		
 		String balance = ordersService.checkOrderEligibility(user, orders, pairId);
 		logger.debug("balance: {}", balance);
 		if (balance.equals("Synchronizing")) {

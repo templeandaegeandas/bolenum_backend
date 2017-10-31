@@ -31,7 +31,7 @@ public class Notification {
 	private List<User> seller;
 	@OneToMany
 	private List<User> buyer;
-
+	
 	private String message;
 	private boolean readStatus;
 
@@ -60,7 +60,7 @@ public class Notification {
 	}
 
 	/**
-	 * @return the sender
+	 * @return the seller
 	 */
 	public List<User> getSeller() {
 		return seller;
@@ -68,7 +68,7 @@ public class Notification {
 
 	/**
 	 * @param seller
-	 *            the sender to set
+	 *            the seller to set
 	 */
 	public void setSeller(List<User> seller) {
 		this.seller = seller;

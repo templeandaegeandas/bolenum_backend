@@ -21,5 +21,4 @@ public interface NotificationRepositroy extends JpaRepository<Notification, Seri
 
 	public Page<Notification> findBySellerAndIsDeleted(User seller, boolean isDeleted, Pageable pagable);
 	
-	public Page<Notification> findAllNotification(boolean isDeleted, Pageable pagable);
 }
