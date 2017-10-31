@@ -182,6 +182,7 @@ public class BTCWalletController {
 //					mapAddress.put("address", user.getEthWalletaddress());
 //					mapAddress.put("balance", balance + " BLN");
 //					map.put("data", mapAddress);
+					
 				} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 						| IllegalBlockSizeException | BadPaddingException | IOException | CipherException
 						| InterruptedException | ExecutionException e) {
