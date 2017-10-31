@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
@@ -31,19 +32,19 @@ public class MailService {
 		mailSender.send(message);
 	}
 
-	public void mailSend(String to, String subject, String text) {
+	public boolean mailSend(String to, String subject, String text) {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setSubject(subject);
 		message.setText(text);
 		message.setTo(to);
-
 		try {
 			mailSender.send(message);
-
-		} catch (Exception e) {
-
+			logger.debug("mail sent succssfully to: {}", to);
+			return true;
+		} catch ( MailException e) {
+			logger.error("mail seding failed to: {}", to);
 			e.printStackTrace();
 		}
+		return false;
 	}
-
 }
