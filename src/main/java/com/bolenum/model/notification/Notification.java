@@ -4,11 +4,13 @@
 package com.bolenum.model.notification;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -25,8 +27,11 @@ public class Notification {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private User seller;
-	private User buyer;
+	@OneToMany
+	private List<User> seller;
+	@OneToMany
+	private List<User> buyer;
+
 	private String message;
 	private boolean readStatus;
 
@@ -47,7 +52,8 @@ public class Notification {
 	}
 
 	/**
-	 * @param id the id to set
+	 * @param id
+	 *            the id to set
 	 */
 	public void setId(Long id) {
 		this.id = id;
@@ -56,29 +62,31 @@ public class Notification {
 	/**
 	 * @return the sender
 	 */
-	public User getSender() {
+	public List<User> getSeller() {
 		return seller;
 	}
 
 	/**
-	 * @param sender the sender to set
+	 * @param seller
+	 *            the sender to set
 	 */
-	public void setSender(User sender) {
-		this.seller = sender;
+	public void setSeller(List<User> seller) {
+		this.seller = seller;
 	}
 
 	/**
-	 * @return the receiver
+	 * @return the buyer
 	 */
-	public User getReceiver() {
+	public List<User> getBuyer() {
 		return buyer;
 	}
 
 	/**
-	 * @param receiver the receiver to set
+	 * @param buyer
+	 *            the buyer to set
 	 */
-	public void setReceiver(User receiver) {
-		this.buyer = receiver;
+	public void setBuyer(List<User> buyer) {
+		this.buyer = buyer;
 	}
 
 	/**
@@ -89,7 +97,8 @@ public class Notification {
 	}
 
 	/**
-	 * @param message the message to set
+	 * @param message
+	 *            the message to set
 	 */
 	public void setMessage(String message) {
 		this.message = message;
@@ -103,7 +112,8 @@ public class Notification {
 	}
 
 	/**
-	 * @param readStatus the readStatus to set
+	 * @param readStatus
+	 *            the readStatus to set
 	 */
 	public void setReadStatus(boolean readStatus) {
 		this.readStatus = readStatus;
@@ -117,7 +127,8 @@ public class Notification {
 	}
 
 	/**
-	 * @param createdOn the createdOn to set
+	 * @param createdOn
+	 *            the createdOn to set
 	 */
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
@@ -131,7 +142,8 @@ public class Notification {
 	}
 
 	/**
-	 * @param deletedOn the deletedOn to set
+	 * @param deletedOn
+	 *            the deletedOn to set
 	 */
 	public void setDeletedOn(Date deletedOn) {
 		this.deletedOn = deletedOn;
@@ -145,11 +157,11 @@ public class Notification {
 	}
 
 	/**
-	 * @param isDeleted the isDeleted to set
+	 * @param isDeleted
+	 *            the isDeleted to set
 	 */
 	public void setDeleted(boolean isDeleted) {
 		this.isDeleted = isDeleted;
 	}
-	
-	
+
 }

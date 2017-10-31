@@ -58,7 +58,7 @@ public class NotificationServiceImpl implements NotificationService {
 		logger.debug("fetching notification of user: {}, page: {}, size: {}", receiver.getEmailId(), pageNumber,
 				pageSize);
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "createdOn");
-		return notificationRepositroy.findByReceiverAndIsDeleted(receiver, false, pageRequest);
+		return notificationRepositroy.findByBuyerAndIsDeleted(receiver, false, pageRequest);
 	}
 
 	/**

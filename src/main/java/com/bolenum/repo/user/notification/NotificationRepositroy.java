@@ -17,9 +17,9 @@ import com.bolenum.model.notification.Notification;
  * @date 31-Oct-2017
  */
 public interface NotificationRepositroy extends JpaRepository<Notification, Serializable> {
-	public Page<Notification> findByReceiverAndIsDeleted(User receiver, boolean isDeleted, Pageable pagable);
+	public Page<Notification> findByBuyerAndIsDeleted(User buyer, boolean isDeleted, Pageable pagable);
 
-	public Page<Notification> findBySenderAndIsDeleted(User sender, boolean isDeleted, Pageable pagable);
+	public Page<Notification> findBySellerAndIsDeleted(User seller, boolean isDeleted, Pageable pagable);
 	
 	public Page<Notification> findAllNotification(boolean isDeleted, Pageable pagable);
 }
