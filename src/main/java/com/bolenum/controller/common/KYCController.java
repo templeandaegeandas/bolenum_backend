@@ -225,6 +225,7 @@ public class KYCController {
 	public ResponseEntity<Object> getKycByUserId(@RequestParam("userId") Long userId) {
 		User user=userService.findByUserId(userId);
 		List<UserKyc> listOfUser = kycService.getListOfKycByUser(user);
+
 		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("submitted.kyc.list"),
 				listOfUser);
 	}

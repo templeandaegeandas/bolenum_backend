@@ -89,5 +89,7 @@ public interface KYCService {
 	 * @return
 	 */
 	List<UserKyc> getListOfKycByUser(User user);
+	
+	public Page<User> getListOfUser(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 }
