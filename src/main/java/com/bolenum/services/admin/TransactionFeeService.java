@@ -4,13 +4,13 @@ import com.bolenum.model.TransactionFee;
 
 public interface TransactionFeeService {
 
-	public double getOtherCryptoFee(double amount);
+	public Double getOtherCryptoFee(Double amount);
 
-	public double getBTCFee(double amount);
+	public Double getBTCFee(Double amount);
 
-	public double getOtherCryptoFee();
+	public Double getOtherCryptoFee();
 	
-	public double getBTCFee();
+	public Double getBTCFee();
 	
 	public TransactionFee saveTransactionFee(TransactionFee transactionFee);
 

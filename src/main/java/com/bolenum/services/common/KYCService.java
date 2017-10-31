@@ -1,10 +1,12 @@
 package com.bolenum.services.common;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bolenum.enums.DocumentType;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;
@@ -28,7 +30,7 @@ public interface KYCService {
 	 * @throws IOException
 	 * @throws MaxSizeExceedException
 	 */
-	User uploadKycDocument(MultipartFile multipartFile, Long userId)
+	UserKyc uploadKycDocument(MultipartFile multipartFile, Long userId, DocumentType documentType)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException;
 
 	/**
@@ -36,7 +38,7 @@ public interface KYCService {
 	 * @param userId
 	 * @returnn User
 	 */
-	User approveKycDocument(Long userId);
+	UserKyc approveKycDocument(Long kycId);
 
 	/**
 	 * 
@@ -44,7 +46,7 @@ public interface KYCService {
 	 * @param rejectionMessage
 	 * @return User
 	 */
-	User disApprovedKycDocument(Long userId, String rejectionMessage);
+	UserKyc disApprovedKycDocument(Long kycId, String rejectionMessage);
 
 	/**
 	 * 
@@ -52,7 +54,8 @@ public interface KYCService {
 	 * @param pageSize
 	 * @return Page<User>
 	 */
-	Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
+	// Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy,
+	// String sortOrder, String searchData);
 
 	/**
 	 * 
@@ -60,5 +63,33 @@ public interface KYCService {
 	 * @return UserKyc
 	 */
 	UserKyc getUserKycById(Long kycId);
+	
+	/**
+	 * 
+	 * @param documentType
+	 * @return
+	 */
+
+	DocumentType validateDocumentType(String documentType);
+
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortOrder
+	 * @param searchData
+	 * @return
+	 */
+	public Page<UserKyc> getListOfKyc(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
+
+	/**
+	 * 
+	 * @param user
+	 * @return
+	 */
+	List<UserKyc> getListOfKycByUser(User user);
+	
+	//public Page<User> getListOfUser(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 }

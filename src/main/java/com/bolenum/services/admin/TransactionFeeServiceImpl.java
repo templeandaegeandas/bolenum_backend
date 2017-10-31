@@ -17,32 +17,35 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 	 * @return
 	 */
 	@Override
-	public double getBTCFee(double amount) {
-		if (amount > 0) {
+	public Double getBTCFee(Double amount) {
+		if (amount != null) {
 			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
-			return ((transactionFee.getFeeBTC() / 100) * amount);
+			if (transactionFee.getFeeBTC() != null) {
+				return ((transactionFee.getFeeBTC() / 100) * amount);
+			}
 		}
-		return 0;
+		return null;
 	}
 
 	/**
 	 * 
 	 */
 	@Override
-	public double getOtherCryptoFee(double amount) {
-
-		if (amount > 0) {
+	public Double getOtherCryptoFee(Double amount) {
+		if (amount != null) {
 			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
-			return ((transactionFee.getFeeOther() / 100) * amount);
+			if (transactionFee.getFeeOther() != null) {
+				return ((transactionFee.getFeeOther() / 100) * amount);
+			}
 		}
-		return 0;
+		return null;
 	}
 
 	/**
 	 * 
 	 * @return
 	 */
-	public double getBTCFee() {
+	public Double getBTCFee() {
 		TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
 		return transactionFee.getFeeBTC();
 	}
@@ -51,33 +54,24 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 	 * 
 	 */
 	@Override
-	public double getOtherCryptoFee() {
-			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
-			return transactionFee.getFeeOther() ;
-	}
-	
-	public TransactionFee saveTransactionFee(TransactionFee transactionFee)
-	{
-		  return transactionFeeRepo.saveAndFlush(transactionFee);
+	public Double getOtherCryptoFee() {
+		TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
+		return transactionFee.getFeeOther();
 	}
 
-	/*@Override
-	public double getBTCFee(double amount) {
-		if (amount > 0) {
-			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
-			return (transactionFee.getFeeBTC() * amount);
-		}
-		return 0;
-	}*/
-	
-	/*
-	@Override
-	public double getOtherCryptoFee() {
-			if (amount > 0) {
-			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
-			return (transactionFee.getFeeOther() * amount);
-		}
-		return 0;
+	public TransactionFee saveTransactionFee(TransactionFee transactionFee) {
+		return transactionFeeRepo.saveAndFlush(transactionFee);
 	}
-	*/
+
+	/*
+	 * @Override public Double getBTCFee(Double amount) { if (amount > 0) {
+	 * TransactionFee transactionFee = transactionFeeRepo.getOne(1L); return
+	 * (transactionFee.getFeeBTC() * amount); } return null; }
+	 */
+
+	/*
+	 * @Override public Double getOtherCryptoFee() { if (amount > 0) {
+	 * TransactionFee transactionFee = transactionFeeRepo.getOne(1L); return
+	 * (transactionFee.getFeeOther() * amount); } return null; }
+	 */
 }
