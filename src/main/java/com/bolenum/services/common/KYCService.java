@@ -13,8 +13,6 @@ import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
 
-import springfox.documentation.spi.DocumentationType;
-
 /**
  * 
  * @author Vishal Kumar
@@ -24,8 +22,6 @@ import springfox.documentation.spi.DocumentationType;
 
 public interface KYCService {
 
-
-
 	/**
 	 * 
 	 * @param multipartFile
@@ -34,7 +30,7 @@ public interface KYCService {
 	 * @throws IOException
 	 * @throws MaxSizeExceedException
 	 */
-	User uploadKycDocument(MultipartFile multipartFile, Long userId ,DocumentType documentType)
+	UserKyc uploadKycDocument(MultipartFile multipartFile, Long userId, DocumentType documentType)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException;
 
 	/**
@@ -42,7 +38,7 @@ public interface KYCService {
 	 * @param userId
 	 * @returnn User
 	 */
-	UserKyc approveKycDocument(Long kycId,Long userId);
+	UserKyc approveKycDocument(Long kycId);
 
 	/**
 	 * 
@@ -50,7 +46,7 @@ public interface KYCService {
 	 * @param rejectionMessage
 	 * @return User
 	 */
-	UserKyc disApprovedKycDocument(Long kycId, String rejectionMessage,Long userId);
+	UserKyc disApprovedKycDocument(Long kycId, String rejectionMessage);
 
 	/**
 	 * 
@@ -58,7 +54,8 @@ public interface KYCService {
 	 * @param pageSize
 	 * @return Page<User>
 	 */
-    //Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
+	// Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy,
+	// String sortOrder, String searchData);
 
 	/**
 	 * 
@@ -66,9 +63,31 @@ public interface KYCService {
 	 * @return UserKyc
 	 */
 	UserKyc getUserKycById(Long kycId);
+	
+	/**
+	 * 
+	 * @param documentType
+	 * @return
+	 */
 
 	DocumentType validateDocumentType(String documentType);
-	
-	public List<User> getListOfUser(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
+
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortOrder
+	 * @param searchData
+	 * @return
+	 */
+	public Page<UserKyc> getListOfKyc(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
+
+	/**
+	 * 
+	 * @param user
+	 * @return
+	 */
+	List<UserKyc> getListOfKycByUser(User user);
 
 }

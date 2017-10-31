@@ -86,17 +86,6 @@ public class User {
 	@OneToOne
 	private Role role;
 
-	@OneToMany
-	private List<UserKyc> userKyc;
-
-	public List<UserKyc> getUserKyc() {
-		return userKyc;
-	}
-
-	public void setUserKyc(List<UserKyc> userKyc) {
-		this.userKyc = userKyc;
-	}
-
 	private String btcWalletUuid;
 
 	private String ethWalletaddress;

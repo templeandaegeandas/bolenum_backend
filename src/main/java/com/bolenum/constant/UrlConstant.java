@@ -53,6 +53,10 @@ public class UrlConstant {
 	public static final String DISAPPROVE_DOCUMENT = BASE_URI_V1 + "/kyc/disapprove";
 	public static final String GET_KYC_BY_ID = BASE_URI_V1 + "/kyc/{kycId}";
 	public static final String SUBMITTED_KYC_LIST = BASE_URI_V1 + "list/kyc";
+	public static final String GET_KYC_BY_USER_ID = BASE_URI_V1 + "list/user/kyc";
+	public static final String SUBMITTED_KYC_LIST_OF_USER=BASE_URI_V1+"user/kyc/list";
+	public static final String SUBMITTED_KYC_BY_USER_ID=BASE_URI_V1+"kyc/by/userid";
+	
 	
 	/******************** Two Factor Authentication API ******/
 	public static final String GEN_GOOGLE_AUTH_QR = "twofactor/auth/google/authenticator";

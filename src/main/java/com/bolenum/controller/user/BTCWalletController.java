@@ -156,16 +156,19 @@ public class BTCWalletController {
 					String balanceBTC = btcWalletService.getWalletBalnce(user.getBtcWalletUuid());
 					balanceBTC = balanceBTC.replace("BTC", "");
 					balanceBTC = balanceBTC.trim();
-					Double amountToTransfer = Double.valueOf(balanceBTC);
-					transactionService.performBtcTransaction(user, withdrawBalanceForm.getToAddress(),
-							amountToTransfer);
+					Double availableBTCBalance = Double.valueOf(balanceBTC);
+					if (availableBTCBalance >= 1.00) {
+						transactionService.performBtcTransaction(user, withdrawBalanceForm.getToAddress(),
+								withdrawBalanceForm.getWithdrawAmount());
+					}
 					break;
 				case "ETH":
-					Double balance = etherumWalletService.getWalletBalance(user);
-					Map<String, Object> mapAddress = new HashMap<>();
-					mapAddress.put("address", user.getEthWalletaddress());
-					mapAddress.put("balance", balance + " ETH");
-					map.put("data", mapAddress);
+					Double availableETHBalance = etherumWalletService.getWalletBalance(user);
+					if (availableETHBalance >= 1.00) {
+						transactionService.performEthTransaction(user, withdrawBalanceForm.getToAddress(),
+								withdrawBalanceForm.getWithdrawAmount());
+
+					}
 					break;
 				default:
 					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
@@ -175,10 +178,10 @@ public class BTCWalletController {
 			case "ERC20TOKEN":
 				try {
 					Double balance = erc20TokenService.getErc20WalletBalance(user, coinCode);
-					Map<String, Object> mapAddress = new HashMap<>();
-					mapAddress.put("address", user.getEthWalletaddress());
-					mapAddress.put("balance", balance + " BLN");
-					map.put("data", mapAddress);
+//					Map<String, Object> mapAddress = new HashMap<>();
+//					mapAddress.put("address", user.getEthWalletaddress());
+//					mapAddress.put("balance", balance + " BLN");
+//					map.put("data", mapAddress);
 				} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
 						| IllegalBlockSizeException | BadPaddingException | IOException | CipherException
 						| InterruptedException | ExecutionException e) {
