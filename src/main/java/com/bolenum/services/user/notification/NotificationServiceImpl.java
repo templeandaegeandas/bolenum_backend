@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import com.bolenum.model.User;
 import com.bolenum.model.notification.Notification;
 import com.bolenum.repo.user.notification.NotificationRepositroy;
+import com.bolenum.services.common.LocaleService;
+import com.bolenum.util.MailService;
 
 /**
  * @author chandan kumar singh
@@ -25,14 +27,24 @@ public class NotificationServiceImpl implements NotificationService {
 	private Logger logger = LoggerFactory.getLogger(NotificationServiceImpl.class);
 
 	@Autowired
+	private MailService mailService;
+
+	@Autowired
 	private NotificationRepositroy notificationRepositroy;
+
+	@Autowired
+	private LocaleService localeService;
 
 	/**
 	 * to send the notification
 	 */
 	@Override
-	public boolean sendNotification(User sender, User receiver, String message) {
-		return false;
+	public boolean sendNotification(User user, String message) {
+		boolean status = mailService.mailSend(user.getEmailId(), localeService.getMessage("trade.summary"), message);
+		if (status) {
+			logger.debug("notification send to : {}", user.getEmailId());
+		}
+		return status;
 	}
 
 	/**
@@ -60,6 +72,11 @@ public class NotificationServiceImpl implements NotificationService {
 	public Page<Notification> getNotification(int pageNumber, int pageSize) {
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "createdOn");
 		return notificationRepositroy.findAllNotification(false, pageRequest);
+	}
+
+	@Override
+	public Notification save(Notification notification) {
+		return notificationRepositroy.saveAndFlush(notification);
 	}
 
 }

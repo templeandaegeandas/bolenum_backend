@@ -13,8 +13,9 @@ import com.bolenum.model.notification.Notification;
  * @date 31-Oct-2017
  */
 public interface NotificationService {
-	
-	public boolean sendNotification(User sender, User receiver, String message);
+	public Notification save(Notification notification);
+
+	public boolean sendNotification(User user, String message);
 
 	public Page<Notification> getNotification(User receiver, int pageNumber, int pageSize);
 

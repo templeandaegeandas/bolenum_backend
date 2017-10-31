@@ -25,8 +25,8 @@ public class Notification {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private User sender;
-	private User receiver;
+	private User seller;
+	private User buyer;
 	private String message;
 	private boolean readStatus;
 
@@ -57,28 +57,28 @@ public class Notification {
 	 * @return the sender
 	 */
 	public User getSender() {
-		return sender;
+		return seller;
 	}
 
 	/**
 	 * @param sender the sender to set
 	 */
 	public void setSender(User sender) {
-		this.sender = sender;
+		this.seller = sender;
 	}
 
 	/**
 	 * @return the receiver
 	 */
 	public User getReceiver() {
-		return receiver;
+		return buyer;
 	}
 
 	/**
 	 * @param receiver the receiver to set
 	 */
 	public void setReceiver(User receiver) {
-		this.receiver = receiver;
+		this.buyer = receiver;
 	}
 
 	/**
