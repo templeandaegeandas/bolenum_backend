@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 import com.bolenum.enums.OrderStandard;
+import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 
 /**
@@ -29,15 +30,18 @@ public class Trade {
 	private User buyer;
 	@OneToOne
 	private User seller;
+	@OneToOne
+	private CurrencyPair pair;
 	private OrderStandard orderStandard;
 	private Date createdOn = new Date();
 
-	public Trade(Double price, Double volume, User buyer, User seller,
+	public Trade(Double price, Double volume, User buyer, User seller, CurrencyPair pair, 
 			OrderStandard orderStandard) {
 		this.price = price;
 		this.volume = volume;
 		this.buyer = buyer;
 		this.seller = seller;
+		this.pair = pair;
 		this.orderStandard = orderStandard;
 	}
 
@@ -81,8 +85,16 @@ public class Trade {
 		return seller;
 	}
 
-	public void setSellerId(User seller) {
+	public void setSeller(User seller) {
 		this.seller = seller;
+	}
+
+	public CurrencyPair getPair() {
+		return pair;
+	}
+
+	public void setPair(CurrencyPair pair) {
+		this.pair = pair;
 	}
 
 	public OrderStandard getOrderStandard() {

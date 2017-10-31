@@ -144,7 +144,7 @@ public class OrdersServiceImpl implements OrdersService {
 					OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
-				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
+				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
@@ -157,7 +157,7 @@ public class OrdersServiceImpl implements OrdersService {
 					OrderType.BUY, OrderStatus.SUBMITTED, pair);
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
-				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
+				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
@@ -195,7 +195,7 @@ public class OrdersServiceImpl implements OrdersService {
 			 */
 			while (sellOrderList.size() > 0 && (remainingVolume > 0) && (price >= getBestBuy(sellOrderList))) {
 				logger.debug("inner buy while loop for buyers and remaining volume: {}", remainingVolume);
-				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders);
+				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
@@ -217,7 +217,7 @@ public class OrdersServiceImpl implements OrdersService {
 			 */
 			while (buyOrderList.size() > 0 && (remainingVolume > 0) && (price <= buyOrderList.get(0).getPrice())) {
 				logger.debug("inner sell while loop for seller and remaining volume: {}", remainingVolume);
-				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders);
+				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
 			}
 			if (remainingVolume > 0) {
 				orders.setVolume(remainingVolume);
@@ -235,7 +235,7 @@ public class OrdersServiceImpl implements OrdersService {
 	 * 
 	 */
 	@Override
-	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders) {
+	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair) {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
 		User buyer, seller;
@@ -298,7 +298,7 @@ public class OrdersServiceImpl implements OrdersService {
 			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
 			if (buyer != seller) {
 				// saving the processed BUY/SELL order in trade
-				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, OrderStandard.LIMIT);
+				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT);
 				tradeList.add(trade);
 				logger.debug("saving trade completed");
 				processTransaction(matchedOrder, qtyTraded, buyer, seller);

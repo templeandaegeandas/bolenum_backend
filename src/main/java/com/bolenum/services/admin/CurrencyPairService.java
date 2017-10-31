@@ -31,5 +31,7 @@ public interface CurrencyPairService {
 	Page<CurrencyPair> getCurrencyList(int pageNumber, int pageSize, String sortBy, String sortOrder);
 
 	List<CurrencyPair> findCurrencyPairByCurrencyId(Long currencyId);
+	
+	List<CurrencyPair> findAllCurrencyPair();
 
 }

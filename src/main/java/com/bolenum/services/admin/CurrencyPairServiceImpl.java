@@ -127,4 +127,9 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 		return currencyPairRepo.findByToCurrencyCurrencyIdAndIsEnabled(currencyId, true);
 	}
 
+	@Override
+	public List<CurrencyPair> findAllCurrencyPair() {
+		return currencyPairRepo.findAll();
+	}
+
 }

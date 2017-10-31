@@ -24,7 +24,7 @@ public interface OrdersService {
 
 	Boolean processLimitOrder(Orders orders);
 
-	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders);
+	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair);
 
 	Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price);
 
