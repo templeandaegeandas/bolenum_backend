@@ -25,7 +25,7 @@ public class TradeServiceImpl implements TradeService {
 		} else {
 			sort = Direction.ASC;
 		}
-		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		Pageable pageRequest = new PageRequest(0, 50, sort, sortBy);
 		return tradeRepository.findByBuyerOrSeller(user, user, pageRequest);
 	}
 	
