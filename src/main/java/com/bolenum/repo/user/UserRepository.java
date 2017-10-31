@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.bolenum.enums.DocumentStatus;
 import com.bolenum.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -54,8 +55,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	//public Page<User> getNewlySubmittedKycListWIthSearch(@Param("searchData") String searchData,
 			//@Param("documentStatus") DocumentStatus documentStatus, Pageable pageable);
 		
-	@Query("select distinct u from User u inner join u.userKyc k where (u.firstName like %:searchData% or u.lastName like %:searchData% or u.emailId like %:searchData%) and k.documentStatus=:documentStatus and u.isDeleted = false")
-	Page<User> getUserByKycStatus(@Param("searchData") String searchData, @Param("documentStatus") DocumentStatus documentStatus, Pageable pageable);
+	//@Query("select distinct u from User u inner join u.userKyc k where (u.firstName like %:searchData% or u.lastName like %:searchData% or u.emailId like %:searchData%) and k.documentStatus=:documentStatus and u.isDeleted = false")
+	//Page<User> getUserByKycStatus(@Param("searchData") String searchData, @Param("documentStatus") DocumentStatus documentStatus, Pageable pageable);
 	
 	public User findByUserId(Long id);
 
