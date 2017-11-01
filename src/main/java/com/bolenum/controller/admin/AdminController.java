@@ -10,12 +10,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.dto.common.AddTransactioFeeAndLimitForm;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
 import com.bolenum.services.admin.AdminService;
@@ -91,15 +93,15 @@ public class AdminController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.POST)
-	public ResponseEntity<Object> addTransactionFees(@Valid @RequestParam TransactionFee transactionFee,
+	public ResponseEntity<Object> addTransactionFees(@Valid @RequestBody AddTransactioFeeAndLimitForm addTransactioFeeAndLimitForm,
 			BindingResult result) {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("admin.transactionfee.add.error"), null);
 		} else {
-			TransactionFee savedTransactionFee = transactionFeeService.saveTransactionFee(transactionFee);
+			TransactionFee savedTransactionFee = transactionFeeService.saveTransactionFee(addTransactioFeeAndLimitForm);
 			if (savedTransactionFee != null) {
-				return ResponseHandler.response(HttpStatus.OK, true,
+				return ResponseHandler.response(HttpStatus.OK, false,
 						localeService.getMessage("admin.trnsactionfee.add.success"), savedTransactionFee);
 			}
 			return ResponseHandler.response(HttpStatus.FORBIDDEN, true,
@@ -107,9 +109,13 @@ public class AdminController {
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTransactionFees() {
-		//List<TransactionFee> listOfTransactionFee=
+		// List<TransactionFee> listOfTransactionFee=
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.transaction.fees.found.success"), null);
 	}

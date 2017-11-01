@@ -1,43 +1,36 @@
-package com.bolenum.model;
+package com.bolenum.dto.common;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * 
- * @Author himanshu
+ * @Author Himanshu Kumar
  * @Date 01-Nov-2017
  */
-@Entity
-public class TransactionFee {
-	
-	/**
-	 *  transaction fee for BTC in case of deposit and withdrawal  
-	 */
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+public class AddTransactioFeeAndLimitForm {
+
+	@ApiModelProperty(hidden = true)
 	private Long id;
-	
-    private Double feeBTC;
-     
-    private Double feeOther;
-    
-    private Double availableBalanceLimitToWithdrawForBTC;
-    
-    private Double availableBalanceLimitToWithdrawForETH;
-    
-    private Double availableBalanceLimitToWithdrawForERC20;
-    
-    private Double availableBalanceLimitToWithdrawForFiat;
-    
-    private Double minimumLimitToSendForBTC;
-    
-    private Double minimumLimitToSendForETH;
-    
-    private Double minimumLimitToSendForERC20;
-    
-    private Double minimumLimitToSendForFIAT;
+
+	private Double feeBTC;
+
+	private Double feeOther;
+
+	private Double availableBalanceLimitToWithdrawForBTC;
+
+	private Double availableBalanceLimitToWithdrawForETH;
+
+	private Double availableBalanceLimitToWithdrawForERC20;
+
+	private Double availableBalanceLimitToWithdrawForFIAT;
+
+	private Double minimumLimitToSendForBTC;
+
+	private Double minimumLimitToSendForETH;
+
+	private Double minimumLimitToSendForERC20;
+
+	private Double minimumLimitToSendForFIAT;
 
 	public Long getId() {
 		return id;
@@ -87,12 +80,12 @@ public class TransactionFee {
 		this.availableBalanceLimitToWithdrawForERC20 = availableBalanceLimitToWithdrawForERC20;
 	}
 
-	public Double getAvailableBalanceLimitToWithdrawForFiat() {
-		return availableBalanceLimitToWithdrawForFiat;
+	public Double getAvailableBalanceLimitToWithdrawForFIAT() {
+		return availableBalanceLimitToWithdrawForFIAT;
 	}
 
-	public void setAvailableBalanceLimitToWithdrawForFiat(Double availableBalanceLimitToWithdrawForFiat) {
-		this.availableBalanceLimitToWithdrawForFiat = availableBalanceLimitToWithdrawForFiat;
+	public void setAvailableBalanceLimitToWithdrawForFIAT(Double availableBalanceLimitToWithdrawForFIAT) {
+		this.availableBalanceLimitToWithdrawForFIAT = availableBalanceLimitToWithdrawForFIAT;
 	}
 
 	public Double getMinimumLimitToSendForBTC() {
@@ -126,7 +119,5 @@ public class TransactionFee {
 	public void setMinimumLimitToSendForFIAT(Double minimumLimitToSendForFIAT) {
 		this.minimumLimitToSendForFIAT = minimumLimitToSendForFIAT;
 	}
-    
-   
-     	
+
 }

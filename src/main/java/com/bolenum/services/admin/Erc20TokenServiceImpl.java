@@ -2,6 +2,7 @@ package com.bolenum.services.admin;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -132,11 +133,12 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	}
 	
 	@Override
-	public Future<TransactionReceipt> transferErc20Token(User user, String tokenName, String toAddress, Long fund) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
+	public Future<TransactionReceipt> transferErc20Token(User user, String tokenName, String toAddress, Double fund) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 		Credentials credentials = getCredentials(user);
 		Erc20Token erc20Token = getByCoin(tokenName);
-		Uint256 transferFunds = new Uint256(fund);
+		BigInteger fundInBig = new BigDecimal(fund).toBigInteger();
+		Uint256 transferFunds = new Uint256(fundInBig);
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j,
 				credentials, BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
 		return token.transferFrom( new Address(user.getEthWalletaddress()), new Address(toAddress), transferFunds);
@@ -147,4 +149,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	
 }
