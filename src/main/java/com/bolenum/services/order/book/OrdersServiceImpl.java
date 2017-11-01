@@ -17,11 +17,13 @@ import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
+import com.bolenum.model.notification.Notification;
 import com.bolenum.model.orders.book.MarketPrice;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.WalletService;
@@ -55,6 +57,9 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Autowired
 	private WalletService walletService;
+
+	@Autowired
+	private NotificationService notificationService;
 
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
@@ -95,10 +100,11 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		return balance;
 	}
+
 	/**
 	 * 
 	 * @description get user order placed volume
-	 * @param user 
+	 * @param user
 	 * @return balance
 	 */
 	private double getPlacedOrderVolume(User user) {
@@ -140,8 +146,8 @@ public class OrdersServiceImpl implements OrdersService {
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		if (orderType.equals(OrderType.BUY)) {
-			List<Orders> sellOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(
-					OrderType.SELL, OrderStatus.SUBMITTED, pair);
+			List<Orders> sellOrderList = ordersRepository
+					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
@@ -153,8 +159,8 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			processed = true;
 		} else {
-			List<Orders> buyOrderList = ordersRepository.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(
-					OrderType.BUY, OrderStatus.SUBMITTED, pair);
+			List<Orders> buyOrderList = ordersRepository
+					.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, pair);
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
@@ -301,7 +307,7 @@ public class OrdersServiceImpl implements OrdersService {
 				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT);
 				tradeList.add(trade);
 				logger.debug("saving trade completed");
-				processTransaction(matchedOrder, qtyTraded, buyer, seller);
+				processTransaction(matchedOrder, orders, qtyTraded, buyer, seller);
 			}
 		}
 		orderAsyncServices.saveTrade(tradeList);
@@ -310,29 +316,60 @@ public class OrdersServiceImpl implements OrdersService {
 
 	/**
 	 * @description processTransaction
-	 * @param orders,qtyTraded,buyerId,sellerId
+	 * @param orders,qtyTraded,buyer,seller
 	 */
-	private void processTransaction(Orders orders, double qtyTraded, User buyer, User seller) {
-		// finding buyer
-//		User buyer = userService.findByUserId(buyerId);
-		// finding seller
-//		User seller = userService.findByUserId(sellerId);
-		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(), orders.getId());
+	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller) {
+		boolean txStatus = false;
+		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
+				matchedOrder.getId());
 		// finding currency pair
-		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(orders.getPair().getPairId());
+		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(matchedOrder.getPair().getPairId());
 		String[] tickters = new String[2];
 		// finding the currency abbreviations
 		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
 		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		// fetching the limit price of order
-		String qtr = getPairedBalance(orders, currencyPair, qtyTraded);
-		logger.debug("other qtr: {}", qtr);
-		if (qtr != null) {
+		String qtr = getPairedBalance(matchedOrder, currencyPair, qtyTraded);
+		logger.debug("paired currency volume: {}", qtr);
+		if (qtr != null && Double.valueOf(qtr) > 0) {
+
 			// process tx buyers and sellers
-			process(tickters[0], qtyTraded, buyer, seller);
+			txStatus = process(tickters[0], qtyTraded, buyer, seller);
+			if (txStatus) {
+				sendNotification(buyer, "your " + orders.getOrderType() + "has been processed, quantity: " + qtyTraded
+						+ " remaining voloume: " + orders.getVolume());
+			}
 			// process tx sellers and buyers
-			process(tickters[1], Double.valueOf(qtr), seller, buyer);
+			txStatus = process(tickters[1], Double.valueOf(qtr), seller, buyer);
+			if (txStatus) {
+				sendNotification(seller, "your " + matchedOrder.getOrderType() + " has been processed, quantity: " + qtr
+						+ " remaining voloume: " + matchedOrder.getVolume());
+			}
+			saveNotification(buyer, seller,
+					"buyer's: " + buyer.getEmailId() + " quantity: " + qtyTraded + ", remaining volume: "
+							+ orders.getVolume() + ", Sellers: " + seller.getEmailId() + ", quantity:" + qtr
+							+ "remaining voloume: " + matchedOrder.getVolume() + " of order Id: " + orders.getId());
+		} else {
+			logger.debug("transaction processing failed due to paired currency volume");
 		}
+	}
+
+	private boolean sendNotification(User user, String msg) {
+		return notificationService.sendNotification(user, msg);
+	}
+
+	private Notification saveNotification(User buyer, User seller, String msg) {
+		List<User> buyers = new ArrayList<>();
+		buyers.add(buyer);
+		List<User> sellers = new ArrayList<>();
+		sellers.add(seller);
+		Notification notification = new Notification();
+		notification.setBuyer(buyers);
+		notification.setSeller(buyers);
+		notification.setMessage(msg);
+		notification.setReadStatus(false);
+		notification.setDeleted(false);
+		return notificationService.save(notification);
 	}
 
 	private boolean process(String currencyAbr, double qtyTraded, User buyer, User seller) {
@@ -341,13 +378,13 @@ public class OrdersServiceImpl implements OrdersService {
 			boolean status = transactionService.performBtcTransaction(seller,
 					bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded);
 			logger.debug("is BTC transaction successed: {}", status);
-			break;
+			return status;
 		case "ETH":
 			status = transactionService.performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded);
 			logger.debug("is ETH transaction successed: {}", status);
-			break;
+			return status;
 		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -359,7 +396,7 @@ public class OrdersServiceImpl implements OrdersService {
 		 * price), price limit given by user
 		 */
 		if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
-			logger.debug("limit order buy on price: {}", orders.getPrice());
+			logger.debug("limit order buy on price: {} and quantity traded: {}", orders.getPrice(), qtyTraded);
 			minBalance = String.valueOf(qtyTraded * orders.getPrice());
 		} else {
 			/**
@@ -389,7 +426,8 @@ public class OrdersServiceImpl implements OrdersService {
 	public Page<Orders> getBuyOrdersListByPair(Long pairId) {
 		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findBuyOrderList(pair, OrderType.BUY, OrderStatus.SUBMITTED, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findBuyOrderList(pair, OrderType.BUY, OrderStatus.SUBMITTED,
+				pageRequest);
 		return orderBook;
 	}
 
@@ -397,7 +435,8 @@ public class OrdersServiceImpl implements OrdersService {
 	public Page<Orders> getSellOrdersListByPair(Long pairId) {
 		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		Page<Orders> orderBook = ordersRepository.findSellOrderList(pair, OrderType.SELL, OrderStatus.SUBMITTED, pageRequest);
+		Page<Orders> orderBook = ordersRepository.findSellOrderList(pair, OrderType.SELL, OrderStatus.SUBMITTED,
+				pageRequest);
 		return orderBook;
 	}
 

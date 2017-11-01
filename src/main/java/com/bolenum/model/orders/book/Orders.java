@@ -3,6 +3,8 @@ package com.bolenum.model.orders.book;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,12 +32,17 @@ public class Orders {
 	private Double totalVolume; // total quantity to keep track of initial
 								// quantity
 	private Double price; // price of 1 UNIT
+	@Enumerated(EnumType.STRING)
 	private OrderStandard orderStandard; // Order is market or limit
+	@Enumerated(EnumType.STRING)
 	private OrderType orderType; // buy or sell
 	private Date createdOn = new Date();
 	private Date deletedOn;
+	private boolean isDeleted;
 	@OneToOne
 	private CurrencyPair pair;
+	
+	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
 	@OneToOne
 	private User user;
@@ -102,6 +109,14 @@ public class Orders {
 
 	public void setDeletedOn(Date deletedOn) {
 		this.deletedOn = deletedOn;
+	}
+
+	public boolean isDeleted() {
+		return isDeleted;
+	}
+
+	public void setDeleted(boolean isDeleted) {
+		this.isDeleted = isDeleted;
 	}
 
 	public CurrencyPair getPair() {
