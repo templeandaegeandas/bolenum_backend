@@ -1,11 +1,11 @@
 package com.bolenum.model;
 
 import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 import com.bolenum.enums.DocumentStatus;
 import com.bolenum.enums.DocumentType;
@@ -31,6 +31,17 @@ public class UserKyc {
 	private Date verifiedDate;
 	private Boolean isVerified = false;
 	
+	@ManyToOne
+	private User user;
+	
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 
 	public Long getId() {
 		return id;

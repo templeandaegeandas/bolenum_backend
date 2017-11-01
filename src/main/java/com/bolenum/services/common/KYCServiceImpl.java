@@ -51,35 +51,43 @@ public class KYCServiceImpl implements KYCService {
 
 	@Autowired
 	private LocaleService localeService;
+
 	@Autowired
 	private SMSServiceUtil smsServiceUtil;
+
+	@Autowired
+	private KYCService kycService;
 
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
 
+	/**
+	 * to upload kyc documents
+	 */
 	@Override
-	public User uploadKycDocument(MultipartFile file, Long userId, DocumentType documentType)
+	public UserKyc uploadKycDocument(MultipartFile file, Long userId, DocumentType documentType)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		long sizeLimit = 1024 * 1024 * 10L;
 		User user = userRepository.findOne(userId);
 		if (user.getMobileNumber() == null || !user.getIsMobileVerified()) {
 			throw new MobileNotVerifiedException(localeService.getMessage("mobile.number.not.verified"));
 		}
+		UserKyc savedKyc = null;
 		if (file != null) {
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
 			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, validExtentions,
 					sizeLimit);
 
-			List<UserKyc> listOfUserKyc = user.getUserKyc();
-		
+			List<UserKyc> listOfUserKyc = kycService.getListOfKycByUser(user);
+
 			if (listOfUserKyc == null || listOfUserKyc.size() == 0) {
 				UserKyc kyc = new UserKyc();
 				kyc.setDocument(updatedFileName);
 				kyc.setDocumentType(documentType);
-				kyc = kycRepo.save(kyc);
 				listOfUserKyc.add(kyc);
-				user.setUserKyc(listOfUserKyc);
-			} else if (listOfUserKyc.size() <= 2) {
+				kyc.setUser(user);
+				savedKyc = kycRepo.save(kyc);
+			} else if (listOfUserKyc.size() > 0 && listOfUserKyc.size() <= 2) {
 				// UserKyc userKyc = user.getUserKyc();
 				boolean added = false;
 				Iterator<UserKyc> iterator = listOfUserKyc.iterator();
@@ -93,68 +101,77 @@ public class KYCServiceImpl implements KYCService {
 						userKyc.setVerifiedDate(null);
 						userKyc.setRejectionMessage(null);
 						added = true;
-						userKyc = kycRepo.save(userKyc);
-						user.setUserKyc(listOfUserKyc);
+						savedKyc = kycRepo.save(userKyc);
+
 					}
 				}
 				if (!added) {
 					UserKyc kyc = new UserKyc();
 					kyc.setDocument(updatedFileName);
 					kyc.setDocumentType(documentType);
-					kyc = kycRepo.save(kyc);
+					kyc.setUser(user);
 					listOfUserKyc.add(kyc);
-					user.setUserKyc(listOfUserKyc);
+					savedKyc = kycRepo.save(kyc);
 				}
 			}
-			return userRepository.save(user);
 		} else
 
 		{
 			return null;
 		}
+		return savedKyc;
 	}
 
+	/**
+	 * to approve kyc document
+	 */
 	@Override
-	public UserKyc approveKycDocument(Long id) {
-		UserKyc userKyc = kycRepo.findOne(id);
+	public UserKyc approveKycDocument(Long kycId) {
+		UserKyc userKyc = kycRepo.findOne(kycId);
 		userKyc.setVerifiedDate(new Date());
 		userKyc.setIsVerified(true);
 		userKyc.setDocumentStatus(DocumentStatus.APPROVED);
 		userKyc.setRejectionMessage(null);
-		// smsServiceUtil.sendMessage(user.getMobileNumber(),
-		// localeService.getMessage("email.text.approve.user.kyc"));
-		// mailService.mailSend(user.getEmailId(),
-		// localeService.getMessage("email.subject.approve.user.kyc"),
-		// localeService.getMessage("email.text.approve.user.kyc"));
+		User user=userKyc.getUser();
+		smsServiceUtil.sendMessage(user.getMobileNumber(), localeService.getMessage("email.text.approve.user.kyc"));
+		mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
+				localeService.getMessage("email.text.approve.user.kyc"));
 		return userKyc;
 	}
 
+	/**
+	 * to disapprove kyc document
+	 */
 	@Override
-	public UserKyc disApprovedKycDocument(Long id, String rejectionMessage) {
+	public UserKyc disApprovedKycDocument(Long kycId, String rejectionMessage) {
 
-		UserKyc userKyc = kycRepo.findOne(id);
+		UserKyc userKyc = kycRepo.findOne(kycId);
 		userKyc.setVerifiedDate(null);
 		userKyc.setIsVerified(false);
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
-
-		// smsServiceUtil.sendMessage(user.getMobileNumber(),
-		// localeService.getMessage("email.text.disapprove.user.kyc"));
-		// mailService.mailSend(user.getEmailId(),
-		// localeService.getMessage("email.subject.disapprove.user.kyc"),
-		// localeService.getMessage("email.text.disapprove.user.kyc"));
+		User user = userKyc.getUser();
+		smsServiceUtil.sendMessage(user.getMobileNumber(), localeService.getMessage("email.text.disapprove.user.kyc"));
+		mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
+				localeService.getMessage("email.text.disapprove.user.kyc"));
 		return userKyc;
 	}
 
-	/*
-	 * @Override public Page<User> getSubmitedKycList(int pageNumber, int pageSize,
-	 * String sortBy, String sortOrder, String searchData) { Direction sort; if
-	 * (sortOrder.equals("desc")) { sort = Direction.DESC; } else { sort =
-	 * Direction.ASC; } Pageable pageRequest = new PageRequest(pageNumber, pageSize,
-	 * sort, sortBy); return
-	 * userRepository.getNewlySubmittedKycListWIthSearch(searchData,
-	 * DocumentStatus.SUBMITTED, pageRequest); }
-	 */
+	// @Override
+	// public Page<User> getSubmitedKycList(int pageNumber, int pageSize, String
+	// sortBy, String sortOrder,
+	// String searchData) {
+	// Direction sort;
+	// if (sortOrder.equals("desc")) {
+	// sort = Direction.DESC;
+	// } else {
+	// sort = Direction.ASC;
+	// }
+	// Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+	// return userRepository.getNewlySubmittedKycListWIthSearch(searchData,
+	// DocumentStatus.SUBMITTED, pageRequest);
+	// }
+
 	@Override
 	public UserKyc getUserKycById(Long kycId) {
 		return kycRepo.findOne(kycId);
@@ -172,5 +189,27 @@ public class KYCServiceImpl implements KYCService {
 		}
 		return null;
 	}
+
+	@Override
+	public Page<UserKyc> getListOfKyc(int pageNumber, int pageSize, String sortBy, String sortOrder,
+			String searchData) {
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		return kycRepo.findByDocumentStatus(DocumentStatus.SUBMITTED, pageRequest);
+
+	}
+
+	@Override
+	public List<UserKyc> getListOfKycByUser(User user) {
+		return kycRepo.findByUser(user);
+	}
+
+	
+
 
 }
