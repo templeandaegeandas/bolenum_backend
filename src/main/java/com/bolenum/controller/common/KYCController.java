@@ -86,7 +86,7 @@ public class KYCController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.APPROVE_DOCUMENT, method = RequestMethod.PUT)
-	public ResponseEntity<Object> approveKycDocument(@RequestParam Long id) {
+	public ResponseEntity<Object> approveKycDocument(@RequestParam ("id") Long id) {
 		UserKyc userKyc = kycService.approveKycDocument(id);
 		if (userKyc != null) {
 			return ResponseHandler.response(HttpStatus.OK, false,

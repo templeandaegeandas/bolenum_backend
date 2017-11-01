@@ -66,10 +66,11 @@ public interface Erc20TokenService {
 	Double getErc20WalletBalance(User user, String tokenName) throws InvalidKeyException, NoSuchAlgorithmException,
 			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException, InterruptedException, ExecutionException;
 
-	Future<TransactionReceipt> transferErc20Token(User user, String tokenName, String toAddress, Long fund)
-			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException;
 
 	Erc20Token saveBolenumErc20Token();
+
+	Future<TransactionReceipt> transferErc20Token(User user, String tokenName, String toAddress, Double fund)
+			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
+			BadPaddingException, IOException, CipherException;
 
 }
