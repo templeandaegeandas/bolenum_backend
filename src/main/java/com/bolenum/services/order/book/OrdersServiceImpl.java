@@ -318,8 +318,10 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @description processTransaction
 	 * @param orders,qtyTraded,buyer,seller
 	 */
-	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller, double remainingVolume) {
+	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller,
+			double remainingVolume) {
 		boolean txStatus = false;
+		String msg;
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
 		// finding currency pair
@@ -336,18 +338,19 @@ public class OrdersServiceImpl implements OrdersService {
 			// process tx buyers and sellers
 			txStatus = process(tickters[0], qtyTraded, buyer, seller);
 			if (txStatus) {
-				sendNotification(seller, "your " + matchedOrder.getOrderType() + " has been processed, quantity: " + qtr
-						+ " remaining voloume: " + matchedOrder.getVolume());
+				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
+						+ " has been processed, quantity: " +matchedOrder.getVolume()+ ", remaining voloume: " + matchedOrder.getVolume();
+				saveNotification(buyer, seller, msg);
+				sendNotification(buyer, msg);
 			}
 			// process tx sellers and buyers
 			txStatus = process(tickters[1], Double.valueOf(qtr), seller, buyer);
 			if (txStatus) {
-				sendNotification(buyer, "your " + orders.getOrderType() + "has been processed, quantity: " + qtyTraded
-						+ " remaining voloume: " + remainingVolume);
+				msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
+						+ " has been processed, quantity: " + qtyTraded + " remaining voloume: " + remainingVolume;
+				saveNotification(seller, buyer, msg);
+				sendNotification(seller, msg);
 			}
-			saveNotification(buyer, seller, "buyer's: " + buyer.getEmailId() + " quantity: " + qtyTraded
-					+ ", remaining volume: " + remainingVolume + ", Sellers: " + seller.getEmailId() + ", quantity:"
-					+ qtr + "remaining voloume: " + matchedOrder.getVolume() + " of order Id: " + matchedOrder.getId());
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
 		}
