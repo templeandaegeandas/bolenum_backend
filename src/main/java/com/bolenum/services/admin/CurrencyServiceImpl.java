@@ -58,6 +58,11 @@ public class CurrencyServiceImpl implements CurrencyService {
 	 */
 	@Override
 	public List<Currency> getCurrencyList() {
+		return currencyRepo.findAll();
+	}
+
+	@Override
+	public List<Currency> getCurrencyListForMarket() {
 		List<CurrencyPair> allCurrencyPair = currencyPairService.findAllCurrencyPair();
 		List<Currency> allCurrencies = currencyRepo.findAll();
 		Iterator<CurrencyPair> iterator = allCurrencyPair.iterator();
