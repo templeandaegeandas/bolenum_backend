@@ -50,6 +50,8 @@ public class User {
 	private String state;
 
 	private String country;
+	
+	private String countryCode;
 
 	private String mobileNumber;
 
@@ -183,6 +185,14 @@ public class User {
 
 	public void setCountry(String country) {
 		this.country = country;
+	}
+
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	public void setCountryCode(String countryCode) {
+		this.countryCode = countryCode;
 	}
 
 	public String getMobileNumber() {

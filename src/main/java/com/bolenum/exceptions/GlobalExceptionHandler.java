@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -140,6 +141,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		// );
 	}
 
+	@Override
+	protected ResponseEntity<Object> handleHttpMessageNotWritable(final HttpMessageNotWritableException ex,
+			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+		ex.printStackTrace();
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+		// return new ResponseEntity<Object>(ex.getMessage(), new HttpHeaders(),
+		// );
+	}
 	// 403
 
 	/**
@@ -179,6 +188,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler({ InvalidDataAccessApiUsageException.class, DataAccessException.class })
 	protected ResponseEntity<Object> handleConflict(final RuntimeException ex, final WebRequest request) {
+		ex.printStackTrace();
 		return ResponseHandler.response(HttpStatus.CONFLICT, true, ex.getMessage(), null);
 	}
 
@@ -193,7 +203,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler({ NullPointerException.class, IllegalStateException.class })
+	@ExceptionHandler({ NullPointerException.class, IllegalStateException.class})
 	public ResponseEntity<Object> handleInternal(final RuntimeException ex, final WebRequest request) {
 		logger.error("500 Status Code");
 		ex.printStackTrace();

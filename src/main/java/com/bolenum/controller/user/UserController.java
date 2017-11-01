@@ -222,15 +222,17 @@ public class UserController {
 	 */
 	@RequestMapping(value = UrlConstant.GET_LOGGEDIN_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getLoggedinUser() {
+		System.out.println("get logged in user");
 		User user = GenericUtils.getLoggedInUser();
+		System.out.println(user);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), user);
 	}
 
 	@RequestMapping(value = UrlConstant.ADD_MOBILE_NUMBER, method = RequestMethod.PUT)
-	public ResponseEntity<Object> addMobileNumber(@RequestParam("mobileNumber") String mobileNumber)
+	public ResponseEntity<Object> addMobileNumber(@RequestParam("mobileNumber") String mobileNumber, @RequestParam("countryCode") String countryCode)
 			throws PersistenceException {
 		User user = GenericUtils.getLoggedInUser();
-		User response = userService.addMobileNumber(mobileNumber, user);
+		User response = userService.addMobileNumber(mobileNumber, countryCode, user);
 		if (response != null) {
 			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.sent.success"),
 					response);
