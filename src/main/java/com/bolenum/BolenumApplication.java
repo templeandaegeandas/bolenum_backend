@@ -45,7 +45,7 @@ public class BolenumApplication {
 	@Autowired
 	MarketPriceService marketPriceService;
 
-	@Scheduled(fixedRate = 20 * 1000)
+//	@Scheduled(fixedRate = 20 * 1000)
 	public void fetchCoinPrice() {
 		 marketPriceService.priceFromCoinMarketCap();
 	}

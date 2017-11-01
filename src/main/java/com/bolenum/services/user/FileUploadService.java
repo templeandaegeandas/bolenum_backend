@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bolenum.enums.DocumentType;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
@@ -28,7 +29,7 @@ public interface FileUploadService {
 	 * @throws PersistenceException
 	 * @throws MaxSizeExceedException
 	 */
-	String uploadFile(MultipartFile multipartFile, String storageLocation, User user, String[] validExtentions,
+	String uploadFile(MultipartFile multipartFile, String storageLocation, User user, DocumentType documentType, String[] validExtentions,
 			long maxSize) throws IOException, PersistenceException, MaxSizeExceedException;
 
 	/**

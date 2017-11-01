@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bolenum.enums.DocumentType;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
@@ -41,7 +42,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 	private static final Logger logger = LoggerFactory.getLogger(FileUploadServiceImpl.class);
 
 	@Override
-	public String uploadFile(MultipartFile multipartFile, String storageLocation, User user, String[] validExtentions,
+	public String uploadFile(MultipartFile multipartFile, String storageLocation, User user, DocumentType documentType, String[] validExtentions,
 			long maxSize) throws IOException, PersistenceException, MaxSizeExceedException {
 		if (multipartFile.getSize() > maxSize) {
 			throw new MaxSizeExceedException(localeService.getMessage("max.file.size.exceeds"));
@@ -52,7 +53,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 		if (!Arrays.asList(validExtentions).contains(extension.toLowerCase())) {
 			throw new PersistenceException(localeService.getMessage("valid.image.extention.error"));
 		}
-		String updatedFileName = user.getFirstName() + "_" + user.getUserId() + "." + extension;
+		String updatedFileName = documentType + "_" + user.getUserId() + "." + extension;
 		InputStream inputStream = multipartFile.getInputStream();
 		BufferedImage imageFromConvert = ImageIO.read(inputStream);
 		File file = new File(storageLocation + updatedFileName);

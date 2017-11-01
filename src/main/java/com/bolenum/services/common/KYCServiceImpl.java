@@ -75,7 +75,7 @@ public class KYCServiceImpl implements KYCService {
 		UserKyc savedKyc = null;
 		if (file != null) {
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
-			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, validExtentions,
+			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, documentType, validExtentions,
 					sizeLimit);
 
 			List<UserKyc> listOfUserKyc = kycService.getListOfKycByUser(user);
@@ -133,10 +133,10 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.APPROVED);
 		userKyc.setRejectionMessage(null);
 		User user=userKyc.getUser();
-		smsServiceUtil.sendMessage(user.getMobileNumber(), localeService.getMessage("email.text.approve.user.kyc"));
+		smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.approve.user.kyc"));
 		mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
 				localeService.getMessage("email.text.approve.user.kyc"));
-		return userKyc;
+		return kycRepo.save(userKyc);
 	}
 
 	/**
@@ -151,10 +151,10 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
 		User user = userKyc.getUser();
-		smsServiceUtil.sendMessage(user.getMobileNumber(), localeService.getMessage("email.text.disapprove.user.kyc"));
+		smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.disapprove.user.kyc"));
 		mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
 				localeService.getMessage("email.text.disapprove.user.kyc"));
-		return userKyc;
+		return kycRepo.save(userKyc);
 	}
 
 	// @Override
@@ -200,7 +200,7 @@ public class KYCServiceImpl implements KYCService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		return kycRepo.findByDocumentStatus(DocumentStatus.SUBMITTED, pageRequest);
+		return kycRepo.findByDocumentStatus(DocumentStatus.SUBMITTED, searchData, pageRequest);
 
 	}
 

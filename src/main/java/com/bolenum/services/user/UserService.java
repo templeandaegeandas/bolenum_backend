@@ -41,7 +41,7 @@ public interface UserService {
 	 * @param user
 	 * @return User
 	 */
-	User addMobileNumber(String mobileNumber, User user) throws PersistenceException;
+	User addMobileNumber(String mobileNumber, String countryCode, User user) throws PersistenceException;
 
 	/**
 	 * 

@@ -25,10 +25,10 @@ public class SMSServiceUtil {
 	
 	public static final Logger logger = LoggerFactory.getLogger(SMSServiceUtil.class);
 
-	public void sendMessage(String mobileNumber, String msg) {
+	public void sendMessage(String mobileNumber, String countryCode, String msg) {
 		Twilio.init(twilioAccountSid, twilioAuthToken);
 		try {
-			Message.creator(new PhoneNumber("+" + mobileNumber.toString()), // to
+			Message.creator(new PhoneNumber("+" + countryCode+ mobileNumber.toString()), // to
 					new PhoneNumber(twilioMobileNumber), // from
 					msg).create();
 			logger.info("Message Sent successfully");
