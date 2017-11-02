@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStandard;
+import com.bolenum.enums.OrderStatus;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
 import com.bolenum.model.orders.book.Orders;
@@ -121,6 +122,15 @@ public class OrderController {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Trade> list = tradeService.getTradedOrders(user, pageNumber, pageSize, sortOrder, sortBy);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
+	}
+	
+	@RequestMapping(value = UrlConstant.MY_ORDER_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getMyOrdereFromBook(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
+		User user = GenericUtils.getLoggedInUser();
+		List<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
 }
