@@ -1,7 +1,5 @@
 package com.bolenum.dto.common;
 
-import javax.validation.constraints.Pattern;
-
 import org.hibernate.validator.constraints.NotBlank;
 
 
@@ -14,7 +12,7 @@ import org.hibernate.validator.constraints.NotBlank;
 public class WithdrawBalanceForm {
 
 	@NotBlank
-	@Pattern(regexp = "\\d+(\\.\\d{2})?|\\.\\d{5}", message = "Please enter valid ammount after decimal enter upto 5 digits")
+	//@Pattern(regexp = "\\d+(\\.\\d{2})?|\\.\\d{5}", message = "Please enter valid ammount after decimal enter upto 5 digits")
 	private Double withdrawAmount;
 
 	@NotBlank

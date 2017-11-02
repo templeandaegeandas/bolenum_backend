@@ -147,7 +147,7 @@ public class BTCWalletController {
 	 * @param coinCode
 	 * @return
 	 */
-	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.GET)
+	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmountFromWallet(@RequestParam(name = "currencyType") String currencyType,
 			@Valid @RequestBody WithdrawBalanceForm withdrawBalanceForm, @RequestParam(name = "code") String coinCode,
 			BindingResult bindingResult) {
@@ -199,21 +199,8 @@ public class BTCWalletController {
 			}
 			break;
 		case "ERC20TOKEN":
-			try {
-				Double balance = erc20TokenService.getErc20WalletBalance(user, coinCode);
-				// Map<String, Object> mapAddress = new HashMap<>();
-				// mapAddress.put("address", user.getEthWalletaddress());
-				// mapAddress.put("balance", balance + " BLN");
-				// map.put("data", mapAddress);
-
-			} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-					| BadPaddingException | IOException | CipherException | InterruptedException
-					| ExecutionException e) {
-				e.printStackTrace();
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-						localService.getMessage("invalid.coin.code"), null);
-			}
-			break;
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
+					null);
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
@@ -233,7 +220,6 @@ public class BTCWalletController {
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("Withdraw successfully"),
 				null);
-
 	}
 
 	private boolean validateWithdrawAmount(Double availableBalance, Double withdrawAmount) {
