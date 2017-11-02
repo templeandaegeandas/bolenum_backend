@@ -396,14 +396,14 @@ public class OrdersServiceImpl implements OrdersService {
 			// process tx buyers and sellers
 			txStatus = process(tickters[0], qtyTraded, buyer, seller);
 			if (txStatus) {
-				sendNotification(buyer, msg);
-				saveNotification(buyer, seller, msg);
+				sendNotification(seller, msg1);
+				saveNotification(seller, buyer, msg1);
 			}
 			// process tx sellers and buyers
 			txStatus = process(tickters[1], Double.valueOf(qtr), seller, buyer);
 			if (txStatus) {
-				sendNotification(seller, msg1);
-				saveNotification(seller, buyer, msg1);
+				sendNotification(buyer, msg);
+				saveNotification(buyer, seller, msg);
 			}
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
