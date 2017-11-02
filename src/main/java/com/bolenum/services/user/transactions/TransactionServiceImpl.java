@@ -26,6 +26,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -44,6 +45,7 @@ import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.EthereumServiceUtil;
 
@@ -65,7 +67,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	TransactionRepo transactionRepo;
-
+	
+	@Autowired
+	private BTCWalletService bTCWalletService;
 	/**
 	 * to perform in app transaction for ethereum
 	 * 
@@ -174,6 +178,24 @@ public class TransactionServiceImpl implements TransactionService {
 		} catch (RestClientException e) {
 			logger.error("btc transaction exception:  {}", e.getMessage());
 			e.printStackTrace();
+		}
+		return false;
+	}
+
+	@Async
+	@Override
+	public boolean performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+		switch (currencyAbr) {
+		case "BTC":
+			logger.debug("BTC transaction started");
+			boolean status = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded);
+			logger.debug("is BTC transaction successed: {}", status);
+			return status;
+		case "ETH":
+			logger.debug("ETH transaction started");
+			status = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded);
+			logger.debug("is ETH transaction successed: {}", status);
+			return status;
 		}
 		return false;
 	}
