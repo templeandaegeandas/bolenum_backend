@@ -209,12 +209,12 @@ public class BTCWalletController {
 					null);
 		}
 
-		if (validAvailableWalletBalance) {
+		if (!validAvailableWalletBalance) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 					localService.getMessage("withdraw.invalid.available.balance"), null);
 		}
 
-		if (validWithdrawAmount) {
+		if (!validWithdrawAmount) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 					localService.getMessage("withdraw.invalid.amount"), null);
 		}
