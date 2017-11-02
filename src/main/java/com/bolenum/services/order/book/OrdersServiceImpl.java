@@ -152,8 +152,14 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 			}
-			if (remainingVolume > 0) {
+			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
+				/**
+				 * if all volume traded then change status to completed of order
+				 */
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
 				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
@@ -165,8 +171,14 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
 			}
-			if (remainingVolume > 0) {
+			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
+				/**
+				 * if all volume traded then change status to completed of order
+				 */
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
 				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
@@ -203,8 +215,14 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("inner buy while loop for buyers and remaining volume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 			}
-			if (remainingVolume > 0) {
+			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
+				/**
+				 * if all volume traded then change status to completed of order
+				 */
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
 				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
@@ -227,6 +245,12 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
+				/**
+				 * if all volume traded then change status to completed of order
+				 */
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
 				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
@@ -339,7 +363,8 @@ public class OrdersServiceImpl implements OrdersService {
 			txStatus = process(tickters[0], qtyTraded, buyer, seller);
 			if (txStatus) {
 				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-						+ " has been processed, quantity: " +matchedOrder.getVolume()+ ", remaining voloume: " + matchedOrder.getVolume();
+						+ " order has been processed, quantity: " + matchedOrder.getVolume() + ", remaining voloume: "
+						+ matchedOrder.getVolume();
 				saveNotification(buyer, seller, msg);
 				sendNotification(buyer, msg);
 			}
@@ -347,7 +372,7 @@ public class OrdersServiceImpl implements OrdersService {
 			txStatus = process(tickters[1], Double.valueOf(qtr), seller, buyer);
 			if (txStatus) {
 				msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-						+ " has been processed, quantity: " + qtyTraded + " remaining voloume: " + remainingVolume;
+						+ " order has been processed, quantity: " + qtyTraded + " remaining voloume: " + remainingVolume;
 				saveNotification(seller, buyer, msg);
 				sendNotification(seller, msg);
 			}
