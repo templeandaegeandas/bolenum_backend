@@ -30,7 +30,7 @@ import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
-import com.bolenum.util.SMSServiceUtil;
+import com.bolenum.util.SMSService;
 import com.bolenum.util.TokenGenerator;
 
 /**
@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
 	private LocaleService localService;
 
 	@Autowired
-	private SMSServiceUtil smsServiceUtil;
+	private SMSService smsServiceUtil;
 
 	@Autowired
 	private OTPRepository otpRepository;

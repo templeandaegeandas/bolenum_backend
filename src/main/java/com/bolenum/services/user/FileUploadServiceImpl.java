@@ -3,6 +3,7 @@ package com.bolenum.services.user;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -55,9 +56,15 @@ public class FileUploadServiceImpl implements FileUploadService {
 		}
 		String updatedFileName = documentType + "_" + user.getUserId() + "." + extension;
 		InputStream inputStream = multipartFile.getInputStream();
-		BufferedImage imageFromConvert = ImageIO.read(inputStream);
+		byte[] buf = new byte[1024];
 		File file = new File(storageLocation + updatedFileName);
-		ImageIO.write(imageFromConvert, extension, file);
+		FileOutputStream fileOutputStream = new FileOutputStream(file);
+		int numRead=0;
+		while ((numRead = inputStream.read(buf)) >= 0) {
+				fileOutputStream.write(buf, 0, numRead);
+		}
+		inputStream.close();
+		fileOutputStream.close();
 		logger.debug("user uploaded file name: {}",String.valueOf(file));
 		//using PosixFilePermission to set file permissions 777
         Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();

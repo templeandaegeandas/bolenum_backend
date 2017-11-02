@@ -25,7 +25,7 @@ import com.bolenum.repo.common.KYCRepo;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.user.FileUploadService;
 import com.bolenum.util.MailService;
-import com.bolenum.util.SMSServiceUtil;
+import com.bolenum.util.SMSService;
 
 /**
  * 
@@ -53,7 +53,7 @@ public class KYCServiceImpl implements KYCService {
 	private LocaleService localeService;
 
 	@Autowired
-	private SMSServiceUtil smsServiceUtil;
+	private SMSService smsServiceUtil;
 
 	@Autowired
 	private KYCService kycService;

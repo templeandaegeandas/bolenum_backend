@@ -32,7 +32,7 @@ import com.bolenum.model.User;
 import com.bolenum.repo.user.OTPRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.common.LocaleService;
-import com.bolenum.util.SMSServiceUtil;
+import com.bolenum.util.SMSService;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -66,7 +66,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	@Autowired
 	private OTPRepository otpRepository;
 	@Autowired
-	private SMSServiceUtil smsServiceUtil;
+	private SMSService smsServiceUtil;
 	@Autowired
 	private LocaleService localeService;
 	
