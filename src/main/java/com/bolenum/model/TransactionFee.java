@@ -38,6 +38,30 @@ public class TransactionFee {
     private Double minimumLimitToSendForERC20;
     
     private Double minimumLimitToSendForFIAT;
+    
+    public TransactionFee()
+    {    	
+    	feeBTC=0.00;
+    	
+    	feeOther=0.00;
+    	
+    	availableBalanceLimitToWithdrawForBTC=0.00;
+    	
+    	availableBalanceLimitToWithdrawForETH=0.00;
+    	
+    	availableBalanceLimitToWithdrawForERC20=0.00;
+    	
+    	availableBalanceLimitToWithdrawForFiat=0.00;
+    	
+    	minimumLimitToSendForBTC=0.00;
+        
+        minimumLimitToSendForETH=0.00;
+        
+        minimumLimitToSendForERC20=0.00;
+        
+        minimumLimitToSendForFIAT=0.00;
+        
+    }
 
 	public Long getId() {
 		return id;
