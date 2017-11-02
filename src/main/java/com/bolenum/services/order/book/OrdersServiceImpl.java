@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.enums.OrderStandard;
@@ -18,7 +17,6 @@ import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
-import com.bolenum.model.notification.Notification;
 import com.bolenum.model.orders.book.MarketPrice;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
@@ -26,7 +24,6 @@ import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
-import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.WalletService;
 
 /**
@@ -48,19 +45,16 @@ public class OrdersServiceImpl implements OrdersService {
 	private CurrencyPairService currencyPairService;
 
 	@Autowired
-	private BTCWalletService bTCWalletService;
-
-	@Autowired
 	private MarketPriceService marketPriceService;
-
-	@Autowired
-	private TransactionService transactionService;
 
 	@Autowired
 	private WalletService walletService;
 
 	@Autowired
 	private NotificationService notificationService;
+	
+	@Autowired
+	private TransactionService transactionService;
 
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
@@ -354,7 +348,6 @@ public class OrdersServiceImpl implements OrdersService {
 	 */
 	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller,
 			double remainingVolume) {
-		boolean txStatus = false;
 		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
@@ -371,40 +364,34 @@ public class OrdersServiceImpl implements OrdersService {
 		if (orders.getOrderType().equals(OrderType.BUY)) {
 			logger.debug("BUY Order");
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
 					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
 			logger.debug("msg: {}", msg);
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been processed, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
+					+ " order has been initiated, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
 					+ tickters[0] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[1];
 			logger.debug("msg1: {}", msg1);
 		} else {
 			logger.debug("SELL Order");
-			msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+			msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
+					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
 					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
-			logger.debug("msg: {}", msg);
-
-			msg1 = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been processed, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
-					+ tickters[0] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[1];
 			logger.debug("msg1: {}", msg1);
+			msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
+					+ " order has been initiated, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
+					+ tickters[0] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[1];
+			logger.debug("msg: {}", msg);
 		}
 
 		if (qtr != null && Double.valueOf(qtr) > 0) {
-
 			// process tx buyers and sellers
-			txStatus = process(tickters[0], qtyTraded, buyer, seller);
-			if (txStatus) {
-				sendNotification(seller, msg1);
-				saveNotification(seller, buyer, msg1);
-			}
+			transactionService.performTransaction(tickters[0], qtyTraded, buyer, seller);
+			sendNotification(seller, msg1);
+			notificationService.saveNotification(seller, buyer, msg1);
 			// process tx sellers and buyers
-			txStatus = process(tickters[1], Double.valueOf(qtr), seller, buyer);
-			if (txStatus) {
-				sendNotification(buyer, msg);
-				saveNotification(buyer, seller, msg);
-			}
+			transactionService.performTransaction(tickters[1], Double.valueOf(qtr), seller, buyer);
+			sendNotification(buyer, msg);
+			notificationService.saveNotification(buyer, seller, msg);
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
 		}
@@ -412,38 +399,6 @@ public class OrdersServiceImpl implements OrdersService {
 
 	private boolean sendNotification(User user, String msg) {
 		return notificationService.sendNotification(user, msg);
-	}
-
-	@Async
-	private Notification saveNotification(User buyer, User seller, String msg) {
-		List<User> buyers = new ArrayList<>();
-		buyers.add(buyer);
-		List<User> sellers = new ArrayList<>();
-		sellers.add(seller);
-		Notification notification = new Notification();
-		notification.setBuyer(buyers);
-		notification.setSeller(buyers);
-		notification.setMessage(msg);
-		notification.setReadStatus(false);
-		notification.setDeleted(false);
-		return notificationService.save(notification);
-	}
-
-	private boolean process(String currencyAbr, double qtyTraded, User buyer, User seller) {
-		switch (currencyAbr) {
-		case "BTC":
-			logger.debug("BTC transaction started");
-			boolean status = transactionService.performBtcTransaction(seller,
-					bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded);
-			logger.debug("is BTC transaction successed: {}", status);
-			return status;
-		case "ETH":
-			logger.debug("ETH transaction started");
-			status = transactionService.performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded);
-			logger.debug("is ETH transaction successed: {}", status);
-			return status;
-		}
-		return false;
 	}
 
 	@Override

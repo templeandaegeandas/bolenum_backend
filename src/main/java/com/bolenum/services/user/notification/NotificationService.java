@@ -13,7 +13,7 @@ import com.bolenum.model.notification.Notification;
  * @date 31-Oct-2017
  */
 public interface NotificationService {
-	public Notification save(Notification notification);
+	public Notification saveNotification(User buyer, User seller, String msg);
 
 	public boolean sendNotification(User user, String message);
 
