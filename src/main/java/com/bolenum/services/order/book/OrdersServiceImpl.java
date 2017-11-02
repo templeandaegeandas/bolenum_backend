@@ -367,24 +367,28 @@ public class OrdersServiceImpl implements OrdersService {
 		// fetching the limit price of order
 		String qtr = getPairedBalance(matchedOrder, currencyPair, qtyTraded);
 		logger.debug("paired currency volume: {}, {}", qtr, tickters[1]);
-
 		// checking the order type BUY
 		if (orders.getOrderType().equals(OrderType.BUY)) {
+			logger.debug("BUY Order");
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
 					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
-
+					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
+			logger.debug("msg: {}", msg);
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
 					+ " order has been processed, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
-					+ tickters[0] + " remaining voloume: " + remainingVolume + " " + tickters[1];
+					+ tickters[0] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[1];
+			logger.debug("msg1: {}", msg1);
 		} else {
+			logger.debug("SELL Order");
 			msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
 					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
+					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
+			logger.debug("msg: {}", msg);
 
 			msg1 = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
 					+ " order has been processed, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
-					+ tickters[0] + " remaining voloume: " + remainingVolume + " " + tickters[1];
+					+ tickters[0] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[1];
+			logger.debug("msg1: {}", msg1);
 		}
 
 		if (qtr != null && Double.valueOf(qtr) > 0) {
