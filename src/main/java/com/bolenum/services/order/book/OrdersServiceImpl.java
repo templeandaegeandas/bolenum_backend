@@ -187,6 +187,7 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		logger.debug("MarketOrder: Order list saving started");
 		orderAsyncServices.saveOrder(ordersList);
+		ordersList.clear();
 		logger.debug("MarketOrder: Order list saving completed");
 		return processed;
 	}
@@ -261,6 +262,7 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		logger.debug("Limit Order: order list saving started");
 		orderAsyncServices.saveOrder(ordersList);
+		ordersList.clear();
 		logger.debug("Limit Order: order list saving finished");
 		return processed;
 	}
@@ -341,6 +343,7 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		logger.debug("tradeList saving started");
 		orderAsyncServices.saveTrade(tradeList);
+		tradeList.clear();
 		logger.debug("tradeList saving finished");
 		return remainingVolume;
 	}
@@ -370,8 +373,8 @@ public class OrdersServiceImpl implements OrdersService {
 			txStatus = process(tickters[0], qtyTraded, buyer, seller);
 			if (txStatus) {
 				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-						+ " order has been processed, quantity: " + qtyTraded + ", remaining voloume: "
-						+ matchedOrder.getVolume();
+						+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+						+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
 				sendNotification(buyer, msg);
 				saveNotification(buyer, seller, msg);
 			}
@@ -379,8 +382,8 @@ public class OrdersServiceImpl implements OrdersService {
 			txStatus = process(tickters[1], Double.valueOf(qtr), seller, buyer);
 			if (txStatus) {
 				msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-						+ " order has been processed, quantity: " + qtyTraded + " remaining voloume: "
-						+ remainingVolume;
+						+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+						+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
 				sendNotification(seller, msg);
 				saveNotification(seller, buyer, msg);
 			}
