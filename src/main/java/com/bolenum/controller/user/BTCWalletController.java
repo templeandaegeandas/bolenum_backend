@@ -189,7 +189,7 @@ public class BTCWalletController {
 				validWithdrawAmount = validateWithdrawAmount(availableETHBalance,
 						withdrawBalanceForm.getWithdrawAmount());
 				if (validAvailableWalletBalance && validWithdrawAmount) {
-					transactionService.performBtcTransaction(user, withdrawBalanceForm.getToAddress(),
+					transactionService.performEthTransaction(user, withdrawBalanceForm.getToAddress(),
 							withdrawBalanceForm.getWithdrawAmount());
 				}
 				break;
@@ -209,12 +209,12 @@ public class BTCWalletController {
 					null);
 		}
 
-		if (validAvailableWalletBalance) {
+		if (!validAvailableWalletBalance) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 					localService.getMessage("withdraw.invalid.available.balance"), null);
 		}
 
-		if (validWithdrawAmount) {
+		if (!validWithdrawAmount) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 					localService.getMessage("withdraw.invalid.amount"), null);
 		}
