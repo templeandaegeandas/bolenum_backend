@@ -355,7 +355,7 @@ public class OrdersServiceImpl implements OrdersService {
 	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller,
 			double remainingVolume) {
 		boolean txStatus = false;
-		String msg;
+		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
 		// finding currency pair
@@ -367,25 +367,49 @@ public class OrdersServiceImpl implements OrdersService {
 		// fetching the limit price of order
 		String qtr = getPairedBalance(matchedOrder, currencyPair, qtyTraded);
 		logger.debug("paired currency volume: {}, {}", qtr, tickters[1]);
+
+		// checking the order type BUY
+		if (orders.getOrderType().equals(OrderType.BUY)) {
+			// buyer is coming order's user
+			buyer = orders.getUser();
+			// seller is matched order's user
+			seller = matchedOrder.getUser();
+			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
+					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
+
+			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
+					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
+		} else {
+			// order type is SELL
+			// buyer is matched order's user
+			buyer = matchedOrder.getUser();
+			// seller is coming order's user
+			seller = orders.getUser();
+
+			msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
+					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
+
+			msg1 = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
+					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
+		}
+
 		if (qtr != null && Double.valueOf(qtr) > 0) {
 
 			// process tx buyers and sellers
 			txStatus = process(tickters[0], qtyTraded, buyer, seller);
 			if (txStatus) {
-				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-						+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-						+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
 				sendNotification(buyer, msg);
 				saveNotification(buyer, seller, msg);
 			}
 			// process tx sellers and buyers
 			txStatus = process(tickters[1], Double.valueOf(qtr), seller, buyer);
 			if (txStatus) {
-				msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-						+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-						+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
-				sendNotification(seller, msg);
-				saveNotification(seller, buyer, msg);
+				sendNotification(seller, msg1);
+				saveNotification(seller, buyer, msg1);
 			}
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
@@ -438,8 +462,8 @@ public class OrdersServiceImpl implements OrdersService {
 		 */
 		if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
 			logger.debug("limit order buy on price: {}, {} and quantity traded: {}, {} ", orders.getPrice(),
-					currencyPair.getToCurrency().get(0).getCurrencyAbbreviation(), qtyTraded,
-					currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
+					currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation(), qtyTraded,
+					currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
 			minBalance = String.valueOf(qtyTraded * orders.getPrice());
 		} else {
 			/**
