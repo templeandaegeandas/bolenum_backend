@@ -370,31 +370,21 @@ public class OrdersServiceImpl implements OrdersService {
 
 		// checking the order type BUY
 		if (orders.getOrderType().equals(OrderType.BUY)) {
-			// buyer is coming order's user
-			buyer = orders.getUser();
-			// seller is matched order's user
-			seller = matchedOrder.getUser();
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
 					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
 					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
 
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
+					+ " order has been processed, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
+					+ tickters[0] + " remaining voloume: " + remainingVolume + " " + tickters[1];
 		} else {
-			// order type is SELL
-			// buyer is matched order's user
-			buyer = matchedOrder.getUser();
-			// seller is coming order's user
-			seller = orders.getUser();
-
 			msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
 					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
 					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
 
 			msg1 = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been processed, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
+					+ " order has been processed, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
+					+ tickters[0] + " remaining voloume: " + remainingVolume + " " + tickters[1];
 		}
 
 		if (qtr != null && Double.valueOf(qtr) > 0) {
