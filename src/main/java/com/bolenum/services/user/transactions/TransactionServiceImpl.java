@@ -76,6 +76,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 */
 	@Override
 	public boolean performEthTransaction(User fromUser, String toAddress, Double amount) {
+		logger.debug("ETH transaction started");
 		String passwordKey = fromUser.getEthWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
@@ -86,11 +87,15 @@ public class TransactionServiceImpl implements TransactionService {
 		try {
 			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
 			logger.debug("decr password: {}", decrPwd);
+			logger.debug("ETH transaction credentials load started");
 			credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+			logger.debug("ETH transaction credentials load completed");
+			logger.debug("ETH transaction send fund started");
 			TransactionReceipt transactionReceipt = Transfer.sendFunds(web3j, credentials, toAddress,
 					BigDecimal.valueOf(amount), Convert.Unit.ETHER);
+			logger.debug("ETH transaction send fund completed");
 			String txHash = transactionReceipt.getTransactionHash();
-			logger.debug("transaction hash:{} for user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
+			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
@@ -109,12 +114,15 @@ public class TransactionServiceImpl implements TransactionService {
 			}
 		} catch (InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException
 				| IllegalBlockSizeException | BadPaddingException e1) {
+			logger.error("ETH transaction failed:  {}", e1.getMessage());
 			e1.printStackTrace();
 		} catch (IOException | InterruptedException | TransactionTimeoutException | CipherException e) {
+			logger.error("ETH transaction failed:  {}", e.getMessage());
 			e.printStackTrace();
 		}
 		return false;
 	}
+
 	/**
 	 * to perform in app transaction for bitcoin
 	 * 
