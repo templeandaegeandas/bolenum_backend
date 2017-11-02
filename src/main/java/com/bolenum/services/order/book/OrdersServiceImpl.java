@@ -152,8 +152,14 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 			}
-			if (remainingVolume > 0) {
+			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
+				/**
+				 * if all volume traded then change status to completed of order
+				 */
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
 				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
@@ -165,8 +171,14 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
 			}
-			if (remainingVolume > 0) {
+			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
+				/**
+				 * if all volume traded then change status to completed of order
+				 */
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
 				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
@@ -203,8 +215,14 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("inner buy while loop for buyers and remaining volume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 			}
-			if (remainingVolume > 0) {
+			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
+				/**
+				 * if all volume traded then change status to completed of order
+				 */
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
 				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
@@ -225,8 +243,14 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("inner sell while loop for seller and remaining volume: {}", remainingVolume);
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
 			}
-			if (remainingVolume > 0) {
+			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
+				/**
+				 * if all volume traded then change status to completed of order
+				 */
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
 				ordersList.add(orders);
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
@@ -307,7 +331,7 @@ public class OrdersServiceImpl implements OrdersService {
 				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT);
 				tradeList.add(trade);
 				logger.debug("saving trade completed");
-				processTransaction(matchedOrder, orders, qtyTraded, buyer, seller);
+				processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume);
 			}
 		}
 		orderAsyncServices.saveTrade(tradeList);
@@ -318,8 +342,10 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @description processTransaction
 	 * @param orders,qtyTraded,buyer,seller
 	 */
-	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller) {
+	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller,
+			double remainingVolume) {
 		boolean txStatus = false;
+		String msg;
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
 		// finding currency pair
@@ -336,19 +362,20 @@ public class OrdersServiceImpl implements OrdersService {
 			// process tx buyers and sellers
 			txStatus = process(tickters[0], qtyTraded, buyer, seller);
 			if (txStatus) {
-				sendNotification(buyer, "your " + orders.getOrderType() + "has been processed, quantity: " + qtyTraded
-						+ " remaining voloume: " + orders.getVolume());
+				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
+						+ " order has been processed, quantity: " + matchedOrder.getVolume() + ", remaining voloume: "
+						+ matchedOrder.getVolume();
+				saveNotification(buyer, seller, msg);
+				sendNotification(buyer, msg);
 			}
 			// process tx sellers and buyers
 			txStatus = process(tickters[1], Double.valueOf(qtr), seller, buyer);
 			if (txStatus) {
-				sendNotification(seller, "your " + matchedOrder.getOrderType() + " has been processed, quantity: " + qtr
-						+ " remaining voloume: " + matchedOrder.getVolume());
+				msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
+						+ " order has been processed, quantity: " + qtyTraded + " remaining voloume: " + remainingVolume;
+				saveNotification(seller, buyer, msg);
+				sendNotification(seller, msg);
 			}
-			saveNotification(buyer, seller,
-					"buyer's: " + buyer.getEmailId() + " quantity: " + qtyTraded + ", remaining volume: "
-							+ orders.getVolume() + ", Sellers: " + seller.getEmailId() + ", quantity:" + qtr
-							+ "remaining voloume: " + matchedOrder.getVolume() + " of order Id: " + orders.getId());
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
 		}
