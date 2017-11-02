@@ -222,9 +222,7 @@ public class UserController {
 	 */
 	@RequestMapping(value = UrlConstant.GET_LOGGEDIN_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getLoggedinUser() {
-		System.out.println("get logged in user");
 		User user = GenericUtils.getLoggedInUser();
-		System.out.println(user);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), user);
 	}
 

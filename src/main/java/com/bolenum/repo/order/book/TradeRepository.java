@@ -11,6 +11,5 @@ import com.bolenum.model.orders.book.Trade;
 
 public interface TradeRepository extends JpaRepository<Trade, Long>{
 
-	@Query("select t from Trade t where t.buyer=:buyer or t.seller=:seller")
-	Page<Trade> findByBuyerOrSeller(@Param("buyer")User buyer, @Param("seller")User Seller, Pageable pageable);
+	Page<Trade> findByBuyerOrSeller(User buyer, User Seller, Pageable pageable);
 }
