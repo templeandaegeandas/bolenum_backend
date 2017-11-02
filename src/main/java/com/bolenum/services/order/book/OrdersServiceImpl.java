@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.enums.OrderStandard;
@@ -184,7 +185,9 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			processed = true;
 		}
+		logger.debug("MarketOrder: Order list saving started");
 		orderAsyncServices.saveOrder(ordersList);
+		logger.debug("MarketOrder: Order list saving completed");
 		return processed;
 	}
 
@@ -256,7 +259,9 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			processed = true;
 		}
+		logger.debug("Limit Order: order list saving started");
 		orderAsyncServices.saveOrder(ordersList);
+		logger.debug("Limit Order: order list saving finished");
 		return processed;
 	}
 
@@ -296,7 +301,7 @@ public class OrdersServiceImpl implements OrdersService {
 				// selling/buying volume greater than matched order volume
 				// qtyTraded is total sellers/buyers volume
 				qtyTraded = matchedOrder.getVolume();
-				logger.debug("qty traded else: ", qtyTraded);
+				logger.debug("qty traded else: {}", qtyTraded);
 				// new selling/buying volume is remainingVolume - qtyTraded
 				remainingVolume = remainingVolume - qtyTraded;
 				logger.debug("remaining volume else: {}", remainingVolume);
@@ -330,11 +335,13 @@ public class OrdersServiceImpl implements OrdersService {
 				// saving the processed BUY/SELL order in trade
 				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT);
 				tradeList.add(trade);
-				logger.debug("saving trade completed");
+				logger.debug("trade added to tradelist");
 				processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume);
 			}
 		}
+		logger.debug("tradeList saving started");
 		orderAsyncServices.saveTrade(tradeList);
+		logger.debug("tradeList saving finished");
 		return remainingVolume;
 	}
 
@@ -356,25 +363,26 @@ public class OrdersServiceImpl implements OrdersService {
 		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		// fetching the limit price of order
 		String qtr = getPairedBalance(matchedOrder, currencyPair, qtyTraded);
-		logger.debug("paired currency volume: {}", qtr);
+		logger.debug("paired currency volume: {}, {}", qtr, tickters[1]);
 		if (qtr != null && Double.valueOf(qtr) > 0) {
 
 			// process tx buyers and sellers
 			txStatus = process(tickters[0], qtyTraded, buyer, seller);
 			if (txStatus) {
 				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-						+ " order has been processed, quantity: " + matchedOrder.getVolume() + ", remaining voloume: "
+						+ " order has been processed, quantity: " + qtyTraded + ", remaining voloume: "
 						+ matchedOrder.getVolume();
-				saveNotification(buyer, seller, msg);
 				sendNotification(buyer, msg);
+				saveNotification(buyer, seller, msg);
 			}
 			// process tx sellers and buyers
 			txStatus = process(tickters[1], Double.valueOf(qtr), seller, buyer);
 			if (txStatus) {
 				msg = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-						+ " order has been processed, quantity: " + qtyTraded + " remaining voloume: " + remainingVolume;
-				saveNotification(seller, buyer, msg);
+						+ " order has been processed, quantity: " + qtyTraded + " remaining voloume: "
+						+ remainingVolume;
 				sendNotification(seller, msg);
+				saveNotification(seller, buyer, msg);
 			}
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
@@ -385,6 +393,7 @@ public class OrdersServiceImpl implements OrdersService {
 		return notificationService.sendNotification(user, msg);
 	}
 
+	@Async
 	private Notification saveNotification(User buyer, User seller, String msg) {
 		List<User> buyers = new ArrayList<>();
 		buyers.add(buyer);
@@ -402,11 +411,13 @@ public class OrdersServiceImpl implements OrdersService {
 	private boolean process(String currencyAbr, double qtyTraded, User buyer, User seller) {
 		switch (currencyAbr) {
 		case "BTC":
+			logger.debug("BTC transaction started");
 			boolean status = transactionService.performBtcTransaction(seller,
 					bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded);
 			logger.debug("is BTC transaction successed: {}", status);
 			return status;
 		case "ETH":
+			logger.debug("ETH transaction started");
 			status = transactionService.performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded);
 			logger.debug("is ETH transaction successed: {}", status);
 			return status;
@@ -423,7 +434,9 @@ public class OrdersServiceImpl implements OrdersService {
 		 * price), price limit given by user
 		 */
 		if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
-			logger.debug("limit order buy on price: {} and quantity traded: {}", orders.getPrice(), qtyTraded);
+			logger.debug("limit order buy on price: {}, {} and quantity traded: {}, {} ", orders.getPrice(),
+					currencyPair.getToCurrency().get(0).getCurrencyAbbreviation(), qtyTraded,
+					currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
 			minBalance = String.valueOf(qtyTraded * orders.getPrice());
 		} else {
 			/**

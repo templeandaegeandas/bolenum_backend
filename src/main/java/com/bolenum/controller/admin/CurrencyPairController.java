@@ -136,7 +136,7 @@ public class CurrencyPairController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.GET)
-	public ResponseEntity<Object> getCurrencyPair(@RequestParam Long pairId) {
+	public ResponseEntity<Object> getCurrencyPair(@RequestParam("pairId") long pairId) {
 		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairId);
 		if (isCurrencyPairExist != null) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("currency.pair.found"),
@@ -152,7 +152,7 @@ public class CurrencyPairController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.PUT)
-	public ResponseEntity<Object> changeStateOfCurrencyPair(@RequestParam Long pairId) {
+	public ResponseEntity<Object> changeStateOfCurrencyPair(@RequestParam("pairId") long pairId) {
 		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairId);
 		if (isCurrencyPairExist != null) {
 			CurrencyPair currencyPair = currencyPairService.changeStateOfCurrencyPair(isCurrencyPairExist);
@@ -172,7 +172,7 @@ public class CurrencyPairController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.PAIRED_CURRENCY, method = RequestMethod.GET)
-	public ResponseEntity<Object> getListOfPairedCurrency(@RequestParam("currencyId") Long currencyId) {
+	public ResponseEntity<Object> getListOfPairedCurrency(@RequestParam("currencyId") long currencyId) {
 		List<CurrencyPair> listOfPairedCurrency = currencyPairService.findCurrencyPairByCurrencyId(currencyId);
 		if (listOfPairedCurrency != null) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("paired.currency.found.success"),
