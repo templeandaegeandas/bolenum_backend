@@ -46,7 +46,7 @@ public class OrderController {
 
 	@Autowired
 	private TradeService tradeService;
-	
+
 	@Autowired
 	private KYCService kycService;
 
@@ -62,18 +62,19 @@ public class OrderController {
 		}
 		User user = GenericUtils.getLoggedInUser();
 		List<UserKyc> kycList = kycService.getListOfKycByUser(user);
-		if (kycList==null || kycList.size()<2) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"), null);
-		}
-		else {
-			for(int i = 0; i < kycList.size(); i++) {
+		if (kycList == null || kycList.size() < 2) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"),
+					null);
+		} else {
+			for (int i = 0; i < kycList.size(); i++) {
 				UserKyc userKyc = kycList.get(i);
 				if (!userKyc.getIsVerified()) {
-					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"), null);
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+							localeService.getMessage("order.verify.kyc"), null);
 				}
 			}
 		}
-		
+
 		String balance = ordersService.checkOrderEligibility(user, orders, pairId);
 		logger.debug("balance: {}", balance);
 		if (balance.equals("Synchronizing")) {
@@ -109,12 +110,14 @@ public class OrderController {
 	@RequestMapping(value = UrlConstant.TRADE_LIST_LOGGEDIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTradedOrdersLoggedInUser(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
-			@RequestParam("sortBy") String sortBy) {
+			@RequestParam("sortBy") String sortBy, @RequestParam("orderType") String orderType,
+			@RequestParam("date") Long date) {
 		User user = GenericUtils.getLoggedInUser();
-		Page<Trade> list = tradeService.getTradedOrdersLoggedIn(user, pageNumber, pageSize, sortOrder, sortBy);
+		Page<Trade> list = tradeService.getTradedOrdersLoggedIn(user, pageNumber, pageSize, sortOrder, sortBy,
+				orderType, date);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
-	
+
 	@RequestMapping(value = UrlConstant.TRADE_LIST_ALL, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTradedOrders(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -123,7 +126,7 @@ public class OrderController {
 		Page<Trade> list = tradeService.getTradedOrders(user, pageNumber, pageSize, sortOrder, sortBy);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
-	
+
 	@RequestMapping(value = UrlConstant.MY_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getMyOrdereFromBook(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,

@@ -7,7 +7,7 @@ import com.bolenum.model.orders.book.Trade;
 
 public interface TradeService {
 
-	Page<Trade> getTradedOrdersLoggedIn(User user, int pageNumber, int pageSize, String sortOrder, String sortBy);
+	Page<Trade> getTradedOrdersLoggedIn(User user, int pageNumber, int pageSize, String sortOrder, String sortBy, String orderType, Long date);
 
 	Page<Trade> getTradedOrders(User user, int pageNumber, int pageSize, String sortOrder, String sortBy);
 
