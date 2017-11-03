@@ -3,6 +3,8 @@ package com.bolenum.services.order.book;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +18,8 @@ import com.bolenum.repo.order.book.TradeRepository;
 
 @Service
 public class TradeServiceImpl implements TradeService {
+	
+	public static final Logger logger = LoggerFactory.getLogger(TradeServiceImpl.class);
 
 	@Autowired
 	private TradeRepository tradeRepository;
@@ -31,6 +35,7 @@ public class TradeServiceImpl implements TradeService {
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		if (orderType.equals("buy")) {
 			if (date != null) {
+				logger.info("comming date: {}", date);
 				Date startDate = new Date(date);
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(startDate);
@@ -38,6 +43,8 @@ public class TradeServiceImpl implements TradeService {
 				cal.set(Calendar.MINUTE, 59);
 				cal.set(Calendar.SECOND, 59);
 				Date endDate = cal.getTime();
+				logger.info("start date: {}", startDate);
+				logger.info("end date: {}", endDate);
 				return tradeRepository.getByBuyerWithDate(user, startDate, endDate, pageRequest);
 			}
 			else {
@@ -53,6 +60,9 @@ public class TradeServiceImpl implements TradeService {
 				cal.set(Calendar.MINUTE, 59);
 				cal.set(Calendar.SECOND, 59);
 				Date endDate = cal.getTime();
+				logger.info("comming date: {}", date);
+				logger.info("start date: {}", startDate);
+				logger.info("end date: {}", endDate);
 				return tradeRepository.getBySellerWithDate(user, startDate, endDate, pageRequest);
 			}
 			else {
@@ -68,6 +78,9 @@ public class TradeServiceImpl implements TradeService {
 				cal.set(Calendar.MINUTE, 59);
 				cal.set(Calendar.SECOND, 59);
 				Date endDate = cal.getTime();
+				logger.info("comming date: {}", date);
+				logger.info("start date: {}", startDate);
+				logger.info("end date: {}", endDate);
 				return tradeRepository.getByBuyerOrSellerWithDate(user, user, startDate, endDate, pageRequest);
 			}
 			else {
