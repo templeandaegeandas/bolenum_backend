@@ -45,6 +45,7 @@ import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.EthereumServiceUtil;
@@ -67,6 +68,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	TransactionRepo transactionRepo;
+	
+	@Autowired
+	private NotificationService notificationService;
 	
 	@Autowired
 	private BTCWalletService bTCWalletService;
@@ -185,16 +189,34 @@ public class TransactionServiceImpl implements TransactionService {
 	@Async
 	@Override
 	public boolean performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" "+currencyAbr+" have been processed successfully!";
+		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" "+currencyAbr+" have been processed successfully!";
 		switch (currencyAbr) {
 		case "BTC":
 			logger.debug("BTC transaction started");
 			boolean status = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded);
 			logger.debug("is BTC transaction successed: {}", status);
+//			String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" BTC have been processed successfully!";
+//			String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" BTC have been processed successfully!";
+			notificationService.sendNotification(seller, msg);
+			notificationService.saveNotification(buyer, seller, msg);
+			notificationService.sendNotification(buyer, msg1);
+			notificationService.saveNotification(buyer, seller, msg1);
+			logger.debug("Message : {}",msg);
+			logger.debug("Message : {}",msg1);
 			return status;
 		case "ETH":
 			logger.debug("ETH transaction started");
 			status = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded);
 			logger.debug("is ETH transaction successed: {}", status);
+//			String msg2 = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" ETH have been processed successfully!";
+//			String msg3 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" ETH have been processed successfully!";
+			notificationService.sendNotification(seller, msg);
+			notificationService.saveNotification(buyer, seller, msg);
+			notificationService.sendNotification(buyer, msg1);
+			notificationService.saveNotification(buyer, seller, msg1);
+			logger.debug("Message : {}",msg);
+			logger.debug("Message : {}",msg1);
 			return status;
 		}
 		return false;

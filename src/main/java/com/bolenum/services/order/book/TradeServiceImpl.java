@@ -2,6 +2,7 @@ package com.bolenum.services.order.book;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,12 @@ public class TradeServiceImpl implements TradeService {
 				logger.info("comming date: {}", date);
 				Date startDate = new Date(date);
 				Calendar cal = Calendar.getInstance();
+				cal.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
+				cal.setTime(startDate);
+				cal.set(Calendar.HOUR_OF_DAY, 00);
+				cal.set(Calendar.MINUTE, 00);
+				cal.set(Calendar.SECOND, 00);
+				startDate = cal.getTime();
 				cal.setTime(startDate);
 				cal.set(Calendar.HOUR_OF_DAY, 23);
 				cal.set(Calendar.MINUTE, 59);
@@ -55,6 +62,12 @@ public class TradeServiceImpl implements TradeService {
 			if (date != null) {
 				Date startDate = new Date(date);
 				Calendar cal = Calendar.getInstance();
+				cal.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
+				cal.setTime(startDate);
+				cal.set(Calendar.HOUR_OF_DAY, 00);
+				cal.set(Calendar.MINUTE, 00);
+				cal.set(Calendar.SECOND, 00);
+				startDate = cal.getTime();
 				cal.setTime(startDate);
 				cal.set(Calendar.HOUR_OF_DAY, 23);
 				cal.set(Calendar.MINUTE, 59);
@@ -73,6 +86,12 @@ public class TradeServiceImpl implements TradeService {
 			if (date != null) { 
 				Date startDate = new Date(date);
 				Calendar cal = Calendar.getInstance();
+				cal.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
+				cal.setTime(startDate);
+				cal.set(Calendar.HOUR_OF_DAY, 00);
+				cal.set(Calendar.MINUTE, 00);
+				cal.set(Calendar.SECOND, 00);
+				startDate = cal.getTime();
 				cal.setTime(startDate);
 				cal.set(Calendar.HOUR_OF_DAY, 23);
 				cal.set(Calendar.MINUTE, 59);
