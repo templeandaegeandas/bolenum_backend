@@ -26,6 +26,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -45,6 +46,8 @@ import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.user.notification.NotificationService;
+import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.EthereumServiceUtil;
 
@@ -66,7 +69,12 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	TransactionRepo transactionRepo;
-
+	
+	@Autowired
+	private NotificationService notificationService;
+	
+	@Autowired
+	private BTCWalletService bTCWalletService;
 	/**
 	 * to perform in app transaction for ethereum
 	 * 
@@ -77,6 +85,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 */
 	@Override
 	public boolean performEthTransaction(User fromUser, String toAddress, Double amount,TransactionStatus transactionStatus) {
+
 		String passwordKey = fromUser.getEthWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
@@ -87,11 +96,15 @@ public class TransactionServiceImpl implements TransactionService {
 		try {
 			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
 			logger.debug("decr password: {}", decrPwd);
+			logger.debug("ETH transaction credentials load started");
 			credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+			logger.debug("ETH transaction credentials load completed");
+			logger.debug("ETH transaction send fund started");
 			TransactionReceipt transactionReceipt = Transfer.sendFunds(web3j, credentials, toAddress,
 					BigDecimal.valueOf(amount), Convert.Unit.ETHER);
+			logger.debug("ETH transaction send fund completed");
 			String txHash = transactionReceipt.getTransactionHash();
-			logger.debug("transaction hash:{} for user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
+			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
@@ -112,8 +125,10 @@ public class TransactionServiceImpl implements TransactionService {
 			}
 		} catch (InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException
 				| IllegalBlockSizeException | BadPaddingException e1) {
+			logger.error("ETH transaction failed:  {}", e1.getMessage());
 			e1.printStackTrace();
 		} catch (IOException | InterruptedException | TransactionTimeoutException | CipherException e) {
+			logger.error("ETH transaction failed:  {}", e.getMessage());
 			e.printStackTrace();
 		}
 		return false;
@@ -172,6 +187,42 @@ public class TransactionServiceImpl implements TransactionService {
 		} catch (RestClientException e) {
 			logger.error("btc transaction exception:  {}", e.getMessage());
 			e.printStackTrace();
+		}
+		return false;
+	}
+
+	@Async
+	@Override
+	public boolean performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" "+currencyAbr+" have been processed successfully!";
+		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" "+currencyAbr+" have been processed successfully!";
+		switch (currencyAbr) {
+		case "BTC":
+			logger.debug("BTC transaction started");
+			boolean status = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded,null);
+			logger.debug("is BTC transaction successed: {}", status);
+//			String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" BTC have been processed successfully!";
+//			String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" BTC have been processed successfully!";
+			notificationService.sendNotification(seller, msg);
+			notificationService.saveNotification(buyer, seller, msg);
+			notificationService.sendNotification(buyer, msg1);
+			notificationService.saveNotification(buyer, seller, msg1);
+			logger.debug("Message : {}",msg);
+			logger.debug("Message : {}",msg1);
+			return status;
+		case "ETH":
+			logger.debug("ETH transaction started");
+			status = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded,null);
+			logger.debug("is ETH transaction successed: {}", status);
+//			String msg2 = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" ETH have been processed successfully!";
+//			String msg3 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" ETH have been processed successfully!";
+			notificationService.sendNotification(seller, msg);
+			notificationService.saveNotification(buyer, seller, msg);
+			notificationService.sendNotification(buyer, msg1);
+			notificationService.saveNotification(buyer, seller, msg1);
+			logger.debug("Message : {}",msg);
+			logger.debug("Message : {}",msg1);
+			return status;
 		}
 		return false;
 	}

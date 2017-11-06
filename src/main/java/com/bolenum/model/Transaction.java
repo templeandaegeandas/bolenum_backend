@@ -7,6 +7,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -46,7 +48,7 @@ public class Transaction {
 	private Double txFee;
 	private Double txAmount;
 	private String txDescription;
-	private CurrencyName currencyType;
+	@Enumerated(EnumType.STRING)
 	private TransactionType transactionType;
 	private TransactionStatus transactionStatus;
 	private Double gas;
@@ -62,13 +64,13 @@ public class Transaction {
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
 			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
 			Double gasPrice, User user) {
+			
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
 		this.txFee = txFee;
 		this.txAmount = txAmmount;
 		this.txDescription = txDescription;
-		this.currencyType = currencyType;
 		this.transactionType = transactionType;
 		this.gas = gas;
 		this.gasPrice = gasPrice;
@@ -216,21 +218,7 @@ public class Transaction {
 	}
 
 	/**
-	 * @return the currencyType
-	 */
-	public CurrencyName getCurrencyType() {
-		return currencyType;
-	}
 
-	/**
-	 * @param currencyType
-	 *            the currencyType to set
-	 */
-	public void setCurrencyType(CurrencyName currencyType) {
-		this.currencyType = currencyType;
-	}
-
-	/**
 	 * @return the transactionType
 	 */
 	public TransactionType getTransactionType() {

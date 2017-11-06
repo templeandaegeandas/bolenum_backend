@@ -1,20 +1,20 @@
 package com.bolenum.model;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import com.bolenum.enums.TwoFactorAuthOption;
+
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -50,6 +50,8 @@ public class User {
 	private String state;
 
 	private String country;
+	
+	private String countryCode;
 
 	private String mobileNumber;
 
@@ -183,6 +185,14 @@ public class User {
 
 	public void setCountry(String country) {
 		this.country = country;
+	}
+
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	public void setCountryCode(String countryCode) {
+		this.countryCode = countryCode;
 	}
 
 	public String getMobileNumber() {

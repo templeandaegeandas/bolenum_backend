@@ -7,5 +7,16 @@ package com.bolenum.enums;
  *
  */
 public enum OrderStatus {
-	SUBMITTED, CANCELLED, COMPLETED
+	SUBMITTED("submitted"), CANCELLED("cancelled"), COMPLETED("completed");
+
+	private String orderStatus;
+
+	private OrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+
 }

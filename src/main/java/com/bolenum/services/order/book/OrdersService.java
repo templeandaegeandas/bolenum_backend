@@ -24,7 +24,7 @@ public interface OrdersService {
 
 	Boolean processLimitOrder(Orders orders);
 
-	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders);
+	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair);
 
 	Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price);
 
@@ -48,9 +48,9 @@ public interface OrdersService {
 
 	Double getBestBuy(List<Orders> buyOrderList);
 
-	String checkOrderEligibility(User user, Orders order);
+	String checkOrderEligibility(User user, Orders order, Long pairId);
 
 	String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded);
 
-	List<Orders> findOrdersListByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus);
+	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
 }

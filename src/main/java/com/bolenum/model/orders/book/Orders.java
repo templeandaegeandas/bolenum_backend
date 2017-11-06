@@ -3,13 +3,18 @@ package com.bolenum.model.orders.book;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.User;
 
 /**
  * 
@@ -27,13 +32,20 @@ public class Orders {
 	private Double totalVolume; // total quantity to keep track of initial
 								// quantity
 	private Double price; // price of 1 UNIT
+	@Enumerated(EnumType.STRING)
 	private OrderStandard orderStandard; // Order is market or limit
+	@Enumerated(EnumType.STRING)
 	private OrderType orderType; // buy or sell
 	private Date createdOn = new Date();
 	private Date deletedOn;
-	private Long pairId;
+	private boolean isDeleted;
+	@OneToOne
+	private CurrencyPair pair;
+	
+	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
-	private Long userId;
+	@OneToOne
+	private User user;
 
 	public Long getId() {
 		return id;
@@ -99,12 +111,20 @@ public class Orders {
 		this.deletedOn = deletedOn;
 	}
 
-	public Long getPairId() {
-		return pairId;
+	public boolean isDeleted() {
+		return isDeleted;
 	}
 
-	public void setPairId(Long pairId) {
-		this.pairId = pairId;
+	public void setDeleted(boolean isDeleted) {
+		this.isDeleted = isDeleted;
+	}
+
+	public CurrencyPair getPair() {
+		return pair;
+	}
+
+	public void setPair(CurrencyPair pair) {
+		this.pair = pair;
 	}
 
 	public OrderStatus getOrderStatus() {
@@ -115,11 +135,11 @@ public class Orders {
 		this.orderStatus = orderStatus;
 	}
 
-	public Long getUserId() {
-		return userId;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setUser(User user) {
+		this.user = user;
 	}
 }

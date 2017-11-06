@@ -7,5 +7,15 @@ package com.bolenum.enums;
  *
  */
 public enum OrderType {
-	BUY,SELL
+	BUY("buy"), SELL("sell");
+
+	private String orderType;
+
+	private OrderType(String orderType) {
+		this.orderType = orderType;
+	}
+
+	public String getOrderType() {
+		return orderType;
+	}
 }

@@ -45,7 +45,7 @@ public class KYCController {
 
 	@Autowired
 	private LocaleService localeService;
-	
+
 	@Autowired
 	private UserService userService;
 
@@ -86,7 +86,7 @@ public class KYCController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.APPROVE_DOCUMENT, method = RequestMethod.PUT)
-	public ResponseEntity<Object> approveKycDocument(@RequestParam ("id") Long id) {
+	public ResponseEntity<Object> approveKycDocument(@RequestParam("kycId") Long id) {
 		UserKyc userKyc = kycService.approveKycDocument(id);
 		if (userKyc != null) {
 			return ResponseHandler.response(HttpStatus.OK, false,
@@ -127,7 +127,8 @@ public class KYCController {
 
 	// @RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method =
 	// RequestMethod.GET)
-	// public ResponseEntity<Object> getSubmittedKycList(@RequestParam("pageNumber")
+	// public ResponseEntity<Object>
+	// getSubmittedKycList(@RequestParam("pageNumber")
 	// int pageNumber,
 	//
 	// @RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String
@@ -214,7 +215,7 @@ public class KYCController {
 		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("submitted.kyc.list"),
 				listOfUser);
 	}
-	
+
 	/**
 	 * 
 	 * @param userId
@@ -223,7 +224,7 @@ public class KYCController {
 	 */
 	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_BY_USER_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getKycByUserId(@RequestParam("userId") Long userId) {
-		User user=userService.findByUserId(userId);
+		User user = userService.findByUserId(userId);
 		List<UserKyc> listOfUser = kycService.getListOfKycByUser(user);
 
 		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("submitted.kyc.list"),

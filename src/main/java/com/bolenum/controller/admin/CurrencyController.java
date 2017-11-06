@@ -142,6 +142,22 @@ public class CurrencyController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
 				currencyList);
 	}
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortOrder
+	 * @param searchData
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_MARKET, method = RequestMethod.GET)
+	public ResponseEntity<Object> getCurrencyListForMarket() {
+		List<Currency> currencyList = currencyService.getCurrencyListForMarket();
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
+				currencyList);
+	}
+
 
 	/**
 	 * 

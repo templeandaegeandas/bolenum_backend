@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 
 /**
@@ -21,45 +23,45 @@ import com.bolenum.model.orders.book.Orders;
 public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	// Double getSumVolumeByPairId(Long pairId);
 
-	List<Orders> findByOrderTypeAndOrderStatusAndPairIdAndPriceLessThanEqualOrderByPriceAsc(OrderType ordertype,
-			OrderStatus orderStatus, Long pairId, Double price);
+	List<Orders> findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType ordertype,
+			OrderStatus orderStatus, CurrencyPair pair, Double price);
 
-	List<Orders> findByOrderTypeAndOrderStatusAndPairIdAndPriceGreaterThanEqualOrderByPriceDesc(OrderType ordertype,
-			OrderStatus orderStatus, Long pairId, Double price);
+	List<Orders> findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType ordertype,
+			OrderStatus orderStatus, CurrencyPair pair, Double price);
 
-	List<Orders> findByOrderTypeAndOrderStatusAndPairIdOrderByPriceAsc(OrderType ordertype, OrderStatus orderStatus,
-			Long pairId);
+	List<Orders> findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType ordertype, OrderStatus orderStatus,
+			CurrencyPair pairId);
 
-	List<Orders> findByOrderTypeAndOrderStatusAndPairIdOrderByPriceDesc(OrderType ordertype, OrderStatus orderStatus,
-			Long pairId);
+	List<Orders> findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(OrderType ordertype, OrderStatus orderStatus,
+			CurrencyPair pairId);
 
-	@Query("select min(o.price) from Orders o where o.orderType = 'SELL' and o.orderStatus = 'SUBMITTED' and o.pairId= :pairId")
-	Double getBestBuy(@Param("pairId") Long pairId);
+	@Query("select min(o.price) from Orders o where o.orderType = 'SELL' and o.orderStatus = 'SUBMITTED' and o.pair= :pair")
+	Double getBestBuy(@Param("pair") CurrencyPair pair);
 
-	@Query("select max(o.price) from Orders o where o.orderType = 'SELL' and o.orderStatus = 'SUBMITTED' and o.pairId= :pairId")
-	Double getWrostBuy(@Param("pairId") Long pairId);
+	@Query("select max(o.price) from Orders o where o.orderType = 'SELL' and o.orderStatus = 'SUBMITTED' and o.pair= :pair")
+	Double getWrostBuy(@Param("pair") CurrencyPair pair);
 
-	@Query("select max(o.price) from Orders o where o.orderType = 'BUY' and o.orderStatus = 'SUBMITTED' and o.pairId= :pairId")
-	Double getBestSell(@Param("pairId") Long pairId);
+	@Query("select max(o.price) from Orders o where o.orderType = 'BUY' and o.orderStatus = 'SUBMITTED' and o.pair= :pair")
+	Double getBestSell(@Param("pair") CurrencyPair pair);
 
-	@Query("select min(o.price) from Orders o where o.orderType = 'BUY' and o.orderStatus = 'SUBMITTED' and o.pairId= :pairId")
-	Double getWrostSell(@Param("pairId") Long pairId);
+	@Query("select min(o.price) from Orders o where o.orderType = 'BUY' and o.orderStatus = 'SUBMITTED' and o.pair= :pair")
+	Double getWrostSell(@Param("pair") CurrencyPair pair);
 
-	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED' and o.pairId= :pairId and o.price >= :price")
-	Long countOrderByOrderTypeAndPriceGreaterThan(@Param("orderType") OrderType orderType, @Param("pairId") Long pairId,
+	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED' and o.pair= :pair and o.price >= :price")
+	Long countOrderByOrderTypeAndPriceGreaterThan(@Param("orderType") OrderType orderType, @Param("pair") CurrencyPair pair,
 			@Param("price") Double price);
 
-	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED' and o.pairId= :pairId and o.price <= :price")
-	Long countOrderByOrderTypeAndPriceLessThan(@Param("orderType") OrderType orderType, @Param("pairId") Long pairId, @Param("price") Double price);
+	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED' and o.pair= :pair and o.price <= :price")
+	Long countOrderByOrderTypeAndPriceLessThan(@Param("orderType") OrderType orderType, @Param("pair") CurrencyPair pair, @Param("price") Double price);
 
 	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED'")
 	Long countOrderByOrderType(@Param("orderType") OrderType orderType);
 	
-	@Query("select o from Orders o where o.pairId = :pairId and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price asc")
-	Page<Orders> findBuyOrderList(@Param("pairId")Long pairId, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
+	@Query("select o from Orders o where o.pair = :pair and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price asc")
+	Page<Orders> findBuyOrderList(@Param("pair")CurrencyPair pair, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 	
-	@Query("select o from Orders o where o.pairId = :pairId and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price desc")
-	Page<Orders> findSellOrderList(@Param("pairId")Long pairId, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
+	@Query("select o from Orders o where o.pair = :pair and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price desc")
+	Page<Orders> findSellOrderList(@Param("pair")CurrencyPair pair, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 
-	List<Orders> findByUserIdAndOrderStatus(Long userId, OrderStatus orderStatus);
+	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
 }
