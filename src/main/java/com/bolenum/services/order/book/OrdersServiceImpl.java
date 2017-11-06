@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.MarketPrice;
@@ -342,11 +343,11 @@ public class OrdersServiceImpl implements OrdersService {
 		switch (currencyAbr) {
 		case "BTC":
 			boolean status = transactionService.performBtcTransaction(seller,
-					bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded);
+					bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded,null);
 			logger.debug("is BTC transaction successed: {}", status);
 			break;
 		case "ETH":
-			status = transactionService.performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded);
+			status = transactionService.performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded,TransactionStatus.WITHDRAW);
 			logger.debug("is ETH transaction successed: {}", status);
 			break;
 		}

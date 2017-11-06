@@ -9,6 +9,11 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -34,7 +39,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	/**
 	 * creating BIP32 hierarchical deterministic (HD) wallets
 	 */
-	
+
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -70,7 +75,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	/**
-	 *  to get wallet address and QR code 
+	 * to get wallet address and QR code
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -86,7 +91,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			boolean isError = (boolean) res.get("error");
 			if (!isError) {
 				String bal = getWalletBalnce(walletUuid);
-				Map<String,Object> data= (Map<String,Object>) res.get("data");
+				Map<String, Object> data = (Map<String, Object>) res.get("data");
 				res.clear();
 				res.put("address", data.get("address"));
 				res.put("file_name", data.get("file_name"));
@@ -99,9 +104,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return map;
 	}
-	
+
 	/**
-	 *  to get bitcoin wallet balance 
+	 * to get bitcoin wallet balance
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -121,7 +126,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	/**
-	 *  to get bitcoin wallet address
+	 * to get bitcoin wallet address
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -143,5 +148,50 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			e.printStackTrace();
 		}
 		return "";
+	}
+
+	/**
+	 * to vaidate address of user wallet
+	 */
+	@Override
+	public boolean validateAddresss(String btcWalletUuid, String toAddress) {
+		RestTemplate restTemplate = new RestTemplate();
+		String url = BTCUrlConstant.WALLET_ADDR;
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+		System.out.println("hiiii" + txRes);
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param availableBalance
+	 * @param availableBalanceLimitToWithdraw
+	 * @param withdrawAmount
+	 * @return
+	 */
+	@Override
+	public boolean validateAvailableWalletBalance(Double availableBalance, Double availableBalanceLimitToWithdraw,
+			Double withdrawAmount) {
+		if (availableBalance >= withdrawAmount && availableBalance >= availableBalanceLimitToWithdraw) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param availableBalance
+	 * @param withdrawAmount
+	 * @return
+	 */
+	@Override
+	public boolean validateWithdrawAmount(Double availableBalance, Double withdrawAmount) {
+		if (availableBalance >= withdrawAmount) {
+			return true;
+		}
+		return false;
 	}
 }

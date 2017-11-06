@@ -39,6 +39,7 @@ import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
 import com.bolenum.constant.BTCUrlConstant;
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
@@ -75,7 +76,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @return true/false if transaction success return true else false
 	 */
 	@Override
-	public boolean performEthTransaction(User fromUser, String toAddress, Double amount) {
+	public boolean performEthTransaction(User fromUser, String toAddress, Double amount,TransactionStatus transactionStatus) {
 		String passwordKey = fromUser.getEthWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
@@ -100,6 +101,8 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
+				transaction.setTransactionStatus(transactionStatus);
+				transaction.setUser(fromUser);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
@@ -115,6 +118,7 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		return false;
 	}
+
 	/**
 	 * to perform in app transaction for bitcoin
 	 * 
@@ -124,7 +128,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @return true/false if transaction success return true else false
 	 */
 	@Override
-	public boolean performBtcTransaction(User fromUser, String toAddress, Double amount) {
+	public boolean performBtcTransaction(User fromUser, String toAddress, Double amount,TransactionStatus transactionStatus) {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = BTCUrlConstant.CREATE_TX;
 		HttpHeaders headers = new HttpHeaders();
@@ -153,6 +157,8 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction.setToAddress(toAddress);
 					transaction.setTxAmount(amount);
 					transaction.setTransactionType(TransactionType.OUTGOING);
+					transaction.setUser(fromUser);
+					transaction.setTransactionStatus(transactionStatus);
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());

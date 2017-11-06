@@ -26,6 +26,7 @@ import org.web3j.crypto.CipherException;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.MarketPrice;
@@ -173,40 +174,49 @@ public class BTCWalletController {
 				balanceBTC = balanceBTC.replace("BTC", "");
 				balanceBTC = balanceBTC.trim();
 				Double availableBTCBalance = Double.valueOf(balanceBTC);
-				validAvailableWalletBalance = validateAvailableWalletBalance(availableBTCBalance,
-						transactionFee.getAvailableBalanceLimitToWithdrawForBTC());
-				validWithdrawAmount = validateWithdrawAmount(availableBTCBalance,
+				validAvailableWalletBalance = btcWalletService.validateAvailableWalletBalance(availableBTCBalance,
+						transactionFee.getAvailableBalanceLimitToWithdrawForBTC(),
 						withdrawBalanceForm.getWithdrawAmount());
+				validWithdrawAmount = btcWalletService.validateWithdrawAmount(availableBTCBalance,
+						withdrawBalanceForm.getWithdrawAmount());
+				//validAddress = btcWalletService.validateAddresss(user.getBtcWalletUuid(),withdrawBalanceForm.getToAddress());
 				if (validAvailableWalletBalance && validWithdrawAmount) {
 					transactionService.performBtcTransaction(user, withdrawBalanceForm.getToAddress(),
-							withdrawBalanceForm.getWithdrawAmount());
+							withdrawBalanceForm.getWithdrawAmount(),TransactionStatus.WITHDRAW);
 				}
 				break;
+
 			case "ETH":
 				Double availableETHBalance = etherumWalletService.getWalletBalance(user);
-				validAvailableWalletBalance = validateAvailableWalletBalance(availableETHBalance,
-						transactionFee.getAvailableBalanceLimitToWithdrawForETH());
-				validWithdrawAmount = validateWithdrawAmount(availableETHBalance,
+				validAvailableWalletBalance = btcWalletService.validateAvailableWalletBalance(availableETHBalance,
+						transactionFee.getAvailableBalanceLimitToWithdrawForETH(),
+						withdrawBalanceForm.getWithdrawAmount());
+
+				validWithdrawAmount = btcWalletService.validateWithdrawAmount(availableETHBalance,
 						withdrawBalanceForm.getWithdrawAmount());
 				if (validAvailableWalletBalance && validWithdrawAmount) {
 					transactionService.performEthTransaction(user, withdrawBalanceForm.getToAddress(),
-							withdrawBalanceForm.getWithdrawAmount());
+							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 				}
 				break;
+
 			default:
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 						localService.getMessage("invalid.coin.code"), null);
 			}
 			break;
+
 		case "ERC20TOKEN":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
+
 		default:
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
+
 		}
 
 		if (!validAvailableWalletBalance) {
@@ -217,23 +227,12 @@ public class BTCWalletController {
 		if (!validWithdrawAmount) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 					localService.getMessage("withdraw.invalid.amount"), null);
+
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("Withdraw successfully"),
-				null);
+
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("Withdraw successfully"), null);
+		
 	}
 
-	private boolean validateWithdrawAmount(Double availableBalance, Double withdrawAmount) {
-		if (availableBalance >= withdrawAmount) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean validateAvailableWalletBalance(Double availableBalance,
-			Double availableBalanceLimitToWithdrawForBTC) {
-		if (availableBalance >= availableBalanceLimitToWithdrawForBTC) {
-			return true;
-		}
-		return false;
-	}
+	
 }

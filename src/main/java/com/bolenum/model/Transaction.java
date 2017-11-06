@@ -10,11 +10,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.bolenum.enums.CurrencyName;
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -37,7 +39,7 @@ public class Transaction {
 	@ApiModelProperty(hidden = true)
 	@UpdateTimestamp
 	private Date updatedOn;
-	@Column(unique=true)
+	@Column(unique = true)
 	private String txHash;
 	private String fromAddress;
 	private String toAddress;
@@ -46,15 +48,20 @@ public class Transaction {
 	private String txDescription;
 	private CurrencyName currencyType;
 	private TransactionType transactionType;
+	private TransactionStatus transactionStatus;
 	private Double gas;
 	private Double gasPrice;
+
+	@ManyToOne
+	private User user;
 
 	public Transaction() {
 
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,Double gasPrice) {
+			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
+			Double gasPrice, User user) {
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
@@ -65,6 +72,7 @@ public class Transaction {
 		this.transactionType = transactionType;
 		this.gas = gas;
 		this.gasPrice = gasPrice;
+		this.user = user;
 	}
 
 	/**
@@ -216,7 +224,7 @@ public class Transaction {
 
 	/**
 	 * @param currencyType
-	 *  the currencyType to set
+	 *            the currencyType to set
 	 */
 	public void setCurrencyType(CurrencyName currencyType) {
 		this.currencyType = currencyType;
@@ -231,7 +239,7 @@ public class Transaction {
 
 	/**
 	 * @param transactionType
-	 * the transactionType to set
+	 *            the transactionType to set
 	 */
 	public void setTransactionType(TransactionType transactionType) {
 		this.transactionType = transactionType;
@@ -260,11 +268,26 @@ public class Transaction {
 	}
 
 	/**
-	 * @param gasPrice 
-	 * the gasPrice to set
+	 * @param gasPrice
+	 *            the gasPrice to set
 	 */
 	public void setGasPrice(Double gasPrice) {
 		this.gasPrice = gasPrice;
 	}
 
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
+	public TransactionStatus getTransactionStatus() {
+		return transactionStatus;
+	}
+
+	public void setTransactionStatus(TransactionStatus transactionStatus) {
+		this.transactionStatus = transactionStatus;
+	}
 }

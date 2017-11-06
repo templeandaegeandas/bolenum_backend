@@ -39,4 +39,11 @@ public interface BTCWalletService {
 	 * 
 	 */
 	String getWalletAddress(String walletUuid);
+	
+    boolean validateAddresss(String btcWalletUuid, String toAddress) ;
+
+	boolean validateWithdrawAmount(Double availableBTCBalance, Double withdrawAmount);
+
+	boolean validateAvailableWalletBalance(Double availableBalance, Double availableBalanceLimitToWithdraw,
+			Double withdrawAmount);
 }

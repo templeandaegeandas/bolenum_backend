@@ -3,6 +3,7 @@
  */
 package com.bolenum.services.user.transactions;
 
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.model.User;
 
 /**
@@ -10,6 +11,6 @@ import com.bolenum.model.User;
  * @date 29-Sep-2017
  */
 public interface TransactionService {
-	public boolean performEthTransaction(User fromUser, String toAddress, Double amount);
-	public boolean performBtcTransaction(User fromUser, String toAddress, Double amount);
+	public boolean performEthTransaction(User fromUser, String toAddress, Double amount,TransactionStatus transactionStatus);
+	public boolean performBtcTransaction(User fromUser, String toAddress, Double amount,TransactionStatus transactionStatus);
 }
