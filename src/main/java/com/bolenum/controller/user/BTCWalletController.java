@@ -165,7 +165,7 @@ public class BTCWalletController {
 		User user = GenericUtils.getLoggedInUser(); // logged in user
 		boolean validAvailableWalletBalance = false;
 		boolean validWithdrawAmount = false;
-
+		Double availableBTCBalance=null;
 		switch (currencyType) {
 		case "CRYPTO":
 			switch (coinCode) {
@@ -173,7 +173,7 @@ public class BTCWalletController {
 				String balanceBTC = btcWalletService.getWalletBalnce(user.getBtcWalletUuid());
 				balanceBTC = balanceBTC.replace("BTC", "");
 				balanceBTC = balanceBTC.trim();
-				Double availableBTCBalance = Double.valueOf(balanceBTC);
+				availableBTCBalance = Double.valueOf(balanceBTC);
 				validAvailableWalletBalance = btcWalletService.validateAvailableWalletBalance(availableBTCBalance,
 						transactionFee.getAvailableBalanceLimitToWithdrawForBTC(),
 						withdrawBalanceForm.getWithdrawAmount());
@@ -230,7 +230,7 @@ public class BTCWalletController {
 
 		}
 
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("Withdraw successfully"), null);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("Withdraw successfully"),availableBTCBalance );
 		
 	}
 

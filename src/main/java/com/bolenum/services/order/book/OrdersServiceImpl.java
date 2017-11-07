@@ -58,9 +58,6 @@ public class OrdersServiceImpl implements OrdersService {
 	@Autowired
 	private TransactionService transactionService;
 	
-	@Autowired
-	private BTCWalletService bTCWalletService;
-
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
 	List<Orders> ordersList = new ArrayList<>();
