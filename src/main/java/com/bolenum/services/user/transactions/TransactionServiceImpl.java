@@ -41,10 +41,12 @@ import org.web3j.utils.Convert;
 
 import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.util.CryptoUtil;
@@ -74,6 +76,9 @@ public class TransactionServiceImpl implements TransactionService {
 	
 	@Autowired
 	private BTCWalletService bTCWalletService;
+	
+	@Autowired
+	private ErrorService errorService;
 	/**
 	 * to perform in app transaction for ethereum
 	 * 
@@ -99,8 +104,17 @@ public class TransactionServiceImpl implements TransactionService {
 			credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
 			logger.debug("ETH transaction credentials load completed");
 			logger.debug("ETH transaction send fund started");
-			TransactionReceipt transactionReceipt = Transfer.sendFunds(web3j, credentials, toAddress,
-					BigDecimal.valueOf(amount), Convert.Unit.ETHER);
+			TransactionReceipt transactionReceipt = null;
+			try {
+				transactionReceipt = Transfer.sendFunds(web3j, credentials, toAddress,
+						BigDecimal.valueOf(amount), Convert.Unit.ETHER);
+			}
+			catch (RuntimeException e) {
+				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount, false);
+				errorService.saveError(error);
+				logger.debug("error saved: {}", error);
+				return false;
+			}
 			logger.debug("ETH transaction send fund completed");
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);

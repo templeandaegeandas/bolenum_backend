@@ -139,7 +139,7 @@ public class UserController {
 			}
 		    User user = authenticationToken.getUser();
 		    etherumWalletService.createWallet(user);
-		    String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
+		    String uuid = "vishalWallet";//btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 		    if (!uuid.isEmpty()) {
 		    	user.setBtcWalletUuid(uuid);
