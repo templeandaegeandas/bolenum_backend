@@ -138,8 +138,8 @@ public class UserController {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"), null);
 			}
 		    User user = authenticationToken.getUser();
-		    etherumWalletService.createWallet(user);
-		    String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
+//		    etherumWalletService.createWallet(user);
+		    String uuid = "demoWallet";//btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 		    if (!uuid.isEmpty()) {
 		    	user.setBtcWalletUuid(uuid);

@@ -55,6 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring().antMatchers("/api/v1/forgetpassword/verify");
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.VERIFY_2FA_OTP);
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.SEND_2FA_OTP);
+		web.ignoring().antMatchers(UrlConstant.WEBSOCKET_PATH + "/**");
 		
 		
 		// Check if Active profiles contains "dev" or "stag"

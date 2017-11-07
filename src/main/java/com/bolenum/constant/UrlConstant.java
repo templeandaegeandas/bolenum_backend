@@ -87,6 +87,7 @@ public class UrlConstant {
 	public static final String GET_TOKEN_BY_ID = "get/token";
 	
 	/****************** WebSocket *****************************/
+	public static final String WEBSOCKET_PATH = "/websocket";
 	public static final String WS_REGISTER_ENDPOINT = "/websocket/bolenum/exchange";
 	public static final String WS_APPLICATION_DEST_PREFIX = "/websocket/app";
 	public static final String WS_BROKER = "/websocket/broker";
