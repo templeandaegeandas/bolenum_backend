@@ -90,10 +90,10 @@ public class KYCController {
 		UserKyc userKyc = kycService.approveKycDocument(id);
 		if (userKyc != null) {
 			return ResponseHandler.response(HttpStatus.OK, false,
-					localeService.getMessage("user.document.disapprove.success"), userKyc);
+					localeService.getMessage("user.document.approve.success"), userKyc);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localeService.getMessage("user.document.disapprove.failed"), null);
+					localeService.getMessage("user.document.approve.failed"), null);
 		}
 	}
 
@@ -108,10 +108,10 @@ public class KYCController {
 				data.get("rejectionMessage"));
 		if (userKyc != null) {
 			return ResponseHandler.response(HttpStatus.OK, false,
-					localeService.getMessage("user.document.approve.success"), userKyc);
+					localeService.getMessage("user.document.disapprove.success"), userKyc);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localeService.getMessage("user.document.approve.failed"), null);
+					localeService.getMessage("user.document.disapprove.failed"), null);
 		}
 	}
 

@@ -1,0 +1,5 @@
+package com.bolenum.enums;
+
+public enum MessageType {
+	DOCUMENT_VERIFICATION,USER_NOTIFICATION,ADMIN_NOTIFICATION,ORDER_BOOK_NOTIFICATION
+}

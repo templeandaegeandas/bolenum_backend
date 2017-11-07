@@ -194,7 +194,7 @@ public class BTCWalletController {
 				validWithdrawAmount = validateWithdrawAmount(availableETHBalance,
 						withdrawBalanceForm.getWithdrawAmount());
 				if (validAvailableWalletBalance && validWithdrawAmount) {
-					transactionService.performBtcTransaction(user, withdrawBalanceForm.getToAddress(),
+					transactionService.performEthTransaction(user, withdrawBalanceForm.getToAddress(),
 							withdrawBalanceForm.getWithdrawAmount());
 				}
 				break;

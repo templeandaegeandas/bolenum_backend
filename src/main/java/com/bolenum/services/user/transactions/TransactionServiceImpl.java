@@ -41,10 +41,13 @@ import org.web3j.utils.Convert;
 
 import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.user.ErrorService;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.EthereumServiceUtil;
@@ -69,7 +72,13 @@ public class TransactionServiceImpl implements TransactionService {
 	TransactionRepo transactionRepo;
 
 	@Autowired
+	private NotificationService notificationService;
+	
+	@Autowired
 	private BTCWalletService bTCWalletService;
+	
+	@Autowired
+	private ErrorService errorService;
 
 	/**
 	 * to perform in app transaction for ethereum
@@ -96,8 +105,17 @@ public class TransactionServiceImpl implements TransactionService {
 			credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
 			logger.debug("ETH transaction credentials load completed");
 			logger.debug("ETH transaction send fund started");
-			TransactionReceipt transactionReceipt = Transfer.sendFunds(web3j, credentials, toAddress,
-					BigDecimal.valueOf(amount), Convert.Unit.ETHER);
+			TransactionReceipt transactionReceipt = null;
+			try {
+				transactionReceipt = Transfer.sendFunds(web3j, credentials, toAddress,
+						BigDecimal.valueOf(amount), Convert.Unit.ETHER);
+			}
+			catch (RuntimeException e) {
+				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount, false);
+				errorService.saveError(error);
+				logger.debug("error saved: {}", error);
+				return false;
+			}
 			logger.debug("ETH transaction send fund completed");
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
@@ -188,17 +206,35 @@ public class TransactionServiceImpl implements TransactionService {
 	@Async
 	@Override
 	public boolean performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" "+currencyAbr+" have been processed successfully!";
+		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" "+currencyAbr+" have been processed successfully!";
 		switch (currencyAbr) {
 		case "BTC":
 			logger.debug("BTC transaction started");
 			boolean status = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
 					qtyTraded);
 			logger.debug("is BTC transaction successed: {}", status);
+//			String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" BTC have been processed successfully!";
+//			String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" BTC have been processed successfully!";
+			notificationService.sendNotification(seller, msg);
+			notificationService.saveNotification(buyer, seller, msg);
+			notificationService.sendNotification(buyer, msg1);
+			notificationService.saveNotification(buyer, seller, msg1);
+			logger.debug("Message : {}",msg);
+			logger.debug("Message : {}",msg1);
 			return status;
 		case "ETH":
 			logger.debug("ETH transaction started");
 			status = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded);
 			logger.debug("is ETH transaction successed: {}", status);
+//			String msg2 = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" ETH have been processed successfully!";
+//			String msg3 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" ETH have been processed successfully!";
+			notificationService.sendNotification(seller, msg);
+			notificationService.saveNotification(buyer, seller, msg);
+			notificationService.sendNotification(buyer, msg1);
+			notificationService.saveNotification(buyer, seller, msg1);
+			logger.debug("Message : {}",msg);
+			logger.debug("Message : {}",msg1);
 			return status;
 		}
 		return false;
