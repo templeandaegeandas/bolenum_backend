@@ -72,6 +72,7 @@ public class UrlConstant {
 	public static final String DEPOSIT = "deposit";
 	public static final String MARKET_PRICE = "market/price";
 	public static final String WITHDRAW = "withdraw";
+	public static final String GET_TRANSACTION_LIST_OF_USER_WITHDRAW="withdraw/list/user";
 	
 	/******************** ORDER API ******/
 	public static final String CREATE_ORDER = "create/order";

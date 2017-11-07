@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -20,6 +21,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -40,6 +45,7 @@ import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
 import com.bolenum.constant.BTCUrlConstant;
+import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Error;
@@ -131,6 +137,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setUser(fromUser);
+				transaction.setCurrencyName(CurrencyName.ETHEREUM);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
@@ -192,6 +199,7 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction.setTransactionType(TransactionType.OUTGOING);
 					transaction.setUser(fromUser);
 					transaction.setTransactionStatus(transactionStatus);
+					transaction.setCurrencyName(CurrencyName.BITCOIN);
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
@@ -244,4 +252,23 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		return false;
 	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus withdraw,int pageNumber, int pageSize, String sortOrder, String sortBy) {
+		
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		return transactionRepo.findByUserAndTransactionStatus(user, withdraw, pageRequest);
+		
+	}
+	
+	
 }

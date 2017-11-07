@@ -104,6 +104,16 @@ public class User {
 	private TwoFactorAuthOption twoFactorAuthOption = TwoFactorAuthOption.NONE;
 
 	private String google2FaAuthKey;
+	
+	private String btcWalletAddress;
+
+	public String getBtcWalletAddress() {
+		return btcWalletAddress;
+	}
+
+	public void setBtcWalletAddress(String btcWalletAddress) {
+		this.btcWalletAddress = btcWalletAddress;
+	}
 
 	public Long getUserId() {
 		return userId;

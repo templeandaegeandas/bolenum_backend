@@ -48,11 +48,25 @@ public class Transaction {
 	private Double txFee;
 	private Double txAmount;
 	private String txDescription;
+	
 	@Enumerated(EnumType.STRING)
 	private TransactionType transactionType;
+	@Enumerated(EnumType.STRING)
 	private TransactionStatus transactionStatus;
 	private Double gas;
 	private Double gasPrice;
+	
+	@Enumerated(EnumType.STRING)
+	private CurrencyName currencyName;
+	
+
+	public CurrencyName getCurrencyName() {
+		return currencyName;
+	}
+
+	public void setCurrencyName(CurrencyName currencyName) {
+		this.currencyName = currencyName;
+	}
 
 	@ManyToOne
 	private User user;
