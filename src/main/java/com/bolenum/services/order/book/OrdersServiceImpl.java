@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
@@ -55,6 +57,9 @@ public class OrdersServiceImpl implements OrdersService {
 	
 	@Autowired
 	private TransactionService transactionService;
+	
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
 
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
@@ -113,13 +118,17 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Override
 	public Boolean processOrder(Orders orders) {
+		Boolean status;
 		if (orders.equals(OrderStandard.MARKET)) {
 			logger.debug("Processing market order");
-			return processMarketOrder(orders);
+			status = processMarketOrder(orders);
 		} else {
 			logger.debug("Processing limit order");
-			return processLimitOrder(orders);
+			status = processLimitOrder(orders);
 		}
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
+				com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
+		return status;
 	}
 
 	@Override
