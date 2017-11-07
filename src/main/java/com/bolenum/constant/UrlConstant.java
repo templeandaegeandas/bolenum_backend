@@ -85,6 +85,15 @@ public class UrlConstant {
 	public static final String ADD_NEW_TOKEN = "add/new/token";
 	public static final String GET_TOKEN_LIST = "get/token/list";
 	public static final String GET_TOKEN_BY_ID = "get/token";
+	
+	/****************** WebSocket *****************************/
+	public static final String WS_REGISTER_ENDPOINT = "/websocket/bolenum/exchange";
+	public static final String WS_APPLICATION_DEST_PREFIX = "/websocket/app";
+	public static final String WS_BROKER = "/websocket/broker";
+	public static final String WS_SENDER_USER = "/sender/user";
+	public static final String WS_SENDER_ADMIN = "/sender/admin";
+	public static final String WS_LISTNER_USER = "/listner/user";
+	public static final String WS_LISTNER_ADMIN = "/listner/admin";
 
 	
 	
