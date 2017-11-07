@@ -67,9 +67,10 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	TransactionRepo transactionRepo;
-	
+
 	@Autowired
 	private BTCWalletService bTCWalletService;
+
 	/**
 	 * to perform in app transaction for ethereum
 	 * 
@@ -154,8 +155,10 @@ public class TransactionServiceImpl implements TransactionService {
 		try {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
-				JSONObject Json = new JSONObject(txRes.getBody());
-				String txHash = (String) Json.get("data");
+				JSONObject responseJson = new JSONObject(txRes.getBody());
+				logger.debug("json object of response: {}", responseJson);
+				JSONObject data = (JSONObject) responseJson.get("data");
+				String txHash = (String) data.get("transactionHash");
 				logger.debug("transaction hash: {}", txHash);
 				Transaction transaction = transactionRepo.findByTxHash(txHash);
 				if (transaction == null) {
@@ -188,7 +191,8 @@ public class TransactionServiceImpl implements TransactionService {
 		switch (currencyAbr) {
 		case "BTC":
 			logger.debug("BTC transaction started");
-			boolean status = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded);
+			boolean status = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
+					qtyTraded);
 			logger.debug("is BTC transaction successed: {}", status);
 			return status;
 		case "ETH":
