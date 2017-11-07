@@ -2,6 +2,8 @@ package com.bolenum.model;
 
 import java.util.Date;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,8 +25,12 @@ public class UserKyc {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+	
+	@Enumerated(EnumType.STRING)
 	private DocumentType documentType ;
 	private String document;
+	
+	@Enumerated(EnumType.STRING)
 	private DocumentStatus documentStatus = DocumentStatus.SUBMITTED;
 	private String rejectionMessage;
 	private Date uploadedDate = new Date();
