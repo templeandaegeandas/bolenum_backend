@@ -13,6 +13,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -71,6 +73,8 @@ public class BTCWalletController {
 	@Autowired
 	private TransactionFeeService transactionFeeService;
 
+	private Logger logger = LoggerFactory.getLogger(BTCWalletController.class);
+
 	/**
 	 * to get the wallet address and QR code for get deposited in the
 	 * wallet @description getWalletAddressAndQrCode @param coin code @return
@@ -80,6 +84,7 @@ public class BTCWalletController {
 	@RequestMapping(value = UrlConstant.DEPOSIT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWalletAddressAndQrCode(@RequestParam(name = "currencyType") String currencyType,
 			@RequestParam(name = "code") String coinCode) {
+		logger.debug("currency Type: {}, code:{}", currencyType, coinCode);
 		if (coinCode == null || coinCode.isEmpty()) {
 			throw new IllegalArgumentException(localService.getMessage("invalid.coin.code"));
 		}
