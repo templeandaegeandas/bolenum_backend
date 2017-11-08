@@ -12,10 +12,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.bolenum.enums.CurrencyName;
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -45,18 +48,37 @@ public class Transaction {
 	private Double txFee;
 	private Double txAmount;
 	private String txDescription;
+	
 	@Enumerated(EnumType.STRING)
 	private TransactionType transactionType;
+	@Enumerated(EnumType.STRING)
+	private TransactionStatus transactionStatus;
 	private Double gas;
 	private Double gasPrice;
+	
+	@Enumerated(EnumType.STRING)
+	private CurrencyName currencyName;
+	
+
+	public CurrencyName getCurrencyName() {
+		return currencyName;
+	}
+
+	public void setCurrencyName(CurrencyName currencyName) {
+		this.currencyName = currencyName;
+	}
+
+	@ManyToOne
+	private User user;
 
 	public Transaction() {
 
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, TransactionType transactionType, Double gas,
-			Double gasPrice) {
+			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
+			Double gasPrice, User user) {
+			
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
@@ -66,6 +88,7 @@ public class Transaction {
 		this.transactionType = transactionType;
 		this.gas = gas;
 		this.gasPrice = gasPrice;
+		this.user = user;
 	}
 
 	/**
@@ -209,6 +232,7 @@ public class Transaction {
 	}
 
 	/**
+
 	 * @return the transactionType
 	 */
 	public TransactionType getTransactionType() {
@@ -253,4 +277,19 @@ public class Transaction {
 		this.gasPrice = gasPrice;
 	}
 
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
+	public TransactionStatus getTransactionStatus() {
+		return transactionStatus;
+	}
+
+	public void setTransactionStatus(TransactionStatus transactionStatus) {
+		this.transactionStatus = transactionStatus;
+	}
 }
