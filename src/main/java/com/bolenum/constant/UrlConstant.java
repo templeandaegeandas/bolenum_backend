@@ -73,6 +73,7 @@ public class UrlConstant {
 	public static final String MARKET_PRICE = "market/price";
 	public static final String WITHDRAW = "withdraw";
 	public static final String GET_TRANSACTION_LIST_OF_USER_WITHDRAW="withdraw/list/user";
+	public static final String GET_TRANSACTION_LIST_OF_USER_DEPOSIT = "deposit/list/user";
 	
 	/******************** ORDER API ******/
 	public static final String CREATE_ORDER = "create/order";
@@ -97,6 +98,4 @@ public class UrlConstant {
 	public static final String WS_LISTNER_USER = "/listner/user";
 	public static final String WS_LISTNER_ADMIN = "/listner/admin";
 
-	
-	
 }

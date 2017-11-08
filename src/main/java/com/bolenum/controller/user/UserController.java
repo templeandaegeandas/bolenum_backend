@@ -336,4 +336,14 @@ public class UserController {
 		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.WITHDRAW,pageNumber,pageSize,sortOrder,sortBy);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"),listOfUserTransaction);
 	}
+	
+	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
+	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
+		User user = GenericUtils.getLoggedInUser();
+		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.DEPOSIT,pageNumber,pageSize,sortOrder,sortBy);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"),listOfUserTransaction);
+	}
+	
 }
