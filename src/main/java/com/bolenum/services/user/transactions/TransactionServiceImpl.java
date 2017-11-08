@@ -255,7 +255,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 * 
 	 */
 	@Override
-	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus withdraw,int pageNumber, int pageSize, String sortOrder, String sortBy) {
+	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus transactionStatus,int pageNumber, int pageSize, String sortOrder, String sortBy) {
 		
 		Direction sort;
 		if (sortOrder.equals("desc")) {
@@ -264,7 +264,7 @@ public class TransactionServiceImpl implements TransactionService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		return transactionRepo.findByUserAndTransactionStatus(user, withdraw, pageRequest);
+		return transactionRepo.findByUserAndTransactionStatus(user, transactionStatus, pageRequest);
 		
 	}
 	
