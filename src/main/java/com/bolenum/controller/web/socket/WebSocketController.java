@@ -34,10 +34,10 @@ public class WebSocketController {
 
 	@MessageMapping(UrlConstant.WS_SENDER_ADMIN)
 	void sendMesageToAdmin(WebSocketMessage webSocketMessage) {
-		logger.debug("Message type: {}",webSocketMessage.getMessageType());
+		logger.debug("Message type: {}",webSocketMessage.getMessageType().toString());
 		simpMessagingTemplate.convertAndSend(
 				UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + webSocketMessage.getReceiver(),
-				webSocketMessage.getMessageType().toString());
+				webSocketMessage.getMessageType());
 	}
 
 }
