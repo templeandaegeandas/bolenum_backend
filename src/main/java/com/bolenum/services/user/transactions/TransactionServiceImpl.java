@@ -9,8 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -182,7 +180,6 @@ public class TransactionServiceImpl implements TransactionService {
 		HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
 		try {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-			System.out.println("txRes ====== ==="+txRes);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
 				JSONObject responseJson = new JSONObject(txRes.getBody());
 				logger.debug("json object of response: {}", responseJson);
@@ -257,7 +254,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 * 
 	 */
 	@Override
-	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus withdraw,int pageNumber, int pageSize, String sortOrder, String sortBy) {
+	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus transactionStatus,int pageNumber, int pageSize, String sortOrder, String sortBy) {
 		
 		Direction sort;
 		if (sortOrder.equals("desc")) {
@@ -266,7 +263,7 @@ public class TransactionServiceImpl implements TransactionService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		return transactionRepo.findByUserAndTransactionStatus(user, withdraw, pageRequest);
+		return transactionRepo.findByUserAndTransactionStatus(user, transactionStatus, pageRequest);
 		
 	}
 	

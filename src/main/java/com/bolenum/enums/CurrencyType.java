@@ -2,7 +2,7 @@ package com.bolenum.enums;
 
 public enum CurrencyType {
 
-	CRYPTO("CRYPTO"), ERC20TOKEN("ERC20TOKEN"), FIAT("FIAT");
+	CRYPTO("crypto"), ERC20TOKEN("erc20token"), FIAT("fiat");
 	private String currencyType;
 
 	private CurrencyType(String currencyType) {
