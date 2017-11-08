@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -21,6 +22,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.exceptions.MaxSizeExceedException;
@@ -28,11 +30,13 @@ import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.Countries;
 import com.bolenum.model.States;
+import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.ErrorCollectionUtil;
@@ -72,6 +76,9 @@ public class UserController {
 	
 	@Autowired
 	private CountryAndStateService countryAndStateService;
+	
+	@Autowired
+	private TransactionService transactionService;
 	
     /**
      * 
@@ -143,6 +150,7 @@ public class UserController {
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 		    if (!uuid.isEmpty()) {
 		    	user.setBtcWalletUuid(uuid);
+		    	user.setBtcWalletAddress(btcWalletService.getWalletAddress(uuid));
 				user.setIsEnabled(true);
 				User savedUser = userService.saveUser(user);
 				logger.debug("user mail verify savedUser: {}", savedUser);
@@ -317,5 +325,15 @@ public class UserController {
 	public ResponseEntity<Object> getStatesByCountryId(@RequestParam("countryId") Long countryId) {
 		List<States> list = countryAndStateService.getStatesByCountry(countryId);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("states.list.by.country.id"), list);
+	}
+	
+	
+	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
+	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
+		User user = GenericUtils.getLoggedInUser();
+		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.WITHDRAW,pageNumber,pageSize,sortOrder,sortBy);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"),listOfUserTransaction);
 	}
 }

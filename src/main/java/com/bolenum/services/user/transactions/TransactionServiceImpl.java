@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -20,6 +21,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -40,6 +45,8 @@ import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
 import com.bolenum.constant.BTCUrlConstant;
+import com.bolenum.enums.CurrencyName;
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
@@ -89,8 +96,8 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @return true/false if transaction success return true else false
 	 */
 	@Override
-	public boolean performEthTransaction(User fromUser, String toAddress, Double amount) {
-		logger.debug("ETH transaction started");
+	public boolean performEthTransaction(User fromUser, String toAddress, Double amount,TransactionStatus transactionStatus) {
+
 		String passwordKey = fromUser.getEthWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
@@ -128,6 +135,9 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
+				transaction.setTransactionStatus(transactionStatus);
+				transaction.setUser(fromUser);
+				transaction.setCurrencyName(CurrencyName.ETHEREUM);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
@@ -155,7 +165,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @return true/false if transaction success return true else false
 	 */
 	@Override
-	public boolean performBtcTransaction(User fromUser, String toAddress, Double amount) {
+	public boolean performBtcTransaction(User fromUser, String toAddress, Double amount,TransactionStatus transactionStatus) {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = BTCUrlConstant.CREATE_TX;
 		HttpHeaders headers = new HttpHeaders();
@@ -172,6 +182,7 @@ public class TransactionServiceImpl implements TransactionService {
 		HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
 		try {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+			System.out.println("txRes ====== ==="+txRes);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
 				JSONObject responseJson = new JSONObject(txRes.getBody());
 				logger.debug("json object of response: {}", responseJson);
@@ -186,6 +197,9 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction.setToAddress(toAddress);
 					transaction.setTxAmount(amount);
 					transaction.setTransactionType(TransactionType.OUTGOING);
+					transaction.setUser(fromUser);
+					transaction.setTransactionStatus(transactionStatus);
+					transaction.setCurrencyName(CurrencyName.BITCOIN);
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
@@ -211,8 +225,7 @@ public class TransactionServiceImpl implements TransactionService {
 		switch (currencyAbr) {
 		case "BTC":
 			logger.debug("BTC transaction started");
-			boolean status = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
-					qtyTraded);
+			boolean status = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded,null);
 			logger.debug("is BTC transaction successed: {}", status);
 //			String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" BTC have been processed successfully!";
 //			String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" BTC have been processed successfully!";
@@ -225,7 +238,7 @@ public class TransactionServiceImpl implements TransactionService {
 			return status;
 		case "ETH":
 			logger.debug("ETH transaction started");
-			status = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded);
+			status = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded,null);
 			logger.debug("is ETH transaction successed: {}", status);
 //			String msg2 = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" ETH have been processed successfully!";
 //			String msg3 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" ETH have been processed successfully!";
@@ -239,4 +252,23 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		return false;
 	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus withdraw,int pageNumber, int pageSize, String sortOrder, String sortBy) {
+		
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		return transactionRepo.findByUserAndTransactionStatus(user, withdraw, pageRequest);
+		
+	}
+	
+	
 }
