@@ -8,7 +8,7 @@ package com.bolenum.enums;
  * @date 29-Sep-2017
  */
 public enum TransactionType {
-	INCOMING("in"), OUTGOING("out");
+	INCOMING("incoming"), OUTGOING("outgoing");
 	
 	private String txType;
 

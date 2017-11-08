@@ -9,8 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -182,7 +180,6 @@ public class TransactionServiceImpl implements TransactionService {
 		HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
 		try {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-			System.out.println("txRes ====== ==="+txRes);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
 				JSONObject responseJson = new JSONObject(txRes.getBody());
 				logger.debug("json object of response: {}", responseJson);

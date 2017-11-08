@@ -2,17 +2,17 @@ package com.bolenum.enums;
 
 public enum DocumentType {
 	
-	NATIONAL_ID("NATIONAL_ID") , RESIDENCE_PROOF("RESIDENCE_PROOF");
+	NATIONAL_ID("national_id") , RESIDENCE_PROOF("residence_proof");
 	
-	private String fileType;
+	private String documentType;
 	
-	private DocumentType(String fileType)
+	private DocumentType(String documentType)
 	{
-		this.fileType=fileType;
+		this.documentType=documentType;
 	}
 	
-	public String getFileType() {
-		return fileType;
+	public String getDocumentType() {
+		return documentType;
 	}
 
 }

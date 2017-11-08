@@ -7,7 +7,7 @@ package com.bolenum.enums;
 
 public enum TransactionStatus {
 
-WITHDRAW("WITHDRAW"), DEPOSIT("WITHDRAW");
+WITHDRAW("withdraw"), DEPOSIT("deposit");
 	
 	private String txStatus;
 
