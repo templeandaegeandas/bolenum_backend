@@ -9,6 +9,6 @@ public interface TradeService {
 
 	Page<Trade> getTradedOrdersLoggedIn(User user, int pageNumber, int pageSize, String sortOrder, String sortBy, String orderType, Long date);
 
-	Page<Trade> getTradedOrders(User user, int pageNumber, int pageSize, String sortOrder, String sortBy);
+	Page<Trade> getTradedOrders(int pageNumber, int pageSize, String sortOrder, String sortBy);
 
 }

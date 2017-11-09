@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
+
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.bolenum.services.order.book.MarketPriceService;
@@ -45,7 +46,7 @@ public class BolenumApplication {
 	}
 
 	@Autowired
-	MarketPriceService marketPriceService;
+	private MarketPriceService marketPriceService;
 
 	@Scheduled(fixedRate = 20 * 1000)
 	public void fetchCoinPrice() {

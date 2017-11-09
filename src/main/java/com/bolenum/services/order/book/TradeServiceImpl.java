@@ -109,7 +109,7 @@ public class TradeServiceImpl implements TradeService {
 	}
 	
 	@Override
-	public Page<Trade> getTradedOrders(User user, int pageNumber, int pageSize, String sortOrder, String sortBy) {
+	public Page<Trade> getTradedOrders(int pageNumber, int pageSize, String sortOrder, String sortBy) {
 		Direction sort;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;

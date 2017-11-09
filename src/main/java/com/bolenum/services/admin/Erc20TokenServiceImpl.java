@@ -63,7 +63,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	
 	@Override
 	public Long countErc20Token() {
-		return erc20TokenRepository.count();
+		return currencyService.countCourencies();
 	}
 
 	@Override
@@ -143,12 +143,5 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 					credentials, BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
 		return token.transferFrom( new Address(user.getEthWalletaddress()), new Address(toAddress), transferFunds);
 	}
-
-	@Override
-	public Erc20Token saveBolenumErc20Token() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	
 }
