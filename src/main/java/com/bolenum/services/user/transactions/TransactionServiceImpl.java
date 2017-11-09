@@ -4,7 +4,6 @@
 package com.bolenum.services.user.transactions;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
@@ -33,12 +32,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.exceptions.TransactionTimeoutException;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
@@ -106,16 +104,18 @@ public class TransactionServiceImpl implements TransactionService {
 		try {
 			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
 			logger.debug("decr password: {}", decrPwd);
-			logger.debug("ETH transaction credentials load started");
-			credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
-			logger.debug("ETH transaction credentials load completed");
-			logger.debug("ETH transaction send fund started");
+			
 			TransactionReceipt transactionReceipt = null;
 			try {
-				transactionReceipt = Transfer.sendFunds(web3j, credentials, toAddress,
+				logger.debug("ETH transaction credentials load started");
+				credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+				logger.debug("ETH transaction credentials load completed");
+				logger.debug("ETH transaction send fund started");
+				RemoteCall<TransactionReceipt> tr = Transfer.sendFunds(web3j, credentials, toAddress,
 						BigDecimal.valueOf(amount), Convert.Unit.ETHER);
+				transactionReceipt = tr.send();
 			}
-			catch (RuntimeException e) {
+			catch (Exception e) {
 				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount, false);
 				errorService.saveError(error);
 				logger.debug("error saved: {}", error);
@@ -147,9 +147,6 @@ public class TransactionServiceImpl implements TransactionService {
 				| IllegalBlockSizeException | BadPaddingException e1) {
 			logger.error("ETH transaction failed:  {}", e1.getMessage());
 			e1.printStackTrace();
-		} catch (IOException | InterruptedException | TransactionTimeoutException | CipherException e) {
-			logger.error("ETH transaction failed:  {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return false;
 	}

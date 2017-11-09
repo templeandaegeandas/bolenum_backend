@@ -27,7 +27,7 @@ public class EthereumServiceUtil implements Cloneable{
 	 */
 	public static Web3j getWeb3jInstance() {
 		if (instance == null) {
-			HttpService httpService = new HttpService("http://10.136.16.90:8000");
+			HttpService httpService = new HttpService("http://127.0.0.1:8000");
 			instance = Web3j.build(httpService);
 			return instance;
 		}

@@ -5,8 +5,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -14,6 +12,7 @@ import javax.crypto.NoSuchPaddingException;
 import org.springframework.data.domain.Page;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.User;
@@ -69,8 +68,8 @@ public interface Erc20TokenService {
 
 	Erc20Token saveBolenumErc20Token();
 
-	Future<TransactionReceipt> transferErc20Token(User user, String tokenName, String toAddress, Double fund)
+	TransactionReceipt transferErc20Token(User user, String tokenName, String toAddress, Double fund)
 			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException;
+			BadPaddingException, IOException, CipherException, TransactionException;
 
 }
