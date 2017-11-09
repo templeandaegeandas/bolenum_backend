@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.bolenum.constant.BTCUrlConstant;
+import com.bolenum.enums.CurrencyName;
+import com.bolenum.enums.TransactionStatus;
+import com.bolenum.enums.TransactionType;
+import com.bolenum.model.Transaction;
+import com.bolenum.model.User;
+import com.bolenum.repo.user.UserRepository;
+import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -40,6 +48,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * creating BIP32 hierarchical deterministic (HD) wallets
 	 */
 
+	@Autowired
+	private TransactionRepo transactionRepo; 
+	
+	@Autowired
+	private UserRepository userRepository;
+	
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -196,5 +210,28 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return true;
 		}
 		return false;
+	}
+
+
+
+
+	@Override
+	public Transaction setDepositeList(Transaction transaction) {
+		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
+		logger.debug("savedTransaction {}",savedTransaction);
+		User user = userRepository.findByBtcWalletAddress(transaction.getToAddress());
+		if (savedTransaction==null) {
+			transaction.setTransactionType(TransactionType.INCOMING);
+			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
+			transaction.setCurrencyName(CurrencyName.BITCOIN);
+			transaction.setUser(user);
+			logger.debug("savedTransaction {}",transaction.getTransactionStatus());
+			return transactionRepo.saveAndFlush(transaction);
+		}
+		else {
+			savedTransaction.setTransactionType(TransactionType.INCOMING);
+			logger.debug("savedTransaction {}",savedTransaction.getTransactionType());
+			return transactionRepo.saveAndFlush(savedTransaction);
+		}
 	}
 }
