@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -23,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.bolenum.constant.BTCUrlConstant;
+import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
@@ -53,6 +55,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
 	
 	@Override
 	public String createHotWallet(String uuid) {
@@ -212,9 +217,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		return false;
 	}
 
-
-
-
+	/**
+	 *  
+	 */
 	@Override
 	public Transaction setDepositeList(Transaction transaction) {
 		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
@@ -226,12 +231,17 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			transaction.setCurrencyName(CurrencyName.BITCOIN);
 			transaction.setUser(user);
 			logger.debug("savedTransaction {}",transaction.getTransactionStatus());
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(transaction);
 		}
 		else {
 			savedTransaction.setTransactionType(TransactionType.INCOMING);
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			logger.debug("savedTransaction {}",savedTransaction.getTransactionType());
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
 	}
+	
 }
