@@ -98,5 +98,7 @@ public class UrlConstant {
 	public static final String WS_SENDER_ADMIN = "/sender/admin";
 	public static final String WS_LISTNER_USER = "/listner/user";
 	public static final String WS_LISTNER_ADMIN = "/listner/admin";
-
+	public static final String WS_LISTNER_ORDER = "/listner/order";
 }
+	
+

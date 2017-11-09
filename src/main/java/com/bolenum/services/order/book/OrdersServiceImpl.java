@@ -10,12 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
-import com.bolenum.enums.TransactionStatus;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.MarketPrice;
@@ -25,7 +26,6 @@ import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
-import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.WalletService;
 
 /**
@@ -58,6 +58,9 @@ public class OrdersServiceImpl implements OrdersService {
 	@Autowired
 	private TransactionService transactionService;
 	
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
+
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
 	List<Orders> ordersList = new ArrayList<>();
@@ -115,13 +118,17 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Override
 	public Boolean processOrder(Orders orders) {
+		Boolean status;
 		if (orders.equals(OrderStandard.MARKET)) {
 			logger.debug("Processing market order");
-			return processMarketOrder(orders);
+			status = processMarketOrder(orders);
 		} else {
 			logger.debug("Processing limit order");
-			return processLimitOrder(orders);
+			status = processLimitOrder(orders);
 		}
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
+				com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
+		return status;
 	}
 
 	@Override
@@ -520,7 +527,6 @@ public class OrdersServiceImpl implements OrdersService {
 		return wrostSell;
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price) {
 		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);

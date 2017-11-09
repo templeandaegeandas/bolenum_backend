@@ -15,7 +15,7 @@ public enum OrderStandard {
 		this.orderStd = orderStd;
 	}
 
-	public String getOrderStatus() {
+	public String getOrderStandard() {
 		return orderStd;
 	}
 

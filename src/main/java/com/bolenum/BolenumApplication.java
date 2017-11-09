@@ -4,6 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+
 import com.bolenum.services.order.book.MarketPriceService;
 
 import io.swagger.annotations.Api;
@@ -17,6 +21,8 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
+//@EnableAsync
+//@EnableScheduling
 @SpringBootApplication(exclude = org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration.class)
 public class BolenumApplication {
 
@@ -43,7 +49,7 @@ public class BolenumApplication {
 	@Autowired
 	MarketPriceService marketPriceService;
 
-//	@Scheduled(fixedRate = 20 * 1000)
+	@Scheduled(fixedRate = 20 * 1000)
 	public void fetchCoinPrice() {
 		 marketPriceService.priceFromCoinMarketCap();
 	}

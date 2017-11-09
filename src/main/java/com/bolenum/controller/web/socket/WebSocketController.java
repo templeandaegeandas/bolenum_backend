@@ -29,7 +29,7 @@ public class WebSocketController {
 	void sendMesageToUser(WebSocketMessage webSocketMessage) {
 		logger.debug("Message type: {}",webSocketMessage.getMessageType());
 		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ADMIN,
-				webSocketMessage.getMessageType().toString());
+				webSocketMessage.getMessageType());
 	}
 
 	@MessageMapping(UrlConstant.WS_SENDER_ADMIN)
@@ -37,7 +37,7 @@ public class WebSocketController {
 		logger.debug("Message type: {}",webSocketMessage.getMessageType());
 		simpMessagingTemplate.convertAndSend(
 				UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + webSocketMessage.getReceiver(),
-				webSocketMessage.getMessageType().toString());
+				webSocketMessage.getMessageType());
 	}
 
 }

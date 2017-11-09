@@ -1,5 +1,16 @@
 package com.bolenum.enums;
 
 public enum MessageType {
-	DOCUMENT_VERIFICATION,USER_NOTIFICATION,ADMIN_NOTIFICATION,ORDER_BOOK_NOTIFICATION
+	DOCUMENT_VERIFICATION("document_verification"), USER_NOTIFICATION("user_notification"), ADMIN_NOTIFICATION(
+			"admin_notification"), ORDER_BOOK_NOTIFICATION("order_book_notification");
+
+	private String messageType;
+
+	private MessageType(String messageType) {
+		this.messageType = messageType;
+	}
+
+	public String getMessageType() {
+		return messageType;
+	}
 }
