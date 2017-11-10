@@ -23,4 +23,6 @@ public interface TransactionService {
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller);
 	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus withdraw, int pageNumber, int pageSize,
 			String sortOrder, String sortBy);
+	Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
+			TransactionStatus transactionStatus);
 }

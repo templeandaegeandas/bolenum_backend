@@ -30,6 +30,11 @@ public class CurrencyServiceImpl implements CurrencyService {
 	public Currency findByCurrencyName(String currencyName) {
 		return currencyRepo.findByCurrencyNameInIgnoreCase(currencyName);
 	}
+	
+	@Override
+	public Currency findByCurrencyAbbreviation(String currencyAbbreviation) {
+		return currencyRepo.findByCurrencyAbbreviationInIgnoreCase(currencyAbbreviation);
+	}
 
 	@Override
 	public Currency saveCurrency(Currency currency) {
