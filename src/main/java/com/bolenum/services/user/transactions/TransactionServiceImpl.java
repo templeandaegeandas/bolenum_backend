@@ -323,7 +323,7 @@ public class TransactionServiceImpl implements TransactionService {
 				} catch (InterruptedException | ExecutionException e) {
 					logger.error("ETH transaction failed: {}", e.getMessage());
 					e.printStackTrace();
-					new AsyncResult<Boolean>(false);
+					return new AsyncResult<Boolean>(false);
 				}
 			}
 			break;
@@ -346,9 +346,8 @@ public class TransactionServiceImpl implements TransactionService {
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error("ERC20TOKEN transaction failed: {}", e.getMessage());
 				e.printStackTrace();
-				new AsyncResult<Boolean>(false);
+				return new AsyncResult<Boolean>(false);
 			}
-			break;
 
 		default:
 			break;
