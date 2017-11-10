@@ -149,7 +149,7 @@ public class OrdersServiceImpl implements OrdersService {
 	 */
 	private boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
 		if (orderList.size() > 0) {
-			Orders matchedOrder = matchedOrder(ordersList);
+			Orders matchedOrder = matchedOrder(orderList);
 			long matchedUserId = matchedOrder.getUser().getUserId();
 			long reqOrderUserId = reqOrder.getUser().getUserId();
 			logger.debug("matched user id: {} and reqested order user id: {}", matchedOrder, reqOrderUserId);
