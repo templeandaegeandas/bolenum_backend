@@ -219,6 +219,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	
 	@Override
+	@Async
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
 		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";
