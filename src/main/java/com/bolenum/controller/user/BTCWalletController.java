@@ -29,6 +29,7 @@ import org.web3j.crypto.CipherException;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
 import com.bolenum.enums.TransactionStatus;
+import com.bolenum.model.Transaction;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.MarketPrice;
@@ -241,6 +242,17 @@ public class BTCWalletController {
 		}
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"),
 				null);
+	}
+
+	@RequestMapping(value = UrlConstant.DEPOSIT_TRANSACTION_STATUS, method = RequestMethod.POST)
+	public ResponseEntity<Object> withdrawAmountFromWallet(@RequestBody Transaction transaction) {
+		Transaction transactionResponse=btcWalletService.setDepositeList(transaction);
+		if (transactionResponse == null) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("Deposit not saved!"),null );
+		}
+		else {
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("Deposit saved successfully!"),transactionResponse );
+		}
 	}
 
 }

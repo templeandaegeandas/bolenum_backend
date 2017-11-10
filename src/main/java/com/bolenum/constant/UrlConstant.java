@@ -74,6 +74,7 @@ public class UrlConstant {
 	public static final String WITHDRAW = "withdraw";
 	public static final String GET_TRANSACTION_LIST_OF_USER_WITHDRAW="withdraw/list";
 	public static final String GET_TRANSACTION_LIST_OF_USER_DEPOSIT = "deposit/list";
+	public static final String DEPOSIT_TRANSACTION_STATUS="transaction/status/deposit";
 	
 	/******************** ORDER API ******/
 	public static final String CREATE_ORDER = "create/order";
@@ -82,6 +83,7 @@ public class UrlConstant {
 	public static final String MY_ORDER_LIST = "get/my/orders";
 	public static final String TRADE_LIST_LOGGEDIN = "get/loggedin/trade/list";
 	public static final String TRADE_LIST_ALL = "get/trade/list";
+	public static final String MY_TRADING_COUNT = "trading/count";
 	
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";
@@ -98,6 +100,9 @@ public class UrlConstant {
 	public static final String WS_LISTNER_USER = "/listner/user";
 	public static final String WS_LISTNER_ADMIN = "/listner/admin";
 	public static final String WS_LISTNER_ORDER = "/listner/order";
+	public static final String WS_LISTNER_DEPOSIT = "/listner/deposit";
+	
+	
 }
 	
 
