@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -32,11 +33,20 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.web3j.crypto.CipherException;
 
 import com.bolenum.constant.BTCUrlConstant;
+
 import com.bolenum.model.Currency;
 import com.bolenum.model.User;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
+
+import com.bolenum.constant.UrlConstant;
+import com.bolenum.enums.CurrencyName;
+import com.bolenum.enums.TransactionStatus;
+import com.bolenum.enums.TransactionType;
+import com.bolenum.model.Transaction;
+import com.bolenum.repo.user.UserRepository;
+import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -64,6 +74,15 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * creating BIP32 hierarchical deterministic (HD) wallets
 	 */
 
+	@Autowired
+	private TransactionRepo transactionRepo; 
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
+	
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -220,8 +239,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return true;
 		}
 		return false;
-	}
-	
+	}	
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) {
 		Double availableBalance = null;
@@ -240,4 +258,30 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return false;
 	}
+
+	/**
+	 *  
+	 */
+	@Override
+	public Transaction setDepositeList(Transaction transaction) {
+		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
+		logger.debug("savedTransaction {}",savedTransaction);
+		User user = userRepository.findByBtcWalletAddress(transaction.getToAddress());
+		if (savedTransaction==null) {
+			transaction.setTransactionType(TransactionType.INCOMING);
+			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
+			transaction.setCurrencyName("BTC");
+			transaction.setUser(user);
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
+			return transactionRepo.saveAndFlush(transaction);
+		}
+		else {
+			savedTransaction.setTransactionType(TransactionType.INCOMING);
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
+			return transactionRepo.saveAndFlush(savedTransaction);
+		}
+	}
+	
 }

@@ -56,4 +56,6 @@ public interface OrdersService {
 	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
 	
 	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList);
+
+    Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
 }
