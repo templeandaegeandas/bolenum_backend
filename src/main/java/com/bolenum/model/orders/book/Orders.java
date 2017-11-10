@@ -39,6 +39,7 @@ public class Orders {
 	private Date createdOn = new Date();
 	private Date deletedOn;
 	private boolean isDeleted;
+	
 	@OneToOne
 	private CurrencyPair pair;
 	

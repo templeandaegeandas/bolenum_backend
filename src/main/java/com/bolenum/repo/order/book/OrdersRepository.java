@@ -64,4 +64,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Page<Orders> findSellOrderList(@Param("pair")CurrencyPair pair, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 
 	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
+	
+	Long countOrderByUserAndOrderType(User user,OrderType orderType);
 }

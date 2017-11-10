@@ -74,6 +74,7 @@ public class OrdersServiceImpl implements OrdersService {
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
+		
 		String tickter = null, minOrderVol = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
@@ -557,5 +558,11 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus) {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
+	}
+
+	@Override
+	public Long countOrdersByOrderTypeAndUser(User user,OrderType orderType)
+	{
+		return ordersRepository.countOrderByUserAndOrderType(user, orderType);
 	}
 }

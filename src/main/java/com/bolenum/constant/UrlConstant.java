@@ -83,6 +83,7 @@ public class UrlConstant {
 	public static final String MY_ORDER_LIST = "get/my/orders";
 	public static final String TRADE_LIST_LOGGEDIN = "get/loggedin/trade/list";
 	public static final String TRADE_LIST_ALL = "get/trade/list";
+	public static final String MY_TRADING_COUNT = "trading/count";
 	
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";
@@ -100,6 +101,7 @@ public class UrlConstant {
 	public static final String WS_LISTNER_ADMIN = "/listner/admin";
 	public static final String WS_LISTNER_ORDER = "/listner/order";
 	public static final String WS_LISTNER_DEPOSIT = "/listner/deposit";
+	
 	
 }
 	
