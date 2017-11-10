@@ -612,7 +612,7 @@ public class OrdersServiceImpl implements OrdersService {
 	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList) {
 		return ordersRepository.totalUserBalanceInBook(user, toCurrencyList, pairedCurrencyList);
 	}
-	
+
 	@Override
 	public Long countOrdersByOrderTypeAndUser(User user,OrderType orderType)
 	{
