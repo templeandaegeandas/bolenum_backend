@@ -219,7 +219,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	
 	@Override
-	public boolean performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
 		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";
 		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying " + qtyTraded + " " + currencyAbr
@@ -238,10 +238,11 @@ public class TransactionServiceImpl implements TransactionService {
 				notificationService.saveNotification(buyer, seller, msg1);
 				logger.debug("Message : {}", msg);
 				logger.debug("Message : {}", msg1);
-				return res;
+				return new AsyncResult<Boolean>(res);
 			}catch (InterruptedException | ExecutionException e) {
 				logger.error("BTC transaction failed: {}", e.getMessage());
 				e.printStackTrace();
+				return new AsyncResult<Boolean>(false);
 			}
 			
 		case "ETH":
@@ -256,13 +257,14 @@ public class TransactionServiceImpl implements TransactionService {
 				notificationService.saveNotification(buyer, seller, msg1);
 				logger.debug("Message : {}", msg);
 				logger.debug("Message : {}", msg1);
-				return res;
+				return new AsyncResult<Boolean>(res);
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error("ETH transaction failed: {}", e.getMessage());
 				e.printStackTrace();
+				new AsyncResult<Boolean>(false);
 			}
 		}
-		return false;
+		return new AsyncResult<Boolean>(false);
 	}
 
 	/**

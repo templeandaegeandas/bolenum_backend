@@ -1,6 +1,5 @@
 package com.bolenum.util;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
