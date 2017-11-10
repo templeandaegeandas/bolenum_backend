@@ -34,8 +34,8 @@ public class MailServiceImpl implements MailService{
 	@Override
 	public void registrationMailSend(String to, String token) {
 		SimpleMailMessage message = new SimpleMailMessage();
-		message.setSubject("verification link for Reistration");
-		message.setText("please verify by clicking on link " + serverUrl + "/#/login?token=" + token);
+		message.setSubject("Verification link for registration");
+		message.setText("Please verify by clicking on link " + serverUrl + "/#/login?token=" + token);
 		message.setTo(to);
 		message.setFrom(mailFrom);
 		mailSender.send(message);

@@ -152,7 +152,7 @@ public class OrdersServiceImpl implements OrdersService {
 			Orders matchedOrder = matchedOrder(orderList);
 			long matchedUserId = matchedOrder.getUser().getUserId();
 			long reqOrderUserId = reqOrder.getUser().getUserId();
-			logger.debug("matched user id: {} and reqested order user id: {}", matchedOrder, reqOrderUserId);
+			logger.debug("matched user id: {} and reqested order user id: {}", matchedUserId, reqOrderUserId);
 			if (matchedUserId == reqOrderUserId) {
 				return true;
 			}
