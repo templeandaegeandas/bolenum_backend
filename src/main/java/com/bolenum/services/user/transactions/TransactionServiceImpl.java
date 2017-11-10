@@ -109,7 +109,7 @@ public class TransactionServiceImpl implements TransactionService {
 		File walletFile = new File(fileName);
 		try {
 			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
-			//logger.debug("decr password: {}", decrPwd);
+			// logger.debug("decr password: {}", decrPwd);
 			TransactionReceipt transactionReceipt = null;
 			try {
 				logger.debug("ETH transaction credentials load started");
@@ -203,21 +203,21 @@ public class TransactionServiceImpl implements TransactionService {
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-						return  new AsyncResult<Boolean>(true);
+						return new AsyncResult<Boolean>(true);
 					}
 				}
 			}
-		} catch (JSONException e) {
-			logger.error("btc transaction JSON exception:  {}", e.getMessage());
-			e.printStackTrace();
-		} catch (RestClientException e) {
+		} catch (JSONException | RestClientException e) {
+			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress, e.getMessage(), "BTC", amount,
+					false);
+			errorService.saveError(error);
+			logger.debug("error saved: {}", error);
 			logger.error("btc transaction exception:  {}", e.getMessage());
 			e.printStackTrace();
 		}
-		return  new AsyncResult<Boolean>(false);
+		return new AsyncResult<Boolean>(false);
 	}
 
-	
 	@Override
 	@Async
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
@@ -228,24 +228,26 @@ public class TransactionServiceImpl implements TransactionService {
 		switch (currencyAbr) {
 		case "BTC":
 			logger.debug("BTC transaction started");
-			Future<Boolean> txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
-					qtyTraded, null);
-			try{
+			Future<Boolean> txStatus = performBtcTransaction(seller,
+					bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded, null);
+			try {
 				boolean res = txStatus.get();
 				logger.debug("is BTC transaction successed: {}", res);
-				notificationService.sendNotification(seller, msg);
-				notificationService.saveNotification(buyer, seller, msg);
-				notificationService.sendNotification(buyer, msg1);
-				notificationService.saveNotification(buyer, seller, msg1);
-				logger.debug("Message : {}", msg);
-				logger.debug("Message : {}", msg1);
+				if (res) {
+					notificationService.sendNotification(seller, msg);
+					notificationService.saveNotification(buyer, seller, msg);
+					notificationService.sendNotification(buyer, msg1);
+					notificationService.saveNotification(buyer, seller, msg1);
+					logger.debug("Message : {}", msg);
+					logger.debug("Message : {}", msg1);
+				}
 				return new AsyncResult<Boolean>(res);
-			}catch (InterruptedException | ExecutionException e) {
+			} catch (InterruptedException | ExecutionException e) {
 				logger.error("BTC transaction failed: {}", e.getMessage());
 				e.printStackTrace();
 				return new AsyncResult<Boolean>(false);
 			}
-			
+
 		case "ETH":
 			logger.debug("ETH transaction started");
 			txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null);
