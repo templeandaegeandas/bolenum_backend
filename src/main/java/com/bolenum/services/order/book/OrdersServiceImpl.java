@@ -54,10 +54,10 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Autowired
 	private NotificationService notificationService;
-	
+
 	@Autowired
 	private TransactionService transactionService;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
@@ -140,6 +140,27 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
+	 * 
+	 * @description to check user requested order and existing order
+	 * @param requested
+	 *            order, list of existing orders
+	 * @return #true if user requested order is matched with own existing user
+	 *         else #false
+	 */
+	private boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
+		if (orderList.size() > 0) {
+			Orders matchedOrder = matchedOrder(ordersList);
+			long matchedUserId = matchedOrder.getUser().getUserId();
+			long reqOrderUserId = reqOrder.getUser().getUserId();
+			logger.debug("matched user id: {} and reqested order user id: {}", matchedOrder, reqOrderUserId);
+			if (matchedUserId == reqOrderUserId) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * process market order
 	 */
 	@Override
@@ -152,6 +173,13 @@ public class OrdersServiceImpl implements OrdersService {
 		if (orderType.equals(OrderType.BUY)) {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
+			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
+			 */
+			if (isUsersSelfOrder(orders, sellOrderList)) {
+				return processed;
+			}
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
@@ -171,6 +199,13 @@ public class OrdersServiceImpl implements OrdersService {
 		} else {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, pair);
+			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
+			 */
+			if (isUsersSelfOrder(orders, buyOrderList)) {
+				return processed;
+			}
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
@@ -215,6 +250,13 @@ public class OrdersServiceImpl implements OrdersService {
 					.findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
+			 */
+			if (isUsersSelfOrder(orders, sellOrderList)) {
+				return processed;
+			}
+			/**
 			 * fetch one best seller's price from list of sellers, order by
 			 * price in ASC then process the order
 			 */
@@ -242,6 +284,13 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, pair, price);
+			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
+			 */
+			if (isUsersSelfOrder(orders, buyOrderList)) {
+				return processed;
+			}
 			/**
 			 * fetch one best buyer's price from list of buyers, order by price
 			 * in desc then process the order
@@ -406,7 +455,6 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 	}
 
-	
 	private boolean sendNotification(User user, String msg) {
 		return notificationService.sendNotification(user, msg);
 	}

@@ -51,7 +51,7 @@ public class MarketPriceServiceImpl implements MarketPriceService {
 	@Override
 	public void priceFromCoinMarketCap() {
 		loadCurrecy();
-		logger.debug("every 20 sec :{}", new Date());
+		//logger.debug("every 20 sec :{}", new Date());
 		String url = "https://api.coinmarketcap.com/v1/ticker/";
 		RestTemplate restTemplate = new RestTemplate();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
