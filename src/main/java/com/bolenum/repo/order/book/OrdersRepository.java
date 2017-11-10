@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
@@ -64,4 +65,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Page<Orders> findSellOrderList(@Param("pair")CurrencyPair pair, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 
 	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
+	
+	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
+	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList, @Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
 }

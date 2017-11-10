@@ -1,9 +1,13 @@
 package com.bolenum.model;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 public class Error {
@@ -17,7 +21,11 @@ public class Error {
 	private String currency;
 	private Double amount;
 	private Boolean canRetry;
-	
+	@CreationTimestamp
+	private Date createdOn;
+	private Date retriedOn;
+	private int count;
+
 	public Error(String fromAddress, String toAddress, String error, String currency, Double amount, Boolean canRetry) {
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
@@ -26,9 +34,9 @@ public class Error {
 		this.amount = amount;
 		this.canRetry = canRetry;
 	}
-	
+
 	public Error() {
-		
+
 	}
 
 	public Long getId() {
@@ -86,4 +94,50 @@ public class Error {
 	public void setCanRetry(Boolean canRetry) {
 		this.canRetry = canRetry;
 	}
+
+	/**
+	 * @return the createdOn
+	 */
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+
+	/**
+	 * @param createdOn 
+	 * the createdOn to set
+	 */
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
+	}
+
+	/**
+	 * @return to get the retried date and time
+	 */
+	public Date getRetriedOn() {
+		return retriedOn;
+	}
+
+	/**
+	 * @param retriedOn 
+	 * the retriedOn to set
+	 */
+	public void setRetriedOn(Date retriedOn) {
+		this.retriedOn = retriedOn;
+	}
+
+	/**
+	 * @return the get the number of retry count 
+	 */
+	public int getCount() {
+		return count;
+	}
+
+	/**
+	 * @param count 
+	 * to set the retry count
+	 */
+	public void setCount(int count) {
+		this.count = count;
+	}
+	
 }

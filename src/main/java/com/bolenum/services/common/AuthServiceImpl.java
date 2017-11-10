@@ -87,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public Map<String, Object> loginResponse(AuthenticationToken token) {
 		Map<String, Object> map = new HashMap<>();
+		map.put("userId", token.getUser().getUserId());
 		map.put("fName", token.getUser().getFirstName());
 		map.put("mName", token.getUser().getMiddleName());
 		map.put("lName", token.getUser().getLastName());

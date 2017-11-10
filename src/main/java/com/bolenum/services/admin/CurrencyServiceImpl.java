@@ -30,6 +30,11 @@ public class CurrencyServiceImpl implements CurrencyService {
 	public Currency findByCurrencyName(String currencyName) {
 		return currencyRepo.findByCurrencyNameInIgnoreCase(currencyName);
 	}
+	
+	@Override
+	public Currency findByCurrencyAbbreviation(String currencyAbbreviation) {
+		return currencyRepo.findByCurrencyAbbreviationInIgnoreCase(currencyAbbreviation);
+	}
 
 	@Override
 	public Currency saveCurrency(Currency currency) {
@@ -88,6 +93,14 @@ public class CurrencyServiceImpl implements CurrencyService {
 	@Override
 	public long countCourencies() {
 		return currencyRepo.count();
+	}
+
+	@Override
+	public List<Currency> getCurrencyListByName(String tokenName) {
+		Currency currency = currencyRepo.findByCurrencyAbbreviation(tokenName);
+		List<Currency> list = new ArrayList<Currency>();
+		list.add(currency);
+		return list;
 	}
 
 }
