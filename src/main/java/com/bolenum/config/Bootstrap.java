@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.jta.bitronix.BitronixXAConnectionFactoryWrapper;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.bolenum.enums.CurrencyType;
@@ -34,6 +36,7 @@ import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.PasswordEncoderUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -56,6 +59,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
+	
+	@Autowired
+	private Environment environment;
 
 	@Autowired
 	private CountryAndStateService countriesAndStateService;
@@ -94,6 +100,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;
+	
+	@Autowired
+	private BTCWalletService btcWalletService;
 
 	private Set<Privilege> privileges = new HashSet<>();
 
@@ -107,8 +116,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		saveCountries();
 		saveStates();
 
-		saveInitialErc20Tokens();
 		saveCurrency();
+		saveInitialErc20Tokens();
 
 		// create initial directories
 		createInitDirectories();
@@ -219,18 +228,30 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		Role r = new Role("ROLE_ADMIN", "Admin role", privilegeService.findAllPrevileges());
 		Role roleAdmin = roleService.findOrCreate(r);
 		User admin = userService.findByEmail("admin@bolenum.com");
+		String activeProfile = environment.getActiveProfiles()[0];
+		logger.debug("Currently active profile: {}",activeProfile);
 		if (admin == null) {
 			User form = new User();
 			form.setIsEnabled(true);
 			form.setFirstName("bolenum");
 			form.setEmailId("admin@bolenum.com");
-			form.setPassword(passwordEncoder.encode("12345"));
+			if (activeProfile.equals("prod")) {
+				form.setPassword(passwordEncoder.encode("m@n!@b0l3num!@#"));
+			}
+			else if (activeProfile.equals("stag")) {
+				form.setPassword(passwordEncoder.encode("bolenum@oodles"));
+			}
+			else {
+				form.setPassword(passwordEncoder.encode("12345"));
+			}
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
 			etherumWalletService.createWallet(user);
 			String uuid = adminService.createAdminHotWallet("adminWallet");
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 			if (!uuid.isEmpty()) {
+				String walletAddress = btcWalletService.getWalletAddress(uuid);
+				user.setBtcWalletAddress(walletAddress);
 				user.setBtcWalletUuid(uuid);
 				user.setIsEnabled(true);
 				User savedUser = userService.saveUser(user);

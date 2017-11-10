@@ -17,7 +17,6 @@ public interface CurrencyRepo extends JpaRepository<Currency,Long>{
 
 	Currency findByCurrencyNameInIgnoreCase(String currencyName);
 	
-//	@Query("select c from Currency c Left Join c.CurrencyPair")
-//	List<Currency> getBypairNotNull();
+	Currency findByCurrencyAbbreviationInIgnoreCase(String currencyAbbreviation);
 	
 }

@@ -1,7 +1,9 @@
 package com.bolenum.controller.user;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -22,6 +24,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
+import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
@@ -34,6 +37,7 @@ import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.transactions.TransactionService;
@@ -79,6 +83,9 @@ public class UserController {
 	
 	@Autowired
 	private TransactionService transactionService;
+	
+	@Autowired
+	private OrdersService orderService;
 	
     /**
      * 
@@ -144,6 +151,7 @@ public class UserController {
 			if(isExpired){
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"), null);
 			}
+			
 		    User user = authenticationToken.getUser();
 		    etherumWalletService.createWallet(user);
 		    String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
@@ -334,7 +342,7 @@ public class UserController {
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.WITHDRAW,pageNumber,pageSize,sortOrder,sortBy);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"),listOfUserTransaction);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("transaction.list.withdraw.success"),listOfUserTransaction);
 	}
 	
 	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
@@ -343,7 +351,26 @@ public class UserController {
 			@RequestParam("sortBy") String sortBy) {  
 		User user = GenericUtils.getLoggedInUser();
 		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.DEPOSIT,pageNumber,pageSize,sortOrder,sortBy);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"),listOfUserTransaction);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("transaction.list.deposit.success"),listOfUserTransaction);
+	}
+	
+	/**
+	 * to get number of trading buy/sell performed by particular user
+	 * 
+	 * @return
+	 */
+	
+	@RequestMapping(value = UrlConstant.MY_TRADING_COUNT, method = RequestMethod.GET)
+	public ResponseEntity<Object> getUserTradingCount() {  
+		User user = GenericUtils.getLoggedInUser();
+		Long totalNumberOfBuy=orderService.countOrdersByOrderTypeAndUser(user, OrderType.BUY);
+		Long totalNumberOfSell=orderService.countOrdersByOrderTypeAndUser(user, OrderType.SELL);
+		Long totalNumberOfTrading=totalNumberOfBuy+totalNumberOfSell;
+		Map<String,Long> tradingNumber=new HashMap<String,Long>();
+		tradingNumber.put("totalNumberOfBuy", totalNumberOfBuy);
+		tradingNumber.put("totalNumberOfSell", totalNumberOfSell);
+		tradingNumber.put("totalNumberOfTrading",totalNumberOfTrading);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("my.trading.count.success"),tradingNumber);
 	}
 	
 }

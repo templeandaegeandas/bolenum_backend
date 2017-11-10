@@ -1,5 +1,6 @@
 package com.bolenum.util;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,9 +22,11 @@ import org.web3j.abi.datatypes.generated.Uint8;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
+import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 
@@ -124,78 +127,78 @@ public final class Erc20TokenWrapper extends Contract {
         });
     }
 
-    public Future<Utf8String> name() {
+    public Future<Utf8String> name() throws IOException {
         Function function = new Function("name", 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
-        return executeCallSingleValueReturnAsync(function);
+        return executeCallSingleValueReturn(function);
     }
 
-    public Future<TransactionReceipt> approve(Address _spender, Uint256 _amount) {
+    public TransactionReceipt approve(Address _spender, Uint256 _amount) throws IOException, TransactionException {
         Function function = new Function("approve", Arrays.<Type>asList(_spender, _amount), Collections.<TypeReference<?>>emptyList());
-        return executeTransactionAsync(function);
+        return executeTransaction(function);
     }
 
-    public Future<Uint256> totalSupply() {
+    public Future<Uint256> totalSupply() throws IOException {
         Function function = new Function("totalSupply", 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-        return executeCallSingleValueReturnAsync(function);
+        return executeCallSingleValueReturn(function);
     }
 
-    public Future<TransactionReceipt> transferFrom(Address _from, Address _to, Uint256 _amount) {
+    public TransactionReceipt transferFrom(Address _from, Address _to, Uint256 _amount) throws IOException, TransactionException {
         Function function = new Function("transferFrom", Arrays.<Type>asList(_from, _to, _amount), Collections.<TypeReference<?>>emptyList());
-        return executeTransactionAsync(function);
+        return  executeTransaction(function);
     }
 
-    public Future<Uint8> decimals() {
+    public Future<Uint8> decimals() throws IOException {
         Function function = new Function("decimals", 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
-        return executeCallSingleValueReturnAsync(function);
+        return executeCallSingleValueReturn(function);
     }
 
-    public Future<Uint256> balanceOf(Address _owner) {
+    public Uint256 balanceOf(Address _owner) throws IOException {
         Function function = new Function("balanceOf", 
                 Arrays.<Type>asList(_owner), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-        return executeCallSingleValueReturnAsync(function);
+        return executeCallSingleValueReturn(function);
     }
 
-    public Future<Address> owner() {
+    public Future<Address> owner() throws IOException {
         Function function = new Function("owner", 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-        return executeCallSingleValueReturnAsync(function);
+        return executeCallSingleValueReturn(function);
     }
 
-    public Future<Utf8String> symbol() {
+    public Future<Utf8String> symbol() throws IOException {
         Function function = new Function("symbol", 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
-        return executeCallSingleValueReturnAsync(function);
+        return executeCallSingleValueReturn(function);
     }
 
-    public Future<TransactionReceipt> transfer(Address _to, Uint256 _amount) {
+    public TransactionReceipt transfer(Address _to, Uint256 _amount) throws IOException, TransactionException {
         Function function = new Function("transfer", Arrays.<Type>asList(_to, _amount), Collections.<TypeReference<?>>emptyList());
-        return executeTransactionAsync(function);
+        return executeTransaction(function);
     }
 
-    public Future<Uint256> allowance(Address _owner, Address _spender) {
+    public Future<Uint256> allowance(Address _owner, Address _spender) throws IOException {
         Function function = new Function("allowance", 
                 Arrays.<Type>asList(_owner, _spender), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-        return executeCallSingleValueReturnAsync(function);
+        return executeCallSingleValueReturn(function);
     }
 
-    public static Future<Erc20TokenWrapper> deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue, Uint256 totalSupply, Utf8String tokenName, Uint8 decimalUnits, Utf8String tokenSymbol) {
+    public static RemoteCall<Erc20TokenWrapper> deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue, Uint256 totalSupply, Utf8String tokenName, Uint8 decimalUnits, Utf8String tokenSymbol) {
         String encodedConstructor = FunctionEncoder.encodeConstructor(Arrays.<Type>asList(totalSupply, tokenName, decimalUnits, tokenSymbol));
-        return deployAsync(Erc20TokenWrapper.class, web3j, credentials, gasPrice, gasLimit, BINARY, encodedConstructor, initialWeiValue);
+        return deployRemoteCall(Erc20TokenWrapper.class, web3j, credentials, gasPrice, gasLimit, BINARY, encodedConstructor, initialWeiValue);
     }
 
-    public static Future<Erc20TokenWrapper> deploy(Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue, Uint256 totalSupply, Utf8String tokenName, Uint8 decimalUnits, Utf8String tokenSymbol) {
+    public static RemoteCall<Erc20TokenWrapper> deploy(Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue, Uint256 totalSupply, Utf8String tokenName, Uint8 decimalUnits, Utf8String tokenSymbol) {
         String encodedConstructor = FunctionEncoder.encodeConstructor(Arrays.<Type>asList(totalSupply, tokenName, decimalUnits, tokenSymbol));
-        return deployAsync(Erc20TokenWrapper.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, encodedConstructor, initialWeiValue);
+        return deployRemoteCall(Erc20TokenWrapper.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, encodedConstructor, initialWeiValue);
     }
 
     public static Erc20TokenWrapper load(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {

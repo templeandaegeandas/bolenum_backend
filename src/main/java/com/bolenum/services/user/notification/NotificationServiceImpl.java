@@ -5,6 +5,7 @@ package com.bolenum.services.user.notification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +45,11 @@ public class NotificationServiceImpl implements NotificationService {
 	 */
 	@Override
 	public boolean sendNotification(User user, String message) {
-		boolean status = mailService.mailSend(user.getEmailId(), localeService.getMessage("trade.summary"), message);
-		if (status) {
+		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage("trade.summary"), message);
+		if (status.isDone()) {
 			logger.debug("notification send to : {}", user.getEmailId());
 		}
-		return status;
+		return false;
 	}
 
 	/**

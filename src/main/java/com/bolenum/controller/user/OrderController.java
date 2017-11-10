@@ -90,8 +90,8 @@ public class OrderController {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
 					null);
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localeService.getMessage("order.processed.fail"), null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.self.fail"),
+					null);
 		}
 	}
 
@@ -122,8 +122,7 @@ public class OrderController {
 	public ResponseEntity<Object> getTradedOrders(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
-		User user = GenericUtils.getLoggedInUser();
-		Page<Trade> list = tradeService.getTradedOrders(user, pageNumber, pageSize, sortOrder, sortBy);
+		Page<Trade> list = tradeService.getTradedOrders(pageNumber, pageSize, sortOrder, sortBy);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
 

@@ -8,8 +8,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -31,6 +29,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 
 import com.bolenum.dto.common.CurrencyForm;
 import com.bolenum.enums.CurrencyType;
@@ -64,7 +63,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	
 	@Override
 	public Long countErc20Token() {
-		return erc20TokenRepository.count();
+		return currencyService.countCourencies();
 	}
 
 	@Override
@@ -127,28 +126,22 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j,
 				credentials, BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
-		amount = token.balanceOf(new Address(user.getEthWalletaddress())).get().getValue().doubleValue();
+		amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
 		logger.debug("Balance of the user is: {}", amount);
 		return amount;
 	}
 	
 	@Override
-	public Future<TransactionReceipt> transferErc20Token(User user, String tokenName, String toAddress, Double fund) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
+	public TransactionReceipt transferErc20Token(User user, String tokenName, String toAddress, Double fund) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException, TransactionException {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-		Credentials credentials = getCredentials(user);
+		
 		Erc20Token erc20Token = getByCoin(tokenName);
 		BigInteger fundInBig = new BigDecimal(fund).toBigInteger();
 		Uint256 transferFunds = new Uint256(fundInBig);
-		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j,
-				credentials, BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
+			Credentials credentials = getCredentials(user);
+			Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j,
+					credentials, BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
 		return token.transferFrom( new Address(user.getEthWalletaddress()), new Address(toAddress), transferFunds);
 	}
-
-	@Override
-	public Erc20Token saveBolenumErc20Token() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	
 }

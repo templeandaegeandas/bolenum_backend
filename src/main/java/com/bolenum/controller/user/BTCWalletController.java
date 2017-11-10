@@ -29,6 +29,7 @@ import org.web3j.crypto.CipherException;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
 import com.bolenum.enums.TransactionStatus;
+import com.bolenum.model.Transaction;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.MarketPrice;
@@ -170,7 +171,7 @@ public class BTCWalletController {
 		User user = GenericUtils.getLoggedInUser(); // logged in user
 		boolean validAvailableWalletBalance = false;
 		boolean validWithdrawAmount = false;
-		Double availableBTCBalance=null;
+		Double availableBTCBalance = null;
 		switch (currencyType) {
 		case "CRYPTO":
 			switch (coinCode) {
@@ -184,10 +185,11 @@ public class BTCWalletController {
 						withdrawBalanceForm.getWithdrawAmount());
 				validWithdrawAmount = btcWalletService.validateWithdrawAmount(availableBTCBalance,
 						withdrawBalanceForm.getWithdrawAmount());
-				//validAddress = btcWalletService.validateAddresss(user.getBtcWalletUuid(),withdrawBalanceForm.getToAddress());
+				// validAddress =
+				// btcWalletService.validateAddresss(user.getBtcWalletUuid(),withdrawBalanceForm.getToAddress());
 				if (validAvailableWalletBalance && validWithdrawAmount) {
 					transactionService.performBtcTransaction(user, withdrawBalanceForm.getToAddress(),
-							withdrawBalanceForm.getWithdrawAmount(),TransactionStatus.WITHDRAW);
+							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 				}
 				break;
 
@@ -212,8 +214,12 @@ public class BTCWalletController {
 			break;
 
 		case "ERC20TOKEN":
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
-					null);
+			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode, withdrawBalanceForm.getWithdrawAmount());
+			if (validWithdrawAmount) {
+					transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(), withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
+			}
+			break;
+			
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
@@ -234,10 +240,19 @@ public class BTCWalletController {
 					localService.getMessage("withdraw.invalid.amount"), null);
 
 		}
-
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("Withdraw successfully"),availableBTCBalance );
-		
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"),
+				null);
 	}
 
-	
+	@RequestMapping(value = UrlConstant.DEPOSIT_TRANSACTION_STATUS, method = RequestMethod.POST)
+	public ResponseEntity<Object> withdrawAmountFromWallet(@RequestBody Transaction transaction) {
+		Transaction transactionResponse=btcWalletService.setDepositeList(transaction);
+		if (transactionResponse == null) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("Deposit not saved!"),null );
+		}
+		else {
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("Deposit saved successfully!"),transactionResponse );
+		}
+	}
+
 }

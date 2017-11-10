@@ -79,7 +79,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		String charset = "UTF-8"; // or "ISO-8859-1"
 		Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<EncodeHintType, ErrorCorrectionLevel>();
 		hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-		String keyUri = generateKeyUri("bolenumexchange.com", "bolenum-exchange", key);
+		String keyUri = generateKeyUri("bolenumexchange.com", user.getEmailId(), key);
 
 		String qrCodeData = keyUri;
 		String base64Image = createQRCode(qrCodeData, filePath, charset, hintMap, 200, 200);

@@ -17,6 +17,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.MarketPrice;
@@ -54,10 +55,10 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Autowired
 	private NotificationService notificationService;
-	
+
 	@Autowired
 	private TransactionService transactionService;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
@@ -74,6 +75,7 @@ public class OrdersServiceImpl implements OrdersService {
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
+		
 		String tickter = null, minOrderVol = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
@@ -140,6 +142,27 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
+	 * 
+	 * @description to check user requested order and existing order
+	 * @param requested
+	 *            order, list of existing orders
+	 * @return #true if user requested order is matched with own existing user
+	 *         else #false
+	 */
+	private boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
+		if (orderList.size() > 0) {
+			Orders matchedOrder = matchedOrder(orderList);
+			long matchedUserId = matchedOrder.getUser().getUserId();
+			long reqOrderUserId = reqOrder.getUser().getUserId();
+			logger.debug("matched user id: {} and reqested order user id: {}", matchedUserId, reqOrderUserId);
+			if (matchedUserId == reqOrderUserId) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * process market order
 	 */
 	@Override
@@ -152,6 +175,13 @@ public class OrdersServiceImpl implements OrdersService {
 		if (orderType.equals(OrderType.BUY)) {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
+			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
+			 */
+			if (isUsersSelfOrder(orders, sellOrderList)) {
+				return processed;
+			}
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
@@ -171,6 +201,13 @@ public class OrdersServiceImpl implements OrdersService {
 		} else {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, pair);
+			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
+			 */
+			if (isUsersSelfOrder(orders, buyOrderList)) {
+				return processed;
+			}
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
@@ -215,6 +252,13 @@ public class OrdersServiceImpl implements OrdersService {
 					.findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
+			 */
+			if (isUsersSelfOrder(orders, sellOrderList)) {
+				return processed;
+			}
+			/**
 			 * fetch one best seller's price from list of sellers, order by
 			 * price in ASC then process the order
 			 */
@@ -242,6 +286,13 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, pair, price);
+			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
+			 */
+			if (isUsersSelfOrder(orders, buyOrderList)) {
+				return processed;
+			}
 			/**
 			 * fetch one best buyer's price from list of buyers, order by price
 			 * in desc then process the order
@@ -318,7 +369,7 @@ public class OrdersServiceImpl implements OrdersService {
 				matchedOrder.setOrderStatus(OrderStatus.COMPLETED);
 				// adding to order list by setting the new volume and status of
 				// processed order
-				ordersList.add(matchedOrder);
+				// ordersList.add(matchedOrder);
 				logger.debug("matching buy/sell completed");
 			}
 			// checking the order type BUY
@@ -406,7 +457,6 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 	}
 
-	
 	private boolean sendNotification(User user, String msg) {
 		return notificationService.sendNotification(user, msg);
 	}
@@ -557,5 +607,15 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus) {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
+	}
+	
+	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList) {
+		return ordersRepository.totalUserBalanceInBook(user, toCurrencyList, pairedCurrencyList);
+	}
+	
+	@Override
+	public Long countOrdersByOrderTypeAndUser(User user,OrderType orderType)
+	{
+		return ordersRepository.countOrderByUserAndOrderType(user, orderType);
 	}
 }

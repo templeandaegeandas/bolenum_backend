@@ -1,8 +1,10 @@
 package com.bolenum.util;
 
+import java.util.concurrent.Future;
+
 public interface MailService {
 
-	boolean mailSend(String to, String subject, String text);
+	Future<Boolean> mailSend(String to, String subject, String text);
 
 	void registrationMailSend(String to, String token);
 
