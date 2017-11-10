@@ -232,10 +232,6 @@ public class TransactionServiceImpl implements TransactionService {
 			try{
 				boolean res = txStatus.get();
 				logger.debug("is BTC transaction successed: {}", res);
-				// String msg = "Hi " + seller.getFirstName() + ", Your transaction
-				// of selling "+qtyTraded+" BTC have been processed successfully!";
-				// String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction
-				// of buying "+qtyTraded+" BTC have been processed successfully!";
 				notificationService.sendNotification(seller, msg);
 				notificationService.saveNotification(buyer, seller, msg);
 				notificationService.sendNotification(buyer, msg1);
@@ -255,12 +251,6 @@ public class TransactionServiceImpl implements TransactionService {
 			try {
 				boolean res = txStatus.get();
 				logger.debug("is ETH transaction successed: {}", res);
-				// String msg2 = "Hi " + seller.getFirstName() + ", Your
-				// transaction of selling "+qtyTraded+" ETH have been processed
-				// successfully!";
-				// String msg3 = "Hi " + buyer.getFirstName() + ", Your
-				// transaction of buying "+qtyTraded+" ETH have been processed
-				// successfully!";
 				notificationService.sendNotification(seller, msg);
 				notificationService.saveNotification(buyer, seller, msg);
 				notificationService.sendNotification(buyer, msg1);
