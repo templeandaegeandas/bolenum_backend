@@ -95,4 +95,12 @@ public class CurrencyServiceImpl implements CurrencyService {
 		return currencyRepo.count();
 	}
 
+	@Override
+	public List<Currency> getCurrencyListByName(String tokenName) {
+		Currency currency = currencyRepo.findByCurrencyAbbreviation(tokenName);
+		List<Currency> list = new ArrayList<Currency>();
+		list.add(currency);
+		return list;
+	}
+
 }
