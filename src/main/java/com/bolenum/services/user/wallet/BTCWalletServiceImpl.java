@@ -230,7 +230,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
 			transaction.setCurrencyName(CurrencyName.BITCOIN);
 			transaction.setUser(user);
-			logger.debug("savedTransaction {}",transaction.getTransactionStatus());
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(transaction);
@@ -239,7 +238,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			savedTransaction.setTransactionType(TransactionType.INCOMING);
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
-			logger.debug("savedTransaction {}",savedTransaction.getTransactionType());
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
 	}
