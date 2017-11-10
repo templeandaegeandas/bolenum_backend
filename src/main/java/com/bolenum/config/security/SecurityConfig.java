@@ -53,6 +53,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring().antMatchers("/refresh");
 		web.ignoring().antMatchers("/api/v1/forgetpassword");
 		web.ignoring().antMatchers("/api/v1/forgetpassword/verify");
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1+UrlConstant.BUY_ORDER_LIST);
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1+UrlConstant.SELL_ORDER_LIST);
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1+UrlConstant.TRADE_LIST_ALL);
+		web.ignoring().antMatchers(UrlConstant.BASE_ADMIN_URI_V1+UrlConstant.CURRENCY_LIST_FOR_MARKET);
+		web.ignoring().antMatchers(UrlConstant.BASE_ADMIN_URI_V1+UrlConstant.PAIRED_CURRENCY);
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1+UrlConstant.MARKET_PRICE);
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.VERIFY_2FA_OTP);
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.SEND_2FA_OTP);
 		web.ignoring().antMatchers(UrlConstant.WEBSOCKET_PATH + "/**");

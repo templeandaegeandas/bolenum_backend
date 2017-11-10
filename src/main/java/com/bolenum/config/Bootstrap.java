@@ -112,8 +112,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		saveCountries();
 		saveStates();
 
-		saveInitialErc20Tokens();
 		saveCurrency();
+		saveInitialErc20Tokens();
 
 		// create initial directories
 		createInitDirectories();

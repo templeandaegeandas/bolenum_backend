@@ -1,5 +1,8 @@
 package com.bolenum.util;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +11,7 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,6 +28,9 @@ public class MailServiceImpl implements MailService{
 
 	@Value("${bolenum.url}")
 	private String serverUrl;
+	
+	@Value("${bolenum.mail.from}")
+	private String mailFrom;
 
 	@Override
 	public void registrationMailSend(String to, String token) {
@@ -31,24 +38,26 @@ public class MailServiceImpl implements MailService{
 		message.setSubject("verification link for Reistration");
 		message.setText("please verify by clicking on link " + serverUrl + "/#/login?token=" + token);
 		message.setTo(to);
+		message.setFrom(mailFrom);
 		mailSender.send(message);
 	}
 
 	@Override
 	@Async
-	public boolean mailSend(String to, String subject, String text) {
+	public Future<Boolean> mailSend(String to, String subject, String text) {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setSubject(subject);
 		message.setText(text);
+		message.setFrom(mailFrom);
 		message.setTo(to);
 		try {
 			mailSender.send(message);
 			logger.debug("mail sent succssfully to: {}", to);
-			return true;
+			return new AsyncResult<Boolean>(true);
 		} catch ( MailException e) {
 			logger.error("mail seding failed to: {}", to);
 			e.printStackTrace();
 		}
-		return false;
+		return new AsyncResult<Boolean>(false);
 	}
 }
