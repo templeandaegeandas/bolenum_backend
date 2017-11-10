@@ -90,8 +90,8 @@ public class OrderController {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
 					null);
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localeService.getMessage("order.processed.fail"), null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.self.fail"),
+					null);
 		}
 	}
 
