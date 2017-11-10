@@ -207,9 +207,16 @@ public class TransactionServiceImpl implements TransactionService {
 					}
 				}
 			}
-		} catch (JSONException | RestClientException e) {
-			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress, e.getMessage(), "BTC", amount,
-					false);
+		} catch (JSONException e) {
+			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress,
+					e.getMessage() + ", ERROR: transaction completed but transaction object not saved in db", "BTC",
+					amount, false);
+			errorService.saveError(error);
+			logger.debug("error saved: {}", error);
+			logger.error("btc transaction exception:  {}", e.getMessage());
+			e.printStackTrace();
+		} catch (RestClientException e) {
+			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress, e.getMessage(), "BTC", amount, false);
 			errorService.saveError(error);
 			logger.debug("error saved: {}", error);
 			logger.error("btc transaction exception:  {}", e.getMessage());

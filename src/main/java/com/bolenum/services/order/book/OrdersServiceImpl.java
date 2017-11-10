@@ -318,7 +318,7 @@ public class OrdersServiceImpl implements OrdersService {
 				matchedOrder.setOrderStatus(OrderStatus.COMPLETED);
 				// adding to order list by setting the new volume and status of
 				// processed order
-				ordersList.add(matchedOrder);
+				// ordersList.add(matchedOrder);
 				logger.debug("matching buy/sell completed");
 			}
 			// checking the order type BUY
