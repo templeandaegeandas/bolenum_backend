@@ -41,10 +41,10 @@ import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
 
 import com.bolenum.constant.UrlConstant;
-import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Transaction;
+
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.fasterxml.jackson.core.JsonParseException;
