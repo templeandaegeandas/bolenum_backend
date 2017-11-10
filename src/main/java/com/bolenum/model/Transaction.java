@@ -56,15 +56,14 @@ public class Transaction {
 	private Double gas;
 	private Double gasPrice;
 	
-	@Enumerated(EnumType.STRING)
-	private CurrencyName currencyName;
+	private String currencyName;
 	
 
-	public CurrencyName getCurrencyName() {
+	public String getCurrencyName() {
 		return currencyName;
 	}
 
-	public void setCurrencyName(CurrencyName currencyName) {
+	public void setCurrencyName(String currencyName) {
 		this.currencyName = currencyName;
 	}
 
