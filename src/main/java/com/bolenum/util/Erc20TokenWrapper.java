@@ -158,7 +158,7 @@ public final class Erc20TokenWrapper extends Contract {
         return executeCallSingleValueReturn(function);
     }
 
-    public Future<Uint256> balanceOf(Address _owner) throws IOException {
+    public Uint256 balanceOf(Address _owner) throws IOException {
         Function function = new Function("balanceOf", 
                 Arrays.<Type>asList(_owner), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
