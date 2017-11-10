@@ -342,7 +342,7 @@ public class UserController {
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.WITHDRAW,pageNumber,pageSize,sortOrder,sortBy);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"),listOfUserTransaction);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("transaction.list.withdraw.success"),listOfUserTransaction);
 	}
 	
 	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
@@ -351,7 +351,7 @@ public class UserController {
 			@RequestParam("sortBy") String sortBy) {  
 		User user = GenericUtils.getLoggedInUser();
 		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.DEPOSIT,pageNumber,pageSize,sortOrder,sortBy);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"),listOfUserTransaction);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("transaction.list.deposit.success"),listOfUserTransaction);
 	}
 	
 	/**
