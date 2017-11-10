@@ -4,11 +4,13 @@
 package com.bolenum.services.user.transactions;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -30,15 +32,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.exceptions.TransactionTimeoutException;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
@@ -78,10 +80,10 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private NotificationService notificationService;
-	
+
 	@Autowired
 	private BTCWalletService bTCWalletService;
-	
+
 	@Autowired
 	private ErrorService errorService;
 
@@ -94,7 +96,9 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @return true/false if transaction success return true else false
 	 */
 	@Override
-	public boolean performEthTransaction(User fromUser, String toAddress, Double amount,TransactionStatus transactionStatus) {
+	@Async
+	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
+			TransactionStatus transactionStatus) {
 
 		String passwordKey = fromUser.getEthWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
@@ -105,21 +109,22 @@ public class TransactionServiceImpl implements TransactionService {
 		File walletFile = new File(fileName);
 		try {
 			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
-			logger.debug("decr password: {}", decrPwd);
-			logger.debug("ETH transaction credentials load started");
-			credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
-			logger.debug("ETH transaction credentials load completed");
-			logger.debug("ETH transaction send fund started");
+			//logger.debug("decr password: {}", decrPwd);
 			TransactionReceipt transactionReceipt = null;
 			try {
-				transactionReceipt = Transfer.sendFunds(web3j, credentials, toAddress,
+				logger.debug("ETH transaction credentials load started");
+				credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+				logger.debug("ETH transaction credentials load completed");
+				logger.debug("ETH transaction send fund started");
+				RemoteCall<TransactionReceipt> tr = Transfer.sendFunds(web3j, credentials, toAddress,
 						BigDecimal.valueOf(amount), Convert.Unit.ETHER);
-			}
-			catch (RuntimeException e) {
-				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount, false);
+				transactionReceipt = tr.send();
+			} catch (Exception e) {
+				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount,
+						false);
 				errorService.saveError(error);
 				logger.debug("error saved: {}", error);
-				return false;
+				return new AsyncResult<Boolean>(false);
 			}
 			logger.debug("ETH transaction send fund completed");
 			String txHash = transactionReceipt.getTransactionHash();
@@ -139,19 +144,15 @@ public class TransactionServiceImpl implements TransactionService {
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-					return true;
+					return new AsyncResult<Boolean>(true);
 				}
-
 			}
 		} catch (InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException
 				| IllegalBlockSizeException | BadPaddingException e1) {
 			logger.error("ETH transaction failed:  {}", e1.getMessage());
 			e1.printStackTrace();
-		} catch (IOException | InterruptedException | TransactionTimeoutException | CipherException e) {
-			logger.error("ETH transaction failed:  {}", e.getMessage());
-			e.printStackTrace();
 		}
-		return false;
+		return new AsyncResult<Boolean>(false);
 	}
 
 	/**
@@ -163,7 +164,9 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @return true/false if transaction success return true else false
 	 */
 	@Override
-	public boolean performBtcTransaction(User fromUser, String toAddress, Double amount,TransactionStatus transactionStatus) {
+	@Async
+	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
+			TransactionStatus transactionStatus) {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = BTCUrlConstant.CREATE_TX;
 		HttpHeaders headers = new HttpHeaders();
@@ -173,9 +176,9 @@ public class TransactionServiceImpl implements TransactionService {
 			request.put("walletId", fromUser.getBtcWalletUuid());
 			request.put("transactionTradeAmount", String.valueOf(amount));
 			request.put("receiverAddress", toAddress);
-		} catch (JSONException e1) {
-			logger.error("json parse error: {}", e1.getMessage());
-			e1.printStackTrace();
+		} catch (JSONException e) {
+			logger.error("json parse error: {}", e.getMessage());
+			e.printStackTrace();
 		}
 		HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
 		try {
@@ -200,7 +203,7 @@ public class TransactionServiceImpl implements TransactionService {
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-						return true;
+						return  new AsyncResult<Boolean>(true);
 					}
 				}
 			}
@@ -211,37 +214,53 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.error("btc transaction exception:  {}", e.getMessage());
 			e.printStackTrace();
 		}
-		return false;
+		return  new AsyncResult<Boolean>(false);
 	}
 
-	@Async
+	
 	@Override
 	public boolean performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
-		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "+qtyTraded+" "+currencyAbr+" have been processed successfully!";
-		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "+qtyTraded+" "+currencyAbr+" have been processed successfully!";
+		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
+				+ " have been processed successfully!";
+		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying " + qtyTraded + " " + currencyAbr
+				+ " have been processed successfully!";
 		switch (currencyAbr) {
 		case "BTC":
 			logger.debug("BTC transaction started");
-			boolean status = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()), qtyTraded,null);
-			logger.debug("is BTC transaction successed: {}", status);
-			notificationService.sendNotification(seller, msg);
-			notificationService.saveNotification(buyer, seller, msg);
-			notificationService.sendNotification(buyer, msg1);
-			notificationService.saveNotification(buyer, seller, msg1);
-			logger.debug("Message : {}",msg);
-			logger.debug("Message : {}",msg1);
-			return status;
+			Future<Boolean> txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
+					qtyTraded, null);
+			try{
+				boolean res = txStatus.get();
+				logger.debug("is BTC transaction successed: {}", res);
+				notificationService.sendNotification(seller, msg);
+				notificationService.saveNotification(buyer, seller, msg);
+				notificationService.sendNotification(buyer, msg1);
+				notificationService.saveNotification(buyer, seller, msg1);
+				logger.debug("Message : {}", msg);
+				logger.debug("Message : {}", msg1);
+				return res;
+			}catch (InterruptedException | ExecutionException e) {
+				logger.error("BTC transaction failed: {}", e.getMessage());
+				e.printStackTrace();
+			}
+			
 		case "ETH":
 			logger.debug("ETH transaction started");
-			status = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded,null);
-			logger.debug("is ETH transaction successed: {}", status);
-			notificationService.sendNotification(seller, msg);
-			notificationService.saveNotification(buyer, seller, msg);
-			notificationService.sendNotification(buyer, msg1);
-			notificationService.saveNotification(buyer, seller, msg1);
-			logger.debug("Message : {}",msg);
-			logger.debug("Message : {}",msg1);
-			return status;
+			txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null);
+			try {
+				boolean res = txStatus.get();
+				logger.debug("is ETH transaction successed: {}", res);
+				notificationService.sendNotification(seller, msg);
+				notificationService.saveNotification(buyer, seller, msg);
+				notificationService.sendNotification(buyer, msg1);
+				notificationService.saveNotification(buyer, seller, msg1);
+				logger.debug("Message : {}", msg);
+				logger.debug("Message : {}", msg1);
+				return res;
+			} catch (InterruptedException | ExecutionException e) {
+				logger.error("ETH transaction failed: {}", e.getMessage());
+				e.printStackTrace();
+			}
 		}
 		return false;
 	}
@@ -250,8 +269,9 @@ public class TransactionServiceImpl implements TransactionService {
 	 * 
 	 */
 	@Override
-	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus transactionStatus,int pageNumber, int pageSize, String sortOrder, String sortBy) {
-		
+	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus transactionStatus, int pageNumber,
+			int pageSize, String sortOrder, String sortBy) {
+
 		Direction sort;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;
@@ -260,8 +280,7 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		return transactionRepo.findByUserAndTransactionStatus(user, transactionStatus, pageRequest);
-		
+
 	}
-	
-	
+
 }
