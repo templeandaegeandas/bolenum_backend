@@ -142,8 +142,11 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 
 		Erc20Token erc20Token = getByCoin(tokenName);
+		logger.debug("Transfering amount in Double: {}", fund);
 		BigInteger fundInBig = new BigDecimal(fund).toBigInteger();
+		logger.debug("Transfering amount in BigInteger: {}", fundInBig);
 		Uint256 transferFunds = new Uint256(fundInBig);
+		logger.debug("Transfering amount in Unit256: {}", transferFunds);
 		Credentials credentials = getCredentials(user);
 		logger.debug("Credentials created of the user: {}", user.getEmailId());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,

@@ -237,8 +237,8 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
-	@Async
-	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
+//	@Async
+	public Boolean performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus) {
 		try {
 			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, tokenName, toAddress,
@@ -262,7 +262,7 @@ public class TransactionServiceImpl implements TransactionService {
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult<Boolean>(true);
+					return true;
 				}
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
@@ -270,7 +270,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.error("{} transaction failed:  {}", tokenName, e.getMessage());
 			e.printStackTrace();
 		}
-		return new AsyncResult<Boolean>(false);
+		return false;
 	}
 
 	@Override
@@ -330,7 +330,7 @@ public class TransactionServiceImpl implements TransactionService {
 			
 		case "ERC20TOKEN":
 			logger.debug("ERC20TOKEN transaction started");
-			txStatus = performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null);
+			txStatus = new AsyncResult<Boolean>(false);//performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null);
 			try {
 				boolean res = txStatus.get();
 				logger.debug("is ERC20TOKEN transaction successed: {}", res);
