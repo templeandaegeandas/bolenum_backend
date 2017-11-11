@@ -214,10 +214,10 @@ public class BTCWalletController {
 			break;
 
 		case "ERC20TOKEN":
-			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode, withdrawBalanceForm.getWithdrawAmount());
-			if (validWithdrawAmount) {
+//			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode, withdrawBalanceForm.getWithdrawAmount());
+//			if (validWithdrawAmount) {
 					transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(), withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
-			}
+//			}
 			break;
 			
 		case "FIAT":
