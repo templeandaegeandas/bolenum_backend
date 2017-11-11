@@ -49,7 +49,7 @@ import com.bolenum.util.EthereumServiceUtil;
  */
 @Service
 public class Erc20TokenServiceImpl implements Erc20TokenService {
-	
+
 	@Value("${bolenum.ethwallet.location}")
 	private String ethWalletLocation;
 
@@ -58,9 +58,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private CurrencyService currencyService;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(Erc20TokenServiceImpl.class);
-	
+
 	@Override
 	public Long countErc20Token() {
 		return currencyService.countCourencies();
@@ -70,7 +70,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	public Erc20Token saveToken(Erc20Token erc20Token) {
 		Erc20Token existingToken = erc20TokenRepository.findByContractAddress(erc20Token.getContractAddress());
 		if (existingToken == null) {
-			CurrencyForm currencyForm = new CurrencyForm(erc20Token.getCurrency().getCurrencyName(), erc20Token.getCurrency().getCurrencyAbbreviation(), CurrencyType.ERC20TOKEN);
+			CurrencyForm currencyForm = new CurrencyForm(erc20Token.getCurrency().getCurrencyName(),
+					erc20Token.getCurrency().getCurrencyAbbreviation(), CurrencyType.ERC20TOKEN);
 			Currency savedCurrency = currencyService.saveCurrency(currencyForm.copy(new Currency()));
 			erc20Token.setCurrency(savedCurrency);
 			return erc20TokenRepository.save(erc20Token);
@@ -96,19 +97,20 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	public Erc20Token getById(Long id) {
 		return erc20TokenRepository.findOne(id);
 	}
-	
+
 	public Erc20Token getByCoin(String coin) {
 		return erc20TokenRepository.findByCurrencyCurrencyAbbreviation(coin);
 	}
 
 	@Override
 	public void saveInitialErc20Token(List<Erc20Token> erc20Tokens) {
-			erc20TokenRepository.save(erc20Tokens);
+		erc20TokenRepository.save(erc20Tokens);
 	}
-	
-	private Credentials getCredentials(User user) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
+
+	private Credentials getCredentials(User user) throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
 		File file = new File(ethWalletLocation);
-		File jsonFile = new File(file+ "/" + user.getEthWalletJsonFileName());
+		File jsonFile = new File(file + "/" + user.getEthWalletJsonFileName());
 		logger.debug("JSON file of the user is: {}", user.getEthWalletJsonFileName());
 		String passwordKey = user.getEthWalletPwdKey();
 		String decPwd = CryptoUtil.decrypt(user.getEthWalletPwd(), passwordKey);
@@ -117,31 +119,40 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	}
 
 	@Override
-	public Double getErc20WalletBalance(User user, String tokenName) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException, InterruptedException, ExecutionException {
+	public Double getErc20WalletBalance(User user, String tokenName)
+			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
+			BadPaddingException, IOException, CipherException, InterruptedException, ExecutionException {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 		Double amount = 0.0;
 		Credentials credentials = getCredentials(user);
 		logger.debug("Requested token name is: {}", tokenName);
 		Erc20Token erc20Token = getByCoin(tokenName);
 		logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
-		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j,
-				credentials, BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
+		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
+				BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
 		amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
 		logger.debug("Balance of the user is: {}", amount);
 		return amount;
 	}
-	
+
 	@Override
-	public TransactionReceipt transferErc20Token(User user, String tokenName, String toAddress, Double fund) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException, TransactionException {
+	public TransactionReceipt transferErc20Token(User user, String tokenName, String toAddress, Double fund)
+			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
+			BadPaddingException, IOException, CipherException, TransactionException {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-		
+
 		Erc20Token erc20Token = getByCoin(tokenName);
 		BigInteger fundInBig = new BigDecimal(fund).toBigInteger();
 		Uint256 transferFunds = new Uint256(fundInBig);
-			Credentials credentials = getCredentials(user);
-			Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j,
-					credentials, BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
-		return token.transferFrom( new Address(user.getEthWalletaddress()), new Address(toAddress), transferFunds);
+		Credentials credentials = getCredentials(user);
+		logger.debug("Credentials created of the user: {}", user.getEmailId());
+		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
+				BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
+		logger.debug("Contract loaded with credentials: {}", erc20Token.getContractAddress());
+		TransactionReceipt receipt = token.transferFrom(new Address(user.getEthWalletaddress()), new Address(toAddress),
+				transferFunds);
+		logger.debug("Fund transfer transaction hash: {}", receipt.getTransactionHash());
+		return receipt;
 	}
-	
+
 }
