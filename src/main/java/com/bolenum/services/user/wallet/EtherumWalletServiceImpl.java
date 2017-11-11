@@ -58,9 +58,13 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 		try {
 			String password = UUID.randomUUID().toString().replaceAll("-", "");
 			fileName = WalletUtils.generateFullNewWalletFile(password, file);
+			logger.debug("wallet file name: {}",fileName);
 			String passwordKey = CryptoUtil.getSecretKey();
+			logger.debug("wallet file passwordKey: {}",passwordKey);
 			String encPwd = CryptoUtil.encrypt(password, passwordKey);
+			logger.debug("wallet file encPwd: {}",encPwd);
 			File jsonFile = new File(file + "/" + fileName);
+			logger.debug("wallet file jsonFile: {}",jsonFile);
 			Credentials credentials = WalletUtils.loadCredentials(password, jsonFile);
 			logger.debug("wallet address: {}", credentials.getAddress());
 			user.setEthWalletaddress(credentials.getAddress());
@@ -75,22 +79,31 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 			}
 
 		} catch (InvalidKeyException e) {
+			logger.error("InvalidKeyException: {}",e.getMessage());
 			e.printStackTrace();
 		} catch (NoSuchPaddingException e) {
+			logger.error("NoSuchPaddingException: {}",e.getMessage());
 			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
+			logger.error("IllegalBlockSizeException: {}",e.getMessage());
 			e.printStackTrace();
 		} catch (BadPaddingException e) {
+			logger.error("BadPaddingException: {}",e.getMessage());
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
+			logger.error("NoSuchAlgorithmException: {}",e.getMessage());
 			e.printStackTrace();
 		} catch (NoSuchProviderException e) {
+			logger.error("NoSuchProviderException: {}",e.getMessage());
 			e.printStackTrace();
 		} catch (InvalidAlgorithmParameterException e) {
+			logger.error("InvalidAlgorithmParameterException: {}",e.getMessage());
 			e.printStackTrace();
 		} catch (CipherException e) {
+			logger.error("CipherException: {}",e.getMessage());
 			e.printStackTrace();
 		} catch (IOException e) {
+			logger.error("IOException: {}",e.getMessage());
 			e.printStackTrace();
 		}
 	}

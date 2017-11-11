@@ -254,5 +254,4 @@ public class BTCWalletController {
 			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("Deposit saved successfully!"),transactionResponse );
 		}
 	}
-
 }
