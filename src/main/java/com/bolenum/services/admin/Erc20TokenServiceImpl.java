@@ -32,7 +32,6 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.Contract;
 
@@ -146,10 +145,10 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Erc20Token erc20Token = getByCoin(tokenName);
 		logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
-				BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
+				Contract.GAS_PRICE, Contract.GAS_LIMIT);
 		amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
 		logger.debug("Balance of the user is: {}", amount);
-		return amount;
+		return amount/10000000;
 	}
 
 	@Override
@@ -159,7 +158,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 
 		Erc20Token erc20Token = getByCoin(tokenName);
-		logger.debug("Transfering amount in Double: {}", fund);
+		logger.debug("Transfering amount in Double: {}", fund*10000000);
 		BigInteger fundInBig = new BigDecimal(fund).toBigInteger();
 		logger.debug("Transfering amount in BigInteger: {}", fundInBig);
 		Uint256 transferFunds = new Uint256(fundInBig);

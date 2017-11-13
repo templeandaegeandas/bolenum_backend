@@ -1,5 +1,7 @@
 package com.bolenum.exceptions;
 
+import java.io.IOException;
+
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolationException;
 
@@ -49,6 +51,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler({ IllegalArgumentException.class })
 	public ResponseEntity<Object> handleIllegalArgumentException(final IllegalArgumentException ex, final WebRequest request) {
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+	}
+	
+	/**
+	 * to handle IOException
+	 * @param ex
+	 * @param request
+	 * @return ResponseEntity
+	 */
+	@ExceptionHandler({ IOException.class })
+	public ResponseEntity<Object> handleIOException(final IOException ex, final WebRequest request) {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
 	
