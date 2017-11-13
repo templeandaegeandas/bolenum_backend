@@ -150,7 +150,7 @@ public final class Erc20TokenWrapper extends Contract {
         return  executeTransaction(function);
     }
 
-    public Future<Uint8> decimals() throws IOException {
+    public Uint8 decimals() throws IOException {
         Function function = new Function("decimals", 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint8>() {}));
