@@ -5,8 +5,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.bolenum.dto.common.CurrencyForm;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
@@ -19,6 +22,8 @@ import com.bolenum.repo.common.CurrencyRepo;
  */
 @Service
 public class CurrencyServiceImpl implements CurrencyService {
+	
+	public static final Logger logger = LoggerFactory.getLogger(CurrencyServiceImpl.class);
 
 	@Autowired
 	private CurrencyRepo currencyRepo;
@@ -70,12 +75,16 @@ public class CurrencyServiceImpl implements CurrencyService {
 	public List<Currency> getCurrencyListForMarket() {
 		List<CurrencyPair> allCurrencyPair = currencyPairService.findAllCurrencyPair();
 		List<Currency> allCurrencies = currencyRepo.findAll();
+		logger.debug("Size of currency before retain: {}",allCurrencies.size());
 		Iterator<CurrencyPair> iterator = allCurrencyPair.iterator();
 		List<Currency> listOfToCurrency = new ArrayList<Currency>();
 		while (iterator.hasNext()) {
+			logger.debug("Count running loop");
 			listOfToCurrency.add(iterator.next().getToCurrency().get(0));
 		}
+		logger.debug("Size of retained currencies: {}", listOfToCurrency.size());
 		allCurrencies.retainAll(listOfToCurrency);
+		logger.debug("Size of currency after retain: {}",allCurrencies.size());
 		return allCurrencies;
 	}
 
