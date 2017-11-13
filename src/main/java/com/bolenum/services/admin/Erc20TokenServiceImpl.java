@@ -181,7 +181,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		ClientTransactionManager transactionManager = new ClientTransactionManager(web3j,
 				erc20Token.getContractAddress());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, transactionManager,
-				BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
+				Contract.GAS_PRICE, Contract.GAS_LIMIT);
 		token.transferEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(tx -> {
 			if (tx._to.getValue() != null) {
 				logger.debug("tx.getTo() {}",tx._to);
@@ -201,7 +201,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue()/10000000);
 			tx.setTransactionType(TransactionType.INCOMING);
 			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
 			tx.setCurrencyName(tokenName);
