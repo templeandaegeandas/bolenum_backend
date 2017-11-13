@@ -3,6 +3,7 @@ package com.bolenum.services.order.book;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,7 +120,7 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public Boolean processOrder(Orders orders) {
+	public Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException {
 		Boolean status;
 		if (orders.equals(OrderStandard.MARKET)) {
 			logger.debug("Processing market order");
@@ -164,9 +165,11 @@ public class OrdersServiceImpl implements OrdersService {
 
 	/**
 	 * process market order
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
 	 */
 	@Override
-	public Boolean processMarketOrder(Orders orders) {
+	public Boolean processMarketOrder(Orders orders) throws InterruptedException, ExecutionException {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		CurrencyPair pair = orders.getPair();
@@ -234,9 +237,11 @@ public class OrdersServiceImpl implements OrdersService {
 
 	/**
 	 * process limit order
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
 	 */
 	@Override
-	public Boolean processLimitOrder(Orders orders) {
+	public Boolean processLimitOrder(Orders orders) throws InterruptedException, ExecutionException {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		logger.debug("Order type is: {}", orderType);
@@ -323,10 +328,12 @@ public class OrdersServiceImpl implements OrdersService {
 
 	/**
 	 * process the buyers and sellers order
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
 	 * 
 	 */
 	@Override
-	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair) {
+	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair) throws InterruptedException, ExecutionException {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
 		User buyer, seller;
@@ -405,9 +412,11 @@ public class OrdersServiceImpl implements OrdersService {
 	/**
 	 * @description processTransaction
 	 * @param orders,qtyTraded,buyer,seller
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
 	 */
 	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller,
-			double remainingVolume) {
+			double remainingVolume) throws InterruptedException, ExecutionException {
 		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());

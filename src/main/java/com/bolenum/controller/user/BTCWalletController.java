@@ -221,8 +221,13 @@ public class BTCWalletController {
 					withdrawBalanceForm.getWithdrawAmount());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
-				transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
-						withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
+				try {
+					transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
+							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
+				} catch (InterruptedException | ExecutionException e) {
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage(e.getMessage()),
+							null);
+				}
 			}
 			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"),
 					null);

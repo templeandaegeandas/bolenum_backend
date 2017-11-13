@@ -239,14 +239,14 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus) {
+			TransactionStatus transactionStatus) throws InterruptedException, ExecutionException {
 		try {
 			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, tokenName, toAddress,
-					amount/10000000);
+					amount);
 			logger.debug("{} transaction send fund completed", tokenName);
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
-					amount/10000000);
+					amount);
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
@@ -275,7 +275,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Async
-	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) throws InterruptedException, ExecutionException {
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
 		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";

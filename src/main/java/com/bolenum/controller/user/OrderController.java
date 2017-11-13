@@ -1,6 +1,7 @@
 package com.bolenum.controller.user;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +86,13 @@ public class OrderController {
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
 		orders.setUser(user);
-		Boolean result = ordersService.processOrder(orders);
+		Boolean result = null;
+		try {
+			result = ordersService.processOrder(orders);
+		} catch (InterruptedException | ExecutionException e) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(e.getMessage()),
+					null);
+		}
 		if (result) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
 					null);
