@@ -148,7 +148,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
 		amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
 		logger.debug("Balance of the user is: {}", amount);
-		return amount/token.decimals().getValue().doubleValue();
+		return amount/createDecimals( token.decimals().getValue().intValue());
 	}
 
 	@Override
@@ -162,8 +162,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		logger.debug("Credentials created of the user: {}", user.getEmailId());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
-		logger.debug("Transfering amount in Double: {}", token.decimals().getValue().doubleValue());
-		BigInteger fundInBig = new BigDecimal(fund*token.decimals().getValue().doubleValue()).toBigInteger();
+		logger.debug("Transfering amount in Double: {}", token.decimals().getValue().intValue());
+		
+		BigInteger fundInBig = new BigDecimal(fund*createDecimals( token.decimals().getValue().intValue())).toBigInteger();
 		logger.debug("Transfering amount in BigInteger: {}", fundInBig);
 		Uint256 transferFunds = new Uint256(fundInBig);
 		logger.debug("Transfering amount in Unit256: {}", transferFunds);
@@ -219,5 +220,13 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			transactionRepo.saveAndFlush(tx);
 		}
 	}
-
+	
+	Double createDecimals(int decimal) {
+		int x = 1, sum=1;
+		while (decimal >= sum) {
+			x = x*10;
+			decimal--;
+		}
+		return Double.valueOf(x);
+	}
 }
