@@ -15,11 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.jta.bitronix.BitronixXAConnectionFactoryWrapper;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.web3j.crypto.CipherException;
 
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Countries;
@@ -118,6 +118,11 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 		saveCurrency();
 		saveInitialErc20Tokens();
+		try {
+			erc20TokenService.saveIncomingErc20Transaction(currencyAbbreviation);
+		} catch (IOException | CipherException e) {
+			e.printStackTrace();
+		}
 
 		// create initial directories
 		createInitDirectories();

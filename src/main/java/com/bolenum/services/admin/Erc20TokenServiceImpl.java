@@ -8,6 +8,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -28,17 +29,25 @@ import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.tx.ClientTransactionManager;
 
 import com.bolenum.dto.common.CurrencyForm;
 import com.bolenum.enums.CurrencyType;
+import com.bolenum.enums.TransactionStatus;
+import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
+import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.admin.Erc20TokenRepository;
+import com.bolenum.repo.user.UserRepository;
+import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.Erc20TokenWrapper;
+import com.bolenum.util.Erc20TokenWrapper.TransferEventResponse;
 import com.bolenum.util.EthereumServiceUtil;
 
 /**
@@ -58,6 +67,12 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private CurrencyService currencyService;
+	
+	@Autowired
+	private TransactionRepo transactionRepo;
+	
+	@Autowired
+	private UserRepository userRepository;
 
 	private static final Logger logger = LoggerFactory.getLogger(Erc20TokenServiceImpl.class);
 
@@ -152,10 +167,55 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
 				BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
 		logger.debug("Contract loaded with credentials: {}", erc20Token.getContractAddress());
-		TransactionReceipt receipt = token.transferFrom(new Address(user.getEthWalletaddress()), new Address(toAddress),
-				transferFunds);
+		TransactionReceipt receipt = token.transfer(new Address(toAddress), transferFunds);
 		logger.debug("Fund transfer transaction hash: {}", receipt.getTransactionHash());
 		return receipt;
+	}
+	
+
+	@Override
+	public void saveIncomingErc20Transaction(String tokenName) throws IOException, CipherException {
+		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
+		Erc20Token erc20Token = getByCoin(tokenName);
+		ClientTransactionManager transactionManager = new ClientTransactionManager(web3j,
+				erc20Token.getContractAddress());
+		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, transactionManager,
+				BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
+		token.transferEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(tx -> {
+			if (tx._to.getValue() != null) {
+				logger.debug("tx.getTo() {}",tx._to);
+				User user = userRepository.findByEthWalletaddress(tx._to.getValue());
+				if (user != null) {
+					logger.debug("new Incoming ethereum transaction for user : {}", user.getEmailId());
+					saveTx(user, tx, tokenName);
+				}
+			}
+		});
+	}
+	
+	private void saveTx(User user, TransferEventResponse transaction, String tokenName) {
+		Transaction tx = transactionRepo.findByTxHash(transaction._transactionHash);
+		if (tx == null) {
+			tx = new Transaction();
+			tx.setTxHash(transaction._transactionHash);
+			tx.setFromAddress(transaction._from.getValue());
+			tx.setToAddress(transaction._to.getValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue());
+			tx.setTransactionType(TransactionType.INCOMING);
+			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
+			tx.setCurrencyName(tokenName);
+			tx.setUser(user);
+			Transaction saved = transactionRepo.saveAndFlush(tx);
+			if (saved != null) {
+				logger.debug("new incoming transaction saved of user: {}", user.getEmailId());
+			}
+		} else {
+			if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
+				tx.setTransactionType(TransactionType.INCOMING);
+			}
+			logger.debug("tx exists: {}", transaction._transactionHash);
+			transactionRepo.saveAndFlush(tx);
+		}
 	}
 
 }
