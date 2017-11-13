@@ -32,7 +32,9 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.ClientTransactionManager;
+import org.web3j.tx.Contract;
 
 import com.bolenum.dto.common.CurrencyForm;
 import com.bolenum.enums.CurrencyType;
@@ -165,7 +167,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Credentials credentials = getCredentials(user);
 		logger.debug("Credentials created of the user: {}", user.getEmailId());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
-				BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
+				Contract.GAS_PRICE, Contract.GAS_LIMIT);
 		logger.debug("Contract loaded with credentials: {}", erc20Token.getContractAddress());
 		TransactionReceipt receipt = token.transfer(new Address(toAddress), transferFunds);
 		logger.debug("Fund transfer transaction hash: {}", receipt.getTransactionHash());
