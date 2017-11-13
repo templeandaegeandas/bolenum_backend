@@ -68,7 +68,7 @@ public interface Erc20TokenService {
 
 	TransactionReceipt transferErc20Token(User user, String tokenName, String toAddress, Double fund)
 			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException, TransactionException;
+			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException, ExecutionException;
 
 	void saveIncomingErc20Transaction(String tokenName) throws IOException, CipherException;
 

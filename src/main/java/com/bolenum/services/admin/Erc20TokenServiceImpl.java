@@ -148,25 +148,26 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
 		amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
 		logger.debug("Balance of the user is: {}", amount);
-		return amount/10000000;
+		return amount/token.decimals().get().getValue().doubleValue();
 	}
 
 	@Override
 	public TransactionReceipt transferErc20Token(User user, String tokenName, String toAddress, Double fund)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException, TransactionException {
+			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException, ExecutionException {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 
 		Erc20Token erc20Token = getByCoin(tokenName);
-		logger.debug("Transfering amount in Double: {}", fund*10000000);
-		BigInteger fundInBig = new BigDecimal(fund).toBigInteger();
-		logger.debug("Transfering amount in BigInteger: {}", fundInBig);
-		Uint256 transferFunds = new Uint256(fundInBig);
-		logger.debug("Transfering amount in Unit256: {}", transferFunds);
 		Credentials credentials = getCredentials(user);
 		logger.debug("Credentials created of the user: {}", user.getEmailId());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
+		logger.debug("Transfering amount in Double: {}", token.decimals().get().getValue().doubleValue());
+		BigInteger fundInBig = new BigDecimal(fund*token.decimals().get().getValue().doubleValue()).toBigInteger();
+		logger.debug("Transfering amount in BigInteger: {}", fundInBig);
+		Uint256 transferFunds = new Uint256(fundInBig);
+		logger.debug("Transfering amount in Unit256: {}", transferFunds);
+		
 		logger.debug("Contract loaded with credentials: {}", erc20Token.getContractAddress());
 		TransactionReceipt receipt = token.transfer(new Address(toAddress), transferFunds);
 		logger.debug("Fund transfer transaction hash: {}", receipt.getTransactionHash());
