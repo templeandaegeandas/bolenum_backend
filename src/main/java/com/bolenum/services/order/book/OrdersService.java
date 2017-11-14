@@ -55,4 +55,9 @@ public interface OrdersService {
 	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
 	
     Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
+
+	Long countActiveOpenOrder();
+	
+	Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType);
+
 }

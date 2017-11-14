@@ -1,5 +1,8 @@
 package com.bolenum.controller.admin;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -18,11 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.AddTransactioFeeAndLimitForm;
+import com.bolenum.enums.OrderType;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
 import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.TransactionFeeService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.order.book.OrdersService;
+import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
@@ -46,7 +52,13 @@ public class AdminController {
 
 	@Autowired
 	private TransactionFeeService transactionFeeService;
-
+	
+	@Autowired
+	private OrdersService ordersService;
+	
+	@Autowired
+	private AuthenticationTokenService authenticationTokenService;
+	
 	public static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
 	@RequestMapping()
@@ -119,4 +131,27 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.transaction.fees.found.success"), null);
 	}
+	
+	/**
+	 *  to count number of new buyers/sellers and active users and active orders that will be 
+	 *  shown on Admin dashboard
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.COUNT_BUYER_SELLER_DASHBOARD, method = RequestMethod.GET)
+	public ResponseEntity<Object> getTotalOfBuyerAndSeller() {
+		
+        Long newBuyers=ordersService.getTotalCountOfNewerBuyerAndSeller(OrderType.BUY);
+        Long newSellers=ordersService.getTotalCountOfNewerBuyerAndSeller(OrderType.SELL);
+        Long activeUsers=authenticationTokenService.countActiveUsers();
+        Long activeOrders=ordersService.countActiveOpenOrder();
+        Map<String,Long> countOfusers=new HashMap<String,Long>();
+        countOfusers.put("newBuyers", newBuyers);
+        countOfusers.put("newSellers", newSellers);
+        countOfusers.put("activeUsers", activeUsers);
+        countOfusers.put("activeOrders", activeOrders);
+		return ResponseHandler.response(HttpStatus.OK, true,
+				localeService.getMessage("admin.count.user.dashboard.success"), countOfusers);
+	}
+	
+	
 }

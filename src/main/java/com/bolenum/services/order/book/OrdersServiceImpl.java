@@ -1,6 +1,7 @@
 package com.bolenum.services.order.book;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -54,10 +55,10 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Autowired
 	private NotificationService notificationService;
-	
+
 	@Autowired
 	private TransactionService transactionService;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
@@ -74,7 +75,7 @@ public class OrdersServiceImpl implements OrdersService {
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
-		
+
 		String tickter = null, minOrderVol = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
@@ -216,8 +217,8 @@ public class OrdersServiceImpl implements OrdersService {
 					.findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
-			 * fetch one best seller's price from list of sellers, order by
-			 * price in ASC then process the order
+			 * fetch one best seller's price from list of sellers, order by price in ASC
+			 * then process the order
 			 */
 			while (sellOrderList.size() > 0 && (remainingVolume > 0) && (price >= getBestBuy(sellOrderList))) {
 				logger.debug("inner buy while loop for buyers and remaining volume: {}", remainingVolume);
@@ -237,15 +238,14 @@ public class OrdersServiceImpl implements OrdersService {
 			processed = true;
 		} else {
 			/**
-			 * fetching the list of BUYERS whose buy price is greater than sell
-			 * price
+			 * fetching the list of BUYERS whose buy price is greater than sell price
 			 */
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
-			 * fetch one best buyer's price from list of buyers, order by price
-			 * in desc then process the order
+			 * fetch one best buyer's price from list of buyers, order by price in desc then
+			 * process the order
 			 */
 			while (buyOrderList.size() > 0 && (remainingVolume > 0) && (price <= buyOrderList.get(0).getPrice())) {
 				logger.debug("inner sell while loop for seller and remaining volume: {}", remainingVolume);
@@ -407,7 +407,6 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 	}
 
-	
 	private boolean sendNotification(User user, String msg) {
 		return notificationService.sendNotification(user, msg);
 	}
@@ -416,9 +415,9 @@ public class OrdersServiceImpl implements OrdersService {
 	public String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded) {
 		String minBalance = null;
 		/**
-		 * if order type is BUY then for Market order, user should have total
-		 * market price, for Limit order user should have volume (volume *
-		 * price), price limit given by user
+		 * if order type is BUY then for Market order, user should have total market
+		 * price, for Limit order user should have volume (volume * price), price limit
+		 * given by user
 		 */
 		if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
 			logger.debug("limit order buy on price: {}, {} and quantity traded: {}, {} ", orders.getPrice(),
@@ -431,17 +430,16 @@ public class OrdersServiceImpl implements OrdersService {
 			 */
 			MarketPrice marketPrice = marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
 			/**
-			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
-			 * BTC, this will update according to order selling book
+			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560 BTC, this will
+			 * update according to order selling book
 			 */
 			Double buyingCurrencyValue = marketPrice.getPriceBTC();
 			logger.debug("order value : {}, buyingCurrencyValue: {}", qtyTraded, buyingCurrencyValue);
 			if (marketPrice != null && buyingCurrencyValue != null) {
 				/**
-				 * user must have this balance to give market order, Example
-				 * user want to BUY 3 BTC on market price, at this moment 1 ETH
-				 * = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC, then user
-				 * must have 51.852876106 ETH to buy 3 BTC
+				 * user must have this balance to give market order, Example user want to BUY 3
+				 * BTC on market price, at this moment 1 ETH = 0.0578560 BTC then for 3 BTC
+				 * (3/0.0578560) BTC, then user must have 51.852876106 ETH to buy 3 BTC
 				 */
 				minBalance = String.valueOf(qtyTraded / buyingCurrencyValue);
 			}
@@ -468,8 +466,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the lowest selling price, thats why it is best buy
-	 * for buyers
+	 * this will calculate the lowest selling price, thats why it is best buy for
+	 * buyers
 	 */
 	@Override
 	public Double getBestBuy(List<Orders> sellOrderList) {
@@ -483,8 +481,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the highest selling price, thats why it is worst buy
-	 * for buyers
+	 * this will calculate the highest selling price, thats why it is worst buy for
+	 * buyers
 	 */
 	@Override
 	public Double getWorstBuy(List<Orders> sellOrderList) {
@@ -498,8 +496,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the highest buying price, thats why it is best sell
-	 * for seller
+	 * this will calculate the highest buying price, thats why it is best sell for
+	 * seller
 	 */
 	@Override
 	public Double getBestSell(List<Orders> buyOrderList) {
@@ -514,8 +512,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the lowest buying price, thats why it is worst sell
-	 * for seller
+	 * this will calculate the lowest buying price, thats why it is worst sell for
+	 * seller
 	 */
 	@Override
 	public Double getWorstSell(List<Orders> buyOrderList) {
@@ -528,6 +526,7 @@ public class OrdersServiceImpl implements OrdersService {
 		return wrostSell;
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price) {
 		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
@@ -561,8 +560,30 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public Long countOrdersByOrderTypeAndUser(User user,OrderType orderType)
-	{
+	public Long countOrdersByOrderTypeAndUser(User user, OrderType orderType) {
 		return ordersRepository.countOrderByUserAndOrderType(user, orderType);
+	}
+
+	@Override
+	public Long countActiveOpenOrder() {
+		
+		Date endDate=new Date();
+		Calendar c=Calendar.getInstance();
+		c.setTime(endDate);
+		c.add(Calendar.DATE,-7);
+		Date startDate=c.getTime();
+		startDate=(Date)startDate;
+		return ordersRepository.countOrdersByCreatedOnBetween(startDate,endDate);
+	}
+
+	@Override
+	public Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType) {
+		Date endDate=new Date();
+		Calendar c=Calendar.getInstance();
+		c.setTime(endDate);
+		c.add(Calendar.DATE,-1);
+		Date startDate=c.getTime();
+		startDate=(Date)endDate;
+		return ordersRepository.countOrderByOrderTypeAndCreatedOnBetween(orderType, startDate, endDate);
 	}
 }

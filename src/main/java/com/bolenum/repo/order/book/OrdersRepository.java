@@ -71,6 +71,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	//@Query("SELECT e FROM Events e WHERE e.eventsDate BETWEEN :startDate AND :endDate")
 	Long countOrdersByCreatedOnBetween(Date startDate,Date endDate);
 
-	Long countOrdersByOrderTypeAndCreatedOnBetween(OrderType orderType,Date startDate,Date endDate);
+	Long countOrderByOrderTypeAndCreatedOnBetween(OrderType orderType,Date startDate,Date endDate);
 	
 }
