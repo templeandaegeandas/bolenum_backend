@@ -59,4 +59,6 @@ public interface OrdersService {
 	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList);
 
     Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
+
+	double getPlacedOrderVolume(User user);
 }

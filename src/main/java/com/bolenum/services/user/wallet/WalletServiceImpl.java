@@ -8,7 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.model.Erc20Token;
 import com.bolenum.model.User;
+import com.bolenum.services.admin.Erc20TokenService;
 
 /**
  * @author chandan kumar singh
@@ -24,19 +26,28 @@ public class WalletServiceImpl implements WalletService {
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;
+	
+	@Autowired
+	private Erc20TokenService erc20TokenService;
 
 	@Override
-	public String getBalance(String ticker, User user) {
+	public String getBalance(String ticker, String currencyType, User user) {
 		logger.debug("get wallet balance ticker: {}", ticker);
 		String balance = null;
-		switch (ticker) {
-		case "BTC":
-			balance = btcWalletService.getWalletBalnce(user.getBtcWalletUuid());
-			break;
-		case "ETH":
-			balance = String.valueOf(etherumWalletService.getWalletBalance(user));
+		switch(currencyType) {
+		case "CRYPTO":
+			switch(ticker) {
+			case "BTC":
+				balance = btcWalletService.getWalletBalnce(user.getBtcWalletUuid());
+				break;
+			case "ETH":
+				balance = String.valueOf(etherumWalletService.getWalletBalance(user));
+				break;
+			}
 			break;
 		case "ERC20TOKEN":
+			Erc20Token erc20Token = erc20TokenService.getByCoin(ticker);
+			balance = String.valueOf(erc20TokenService.getErc20WalletBalance(user, erc20Token));
 			break;
 		case "FIAT":
 			break;

@@ -75,16 +75,12 @@ public class CurrencyServiceImpl implements CurrencyService {
 	public List<Currency> getCurrencyListForMarket() {
 		List<CurrencyPair> allCurrencyPair = currencyPairService.findAllCurrencyPair();
 		List<Currency> allCurrencies = currencyRepo.findAll();
-		logger.debug("Size of currency before retain: {}",allCurrencies.size());
 		Iterator<CurrencyPair> iterator = allCurrencyPair.iterator();
 		List<Currency> listOfToCurrency = new ArrayList<Currency>();
 		while (iterator.hasNext()) {
-			logger.debug("Count running loop");
 			listOfToCurrency.add(iterator.next().getToCurrency().get(0));
 		}
-		logger.debug("Size of retained currencies: {}", listOfToCurrency.size());
 		allCurrencies.retainAll(listOfToCurrency);
-		logger.debug("Size of currency after retain: {}",allCurrencies.size());
 		return allCurrencies;
 	}
 
