@@ -5,9 +5,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import com.bolenum.dto.common.CurrencyForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.repo.common.CurrencyRepo;
@@ -19,6 +23,8 @@ import com.bolenum.repo.common.CurrencyRepo;
  */
 @Service
 public class CurrencyServiceImpl implements CurrencyService {
+	
+	public static final Logger logger = LoggerFactory.getLogger(CurrencyServiceImpl.class);
 
 	@Autowired
 	private CurrencyRepo currencyRepo;
@@ -63,7 +69,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 	 */
 	@Override
 	public List<Currency> getCurrencyList() {
-		return currencyRepo.findAll();
+		return currencyRepo.findByCurrencyTypeNotIn(CurrencyType.FIAT);
 	}
 
 	@Override

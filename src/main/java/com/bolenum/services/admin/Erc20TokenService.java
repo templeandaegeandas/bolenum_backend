@@ -5,7 +5,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -64,11 +63,14 @@ public interface Erc20TokenService {
 	 */
 	Long countErc20Token();
 	
-	Double getErc20WalletBalance(User user, String tokenName) throws InvalidKeyException, NoSuchAlgorithmException,
-			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException, InterruptedException, ExecutionException;
+	Double getErc20WalletBalance(User user, Erc20Token erc20Token);
 
-	TransactionReceipt transferErc20Token(User user, String tokenName, String toAddress, Double fund)
+	TransactionReceipt transferErc20Token(User user, Erc20Token erc20Token, String toAddress, Double fund)
 			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException, TransactionException;
+			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException, ExecutionException;
+
+	void saveIncomingErc20Transaction(String tokenName) throws IOException, CipherException;
+
+	Erc20Token getByCoin(String coin);
 
 }

@@ -50,6 +50,7 @@ import org.web3j.utils.Convert;
 import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
@@ -241,7 +242,8 @@ public class TransactionServiceImpl implements TransactionService {
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus) {
 		try {
-			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, tokenName, toAddress,
+			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
+			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, erc20Token, toAddress,
 					amount);
 			logger.debug("{} transaction send fund completed", tokenName);
 			String txHash = transactionReceipt.getTransactionHash();
@@ -250,23 +252,25 @@ public class TransactionServiceImpl implements TransactionService {
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
+				logger.debug("saving transaction for user: {}", fromUser.getEmailId());
 				transaction = new Transaction();
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
-				transaction.setTxAmount(amount);
+				transaction.setTxAmount(amount/erc20Token.getDecimalValue());
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setUser(fromUser);
 				transaction.setCurrencyName(tokenName);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException | IOException | CipherException | TransactionException e) {
+				| BadPaddingException | IOException | CipherException | TransactionException | InterruptedException | ExecutionException e) {
 			logger.error("{} transaction failed:  {}", tokenName, e.getMessage());
 			e.printStackTrace();
 		}
@@ -275,7 +279,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Async
-	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) throws InterruptedException, ExecutionException {
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
 		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";

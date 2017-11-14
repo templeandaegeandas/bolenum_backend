@@ -15,11 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.jta.bitronix.BitronixXAConnectionFactoryWrapper;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import org.web3j.crypto.CipherException;
 
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Countries;
@@ -118,6 +118,11 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 		saveCurrency();
 		saveInitialErc20Tokens();
+		try {
+			erc20TokenService.saveIncomingErc20Transaction(currencyAbbreviation);
+		} catch (IOException | CipherException e) {
+			e.printStackTrace();
+		}
 
 		// create initial directories
 		createInitDirectories();
@@ -308,7 +313,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	void saveInitialErc20Tokens() {
 		long count = erc20TokenService.countErc20Token();
-		if (count == 2) {
+		if (count == 3) {
 			Currency currencyBLN = currencyService
 					.saveCurrency(new Currency(currencyName, currencyAbbreviation, CurrencyType.ERC20TOKEN));
 			Erc20Token erc20TokenBLN = new Erc20Token(walletAddress, contractAddress, currencyBLN);
@@ -330,8 +335,10 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		if (count == 0) {
 			Currency currency1 = new Currency("BITCOIN", "BTC", CurrencyType.CRYPTO);
 			Currency currency2 = new Currency("ETHEREUM", "ETH", CurrencyType.CRYPTO);
+			Currency ngn = new Currency("NIGERIAN NAIRA", "NGN", CurrencyType.FIAT);
 			currencyService.saveCurrency(currency1);
 			currencyService.saveCurrency(currency2);
+			currencyService.saveCurrency(ngn);
 		}
 	}
 }

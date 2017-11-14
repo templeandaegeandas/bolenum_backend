@@ -4,16 +4,8 @@
 package com.bolenum.services.user.wallet;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,18 +22,16 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.web3j.crypto.CipherException;
 
 import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
-import com.bolenum.model.Currency;
+import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
-import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -63,9 +53,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	
 	@Autowired
 	private OrdersService orderService;
-	
-	@Autowired
-	private CurrencyService currencyService;
 
 	/**
 	 * creating BIP32 hierarchical deterministic (HD) wallets
@@ -134,6 +121,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			boolean isError = (boolean) res.get("error");
 			if (!isError) {
 				String bal = getWalletBalnce(walletUuid);
+				bal = bal.replace("BTC", "").trim();
 				Map<String, Object> data = (Map<String, Object>) res.get("data");
 				res.clear();
 				res.put("address", data.get("address"));
@@ -236,20 +224,16 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return true;
 		}
 		return false;
-	}	
+	}
+	
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) {
 		Double availableBalance = null;
-		try {
-			availableBalance = erc20TokenService.getErc20WalletBalance(user, tokenName);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException | IOException | CipherException | InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		List<Currency> currencyList = currencyService.getCurrencyListByName(tokenName);
-//		Double balance = orderService.totalUserBalanceInBook(user, currencyList, currencyList);
+		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
+			availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
+		double placeOrderVolume = orderService.getPlacedOrderVolume(user);
 		logger.debug("Available balance: {}", availableBalance);
-		logger.debug("OrderBook balance of user: {}");
+		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
 		if (availableBalance >= withdrawAmount) {
 			return true;
 		}

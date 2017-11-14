@@ -51,7 +51,8 @@ public class Orders {
 	
 	@OneToOne
 	private User user;
-
+	private boolean isLocked;
+	
 	public Long getId() {
 		return id;
 	}
@@ -147,4 +148,22 @@ public class Orders {
 	public void setUser(User user) {
 		this.user = user;
 	}
+
+	/**
+	 * return true if order is locked else false 
+	 * @return the isLocked
+	 */
+	public boolean isLocked() {
+		return isLocked;
+	}
+
+	/**
+	 * @param isLocked
+	 *  the isLocked to set
+	 */
+	public void setLocked(boolean isLocked) {
+		this.isLocked = isLocked;
+	}
+	
+	
 }

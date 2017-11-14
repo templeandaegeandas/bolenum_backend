@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,6 @@ import com.bolenum.enums.OrderType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
-import com.bolenum.model.orders.book.MarketPrice;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
@@ -48,8 +48,9 @@ public class OrdersServiceImpl implements OrdersService {
 	@Autowired
 	private CurrencyPairService currencyPairService;
 
-	@Autowired
-	private MarketPriceService marketPriceService;
+	/*
+	 * @Autowired private MarketPriceService marketPriceService;
+	 */
 
 	@Autowired
 	private WalletService walletService;
@@ -76,23 +77,28 @@ public class OrdersServiceImpl implements OrdersService {
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
-		String tickter = null, minOrderVol = null;
+
+		String tickter = null, minOrderVol = null, currencyType = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
 		 */
 		if (orders.getOrderType().equals(OrderType.SELL)) {
-			tickter = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+			Currency currency = currencyPair.getToCurrency().get(0);
+			tickter = currency.getCurrencyAbbreviation();
+			currencyType = currency.getCurrencyType().toString();
 			minOrderVol = String.valueOf(orders.getVolume());
 		} else {
 			minOrderVol = getPairedBalance(orders, currencyPair, orders.getVolume());
-			tickter = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+			Currency currency = currencyPair.getPairedCurrency().get(0);
+			tickter = currency.getCurrencyAbbreviation();
+			currencyType = currency.getCurrencyType().toString();
 		}
 		double userPlacedOrderVolume = getPlacedOrderVolume(user);
 		logger.debug("user placed order volume: {} and order volume: {}", userPlacedOrderVolume, minOrderVol);
 		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
 		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
 		// getting the user current wallet balance
-		String balance = walletService.getBalance(tickter, user);
+		String balance = walletService.getBalance(tickter,currencyType, user);
 		balance = balance.replace("BTC", "");
 		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
 			// user must have balance then user is eligible for placing order
@@ -109,7 +115,8 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @param user
 	 * @return balance
 	 */
-	private double getPlacedOrderVolume(User user) {
+	@Override
+	public double getPlacedOrderVolume(User user) {
 		List<Orders> orders = findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
 		double total = 0.0;
 		for (Orders order : orders) {
@@ -119,7 +126,7 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public Boolean processOrder(Orders orders) {
+	public Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException {
 		Boolean status;
 		if (orders.equals(OrderStandard.MARKET)) {
 			logger.debug("Processing market order");
@@ -164,9 +171,12 @@ public class OrdersServiceImpl implements OrdersService {
 
 	/**
 	 * process market order
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@Override
-	public Boolean processMarketOrder(Orders orders) {
+	public Boolean processMarketOrder(Orders orders) throws InterruptedException, ExecutionException {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		CurrencyPair pair = orders.getPair();
@@ -234,9 +244,12 @@ public class OrdersServiceImpl implements OrdersService {
 
 	/**
 	 * process limit order
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@Override
-	public Boolean processLimitOrder(Orders orders) {
+	public Boolean processLimitOrder(Orders orders) throws InterruptedException, ExecutionException {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		logger.debug("Order type is: {}", orderType);
@@ -323,9 +336,13 @@ public class OrdersServiceImpl implements OrdersService {
 	/**
 	 * process the buyers and sellers order
 	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
+	 * 
 	 */
 	@Override
-	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair) {
+	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair)
+			throws InterruptedException, ExecutionException {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
 		User buyer, seller;
@@ -404,9 +421,11 @@ public class OrdersServiceImpl implements OrdersService {
 	/**
 	 * @description processTransaction
 	 * @param orders,qtyTraded,buyer,seller
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller,
-			double remainingVolume) {
+			double remainingVolume) throws InterruptedException, ExecutionException {
 		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
@@ -477,14 +496,16 @@ public class OrdersServiceImpl implements OrdersService {
 			/**
 			 * fetching the market BTC price of buying currency
 			 */
-			MarketPrice marketPrice = marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
+
+			// MarketPrice marketPrice =
+			// marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
 			/**
 			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560 BTC, this will
 			 * update according to order selling book
 			 */
-			Double buyingCurrencyValue = marketPrice.getPriceBTC();
+			double buyingCurrencyValue = currencyPair.getPairedCurrency().get(0).getPriceBTC();
 			logger.debug("order value : {}, buyingCurrencyValue: {}", qtyTraded, buyingCurrencyValue);
-			if (marketPrice != null && buyingCurrencyValue != null) {
+			if (buyingCurrencyValue > 0) {
 				/**
 				 * user must have this balance to give market order, Example user want to BUY 3
 				 * BTC on market price, at this moment 1 ETH = 0.0578560 BTC then for 3 BTC
@@ -631,14 +652,17 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.countOrderByOrderTypeAndCreatedOnBetween(orderType, startDate, endDate);
 	}
 
-	
 	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList) {
 		return ordersRepository.totalUserBalanceInBook(user, toCurrencyList, pairedCurrencyList);
 	}
 
 	@Override
-	public Long countOrdersByOrderTypeAndUser(User user,OrderType orderType)
-	{
+	public Long countOrdersByOrderTypeAndUser(User user, OrderType orderType) {
 		return ordersRepository.countOrderByUserAndOrderType(user, orderType);
+	}
+
+	@Override
+	public Orders getOrderDetails(long orderId) {
+		return ordersRepository.getOne(orderId);
 	}
 }

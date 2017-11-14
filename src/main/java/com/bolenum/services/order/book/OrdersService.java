@@ -1,6 +1,7 @@
 package com.bolenum.services.order.book;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.data.domain.Page;
 
@@ -21,11 +22,11 @@ public interface OrdersService {
 
 	Orders deleteOrder(Long ordersId);
 
-	Boolean processMarketOrder(Orders orders);
+	Boolean processMarketOrder(Orders orders) throws InterruptedException, ExecutionException;
 
-	Boolean processLimitOrder(Orders orders);
+	Boolean processLimitOrder(Orders orders) throws InterruptedException, ExecutionException;
 
-	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair);
+	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair) throws InterruptedException, ExecutionException;
 
 	Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price);
 
@@ -35,7 +36,7 @@ public interface OrdersService {
 
 	void removeOrderFromList(List<Orders> ordersList);
 
-	Boolean processOrder(Orders orders);
+	Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException;
 
 	Page<Orders> getBuyOrdersListByPair(Long pairId);
 
@@ -62,4 +63,8 @@ public interface OrdersService {
 	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList);
 
     Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
+	
+    public Orders getOrderDetails(long orderId);
+    
+	double getPlacedOrderVolume(User user);
 }
