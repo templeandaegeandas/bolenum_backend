@@ -215,6 +215,7 @@ public class BTCWalletController {
 				transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 			}
+			break;
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);

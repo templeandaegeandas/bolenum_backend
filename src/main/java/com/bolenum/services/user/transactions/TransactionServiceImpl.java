@@ -252,6 +252,7 @@ public class TransactionServiceImpl implements TransactionService {
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
+				logger.debug("saving transaction for user: {}", fromUser.getEmailId());
 				transaction = new Transaction();
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
@@ -262,6 +263,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setUser(fromUser);
 				transaction.setCurrencyName(tokenName);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);

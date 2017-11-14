@@ -210,7 +210,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 						logger.debug("tx.getTo() {}", tx._to);
 						User user = userRepository.findByEthWalletaddress(tx._to.getValue());
 						if (user != null) {
-							logger.debug("new Incoming ethereum transaction for user : {}", user.getEmailId());
+							logger.debug("new Incoming {} transaction for user : {}", tokenName, user.getEmailId());
 							saveTx(user, tx, tokenName, erc20Token);
 						}
 					}
@@ -221,6 +221,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Transaction tx = transactionRepo.findByTxHash(transaction._transactionHash);
 		if (tx == null) {
 			tx = new Transaction();
+			logger.debug("saving transaction for user: {}", user.getEmailId());
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
@@ -230,6 +231,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setCurrencyName(tokenName);
 			tx.setUser(user);
 			Transaction saved = transactionRepo.saveAndFlush(tx);
+			logger.debug("transaction saved completed: {}", user.getEmailId());
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", user.getEmailId());
 			}
