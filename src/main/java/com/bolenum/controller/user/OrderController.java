@@ -1,6 +1,8 @@
 package com.bolenum.controller.user;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -18,10 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
+import com.bolenum.model.BankAccountDetails;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
+import com.bolenum.services.common.BankDetailsService;
 import com.bolenum.services.common.KYCService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
@@ -53,6 +57,9 @@ public class OrderController {
 
 	@Autowired
 	private LocaleService localeService;
+
+	@Autowired
+	private BankDetailsService bankDetailsService;
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
@@ -140,6 +147,26 @@ public class OrderController {
 		User user = GenericUtils.getLoggedInUser();
 		List<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
+	}
+	@RequestMapping(value = UrlConstant.ORDER_BY_ID, method = RequestMethod.GET)
+	public ResponseEntity<Object> getOrderDetails(@RequestParam("orderId") long orderId) {
+		User user = GenericUtils.getLoggedInUser();
+		List<BankAccountDetails> banks = bankDetailsService.findByUser(user);
+		BankAccountDetails bankAccountDetails = null;
+		for (BankAccountDetails bank : banks) {
+			if (bank.isPrimary()) {
+				bankAccountDetails = bank;
+				break;
+			}
+		}
+		if (bankAccountDetails == null) {
+			bankAccountDetails = banks.get(0);
+		}
+		Orders orders = ordersService.getOrderDetails(orderId);
+		Map<String, Object> map = new HashMap();
+		map.put("bankDetails", bankAccountDetails);
+		map.put("orderDetails", orders);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
 	}
 
 }

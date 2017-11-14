@@ -21,7 +21,6 @@ import com.bolenum.enums.OrderType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
-import com.bolenum.model.orders.book.MarketPrice;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
@@ -48,8 +47,9 @@ public class OrdersServiceImpl implements OrdersService {
 	@Autowired
 	private CurrencyPairService currencyPairService;
 
-	@Autowired
-	private MarketPriceService marketPriceService;
+	/*
+	 * @Autowired private MarketPriceService marketPriceService;
+	 */
 
 	@Autowired
 	private WalletService walletService;
@@ -76,7 +76,6 @@ public class OrdersServiceImpl implements OrdersService {
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
-		
 		String tickter = null, minOrderVol = null, currencyType = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
@@ -170,8 +169,9 @@ public class OrdersServiceImpl implements OrdersService {
 
 	/**
 	 * process market order
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@Override
 	public Boolean processMarketOrder(Orders orders) throws InterruptedException, ExecutionException {
@@ -242,8 +242,9 @@ public class OrdersServiceImpl implements OrdersService {
 
 	/**
 	 * process limit order
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	@Override
 	public Boolean processLimitOrder(Orders orders) throws InterruptedException, ExecutionException {
@@ -333,12 +334,14 @@ public class OrdersServiceImpl implements OrdersService {
 
 	/**
 	 * process the buyers and sellers order
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * 
 	 */
 	@Override
-	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair) throws InterruptedException, ExecutionException {
+	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair)
+			throws InterruptedException, ExecutionException {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
 		User buyer, seller;
@@ -417,8 +420,8 @@ public class OrdersServiceImpl implements OrdersService {
 	/**
 	 * @description processTransaction
 	 * @param orders,qtyTraded,buyer,seller
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
 	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller,
 			double remainingVolume) throws InterruptedException, ExecutionException {
@@ -492,14 +495,16 @@ public class OrdersServiceImpl implements OrdersService {
 			/**
 			 * fetching the market BTC price of buying currency
 			 */
-			MarketPrice marketPrice = marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
+
+			// MarketPrice marketPrice =
+			// marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
 			/**
 			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
 			 * BTC, this will update according to order selling book
 			 */
-			Double buyingCurrencyValue = marketPrice.getPriceBTC();
+			double buyingCurrencyValue = currencyPair.getPairedCurrency().get(0).getPriceBTC();
 			logger.debug("order value : {}, buyingCurrencyValue: {}", qtyTraded, buyingCurrencyValue);
-			if (marketPrice != null && buyingCurrencyValue != null) {
+			if (buyingCurrencyValue > 0) {
 				/**
 				 * user must have this balance to give market order, Example
 				 * user want to BUY 3 BTC on market price, at this moment 1 ETH
@@ -622,14 +627,18 @@ public class OrdersServiceImpl implements OrdersService {
 	public List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus) {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
 	}
-	
+
 	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList) {
 		return ordersRepository.totalUserBalanceInBook(user, toCurrencyList, pairedCurrencyList);
 	}
 
 	@Override
-	public Long countOrdersByOrderTypeAndUser(User user,OrderType orderType)
-	{
+	public Long countOrdersByOrderTypeAndUser(User user, OrderType orderType) {
 		return ordersRepository.countOrderByUserAndOrderType(user, orderType);
+	}
+
+	@Override
+	public Orders getOrderDetails(long orderId) {
+		return ordersRepository.getOne(orderId);
 	}
 }

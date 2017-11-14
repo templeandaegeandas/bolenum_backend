@@ -313,7 +313,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	void saveInitialErc20Tokens() {
 		long count = erc20TokenService.countErc20Token();
-		if (count == 2) {
+		if (count == 3) {
 			Currency currencyBLN = currencyService
 					.saveCurrency(new Currency(currencyName, currencyAbbreviation, CurrencyType.ERC20TOKEN));
 			Erc20Token erc20TokenBLN = new Erc20Token(walletAddress, contractAddress, currencyBLN);
@@ -335,8 +335,10 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		if (count == 0) {
 			Currency currency1 = new Currency("BITCOIN", "BTC", CurrencyType.CRYPTO);
 			Currency currency2 = new Currency("ETHEREUM", "ETH", CurrencyType.CRYPTO);
+			Currency ngn = new Currency("NIGERIAN NAIRA", "NGN", CurrencyType.FIAT);
 			currencyService.saveCurrency(currency1);
 			currencyService.saveCurrency(currency2);
+			currencyService.saveCurrency(ngn);
 		}
 	}
 }

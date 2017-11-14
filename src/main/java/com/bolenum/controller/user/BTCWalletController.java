@@ -26,11 +26,9 @@ import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
-import com.bolenum.model.orders.book.MarketPrice;
 import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.TransactionFeeService;
 import com.bolenum.services.common.LocaleService;
-import com.bolenum.services.order.book.MarketPriceService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
@@ -60,9 +58,9 @@ public class BTCWalletController {
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
-	@Autowired
-	private MarketPriceService marketPriceService;
-
+	/*
+	 * @Autowired private MarketPriceService marketPriceService;
+	 */
 	@Autowired
 	private TransactionService transactionService;
 
@@ -97,7 +95,7 @@ public class BTCWalletController {
 				Double balance = etherumWalletService.getWalletBalance(user);
 				Map<String, Object> mapAddress = new HashMap<>();
 				mapAddress.put("address", user.getEthWalletaddress());
-				mapAddress.put("balance", balance + " ETH");
+				mapAddress.put("balance", balance);
 				map.put("data", mapAddress);
 				break;
 			default:
@@ -117,7 +115,7 @@ public class BTCWalletController {
 			df.setMaximumFractionDigits(8);
 			Map<String, Object> mapAddress = new HashMap<>();
 			mapAddress.put("address", user.getEthWalletaddress());
-			mapAddress.put("balance", df.format(balance) + coinCode);
+			mapAddress.put("balance", df.format(balance));
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":
@@ -137,8 +135,9 @@ public class BTCWalletController {
 	 */
 	@RequestMapping(value = UrlConstant.MARKET_PRICE, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBtcToEthPrice(@RequestParam("symbol") String currencyAbbreviation) {
-		MarketPrice marketPrice = marketPriceService.findByCurrencyId(currencyAbbreviation);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), marketPrice);
+		// MarketPrice marketPrice =
+		// marketPriceService.findByCurrencyId(currencyAbbreviation);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
 	}
 
 	/**

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.dto.common.CurrencyForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.repo.common.CurrencyRepo;
@@ -68,7 +69,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 	 */
 	@Override
 	public List<Currency> getCurrencyList() {
-		return currencyRepo.findAll();
+		return currencyRepo.findByCurrencyTypeNotIn(CurrencyType.FIAT);
 	}
 
 	@Override
