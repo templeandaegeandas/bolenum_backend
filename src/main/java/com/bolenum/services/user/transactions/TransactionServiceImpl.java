@@ -50,6 +50,7 @@ import org.web3j.utils.Convert;
 import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
@@ -239,9 +240,10 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus) throws InterruptedException, ExecutionException {
+			TransactionStatus transactionStatus) {
 		try {
-			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, tokenName, toAddress,
+			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
+			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, erc20Token, toAddress,
 					amount);
 			logger.debug("{} transaction send fund completed", tokenName);
 			String txHash = transactionReceipt.getTransactionHash();
@@ -254,7 +256,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
-				transaction.setTxAmount(amount/10000000);
+				transaction.setTxAmount(amount/erc20Token.getDecimalValue());
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setUser(fromUser);
@@ -266,7 +268,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException | IOException | CipherException | TransactionException e) {
+				| BadPaddingException | IOException | CipherException | TransactionException | InterruptedException | ExecutionException e) {
 			logger.error("{} transaction failed:  {}", tokenName, e.getMessage());
 			e.printStackTrace();
 		}

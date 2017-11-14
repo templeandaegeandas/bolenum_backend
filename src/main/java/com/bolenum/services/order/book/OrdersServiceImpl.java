@@ -76,24 +76,27 @@ public class OrdersServiceImpl implements OrdersService {
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
-
-		String tickter = null, minOrderVol = null;
+		String tickter = null, minOrderVol = null, currencyType = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
 		 */
 		if (orders.getOrderType().equals(OrderType.SELL)) {
-			tickter = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+			Currency currency = currencyPair.getToCurrency().get(0);
+			tickter = currency.getCurrencyAbbreviation();
+			currencyType = currency.getCurrencyType().toString();
 			minOrderVol = String.valueOf(orders.getVolume());
 		} else {
 			minOrderVol = getPairedBalance(orders, currencyPair, orders.getVolume());
-			tickter = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+			Currency currency = currencyPair.getPairedCurrency().get(0);
+			tickter = currency.getCurrencyAbbreviation();
+			currencyType = currency.getCurrencyType().toString();
 		}
 		double userPlacedOrderVolume = getPlacedOrderVolume(user);
 		logger.debug("user placed order volume: {} and order volume: {}", userPlacedOrderVolume, minOrderVol);
 		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
 		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
 		// getting the user current wallet balance
-		String balance = walletService.getBalance(tickter, user);
+		String balance = walletService.getBalance(tickter,currencyType, user);
 		balance = balance.replace("BTC", "");
 		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
 			// user must have balance then user is eligible for placing order
@@ -110,7 +113,8 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @param user
 	 * @return balance
 	 */
-	private double getPlacedOrderVolume(User user) {
+	@Override
+	public double getPlacedOrderVolume(User user) {
 		List<Orders> orders = findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
 		double total = 0.0;
 		for (Orders order : orders) {

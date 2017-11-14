@@ -10,5 +10,5 @@ import com.bolenum.model.User;
  * @date 17-Oct-2017
  */
 public interface WalletService {
-	public String getBalance(String ticker, User user);
+	public String getBalance(String ticker, String currencyType, User user);
 }

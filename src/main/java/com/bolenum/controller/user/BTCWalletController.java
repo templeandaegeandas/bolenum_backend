@@ -1,17 +1,10 @@
 
 package com.bolenum.controller.user;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -25,11 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.web3j.crypto.CipherException;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
 import com.bolenum.enums.TransactionStatus;
+import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
@@ -111,21 +104,19 @@ public class BTCWalletController {
 			}
 			break;
 		case "ERC20TOKEN":
-			try {
-				Double balance = erc20TokenService.getErc20WalletBalance(user, coinCode);
-				DecimalFormat df = new DecimalFormat("0");
-				df.setMaximumFractionDigits(8);
-				Map<String, Object> mapAddress = new HashMap<>();
-				mapAddress.put("address", user.getEthWalletaddress());
-				mapAddress.put("balance", df.format(balance) + coinCode);
-				map.put("data", mapAddress);
-			} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-					| BadPaddingException | IOException | CipherException | InterruptedException
-					| ExecutionException e) {
-				e.printStackTrace();
+			Erc20Token erc20Token = erc20TokenService.getByCoin(coinCode);
+			Double balance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
+			if (balance == null) {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-						localService.getMessage("invalid.coin.code"), null);
+						localService.getMessage("There is an error for getting balance of user for: " + coinCode),
+						null);
 			}
+			DecimalFormat df = new DecimalFormat("0");
+			df.setMaximumFractionDigits(8);
+			Map<String, Object> mapAddress = new HashMap<>();
+			mapAddress.put("address", user.getEthWalletaddress());
+			mapAddress.put("balance", df.format(balance) + coinCode);
+			map.put("data", mapAddress);
 			break;
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
@@ -220,25 +211,15 @@ public class BTCWalletController {
 					withdrawBalanceForm.getWithdrawAmount());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
-				try {
-					transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
-							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
-				} catch (InterruptedException | ExecutionException e) {
-					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-							localService.getMessage(e.getMessage()), null);
-				}
+				transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
+						withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 			}
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"),
-					null);
-
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
-
 		default:
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
-
 		}
 
 		if (!validAvailableWalletBalance) {

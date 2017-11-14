@@ -61,4 +61,6 @@ public interface OrdersService {
     Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
 	
     public Orders getOrderDetails(long orderId);
+    
+	double getPlacedOrderVolume(User user);
 }

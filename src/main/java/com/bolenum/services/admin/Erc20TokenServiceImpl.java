@@ -46,6 +46,7 @@ import com.bolenum.model.User;
 import com.bolenum.repo.admin.Erc20TokenRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.Erc20TokenWrapper;
 import com.bolenum.util.Erc20TokenWrapper.TransferEventResponse;
@@ -68,12 +69,15 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private CurrencyService currencyService;
-	
+
 	@Autowired
 	private TransactionRepo transactionRepo;
-	
+
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private LocaleService localeService;
 
 	private static final Logger logger = LoggerFactory.getLogger(Erc20TokenServiceImpl.class);
 
@@ -86,13 +90,26 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	public Erc20Token saveToken(Erc20Token erc20Token) {
 		Erc20Token existingToken = erc20TokenRepository.findByContractAddress(erc20Token.getContractAddress());
 		if (existingToken == null) {
-			CurrencyForm currencyForm = new CurrencyForm(erc20Token.getCurrency().getCurrencyName(),
-					erc20Token.getCurrency().getCurrencyAbbreviation(), CurrencyType.ERC20TOKEN);
+			Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
+			ClientTransactionManager transactionManager = new ClientTransactionManager(web3j,
+					erc20Token.getContractAddress());
+			Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, transactionManager,
+					Contract.GAS_PRICE, Contract.GAS_LIMIT);
+			Double decimalValue = null;
+			try {
+				decimalValue = createDecimals(token.decimals().getValue().intValue());
+				logger.debug("Decimal value of this contract is: {}", decimalValue);
+			} catch (Exception e) {
+				return null;
+			}
+			erc20Token.setDecimalValue(decimalValue);
+			CurrencyForm currencyForm = new CurrencyForm(erc20Token.getCurrency().getCurrencyName().toUpperCase(),
+					erc20Token.getCurrency().getCurrencyAbbreviation().toUpperCase(), CurrencyType.ERC20TOKEN);
 			Currency savedCurrency = currencyService.saveCurrency(currencyForm.copy(new Currency()));
 			erc20Token.setCurrency(savedCurrency);
 			return erc20TokenRepository.save(erc20Token);
 		} else {
-			throw new PersistenceException("erc.token.already.exist");
+			throw new PersistenceException(localeService.getMessage("erc.token.already.exist"));
 		}
 	}
 
@@ -113,7 +130,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	public Erc20Token getById(Long id) {
 		return erc20TokenRepository.findOne(id);
 	}
-
+	
+	@Override
 	public Erc20Token getByCoin(String coin) {
 		return erc20TokenRepository.findByCurrencyCurrencyAbbreviation(coin);
 	}
@@ -135,46 +153,48 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	}
 
 	@Override
-	public Double getErc20WalletBalance(User user, String tokenName)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException, InterruptedException, ExecutionException {
+	public Double getErc20WalletBalance(User user, Erc20Token erc20Token) {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 		Double amount = 0.0;
-		Credentials credentials = getCredentials(user);
-		logger.debug("Requested token name is: {}", tokenName);
-		Erc20Token erc20Token = getByCoin(tokenName);
-		logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
-		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
-				Contract.GAS_PRICE, Contract.GAS_LIMIT);
-		amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
-		logger.debug("Balance of the user is: {}", amount);
-		return amount/createDecimals( token.decimals().getValue().intValue());
+		Credentials credentials;
+		Erc20TokenWrapper token = null;
+		try {
+			credentials = getCredentials(user);
+			logger.debug("Requested token name is: {}", erc20Token.getCurrency().getCurrencyAbbreviation());
+			logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
+			token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials, Contract.GAS_PRICE,
+					Contract.GAS_LIMIT);
+			amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
+			logger.debug("Balance of the user is: {}", amount);
+			return amount / createDecimals(token.decimals().getValue().intValue());
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+				| BadPaddingException | IOException | CipherException e) {
+			logger.debug("User getting balance for: {} failed", erc20Token.getCurrency().getCurrencyAbbreviation());
+			return null;
+		}
 	}
 
 	@Override
-	public TransactionReceipt transferErc20Token(User user, String tokenName, String toAddress, Double fund)
+	public TransactionReceipt transferErc20Token(User user, Erc20Token erc20Token, String toAddress, Double fund)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException, ExecutionException {
+			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException,
+			ExecutionException {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-
-		Erc20Token erc20Token = getByCoin(tokenName);
 		Credentials credentials = getCredentials(user);
 		logger.debug("Credentials created of the user: {}", user.getEmailId());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
 		logger.debug("Transfering amount in Double: {}", token.decimals().getValue().intValue());
-		
-		BigInteger fundInBig = new BigDecimal(fund*createDecimals( token.decimals().getValue().intValue())).toBigInteger();
+		BigInteger fundInBig = new BigDecimal(fund * createDecimals(token.decimals().getValue().intValue()))
+				.toBigInteger();
 		logger.debug("Transfering amount in BigInteger: {}", fundInBig);
 		Uint256 transferFunds = new Uint256(fundInBig);
 		logger.debug("Transfering amount in Unit256: {}", transferFunds);
-		
 		logger.debug("Contract loaded with credentials: {}", erc20Token.getContractAddress());
 		TransactionReceipt receipt = token.transfer(new Address(toAddress), transferFunds);
 		logger.debug("Fund transfer transaction hash: {}", receipt.getTransactionHash());
 		return receipt;
 	}
-	
 
 	@Override
 	public void saveIncomingErc20Transaction(String tokenName) throws IOException, CipherException {
@@ -184,26 +204,27 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				erc20Token.getContractAddress());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, transactionManager,
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
-		token.transferEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(tx -> {
-			if (tx._to.getValue() != null) {
-				logger.debug("tx.getTo() {}",tx._to);
-				User user = userRepository.findByEthWalletaddress(tx._to.getValue());
-				if (user != null) {
-					logger.debug("new Incoming ethereum transaction for user : {}", user.getEmailId());
-					saveTx(user, tx, tokenName);
-				}
-			}
-		});
+		token.transferEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+				.subscribe(tx -> {
+					if (tx._to.getValue() != null) {
+						logger.debug("tx.getTo() {}", tx._to);
+						User user = userRepository.findByEthWalletaddress(tx._to.getValue());
+						if (user != null) {
+							logger.debug("new Incoming ethereum transaction for user : {}", user.getEmailId());
+							saveTx(user, tx, tokenName, erc20Token);
+						}
+					}
+				});
 	}
-	
-	private void saveTx(User user, TransferEventResponse transaction, String tokenName) {
+
+	private void saveTx(User user, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token ) {
 		Transaction tx = transactionRepo.findByTxHash(transaction._transactionHash);
 		if (tx == null) {
 			tx = new Transaction();
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue()/10000000);
+			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			tx.setTransactionType(TransactionType.INCOMING);
 			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
 			tx.setCurrencyName(tokenName);
@@ -220,13 +241,13 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			transactionRepo.saveAndFlush(tx);
 		}
 	}
-	
+
 	Double createDecimals(int decimal) {
-		int x = 1, sum=1;
-		while (decimal >= sum) {
-			x = x*10;
-			decimal--;
+		int constant = 10;
+		double ans = 1;
+		for (int i = decimal; i > 0; i--) {
+			ans *= constant;
 		}
-		return Double.valueOf(x);
+		return Double.valueOf(ans);
 	}
 }

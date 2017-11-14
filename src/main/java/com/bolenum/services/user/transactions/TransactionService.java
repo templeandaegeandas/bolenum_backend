@@ -25,5 +25,5 @@ public interface TransactionService {
 	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus withdraw, int pageNumber, int pageSize,
 			String sortOrder, String sortBy);
 	Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus) throws InterruptedException, ExecutionException;
+			TransactionStatus transactionStatus);
 }
