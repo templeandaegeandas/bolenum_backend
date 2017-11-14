@@ -96,7 +96,7 @@ public class OrdersServiceImpl implements OrdersService {
 		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
 		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
 		// getting the user current wallet balance
-		String balance = walletService.getBalance(tickter,currencyType, user);
+		String balance = walletService.getBalance(tickter, currencyType, user);
 		balance = balance.replace("BTC", "");
 		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
 			// user must have balance then user is eligible for placing order
@@ -234,7 +234,15 @@ public class OrdersServiceImpl implements OrdersService {
 			processed = true;
 		}
 		logger.debug("MarketOrder: Order list saving started");
-		orderAsyncServices.saveOrder(ordersList);
+		/**
+		 * if any exception occurs then clear list, otherwise double order will
+		 * be placed
+		 */
+		try {
+			orderAsyncServices.saveOrder(ordersList);
+		} catch (Exception e) {
+			ordersList.clear();
+		}
 		ordersList.clear();
 		logger.debug("MarketOrder: Order list saving completed");
 		return processed;
@@ -326,7 +334,11 @@ public class OrdersServiceImpl implements OrdersService {
 			processed = true;
 		}
 		logger.debug("Limit Order: order list saving started");
-		orderAsyncServices.saveOrder(ordersList);
+		try {
+			orderAsyncServices.saveOrder(ordersList);
+		} catch (Exception e) {
+			ordersList.clear();
+		}
 		ordersList.clear();
 		logger.debug("Limit Order: order list saving finished");
 		return processed;

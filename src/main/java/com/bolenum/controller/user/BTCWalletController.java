@@ -22,10 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
 import com.bolenum.enums.TransactionStatus;
+import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
+import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.TransactionFeeService;
 import com.bolenum.services.common.LocaleService;
@@ -58,9 +60,9 @@ public class BTCWalletController {
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
-	/*
-	 * @Autowired private MarketPriceService marketPriceService;
-	 */
+	@Autowired
+	private CurrencyService currencyService;
+
 	@Autowired
 	private TransactionService transactionService;
 
@@ -135,9 +137,8 @@ public class BTCWalletController {
 	 */
 	@RequestMapping(value = UrlConstant.MARKET_PRICE, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBtcToEthPrice(@RequestParam("symbol") String currencyAbbreviation) {
-		// MarketPrice marketPrice =
-		// marketPriceService.findByCurrencyId(currencyAbbreviation);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
+		Currency marketPrice = currencyService.findByCurrencyAbbreviation(currencyAbbreviation);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), marketPrice);
 	}
 
 	/**
