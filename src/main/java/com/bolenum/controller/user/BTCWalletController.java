@@ -33,11 +33,9 @@ import com.bolenum.enums.TransactionStatus;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
-import com.bolenum.model.orders.book.MarketPrice;
 import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.TransactionFeeService;
 import com.bolenum.services.common.LocaleService;
-import com.bolenum.services.order.book.MarketPriceService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
@@ -67,9 +65,9 @@ public class BTCWalletController {
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
-	@Autowired
-	private MarketPriceService marketPriceService;
-
+	/*
+	 * @Autowired private MarketPriceService marketPriceService;
+	 */
 	@Autowired
 	private TransactionService transactionService;
 
@@ -146,8 +144,9 @@ public class BTCWalletController {
 	 */
 	@RequestMapping(value = UrlConstant.MARKET_PRICE, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBtcToEthPrice(@RequestParam("symbol") String currencyAbbreviation) {
-		MarketPrice marketPrice = marketPriceService.findByCurrencyId(currencyAbbreviation);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), marketPrice);
+		// MarketPrice marketPrice =
+		// marketPriceService.findByCurrencyId(currencyAbbreviation);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
 	}
 
 	/**
@@ -225,8 +224,8 @@ public class BTCWalletController {
 					transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
 							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 				} catch (InterruptedException | ExecutionException e) {
-					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage(e.getMessage()),
-							null);
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+							localService.getMessage(e.getMessage()), null);
 				}
 			}
 			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"),
