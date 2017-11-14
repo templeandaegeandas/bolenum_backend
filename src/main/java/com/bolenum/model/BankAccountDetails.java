@@ -21,19 +21,19 @@ public class BankAccountDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
 	@NotBlank
 	private String accountHolderName;
-	
+
 	@NotBlank
 	private String accountNumber;
-	
+
 	@NotBlank
 	private String bankName;
-	
+
 	@NotBlank
 	private String ifscCode;
-	
+
 	private String address;
 	private String city;
 	private String district;
@@ -43,10 +43,11 @@ public class BankAccountDetails {
 	private Boolean isDeleted = false;
 	private Date onCreated;
 	private Date onUpdated;
+	private boolean isPrimary;
 	
 	@ManyToOne
 	private User user;
-	
+
 	public User getUser() {
 		return user;
 	}
@@ -126,7 +127,7 @@ public class BankAccountDetails {
 	public void setState(String state) {
 		this.state = state;
 	}
-	
+
 	public String getBranch() {
 		return branch;
 	}
@@ -165,6 +166,23 @@ public class BankAccountDetails {
 
 	public void setOnUpdated(Date onUpdated) {
 		this.onUpdated = onUpdated;
+	}
+
+	/**
+	 * return #true if bank details is primary else #false
+	 * 
+	 * @return the isPrimary
+	 */
+	public boolean isPrimary() {
+		return isPrimary;
+	}
+
+	/**
+	 * @param isPrimary
+	 *            the isPrimary to set
+	 */
+	public void setPrimary(boolean isPrimary) {
+		this.isPrimary = isPrimary;
 	}
 
 }
