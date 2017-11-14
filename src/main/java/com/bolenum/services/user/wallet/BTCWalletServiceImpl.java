@@ -121,6 +121,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			boolean isError = (boolean) res.get("error");
 			if (!isError) {
 				String bal = getWalletBalnce(walletUuid);
+				bal = bal.replace("BTC", "").trim();
 				Map<String, Object> data = (Map<String, Object>) res.get("data");
 				res.clear();
 				res.put("address", data.get("address"));

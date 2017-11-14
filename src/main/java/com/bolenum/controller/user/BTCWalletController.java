@@ -95,7 +95,7 @@ public class BTCWalletController {
 				Double balance = etherumWalletService.getWalletBalance(user);
 				Map<String, Object> mapAddress = new HashMap<>();
 				mapAddress.put("address", user.getEthWalletaddress());
-				mapAddress.put("balance", balance + " ETH");
+				mapAddress.put("balance", balance);
 				map.put("data", mapAddress);
 				break;
 			default:
@@ -115,7 +115,7 @@ public class BTCWalletController {
 			df.setMaximumFractionDigits(8);
 			Map<String, Object> mapAddress = new HashMap<>();
 			mapAddress.put("address", user.getEthWalletaddress());
-			mapAddress.put("balance", df.format(balance) + coinCode);
+			mapAddress.put("balance", df.format(balance));
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":
