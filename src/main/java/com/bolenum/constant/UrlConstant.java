@@ -102,9 +102,7 @@ public class UrlConstant {
 	public static final String WS_LISTNER_ADMIN = "/listner/admin";
 	public static final String WS_LISTNER_ORDER = "/listner/order";
 	public static final String WS_LISTNER_DEPOSIT = "/listner/deposit";
-	
-	
-	
+
 }
 	
 

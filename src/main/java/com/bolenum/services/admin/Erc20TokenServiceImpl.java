@@ -126,7 +126,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j,
 				credentials, BigInteger.valueOf(4700000), BigInteger.valueOf(3100000));
-		amount = token.balanceOf(new Address(user.getEthWalletaddress())).get().getValue().doubleValue();
+		amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
 		logger.debug("Balance of the user is: {}", amount);
 		return amount;
 	}

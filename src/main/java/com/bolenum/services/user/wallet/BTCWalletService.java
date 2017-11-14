@@ -5,6 +5,8 @@ package com.bolenum.services.user.wallet;
 
 import java.util.Map;
 
+import com.bolenum.model.User;
+
 import com.bolenum.model.Transaction;
 
 /**
@@ -48,6 +50,8 @@ public interface BTCWalletService {
 
 	boolean validateAvailableWalletBalance(Double availableBalance, Double availableBalanceLimitToWithdraw,
 			Double withdrawAmount);
+
+	boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount);
 
 	Transaction setDepositeList(Transaction transaction);
 }

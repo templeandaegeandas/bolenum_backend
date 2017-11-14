@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
@@ -66,11 +67,17 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 
 	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
 	
-	Long countOrderByUserAndOrderType(User user,OrderType orderType);
+	
 
 	//@Query("SELECT e FROM Events e WHERE e.eventsDate BETWEEN :startDate AND :endDate")
 	Long countOrdersByCreatedOnBetween(Date startDate,Date endDate);
-
+	
+	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
+	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList, @Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
+	
 	Long countOrderByOrderTypeAndCreatedOnBetween(OrderType orderType,Date startDate,Date endDate);
+	
+	Long countOrderByUserAndOrderType(User user,OrderType orderType);
+
 	
 }

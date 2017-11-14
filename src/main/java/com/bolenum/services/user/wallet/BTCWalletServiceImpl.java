@@ -4,8 +4,16 @@
 package com.bolenum.services.user.wallet;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,16 +30,21 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.web3j.crypto.CipherException;
 
 import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.admin.CurrencyService;
+import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.order.book.OrdersService;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -45,6 +58,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BTCWalletServiceImpl implements BTCWalletService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BTCWalletServiceImpl.class);
+	
+	@Autowired
+	private Erc20TokenService erc20TokenService;
+	
+	@Autowired
+	private OrdersService orderService;
+	
+	@Autowired
+	private CurrencyService currencyService;
 
 	/**
 	 * creating BIP32 hierarchical deterministic (HD) wallets
@@ -215,6 +237,24 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return true;
 		}
 		return false;
+	}	
+	@Override
+	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) {
+		Double availableBalance = null;
+		try {
+			availableBalance = erc20TokenService.getErc20WalletBalance(user, tokenName);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+				| BadPaddingException | IOException | CipherException | InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		List<Currency> currencyList = currencyService.getCurrencyListByName(tokenName);
+//		Double balance = orderService.totalUserBalanceInBook(user, currencyList, currencyList);
+		logger.debug("Available balance: {}", availableBalance);
+		logger.debug("OrderBook balance of user: {}");
+		if (availableBalance >= withdrawAmount) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -228,7 +268,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (savedTransaction==null) {
 			transaction.setTransactionType(TransactionType.INCOMING);
 			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
-			transaction.setCurrencyName(CurrencyName.BITCOIN);
+			transaction.setCurrencyName("BTC");
 			transaction.setUser(user);
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);

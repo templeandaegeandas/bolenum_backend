@@ -133,9 +133,15 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.APPROVED);
 		userKyc.setRejectionMessage(null);
 		User user=userKyc.getUser();
-		smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.approve.user.kyc"));
-		mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
-				localeService.getMessage("email.text.approve.user.kyc"));
+		if (userKyc.getDocumentType().equals(DocumentType.NATIONAL_ID)) {
+			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.approve.user.kyc.nationalId"));
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
+					localeService.getMessage("email.text.approve.user.kyc.nationalId"));
+		} else {
+			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.approve.user.kyc.addressproof"));
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
+					localeService.getMessage("email.text.approve.user.kyc.addressproof"));
+		}
 		return kycRepo.save(userKyc);
 	}
 
@@ -151,9 +157,15 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
 		User user = userKyc.getUser();
-		smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.disapprove.user.kyc"));
-		mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
-				localeService.getMessage("email.text.disapprove.user.kyc"));
+		if (userKyc.getDocumentType().equals(DocumentType.NATIONAL_ID)) {
+			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
+					localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
+		} else {
+			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
+					localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
+		}
 		return kycRepo.save(userKyc);
 	}
 

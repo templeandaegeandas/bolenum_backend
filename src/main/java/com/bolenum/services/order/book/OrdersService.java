@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
@@ -54,6 +55,12 @@ public interface OrdersService {
 
 	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
 	
+	Long countActiveOpenOrder();
+	
+	Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType);
+
+	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList);
+
     Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
 
 	Long countActiveOpenOrder();

@@ -4,6 +4,7 @@
 package com.bolenum.services.user.transactions;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
@@ -36,16 +37,17 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
 import com.bolenum.constant.BTCUrlConstant;
-import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Error;
@@ -53,6 +55,8 @@ import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.admin.CurrencyService;
+import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.wallet.BTCWalletService;
@@ -62,6 +66,7 @@ import com.bolenum.util.EthereumServiceUtil;
 /**
  * @author chandan kumar singh
  * @date 29-Sep-2017
+ * @modified Vishal Kumar
  */
 @Service
 @Transactional
@@ -87,6 +92,12 @@ public class TransactionServiceImpl implements TransactionService {
 	@Autowired
 	private ErrorService errorService;
 
+	@Autowired
+	private Erc20TokenService erc20TokenService;
+
+	@Autowired
+	private CurrencyService currencyService;
+
 	/**
 	 * to perform in app transaction for ethereum
 	 * 
@@ -109,7 +120,7 @@ public class TransactionServiceImpl implements TransactionService {
 		File walletFile = new File(fileName);
 		try {
 			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
-			//logger.debug("decr password: {}", decrPwd);
+			// logger.debug("decr password: {}", decrPwd);
 			TransactionReceipt transactionReceipt = null;
 			try {
 				logger.debug("ETH transaction credentials load started");
@@ -140,7 +151,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setUser(fromUser);
-				transaction.setCurrencyName(CurrencyName.ETHEREUM);
+				transaction.setCurrencyName("ETH");
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
@@ -199,80 +210,151 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction.setTransactionType(TransactionType.OUTGOING);
 					transaction.setUser(fromUser);
 					transaction.setTransactionStatus(transactionStatus);
-					transaction.setCurrencyName(CurrencyName.BITCOIN);
+					transaction.setCurrencyName("BTC");
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-						return  new AsyncResult<Boolean>(true);
+						return new AsyncResult<Boolean>(true);
 					}
 				}
 			}
 		} catch (JSONException e) {
-			logger.error("btc transaction JSON exception:  {}", e.getMessage());
+			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress,
+					e.getMessage() + ", ERROR: transaction completed but transaction object not saved in db", "BTC",
+					amount, false);
+			errorService.saveError(error);
+			logger.debug("error saved: {}", error);
+			logger.error("btc transaction exception:  {}", e.getMessage());
 			e.printStackTrace();
 		} catch (RestClientException e) {
+			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress, e.getMessage(), "BTC", amount, false);
+			errorService.saveError(error);
+			logger.debug("error saved: {}", error);
 			logger.error("btc transaction exception:  {}", e.getMessage());
 			e.printStackTrace();
 		}
-		return  new AsyncResult<Boolean>(false);
+		return new AsyncResult<Boolean>(false);
 	}
 
-	
 	@Override
-	public boolean performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+	@Async
+	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
+			TransactionStatus transactionStatus) {
+		try {
+			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, tokenName, toAddress,
+					amount);
+			logger.debug("{} transaction send fund completed", tokenName);
+			String txHash = transactionReceipt.getTransactionHash();
+			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
+					amount);
+			Transaction transaction = transactionRepo.findByTxHash(txHash);
+			logger.debug("transaction by hash: {}", transaction);
+			if (transaction == null) {
+				transaction = new Transaction();
+				transaction.setTxHash(transactionReceipt.getTransactionHash());
+				transaction.setFromAddress(fromUser.getEthWalletaddress());
+				transaction.setToAddress(toAddress);
+				transaction.setTxAmount(amount);
+				transaction.setTransactionType(TransactionType.OUTGOING);
+				transaction.setTransactionStatus(transactionStatus);
+				transaction.setUser(fromUser);
+				transaction.setCurrencyName(tokenName);
+				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				if (saved != null) {
+					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
+					return new AsyncResult<Boolean>(true);
+				}
+			}
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+				| BadPaddingException | IOException | CipherException | TransactionException e) {
+			logger.error("{} transaction failed:  {}", tokenName, e.getMessage());
+			e.printStackTrace();
+		}
+		return new AsyncResult<Boolean>(false);
+	}
+
+	@Override
+	@Async
+	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
 		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";
 		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";
-		switch (currencyAbr) {
-		case "BTC":
-			logger.debug("BTC transaction started");
-			Future<Boolean> txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
-					qtyTraded, null);
-			try{
-				boolean res = txStatus.get();
-				logger.debug("is BTC transaction successed: {}", res);
-				// String msg = "Hi " + seller.getFirstName() + ", Your transaction
-				// of selling "+qtyTraded+" BTC have been processed successfully!";
-				// String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction
-				// of buying "+qtyTraded+" BTC have been processed successfully!";
-				notificationService.sendNotification(seller, msg);
-				notificationService.saveNotification(buyer, seller, msg);
-				notificationService.sendNotification(buyer, msg1);
-				notificationService.saveNotification(buyer, seller, msg1);
-				logger.debug("Message : {}", msg);
-				logger.debug("Message : {}", msg1);
-				return res;
-			}catch (InterruptedException | ExecutionException e) {
-				logger.error("BTC transaction failed: {}", e.getMessage());
-				e.printStackTrace();
+		Future<Boolean> txStatus;
+		switch (currencyType) {
+		case "CRYPTO":
+			switch (currencyAbr) {
+			case "BTC":
+				logger.debug("BTC transaction started");
+				txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
+						qtyTraded, null);
+				try{
+					boolean res = txStatus.get();
+					logger.debug("is BTC transaction successed: {}", res);
+					if (res) {
+						notificationService.sendNotification(seller, msg);
+						notificationService.saveNotification(buyer, seller, msg);
+						notificationService.sendNotification(buyer, msg1);
+						notificationService.saveNotification(buyer, seller, msg1);
+						logger.debug("Message : {}", msg);
+						logger.debug("Message : {}", msg1);
+						return new AsyncResult<Boolean>(res);
+					}
+				}catch (InterruptedException | ExecutionException e) {
+					logger.error("BTC transaction failed: {}", e.getMessage());
+					e.printStackTrace();
+					return new AsyncResult<Boolean>(false);
+				}
+				
+			case "ETH":
+				logger.debug("ETH transaction started");
+				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null);
+				try {
+					boolean res = txStatus.get();
+					logger.debug("is ETH transaction successed: {}", res);
+					notificationService.sendNotification(seller, msg);
+					notificationService.saveNotification(buyer, seller, msg);
+					notificationService.sendNotification(buyer, msg1);
+					notificationService.saveNotification(buyer, seller, msg1);
+					logger.debug("Message : {}", msg);
+					logger.debug("Message : {}", msg1);
+					return new AsyncResult<Boolean>(res);
+				} catch (InterruptedException | ExecutionException e) {
+					logger.error("ETH transaction failed: {}", e.getMessage());
+					e.printStackTrace();
+					return new AsyncResult<Boolean>(false);
+				}
 			}
+			break;
 			
-		case "ETH":
-			logger.debug("ETH transaction started");
-			txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null);
+		case "ERC20TOKEN":
+			logger.debug("ERC20TOKEN transaction started");
+			txStatus = performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null);
 			try {
 				boolean res = txStatus.get();
-				logger.debug("is ETH transaction successed: {}", res);
-				// String msg2 = "Hi " + seller.getFirstName() + ", Your
-				// transaction of selling "+qtyTraded+" ETH have been processed
-				// successfully!";
-				// String msg3 = "Hi " + buyer.getFirstName() + ", Your
-				// transaction of buying "+qtyTraded+" ETH have been processed
-				// successfully!";
-				notificationService.sendNotification(seller, msg);
-				notificationService.saveNotification(buyer, seller, msg);
-				notificationService.sendNotification(buyer, msg1);
-				notificationService.saveNotification(buyer, seller, msg1);
-				logger.debug("Message : {}", msg);
-				logger.debug("Message : {}", msg1);
-				return res;
+				logger.debug("is ERC20TOKEN transaction successed: {}", res);
+				if (res) {
+					notificationService.sendNotification(seller, msg);
+					notificationService.saveNotification(buyer, seller, msg);
+					notificationService.sendNotification(buyer, msg1);
+					notificationService.saveNotification(buyer, seller, msg1);
+					logger.debug("Message : {}", msg);
+					logger.debug("Message : {}", msg1);
+				}
+				return new AsyncResult<Boolean>(res);
 			} catch (InterruptedException | ExecutionException e) {
-				logger.error("ETH transaction failed: {}", e.getMessage());
+				logger.error("ERC20TOKEN transaction failed: {}", e.getMessage());
 				e.printStackTrace();
+				return new AsyncResult<Boolean>(false);
 			}
+
+		default:
+			break;
 		}
-		return false;
+
+	return new AsyncResult<Boolean>(false);
+
 	}
 
 	/**

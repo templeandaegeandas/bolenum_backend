@@ -214,8 +214,12 @@ public class BTCWalletController {
 			break;
 
 		case "ERC20TOKEN":
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
-					null);
+			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode, withdrawBalanceForm.getWithdrawAmount());
+			if (validWithdrawAmount) {
+					transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(), withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
+			}
+			break;
+			
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
@@ -237,7 +241,7 @@ public class BTCWalletController {
 
 		}
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"),
-				availableBTCBalance);
+				null);
 	}
 
 	@RequestMapping(value = UrlConstant.DEPOSIT_TRANSACTION_STATUS, method = RequestMethod.POST)
@@ -250,5 +254,4 @@ public class BTCWalletController {
 			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("Deposit saved successfully!"),transactionResponse );
 		}
 	}
-
 }

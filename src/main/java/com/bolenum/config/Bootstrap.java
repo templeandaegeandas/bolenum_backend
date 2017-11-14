@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jta.bitronix.BitronixXAConnectionFactoryWrapper;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.bolenum.enums.CurrencyType;
@@ -58,6 +59,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
+	
+	@Autowired
+	private Environment environment;
 
 	@Autowired
 	private CountryAndStateService countriesAndStateService;
@@ -224,12 +228,22 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		Role r = new Role("ROLE_ADMIN", "Admin role", privilegeService.findAllPrevileges());
 		Role roleAdmin = roleService.findOrCreate(r);
 		User admin = userService.findByEmail("admin@bolenum.com");
+		String activeProfile = environment.getActiveProfiles()[0];
+		logger.debug("Currently active profile: {}",activeProfile);
 		if (admin == null) {
 			User form = new User();
 			form.setIsEnabled(true);
 			form.setFirstName("bolenum");
 			form.setEmailId("admin@bolenum.com");
-			form.setPassword(passwordEncoder.encode("12345"));
+			if (activeProfile.equals("prod")) {
+				form.setPassword(passwordEncoder.encode("m@n!@b0l3num!@#"));
+			}
+			else if (activeProfile.equals("stag")) {
+				form.setPassword(passwordEncoder.encode("bolenum@oodles"));
+			}
+			else {
+				form.setPassword(passwordEncoder.encode("12345"));
+			}
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
 			etherumWalletService.createWallet(user);
