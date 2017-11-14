@@ -1,6 +1,7 @@
 package com.bolenum.repo.common;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,5 +21,9 @@ public interface AuthenticationTokenRepo extends JpaRepository<AuthenticationTok
 	List<AuthenticationToken> findByUserAndTokentype(User user,TokenType tokentype);
 	List<AuthenticationToken> findByUserAndIsDeleted(User user, boolean isDeleted);
 	List<AuthenticationToken> findByUserAndIsDeletedAndTokentype(User user, boolean isDeleted,TokenType token);
+
+	
+	Long countAuthenticationTokenByUpdatedOnBetween(Date startDate,Date endDate);
+ 	
 
 }

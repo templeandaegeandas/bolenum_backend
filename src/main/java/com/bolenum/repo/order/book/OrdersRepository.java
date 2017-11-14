@@ -1,5 +1,6 @@
 package com.bolenum.repo.order.book;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -66,4 +67,10 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
 	
 	Long countOrderByUserAndOrderType(User user,OrderType orderType);
+
+	//@Query("SELECT e FROM Events e WHERE e.eventsDate BETWEEN :startDate AND :endDate")
+	Long countOrdersByCreatedOnBetween(Date startDate,Date endDate);
+
+	Long countOrdersByOrderTypeAndCreatedOnBetween(OrderType orderType,Date startDate,Date endDate);
+	
 }
