@@ -54,7 +54,7 @@ public interface OrdersService {
 	String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded);
 
 	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
-	
+
 	Long countActiveOpenOrder();
 	
 	Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType);
@@ -62,9 +62,4 @@ public interface OrdersService {
 	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList);
 
     Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
-
-	Long countActiveOpenOrder();
-	
-	Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType);
-
 }

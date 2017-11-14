@@ -34,7 +34,6 @@ import org.web3j.crypto.CipherException;
 
 import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.constant.UrlConstant;
-import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Currency;
