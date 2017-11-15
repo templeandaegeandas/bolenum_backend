@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
 import com.bolenum.enums.TransactionStatus;
+import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.TransactionFee;
@@ -205,16 +206,23 @@ public class BTCWalletController {
 						localService.getMessage("invalid.coin.code"), null);
 			}
 			break;
-
 		case "ERC20TOKEN":
-			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode,
-					withdrawBalanceForm.getWithdrawAmount());
+			try {
+				validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode,
+						withdrawBalanceForm.getWithdrawAmount());
+			} catch (InsufficientBalanceException e) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, e.getMessage(), null);
+			}
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
 				transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.erc20.success"), null);
 			}
-			break;
+			else {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+						localService.getMessage("withdraw.invalid.available.balance"), null);
+			}
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
@@ -222,16 +230,13 @@ public class BTCWalletController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
 		}
-
 		if (!validAvailableWalletBalance) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 					localService.getMessage("withdraw.invalid.available.balance"), null);
 		}
-
 		if (!validWithdrawAmount) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 					localService.getMessage("withdraw.invalid.amount"), null);
-
 		}
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"), null);
 	}

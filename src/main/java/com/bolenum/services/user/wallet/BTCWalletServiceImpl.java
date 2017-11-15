@@ -4,6 +4,7 @@
 package com.bolenum.services.user.wallet;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,12 +28,14 @@ import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -66,6 +69,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
+	
+	@Autowired
+	private LocaleService localeService;
 	
 	@Override
 	public String createHotWallet(String uuid) {
@@ -227,17 +233,20 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 	
 	@Override
-	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) {
+	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) throws InsufficientBalanceException {
 		Double availableBalance = null;
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 			availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
 		double placeOrderVolume = orderService.getPlacedOrderVolume(user);
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
-		if (availableBalance >= withdrawAmount) {
+		if (availableBalance >= (withdrawAmount+placeOrderVolume)) {
 			return true;
 		}
-		return false;
+		else {
+			availableBalance = availableBalance - withdrawAmount+placeOrderVolume;
+			throw new InsufficientBalanceException(MessageFormat.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
+		}
 	}
 
 	/**

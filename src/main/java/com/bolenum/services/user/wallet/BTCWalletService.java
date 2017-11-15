@@ -6,7 +6,7 @@ package com.bolenum.services.user.wallet;
 import java.util.Map;
 
 import com.bolenum.model.User;
-
+import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Transaction;
 
 /**
@@ -51,7 +51,7 @@ public interface BTCWalletService {
 	boolean validateAvailableWalletBalance(Double availableBalance, Double availableBalanceLimitToWithdraw,
 			Double withdrawAmount);
 
-	boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount);
+	boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) throws InsufficientBalanceException;
 
 	Transaction setDepositeList(Transaction transaction);
 }

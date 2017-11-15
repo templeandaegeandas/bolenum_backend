@@ -257,7 +257,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
-				transaction.setTxAmount(amount/erc20Token.getDecimalValue());
+				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setUser(fromUser);

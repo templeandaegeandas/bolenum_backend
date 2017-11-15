@@ -225,7 +225,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue());
 			tx.setTransactionType(TransactionType.INCOMING);
 			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
 			tx.setCurrencyName(tokenName);
