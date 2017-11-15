@@ -163,6 +163,7 @@ public class TransactionServiceImpl implements TransactionService {
 				if (receiverUser != null) {
 					transaction.setToUser(receiverUser); 
 				}
+
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
@@ -228,6 +229,7 @@ public class TransactionServiceImpl implements TransactionService {
 					if (receiverUser != null) {
 						transaction.setToUser(receiverUser); 
 					}
+
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
@@ -255,6 +257,7 @@ public class TransactionServiceImpl implements TransactionService {
 		return new AsyncResult<Boolean>(false);
 	}
 
+	
 	@Override
 	@Async
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
@@ -306,6 +309,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Async
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller)
 			throws InterruptedException, ExecutionException {
+
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
 		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";
@@ -319,7 +323,8 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("BTC transaction started");
 				txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
 						qtyTraded, null);
-				try {
+
+				try{
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
 					if (res) {
@@ -337,6 +342,7 @@ public class TransactionServiceImpl implements TransactionService {
 					return new AsyncResult<Boolean>(false);
 				}
 
+				
 			case "ETH":
 				logger.debug("ETH transaction started");
 				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null);
@@ -357,7 +363,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 			}
 			break;
-
+			
 		case "ERC20TOKEN":
 			logger.debug("ERC20TOKEN transaction started");
 			txStatus = performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null);
@@ -384,6 +390,7 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 
 		return new AsyncResult<Boolean>(false);
+
 
 	}
 

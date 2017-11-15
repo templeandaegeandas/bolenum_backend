@@ -58,7 +58,6 @@ public class OrderController {
 	@Autowired
 	private LocaleService localeService;
 
-
 	@Autowired
 	private BankDetailsService bankDetailsService;
 

@@ -99,6 +99,7 @@ public class OrdersServiceImpl implements OrdersService {
 		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
 		// getting the user current wallet balance
 		String balance = walletService.getBalance(tickter, currencyType, user);
+
 		balance = balance.replace("BTC", "");
 		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
 			// user must have balance then user is eligible for placing order
@@ -155,6 +156,8 @@ public class OrdersServiceImpl implements OrdersService {
 	 *            order, list of existing orders
 	 * @return #true if user requested order is matched with own existing user else
 	 *         #false
+	 * @return #true if user requested order is matched with own existing user
+	 *         else #false
 	 */
 	private boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
 		if (orderList.size() > 0) {
@@ -186,7 +189,8 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			/**
-			 * checking user self order, return false if self order else proceed.
+			 * checking user self order, return false if self order else
+			 * proceed.
 			 */
 			if (isUsersSelfOrder(orders, sellOrderList)) {
 				return processed;
@@ -211,7 +215,9 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, pair);
 			/**
-			 * checking user self order, return false if self order else proceed.
+
+			 * checking user self order, return false if self order else
+			 * proceed.
 			 */
 			if (isUsersSelfOrder(orders, buyOrderList)) {
 				return processed;
@@ -264,6 +270,7 @@ public class OrdersServiceImpl implements OrdersService {
 							OrderStatus.SUBMITTED, pair, price);
 			/**
 			 * checking user self order, return false if self order else proceed.
+
 			 */
 			if (isUsersSelfOrder(orders, sellOrderList)) {
 				return processed;
@@ -295,6 +302,13 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, pair, price);
+			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
+			 */
+			if (isUsersSelfOrder(orders, buyOrderList)) {
+				return processed;
+			}
 			/**
 			 * checking user self order, return false if self order else proceed.
 			 */

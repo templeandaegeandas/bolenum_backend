@@ -80,6 +80,7 @@ public class Transaction {
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
 			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
 			Double gasPrice, User fromUser ,User toUser) {
+	
 			
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
@@ -280,8 +281,6 @@ public class Transaction {
 		this.gasPrice = gasPrice;
 	}
 
-	
-	
 	public User getFromUser() {
 		return fromUser;
 	}
@@ -297,7 +296,7 @@ public class Transaction {
 	public void setToUser(User toUser) {
 		this.toUser = toUser;
 	}
-
+	
 	public TransactionStatus getTransactionStatus() {
 		return transactionStatus;
 	}

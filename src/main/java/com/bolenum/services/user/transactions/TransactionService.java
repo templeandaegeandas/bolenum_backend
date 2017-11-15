@@ -26,5 +26,5 @@ public interface TransactionService {
 			String sortOrder, String sortBy);
 	Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus);
-	
+
 }

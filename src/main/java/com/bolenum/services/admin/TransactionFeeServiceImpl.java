@@ -131,7 +131,9 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 			listOfTransactionFee = transactionFeeRepo.findAll();
 
 		}
+
 		TransactionFee transactionFee = listOfTransactionFee.get(0);
+		
 		if (addTransactioFeeAndLimitForm.getFeeBTC() != null) {
 			transactionFee.setFeeBTC(addTransactioFeeAndLimitForm.getFeeBTC());
 		}
@@ -186,6 +188,7 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 	
 	@Override
 	public TransactionFee getTransactionFeeDetails() {
+
 		List<TransactionFee> listOfTransactionFee = transactionFeeRepo.findAll();
 		if (listOfTransactionFee.size() == 0) {
 			transactionFeeRepo.save(new TransactionFee());

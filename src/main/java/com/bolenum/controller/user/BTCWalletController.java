@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
 import com.bolenum.enums.TransactionStatus;
+import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.TransactionFee;
@@ -63,6 +64,8 @@ public class BTCWalletController {
 	 */
 	@Autowired
 	private TransactionService transactionService;
+
+
 
 	@Autowired
 	private TransactionFeeService transactionFeeService;
@@ -140,17 +143,20 @@ public class BTCWalletController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
 	}
 
+
+
 	/**
 	 * 
 	 * @param currencyType
 	 * @param withdrawBalanceForm
 	 * @param coinCode
 	 * @return
+	 * @throws InsufficientBalanceException 
 	 */
 	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmountFromWallet(@RequestParam(name = "currencyType") String currencyType,
 			@Valid @RequestBody WithdrawBalanceForm withdrawBalanceForm, @RequestParam(name = "code") String coinCode,
-			BindingResult bindingResult) {
+			BindingResult bindingResult) throws InsufficientBalanceException {
 
 		if (bindingResult.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
@@ -238,7 +244,7 @@ public class BTCWalletController {
 
 
 	@RequestMapping(value = UrlConstant.DEPOSIT_TRANSACTION_STATUS, method = RequestMethod.POST)
-	public ResponseEntity<Object> withdrawAmountFromWallet(@RequestBody Transaction transaction) {
+	public ResponseEntity<Object> depositTransactionStatus(@RequestBody Transaction transaction) {
 		Transaction transactionResponse = btcWalletService.setDepositeList(transaction);
 		if (transactionResponse == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("Deposit not saved!"),

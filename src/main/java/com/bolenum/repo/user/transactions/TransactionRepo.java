@@ -28,4 +28,5 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 
 	Page<Transaction> findByToUserAndTransactionStatusOrTransactionStatus(User toUser,TransactionStatus transactionStatus,TransactionStatus transactionStatus1, Pageable pageable);
 
+
 }

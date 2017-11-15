@@ -238,6 +238,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", fromUser.getEmailId());
+
 			}
 		} else {
 			if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {

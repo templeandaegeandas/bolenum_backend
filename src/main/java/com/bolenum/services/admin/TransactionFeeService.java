@@ -29,5 +29,6 @@ public interface TransactionFeeService {
 	
 	public TransactionFee saveTransactionFee(AddTransactioFeeAndLimitForm addTransactioFeeAndLimitForm);
 
+
 	public TransactionFee getTransactionFeeDetails();
 }
