@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
@@ -22,12 +24,15 @@ import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
+import com.bolenum.model.orders.book.PartialTrade;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 
@@ -67,7 +72,11 @@ public class OrdersServiceImpl implements OrdersService {
 
 	List<Orders> ordersList = new ArrayList<>();
 
+	List<Orders> matchedOrdersList = new ArrayList<>();
+
 	List<Trade> tradeList = new ArrayList<>();
+
+	List<PartialTrade> partialTradeList = new ArrayList<>();
 
 	/**
 	 * this will check user wallet balance to get place an order
@@ -126,7 +135,7 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException {
 		Boolean status;
-		if (orders.equals(OrderStandard.MARKET)) {
+		if (orders.getOrderStandard().equals(OrderStandard.MARKET)) {
 			logger.debug("Processing market order");
 			status = processMarketOrder(orders);
 		} else {
@@ -178,6 +187,11 @@ public class OrdersServiceImpl implements OrdersService {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		CurrencyPair pair = orders.getPair();
+		boolean isFiat = false;
+		if (pair.getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)
+				|| pair.getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)) {
+			isFiat = true;
+		}
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		if (orderType.equals(OrderType.BUY)) {
@@ -187,24 +201,29 @@ public class OrdersServiceImpl implements OrdersService {
 			 * checking user self order, return false if self order else
 			 * proceed.
 			 */
-			if (isUsersSelfOrder(orders, sellOrderList)) {
-				return processed;
-			}
+			// if (isUsersSelfOrder(orders, sellOrderList)) {
+			// return processed;
+			// }
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
-				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
-			}
-			if (remainingVolume >= 0) {
-				orders.setVolume(remainingVolume);
-				/**
-				 * if all volume traded then change status to completed of order
-				 */
-				if (remainingVolume == 0) {
-					orders.setOrderStatus(OrderStatus.COMPLETED);
+				if (isFiat) {
+					remainingVolume = processFiatOrderList(sellOrderList, remainingVolume, orders, pair);
+				} else {
+					remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 				}
-				ordersList.add(orders);
-				logger.debug("qty remaining so added in book: {}", remainingVolume);
 			}
+			// if (remainingVolume >= 0) {
+			// orders.setVolume(remainingVolume);
+			// /**
+			// * if all volume traded then change status to completed of order
+			// */
+			// if (remainingVolume == 0) {
+			// orders.setOrderStatus(OrderStatus.COMPLETED);
+			// }
+			// ordersList.add(orders);
+			// logger.debug("qty remaining so added in book: {}",
+			// remainingVolume);
+			// }
 			processed = true;
 		} else {
 			List<Orders> buyOrderList = ordersRepository
@@ -213,12 +232,17 @@ public class OrdersServiceImpl implements OrdersService {
 			 * checking user self order, return false if self order else
 			 * proceed.
 			 */
-			if (isUsersSelfOrder(orders, buyOrderList)) {
-				return processed;
-			}
+			// if (isUsersSelfOrder(orders, buyOrderList)) {
+			// return processed;
+			// }
+			logger.debug("buyOrderList.size(): {}",buyOrderList.size());
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
-				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
+				if (isFiat) {
+					remainingVolume = processFiatOrderList(buyOrderList, remainingVolume, orders, pair);
+				} else {
+					remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
+				}
 			}
 			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
@@ -352,6 +376,117 @@ public class OrdersServiceImpl implements OrdersService {
 	 * 
 	 */
 	@Override
+	public Double processFiatOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders,
+			CurrencyPair pair) throws InterruptedException, ExecutionException {
+		// fetching order type BUY or SELL
+		OrderType orderType = orders.getOrderType();
+		User buyer, seller;
+		logger.debug("process order list remainingVolume: {}", remainingVolume);
+		// process till order size and remaining volume is > 0
+		while ((ordersList.size() > 0) && (remainingVolume > 0)) {
+			logger.debug("inner fiat order proccessing while");
+			Double qtyTraded; // total number quantity which is processed
+			// fetch matched order object
+			Orders matchedOrder = matchedOrder(ordersList);
+			// checking selling/buying volume less than matched order volume
+			logger.debug("matched order volume: {}", matchedOrder.getVolume());
+			if (remainingVolume < matchedOrder.getVolume()) {
+				// qtyTraded is total selling/buying volume
+				qtyTraded = remainingVolume;
+				logger.debug("qty traded: {}", qtyTraded);
+				// setting new required SELL/BUY volume is remaining order
+				// volume
+				double remain = matchedOrder.getVolume() - remainingVolume;
+				logger.debug("reamining volume: {}", remain);
+				matchedOrder.setVolume(remain);
+				logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
+				matchedOrder.setLockedVolume(qtyTraded);
+				logger.debug("locked volume after set: {}", matchedOrder.getLockedVolume());
+				// adding matched order in list with remaining volume
+				ordersList.add(matchedOrder);
+				// now selling/buying volume is 0
+				remainingVolume = 0.0;
+			} else {
+				// selling/buying volume greater than matched order volume
+				// qtyTraded is total sellers/buyers volume
+				qtyTraded = matchedOrder.getVolume();
+				logger.debug("qty traded else: {}", qtyTraded);
+				// new selling/buying volume is remainingVolume - qtyTraded
+				remainingVolume = remainingVolume - qtyTraded;
+				logger.debug("remaining volume else: {}", remainingVolume);
+				// removed processed order
+				removeOrderFromList(ordersList);
+				// new volume of processed order is 0
+				matchedOrder.setVolume(0.0);
+				matchedOrder.setLockedVolume(qtyTraded);
+				logger.debug("locked volume after set else: {}", matchedOrder.getLockedVolume());
+				// status of processed order is completed
+				matchedOrder.setOrderStatus(OrderStatus.COMPLETED);
+				// locking coming order matched volume
+				orders.setLockedVolume(qtyTraded);
+				// volume of coming order
+				orders.setVolume(remainingVolume);
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
+				matchedOrdersList.add(matchedOrder);
+				matchedOrdersList.add(orders);
+				logger.debug("matching buy/sell completed");
+			}
+			// checking the order type BUY
+			if (orderType.equals(OrderType.BUY)) {
+				// buyer is coming order's user
+				buyer = orders.getUser();
+				// seller is matched order's user
+				seller = matchedOrder.getUser();
+			} else {
+				// order type is SELL
+				// buyer is matched order's user
+				buyer = matchedOrder.getUser();
+				// seller is coming order's user
+				seller = orders.getUser();
+			}
+			// buyer and seller must be different user
+			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
+			// saving the processed BUY/SELL order in partial trade
+			PartialTrade trade = new PartialTrade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair,
+					OrderStandard.MARKET);
+			partialTradeList.add(trade);
+			logger.debug("partial Trade added to partial trade list");
+		}
+		logger.debug("order list saving started");
+		ordersList.addAll(matchedOrdersList);
+
+		ObjectMapper map = new ObjectMapper();
+		try {
+			String s = map.writeValueAsString(matchedOrdersList);
+			System.out.println("matched order list: " + s);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		matchedOrdersList.clear();
+		try {
+			String s = map.writeValueAsString(ordersList);
+			System.out.println("order list: " + s);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		orderAsyncServices.saveOrder(ordersList);
+		ordersList.clear();
+		logger.debug("order list saving finished");
+		orderAsyncServices.savePartialTrade(partialTradeList);
+		partialTradeList.clear();
+		return remainingVolume;
+	}
+
+	/**
+	 * process the buyers and sellers order
+	 * 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
+	 * 
+	 */
+	@Override
 	public Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair)
 			throws InterruptedException, ExecutionException {
 		// fetching order type BUY or SELL
@@ -414,7 +549,7 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			// buyer and seller must be different user
 			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
-			if (buyer != seller) {
+			if (buyer.getUserId() != seller.getUserId()) {
 				// saving the processed BUY/SELL order in trade
 				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT);
 				tradeList.add(trade);
@@ -652,5 +787,69 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public Orders getOrderDetails(long orderId) {
 		return ordersRepository.getOne(orderId);
+	}
+
+	/**
+	 * to check the eligibility to place an order by checking available balance
+	 * of crypto currencies #return "proceed" if user have sufficient balance
+	 * #return "Synchronizing" if BTC block chain is syncing with network
+	 */
+	@Override
+	public String checkFiatOrderEligibility(User user, Orders orders, long pairId) {
+		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
+		orders.setPair(currencyPair);
+
+		Currency currency = null;
+		Currency toCurrency = currencyPair.getToCurrency().get(0);
+		if (!(toCurrency.getCurrencyType().equals(CurrencyType.FIAT))) {
+			currency = toCurrency;
+		}
+
+		Currency pairCurrency = currencyPair.getPairedCurrency().get(0);
+		if (!(pairCurrency.getCurrencyType().equals(CurrencyType.FIAT))) {
+			currency = pairCurrency;
+		}
+		String tickter = null, minOrderVol = null, currencyType = null;
+		/**
+		 * if order type is SELL then only checking, user have selling volume
+		 */
+		if (orders.getOrderType().equals(OrderType.SELL)) {
+			minOrderVol = String.valueOf(orders.getVolume());
+		} else {
+			minOrderVol = "0";
+		}
+		tickter = currency.getCurrencyAbbreviation();
+		currencyType = currency.getCurrencyType().toString();
+		double userPlacedOrderVolume = getPlacedOrderVolumeOfCurrency(user, OrderStatus.SUBMITTED, OrderType.SELL,
+				currency);
+		logger.debug("user placed order volume: {} and order volume: {}", userPlacedOrderVolume, minOrderVol);
+		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
+		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
+		// getting the user current wallet balance
+		String balance = walletService.getBalance(tickter, currencyType, user);
+		balance = balance.replace("BTC", "");
+		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
+			// user must have balance then user is eligible for placing order
+			if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
+				balance = "proceed";
+			}
+		}
+		return balance;
+	}
+
+	/**
+	 * @description getPlacedOrderVolumeOfCurrency @param @return
+	 *              double @exception
+	 * 
+	 */
+	private double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType,
+			Currency currency) {
+		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(user, orderStatus,
+				orderType, currency);
+		double total = 0.0;
+		for (Orders order : orders) {
+			total = total + order.getVolume();
+		}
+		return total;
 	}
 }
