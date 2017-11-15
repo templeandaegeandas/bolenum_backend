@@ -3,6 +3,7 @@ package com.bolenum.services.user;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bolenum.enums.DocumentType;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
@@ -41,7 +43,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 	private static final Logger logger = LoggerFactory.getLogger(FileUploadServiceImpl.class);
 
 	@Override
-	public String uploadFile(MultipartFile multipartFile, String storageLocation, User user, String[] validExtentions,
+	public String uploadFile(MultipartFile multipartFile, String storageLocation, User user, DocumentType documentType, String[] validExtentions,
 			long maxSize) throws IOException, PersistenceException, MaxSizeExceedException {
 		if (multipartFile.getSize() > maxSize) {
 			throw new MaxSizeExceedException(localeService.getMessage("max.file.size.exceeds"));
@@ -52,11 +54,17 @@ public class FileUploadServiceImpl implements FileUploadService {
 		if (!Arrays.asList(validExtentions).contains(extension.toLowerCase())) {
 			throw new PersistenceException(localeService.getMessage("valid.image.extention.error"));
 		}
-		String updatedFileName = user.getFirstName() + "_" + user.getUserId() + "." + extension;
+		String updatedFileName = documentType + "_" + user.getUserId() + "." + extension;
 		InputStream inputStream = multipartFile.getInputStream();
-		BufferedImage imageFromConvert = ImageIO.read(inputStream);
+		byte[] buf = new byte[1024];
 		File file = new File(storageLocation + updatedFileName);
-		ImageIO.write(imageFromConvert, extension, file);
+		FileOutputStream fileOutputStream = new FileOutputStream(file);
+		int numRead=0;
+		while ((numRead = inputStream.read(buf)) >= 0) {
+				fileOutputStream.write(buf, 0, numRead);
+		}
+		inputStream.close();
+		fileOutputStream.close();
 		logger.debug("user uploaded file name: {}",String.valueOf(file));
 		//using PosixFilePermission to set file permissions 777
         Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();

@@ -3,6 +3,8 @@ package com.bolenum.model;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,11 +31,13 @@ public class AuthenticationToken {
 	@ManyToOne
 	private User user;
 
+	@Enumerated(EnumType.STRING)
 	private TokenType tokentype;
 	@NotBlank
 	private String token;
 	@CreationTimestamp
 	private Date createdOn;
+	
 	@UpdateTimestamp
 	private Date updatedOn;
 	

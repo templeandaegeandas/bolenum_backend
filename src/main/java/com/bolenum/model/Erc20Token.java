@@ -27,6 +27,7 @@ public class Erc20Token {
 	private String contractAddress;
 	@OneToOne
 	private Currency currency;
+	private Double decimalValue;
 	private Boolean isDeleted = false;
 	private Date createdDate = new Date();
 	
@@ -70,6 +71,14 @@ public class Erc20Token {
 
 	public void setCurrency(Currency currency) {
 		this.currency = currency;
+	}
+
+	public Double getDecimalValue() {
+		return decimalValue;
+	}
+
+	public void setDecimalValue(Double decimalValue) {
+		this.decimalValue = decimalValue;
 	}
 
 	public Boolean getIsDeleted() {

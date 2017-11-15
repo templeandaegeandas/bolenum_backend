@@ -7,14 +7,18 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.bolenum.enums.CurrencyName;
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -37,34 +41,57 @@ public class Transaction {
 	@ApiModelProperty(hidden = true)
 	@UpdateTimestamp
 	private Date updatedOn;
-	@Column(unique=true)
+	@Column(unique = true)
 	private String txHash;
 	private String fromAddress;
 	private String toAddress;
 	private Double txFee;
 	private Double txAmount;
 	private String txDescription;
-	private CurrencyName currencyType;
+	
+	@Enumerated(EnumType.STRING)
 	private TransactionType transactionType;
+	@Enumerated(EnumType.STRING)
+	private TransactionStatus transactionStatus;
 	private Double gas;
 	private Double gasPrice;
+	
+	private String currencyName;
+	
+
+	public String getCurrencyName() {
+		return currencyName;
+	}
+
+	public void setCurrencyName(String currencyName) {
+		this.currencyName = currencyName;
+	}
+
+	@ManyToOne
+	private User fromUser;
+	
+	@ManyToOne
+	private User toUser;
 
 	public Transaction() {
 
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,Double gasPrice) {
+			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
+			Double gasPrice, User fromUser ,User toUser) {
+			
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
 		this.txFee = txFee;
 		this.txAmount = txAmmount;
 		this.txDescription = txDescription;
-		this.currencyType = currencyType;
 		this.transactionType = transactionType;
 		this.gas = gas;
 		this.gasPrice = gasPrice;
+		this.fromUser = fromUser;
+		this.toUser=toUser;
 	}
 
 	/**
@@ -208,21 +235,7 @@ public class Transaction {
 	}
 
 	/**
-	 * @return the currencyType
-	 */
-	public CurrencyName getCurrencyType() {
-		return currencyType;
-	}
 
-	/**
-	 * @param currencyType
-	 *  the currencyType to set
-	 */
-	public void setCurrencyType(CurrencyName currencyType) {
-		this.currencyType = currencyType;
-	}
-
-	/**
 	 * @return the transactionType
 	 */
 	public TransactionType getTransactionType() {
@@ -231,7 +244,7 @@ public class Transaction {
 
 	/**
 	 * @param transactionType
-	 * the transactionType to set
+	 *            the transactionType to set
 	 */
 	public void setTransactionType(TransactionType transactionType) {
 		this.transactionType = transactionType;
@@ -260,11 +273,36 @@ public class Transaction {
 	}
 
 	/**
-	 * @param gasPrice 
-	 * the gasPrice to set
+	 * @param gasPrice
+	 *            the gasPrice to set
 	 */
 	public void setGasPrice(Double gasPrice) {
 		this.gasPrice = gasPrice;
 	}
 
+	
+	
+	public User getFromUser() {
+		return fromUser;
+	}
+
+	public void setFromUser(User fromUser) {
+		this.fromUser = fromUser;
+	}
+
+	public User getToUser() {
+		return toUser;
+	}
+
+	public void setToUser(User toUser) {
+		this.toUser = toUser;
+	}
+
+	public TransactionStatus getTransactionStatus() {
+		return transactionStatus;
+	}
+
+	public void setTransactionStatus(TransactionStatus transactionStatus) {
+		this.transactionStatus = transactionStatus;
+	}
 }

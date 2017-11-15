@@ -3,7 +3,6 @@
  */
 package com.bolenum.services.order.book;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -21,9 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.bolenum.model.Currency;
-import com.bolenum.model.orders.book.MarketPrice;
 import com.bolenum.repo.common.CurrencyRepo;
-import com.bolenum.repo.order.book.MarketPriceRepo;
 
 /**
  * @author chandan kumar singh
@@ -33,16 +30,17 @@ import com.bolenum.repo.order.book.MarketPriceRepo;
 @Transactional
 public class MarketPriceServiceImpl implements MarketPriceService {
 	private Logger logger = LoggerFactory.getLogger(MarketPriceServiceImpl.class);
-	@Autowired
-	private MarketPriceRepo marketPriceRepo;
+	/*
+	 * @Autowired private MarketPriceRepo marketPriceRepo;
+	 */
 	@Autowired
 	private CurrencyRepo currencyRepo;
 	private List<Currency> list;
 
-	@Override
-	public MarketPrice savePrice(MarketPrice marketPrice) {
-		return marketPriceRepo.saveAndFlush(marketPrice);
-	}
+	/*
+	 * @Override public MarketPrice savePrice(MarketPrice marketPrice) { return
+	 * marketPriceRepo.saveAndFlush(marketPrice); }
+	 */
 
 	private void loadCurrecy() {
 		list = currencyRepo.findAll();
@@ -51,7 +49,7 @@ public class MarketPriceServiceImpl implements MarketPriceService {
 	@Override
 	public void priceFromCoinMarketCap() {
 		loadCurrecy();
-		logger.debug("every 20 sec :{}", new Date());
+		// logger.debug("every 20 sec :{}", new Date());
 		String url = "https://api.coinmarketcap.com/v1/ticker/";
 		RestTemplate restTemplate = new RestTemplate();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
@@ -91,24 +89,18 @@ public class MarketPriceServiceImpl implements MarketPriceService {
 	}
 
 	private void saveMarketPrice(Currency currency, String priceBtc, String priceUsd) {
-		MarketPrice marketPrice = marketPriceRepo.findByCurrency(currency);
-		if (marketPrice == null) {
-			marketPrice = new MarketPrice();
-			marketPrice.setCurrency(currency);
-		}
-		marketPrice.setPriceBTC(Double.valueOf(priceBtc));
-		marketPrice.setPriceUSD(Double.valueOf(priceUsd));
-		marketPrice.setUpdatedOn(new Date());
-		savePrice(marketPrice);
+		currency.setPriceBTC(Double.valueOf(priceBtc));
+		currency.setPriceUSD(Double.valueOf(priceUsd));
+		currencyRepo.save(currency);
 	}
 
-	@Override
-	public MarketPrice findByCurrency(Currency currency) {
-		return marketPriceRepo.findByCurrency(currency);
-	}
-	
-	@Override
-	public MarketPrice findByCurrencyId(String currencyAbbreviation) {
-		return marketPriceRepo.findByCurrencyCurrencyAbbreviation(currencyAbbreviation);
-	}
+	/*
+	 * @Override public MarketPrice findByCurrency(Currency currency) { return
+	 * marketPriceRepo.findByCurrency(currency); }
+	 * 
+	 * @Override public MarketPrice findByCurrencyId(String
+	 * currencyAbbreviation) { return
+	 * marketPriceRepo.findByCurrencyCurrencyAbbreviation(currencyAbbreviation);
+	 * }
+	 */
 }

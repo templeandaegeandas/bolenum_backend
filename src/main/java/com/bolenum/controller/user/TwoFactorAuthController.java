@@ -50,6 +50,13 @@ public class TwoFactorAuthController {
 	@Autowired
 	private AuthService authService;
 	
+	/**
+	 * 
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws WriterException
+	 * @throws IOException
+	 */
 	@RequestMapping(value = UrlConstant.GEN_GOOGLE_AUTH_QR, method = RequestMethod.POST)
 	ResponseEntity<Object> generateGoogleAuthQr() throws URISyntaxException, WriterException, IOException {
 		User user = GenericUtils.getLoggedInUser();
@@ -63,6 +70,11 @@ public class TwoFactorAuthController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param secret
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.VERIFY_GOOGLE_AUTH_KEY, method = RequestMethod.PUT)
 	ResponseEntity<Object> authenticateGoogleAuthKey(@RequestParam("secret") String secret) {
 		User user = GenericUtils.getLoggedInUser();
@@ -83,6 +95,10 @@ public class TwoFactorAuthController {
 	}
 
 
+	/**
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.TWO_FACTOR_AUTH_VIA_MOBILE, method = RequestMethod.PUT)
 	ResponseEntity<Object> setTwoFactorAuthViaMobile() {
 		User user = GenericUtils.getLoggedInUser();
@@ -106,6 +122,12 @@ public class TwoFactorAuthController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param loginForm
+	 * @param bindingResult
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.SEND_2FA_OTP, method = RequestMethod.PUT)
 	ResponseEntity<Object> sendOtpForTwoFactorAuth(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult) {
 		User user = userService.findByEmail(loginForm.getEmailId());
@@ -119,6 +141,12 @@ public class TwoFactorAuthController {
 		}
 	}
 
+	/**
+	 * @param loginForm
+	 * @param bindingResult
+	 * @param otp
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.VERIFY_2FA_OTP, method = RequestMethod.PUT)
 	ResponseEntity<Object> verify2faOtp(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult, @RequestParam("otp") int otp) throws InvalidOtpException {
 		User user = userService.findByEmail(loginForm.getEmailId());
@@ -140,6 +168,10 @@ public class TwoFactorAuthController {
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.REMOVE_TWO_FACTOR_AUTH, method = RequestMethod.DELETE)
 	ResponseEntity<Object> removeTwoFactorAuth() {
 		User user = GenericUtils.getLoggedInUser();

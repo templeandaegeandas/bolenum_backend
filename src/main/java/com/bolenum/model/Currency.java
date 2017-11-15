@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -44,6 +46,7 @@ public class Currency {
 	@UpdateTimestamp
 	private Date UpdatedOn;
 	
+	@Enumerated(EnumType.STRING)
 	private CurrencyType currencyType;
 
 	@ApiModelProperty(hidden = true)
@@ -51,7 +54,10 @@ public class Currency {
 
 	private boolean isDeleted = false;
 	
+	private Double priceUSD;
 
+	private Double priceBTC;
+	
 	public Currency() {
 
 	}
@@ -124,6 +130,35 @@ public class Currency {
 
 	public void setCurrencyType(CurrencyType currencyType) {
 		this.currencyType = currencyType;
+	}
+	/**
+	 * @return the priceUSD
+	 */
+	public Double getPriceUSD() {
+		return priceUSD;
+	}
+
+	/**
+	 * @param priceUSD
+	 *            the priceUSD to set
+	 */
+	public void setPriceUSD(Double priceUSD) {
+		this.priceUSD = priceUSD;
+	}
+
+	/**
+	 * @return the price_BTC
+	 */
+	public Double getPriceBTC() {
+		return priceBTC;
+	}
+
+	/**
+	 * @param price_BTC
+	 *            the price_BTC to set
+	 */
+	public void setPriceBTC(Double price_BTC) {
+		this.priceBTC = price_BTC;
 	}
 
 }

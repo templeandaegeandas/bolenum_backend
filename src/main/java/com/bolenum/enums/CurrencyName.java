@@ -8,14 +8,14 @@ package com.bolenum.enums;
  * @date 29-Sep-2017
  */
 public enum CurrencyName {
-	BITCOIN("BTC"), ETHEREUM("ETH"), BOLENO("BLN");
-	private String currencyType;
+	BITCOIN("bitcoin"), ETHEREUM("ethereum"), ERC20TOKEN("erc20token"),FIAT("fiat");
+	private String currencyName;
 
-	private CurrencyName(String currencyType) {
-		this.currencyType = currencyType;
+	private CurrencyName(String currencyName) {
+		this.currencyName = currencyName;
 	}
 
-	public String getCurrencyType() {
-		return currencyType;
+	public String getCurrencyName() {
+		return currencyName;
 	}
 }

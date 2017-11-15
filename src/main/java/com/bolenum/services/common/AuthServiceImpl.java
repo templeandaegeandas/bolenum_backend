@@ -70,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
 			// Generate Token and Save it for the logged in user
 			AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
 			authToken.setTokentype(TokenType.AUTHENTICATION);
+			
 			AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
 			UserActivity userActivity = new UserActivity(ipAddress, browserName, clientOSName, savedAuthToken);
 			userActivityRepository.save(userActivity);
@@ -87,6 +88,7 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public Map<String, Object> loginResponse(AuthenticationToken token) {
 		Map<String, Object> map = new HashMap<>();
+		map.put("userId", token.getUser().getUserId());
 		map.put("fName", token.getUser().getFirstName());
 		map.put("mName", token.getUser().getMiddleName());
 		map.put("lName", token.getUser().getLastName());

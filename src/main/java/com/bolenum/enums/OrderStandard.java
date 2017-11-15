@@ -7,5 +7,16 @@ package com.bolenum.enums;
  *
  */
 public enum OrderStandard {
-	MARKET, LIMIT
+	MARKET("market"), LIMIT("limit");
+
+	private String orderStd;
+
+	private OrderStandard(String orderStd) {
+		this.orderStd = orderStd;
+	}
+
+	public String getOrderStandard() {
+		return orderStd;
+	}
+
 }

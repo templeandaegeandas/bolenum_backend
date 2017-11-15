@@ -9,6 +9,13 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -17,6 +24,16 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.bolenum.constant.BTCUrlConstant;
+import com.bolenum.constant.UrlConstant;
+import com.bolenum.enums.TransactionStatus;
+import com.bolenum.enums.TransactionType;
+import com.bolenum.model.Erc20Token;
+import com.bolenum.model.Transaction;
+import com.bolenum.model.User;
+import com.bolenum.repo.user.UserRepository;
+import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.order.book.OrdersService;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -31,10 +48,25 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BTCWalletServiceImpl.class);
 
+	@Autowired
+	private Erc20TokenService erc20TokenService;
+
+	@Autowired
+	private OrdersService orderService;
+
 	/**
 	 * creating BIP32 hierarchical deterministic (HD) wallets
 	 */
-	
+
+	@Autowired
+	private TransactionRepo transactionRepo;
+
+	@Autowired
+	private UserRepository userRepository;
+
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
+
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -69,6 +101,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		return "";
 	}
 
+	/**
+	 * to get wallet address and QR code
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getWalletAddressAndQrCode(String walletUuid) {
@@ -83,7 +118,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			boolean isError = (boolean) res.get("error");
 			if (!isError) {
 				String bal = getWalletBalnce(walletUuid);
-				Map<String,Object> data= (Map<String,Object>) res.get("data");
+				bal = bal.replace("BTC", "").trim();
+				Map<String, Object> data = (Map<String, Object>) res.get("data");
 				res.clear();
 				res.put("address", data.get("address"));
 				res.put("file_name", data.get("file_name"));
@@ -96,9 +132,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return map;
 	}
-	
+
 	/**
-	 * 
+	 * to get bitcoin wallet balance
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -117,6 +153,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		return "";
 	}
 
+	/**
+	 * to get bitcoin wallet address
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public String getWalletAddress(String walletUuid) {
@@ -138,4 +177,89 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return "";
 	}
+
+	/**
+	 * to vaidate address of user wallet
+	 */
+	@Override
+	public boolean validateAddresss(String btcWalletUuid, String toAddress) {
+		RestTemplate restTemplate = new RestTemplate();
+		String url = BTCUrlConstant.WALLET_ADDR;
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+		System.out.println("hiiii" + txRes);
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param availableBalance
+	 * @param availableBalanceLimitToWithdraw
+	 * @param withdrawAmount
+	 * @return
+	 */
+	@Override
+	public boolean validateAvailableWalletBalance(Double availableBalance, Double availableBalanceLimitToWithdraw,
+			Double withdrawAmount) {
+		if (availableBalance >= withdrawAmount && availableBalance >= availableBalanceLimitToWithdraw) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param availableBalance
+	 * @param withdrawAmount
+	 * @return
+	 */
+	@Override
+	public boolean validateWithdrawAmount(Double availableBalance, Double withdrawAmount) {
+		if (availableBalance >= withdrawAmount) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) {
+		Double availableBalance = null;
+		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
+		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
+		double placeOrderVolume = orderService.getPlacedOrderVolume(user);
+		logger.debug("Available balance: {}", availableBalance);
+		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
+		if (availableBalance >= withdrawAmount) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 *  
+	 */
+	@Override
+	public Transaction setDepositeList(Transaction transaction) {
+		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
+		logger.debug("savedTransaction {}", savedTransaction);
+		User toUser = userRepository.findByBtcWalletAddress(transaction.getToAddress());
+		if (savedTransaction == null) {
+			transaction.setTransactionType(TransactionType.INCOMING);
+			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
+			transaction.setCurrencyName("BTC");
+			transaction.setToUser(toUser);
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
+			return transactionRepo.saveAndFlush(transaction);
+		} else {
+			savedTransaction.setTransactionType(TransactionType.INCOMING);
+			savedTransaction.setToUser(toUser);
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
+			return transactionRepo.saveAndFlush(savedTransaction);
+		}
+	}
+
 }

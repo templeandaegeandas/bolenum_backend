@@ -41,7 +41,7 @@ public interface UserService {
 	 * @param user
 	 * @return User
 	 */
-	User addMobileNumber(String mobileNumber, User user) throws PersistenceException;
+	User addMobileNumber(String mobileNumber, String countryCode, User user) throws PersistenceException;
 
 	/**
 	 * 
@@ -61,6 +61,6 @@ public interface UserService {
 	public User findByUserId(Long id);
 	
 	public User uploadImage(String imageBase64, Long userId) throws IOException, PersistenceException, MaxSizeExceedException;
-
-
+	
+	
 }

@@ -1,5 +1,6 @@
 package com.bolenum.services.user;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.transaction.Transactional;
@@ -39,5 +40,21 @@ public class AuthenticationServiceImpl implements AuthenticationTokenService {
 		} else {
 			return false; // token has not expired
 		}
+	}
+
+	/**
+	 *  to count number of user who logged in within 7 days
+	 */
+	@Override
+	public Long countActiveUsers() {
+		
+		Date endDate=new Date();
+		Calendar c=Calendar.getInstance();
+		c.setTime(endDate);
+		c.add(Calendar.DATE,-7);
+		Date startDate=c.getTime();
+		startDate=(Date)startDate;
+		return authenticationTokenRepo.countAuthenticationTokenByCreatedOnBetween(startDate, endDate);
+		
 	}
 }

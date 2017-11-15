@@ -24,12 +24,14 @@ public interface CurrencyPairService {
 
 	public Boolean validCurrencyPair(CurrencyPair currencyPair);
 
-	public CurrencyPair findCurrencypairByPairId(Long pairID);
+	public CurrencyPair findCurrencypairByPairId(Long pairId);
 
 	public CurrencyPair changeStateOfCurrencyPair(CurrencyPair isCurrencyPairExist);
 
 	Page<CurrencyPair> getCurrencyList(int pageNumber, int pageSize, String sortBy, String sortOrder);
 
-	public List<CurrencyPair> getListOFPairedCurrency(Currency isCurrencyExist);
+	List<CurrencyPair> findCurrencyPairByCurrencyId(Long currencyId);
+	
+	List<CurrencyPair> findAllCurrencyPair();
 
 }

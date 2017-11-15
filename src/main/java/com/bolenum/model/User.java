@@ -1,16 +1,22 @@
 package com.bolenum.model;
 
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import com.bolenum.enums.TwoFactorAuthOption;
+
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -46,6 +52,8 @@ public class User {
 	private String state;
 
 	private String country;
+	
+	private String countryCode;
 
 	private String mobileNumber;
 
@@ -82,9 +90,6 @@ public class User {
 	@OneToOne
 	private Role role;
 
-	@OneToOne
-	private UserKyc userKyc;
-
 	private String btcWalletUuid;
 
 	private String ethWalletaddress;
@@ -95,9 +100,20 @@ public class User {
 
 	private String ethWalletJsonFileName;
 
+	@Enumerated(EnumType.STRING)
 	private TwoFactorAuthOption twoFactorAuthOption = TwoFactorAuthOption.NONE;
 
 	private String google2FaAuthKey;
+	
+	private String btcWalletAddress;
+
+	public String getBtcWalletAddress() {
+		return btcWalletAddress;
+	}
+
+	public void setBtcWalletAddress(String btcWalletAddress) {
+		this.btcWalletAddress = btcWalletAddress;
+	}
 
 	public Long getUserId() {
 		return userId;
@@ -182,6 +198,14 @@ public class User {
 
 	public void setCountry(String country) {
 		this.country = country;
+	}
+
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	public void setCountryCode(String countryCode) {
+		this.countryCode = countryCode;
 	}
 
 	public String getMobileNumber() {
@@ -308,13 +332,6 @@ public class User {
 		this.role = role;
 	}
 
-	public UserKyc getUserKyc() {
-		return userKyc;
-	}
-
-	public void setUserKyc(UserKyc userKyc) {
-		this.userKyc = userKyc;
-	}
 
 	public String getProfileImage() {
 		return profileImage;

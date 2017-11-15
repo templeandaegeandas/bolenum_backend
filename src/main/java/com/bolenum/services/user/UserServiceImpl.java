@@ -30,7 +30,7 @@ import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
-import com.bolenum.util.SMSServiceUtil;
+import com.bolenum.util.SMSService;
 import com.bolenum.util.TokenGenerator;
 
 /**
@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
 	private LocaleService localService;
 
 	@Autowired
-	private SMSServiceUtil smsServiceUtil;
+	private SMSService smsServiceUtil;
 
 	@Autowired
 	private OTPRepository otpRepository;
@@ -201,16 +201,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User addMobileNumber(String mobileNumber, User user) throws PersistenceException {
+	public User addMobileNumber(String mobileNumber, String countryCode, User user) throws PersistenceException {
 		User existinguser = userRepository.findByMobileNumber(mobileNumber);
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
 		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
 		logger.debug("Otp sent success: {}", code);
 		if (existinguser == null) {
-			smsServiceUtil.sendMessage(mobileNumber, message);
+			smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			if (otpRepository.save(otp) != null) {
+				user.setCountryCode(countryCode);
 				user.setMobileNumber(mobileNumber);
 				user.setIsMobileVerified(false);
 				return userRepository.save(user);
@@ -221,7 +222,7 @@ public class UserServiceImpl implements UserService {
 			if (existinguser.getUserId().equals(user.getUserId()) && existinguser.getIsMobileVerified()) {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.verified.by.you"));
 			} else if (existinguser.getUserId().equals(user.getUserId()) && !existinguser.getIsMobileVerified()) {
-				smsServiceUtil.sendMessage(mobileNumber, message);
+				smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
 				OTP otp = new OTP(mobileNumber, code, user);
 				otpRepository.save(otp);
 				return existinguser;
@@ -264,7 +265,7 @@ public class UserServiceImpl implements UserService {
 		int code = (100000 + r.nextInt(900000));
 		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
 		logger.debug("Otp sent success: {}", code);
-		smsServiceUtil.sendMessage(mobileNumber, message);
+		smsServiceUtil.sendMessage(mobileNumber, user.getCountryCode(), message);
 		OTP otp = new OTP(mobileNumber, code, user);
 		otpRepository.save(otp);
 	}
