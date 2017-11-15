@@ -58,9 +58,12 @@ public interface UserService {
 	 * @throws Exception
 	 */
 	void resendOTP(User user);
+
 	public User findByUserId(Long id);
-	
-	public User uploadImage(String imageBase64, Long userId) throws IOException, PersistenceException, MaxSizeExceedException;
-	
-	
+
+	public User uploadImage(String imageBase64, Long userId)
+			throws IOException, PersistenceException, MaxSizeExceedException;
+
+	public boolean isKycVerified(User user);
+
 }

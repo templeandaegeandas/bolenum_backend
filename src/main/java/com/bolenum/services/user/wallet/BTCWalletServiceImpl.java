@@ -130,7 +130,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				map.put("data", res);
 			}
 		} catch (RestClientException e) {
-			logger.error("get Wallet Address And QrCode exception RCE:  {}", e.getMessage());
+			logger.error("get Wallet Address exception RCE:  {}", e.getMessage());
 			e.printStackTrace();
 		}
 		return map;

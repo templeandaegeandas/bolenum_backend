@@ -39,16 +39,16 @@ public class Orders {
 	private Date createdOn = new Date();
 	private Date deletedOn;
 	private boolean isDeleted;
-	
+
 	@OneToOne
 	private CurrencyPair pair;
-	
+
 	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
 	@OneToOne
 	private User user;
-	private boolean isLocked;
-	
+	private double lockedVolume;
+
 	public Long getId() {
 		return id;
 	}
@@ -146,20 +146,17 @@ public class Orders {
 	}
 
 	/**
-	 * return true if order is locked else false 
-	 * @return the isLocked
+	 * @return the lockedVolume
 	 */
-	public boolean isLocked() {
-		return isLocked;
+	public double getLockedVolume() {
+		return lockedVolume;
 	}
 
 	/**
-	 * @param isLocked
-	 *  the isLocked to set
+	 * @param lockedVolume
 	 */
-	public void setLocked(boolean isLocked) {
-		this.isLocked = isLocked;
+	public void setLockedVolume(double lockedVolume) {
+		this.lockedVolume = lockedVolume;
 	}
-	
-	
+
 }

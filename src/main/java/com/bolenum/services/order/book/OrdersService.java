@@ -63,4 +63,9 @@ public interface OrdersService {
     public Orders getOrderDetails(long orderId);
     
 	double getPlacedOrderVolume(User user);
+
+	String checkFiatOrderEligibility(User user, Orders orders, long pairId);
+
+	Double processFiatOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair)
+			throws InterruptedException, ExecutionException;
 }

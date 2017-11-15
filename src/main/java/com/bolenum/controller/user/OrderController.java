@@ -22,14 +22,13 @@ import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.model.BankAccountDetails;
 import com.bolenum.model.User;
-import com.bolenum.model.UserKyc;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.services.common.BankDetailsService;
-import com.bolenum.services.common.KYCService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.order.book.TradeService;
+import com.bolenum.services.user.UserService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
@@ -53,13 +52,13 @@ public class OrderController {
 	private TradeService tradeService;
 
 	@Autowired
-	private KYCService kycService;
-
-	@Autowired
 	private LocaleService localeService;
 
 	@Autowired
 	private BankDetailsService bankDetailsService;
+
+	@Autowired
+	private UserService userService;
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
@@ -69,20 +68,11 @@ public class OrderController {
 					null);
 		}
 		User user = GenericUtils.getLoggedInUser();
-		List<UserKyc> kycList = kycService.getListOfKycByUser(user);
-		if (kycList == null || kycList.size() < 2) {
+		boolean kycVerified = userService.isKycVerified(user);
+		if (!kycVerified) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"),
 					null);
-		} else {
-			for (int i = 0; i < kycList.size(); i++) {
-				UserKyc userKyc = kycList.get(i);
-				if (!userKyc.getIsVerified()) {
-					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-							localeService.getMessage("order.verify.kyc"), null);
-				}
-			}
 		}
-
 		String balance = ordersService.checkOrderEligibility(user, orders, pairId);
 		logger.debug("balance: {}", balance);
 		if (balance.equals("Synchronizing")) {
@@ -148,6 +138,7 @@ public class OrderController {
 		List<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
+
 	@RequestMapping(value = UrlConstant.ORDER_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrderDetails(@RequestParam("orderId") long orderId) {
 		User user = GenericUtils.getLoggedInUser();
