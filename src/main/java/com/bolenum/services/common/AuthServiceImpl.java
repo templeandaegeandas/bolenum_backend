@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
 			// Generate Token and Save it for the logged in user
 			AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
 			authToken.setTokentype(TokenType.AUTHENTICATION);
-			authToken.setUpdatedOn(new Date());
+			
 			AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
 			UserActivity userActivity = new UserActivity(ipAddress, browserName, clientOSName, savedAuthToken);
 			userActivityRepository.save(userActivity);

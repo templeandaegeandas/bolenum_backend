@@ -98,7 +98,7 @@ public class OrdersServiceImpl implements OrdersService {
 		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
 		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
 		// getting the user current wallet balance
-		String balance = walletService.getBalance(tickter,currencyType, user);
+		String balance = walletService.getBalance(tickter, currencyType, user);
 		balance = balance.replace("BTC", "");
 		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
 			// user must have balance then user is eligible for placing order
@@ -153,8 +153,8 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @description to check user requested order and existing order
 	 * @param requested
 	 *            order, list of existing orders
-	 * @return #true if user requested order is matched with own existing user
-	 *         else #false
+	 * @return #true if user requested order is matched with own existing user else
+	 *         #false
 	 */
 	private boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
 		if (orderList.size() > 0) {
@@ -186,8 +186,7 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			/**
-			 * checking user self order, return false if self order else
-			 * proceed.
+			 * checking user self order, return false if self order else proceed.
 			 */
 			if (isUsersSelfOrder(orders, sellOrderList)) {
 				return processed;
@@ -212,8 +211,7 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, pair);
 			/**
-			 * checking user self order, return false if self order else
-			 * proceed.
+			 * checking user self order, return false if self order else proceed.
 			 */
 			if (isUsersSelfOrder(orders, buyOrderList)) {
 				return processed;
@@ -265,15 +263,14 @@ public class OrdersServiceImpl implements OrdersService {
 					.findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
-			 * checking user self order, return false if self order else
-			 * proceed.
+			 * checking user self order, return false if self order else proceed.
 			 */
 			if (isUsersSelfOrder(orders, sellOrderList)) {
 				return processed;
 			}
 			/**
-			 * fetch one best seller's price from list of sellers, order by
-			 * price in ASC then process the order
+			 * fetch one best seller's price from list of sellers, order by price in ASC
+			 * then process the order
 			 */
 			while (sellOrderList.size() > 0 && (remainingVolume > 0) && (price >= getBestBuy(sellOrderList))) {
 				logger.debug("inner buy while loop for buyers and remaining volume: {}", remainingVolume);
@@ -299,15 +296,14 @@ public class OrdersServiceImpl implements OrdersService {
 					.findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
-			 * checking user self order, return false if self order else
-			 * proceed.
+			 * checking user self order, return false if self order else proceed.
 			 */
 			if (isUsersSelfOrder(orders, buyOrderList)) {
 				return processed;
 			}
 			/**
-			 * fetch one best buyer's price from list of buyers, order by price
-			 * in desc then process the order
+			 * fetch one best buyer's price from list of buyers, order by price in desc then
+			 * process the order
 			 */
 			while (buyOrderList.size() > 0 && (remainingVolume > 0) && (price <= buyOrderList.get(0).getPrice())) {
 				logger.debug("inner sell while loop for seller and remaining volume: {}", remainingVolume);

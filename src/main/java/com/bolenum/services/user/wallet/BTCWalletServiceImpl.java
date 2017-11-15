@@ -247,18 +247,19 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	public Transaction setDepositeList(Transaction transaction) {
 		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
 		logger.debug("savedTransaction {}",savedTransaction);
-		User user = userRepository.findByBtcWalletAddress(transaction.getToAddress());
+		User toUser = userRepository.findByBtcWalletAddress(transaction.getToAddress());
 		if (savedTransaction==null) {
 			transaction.setTransactionType(TransactionType.INCOMING);
 			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
 			transaction.setCurrencyName("BTC");
-			transaction.setUser(user);
+			transaction.setToUser(toUser);
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(transaction);
 		}
 		else {
 			savedTransaction.setTransactionType(TransactionType.INCOMING);
+			savedTransaction.setToUser(toUser);
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(savedTransaction);
