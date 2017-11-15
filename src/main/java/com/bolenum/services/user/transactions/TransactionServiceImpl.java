@@ -324,7 +324,7 @@ public class TransactionServiceImpl implements TransactionService {
 				txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
 						qtyTraded, null);
 
-				try{
+				try {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
 					if (res) {
@@ -363,7 +363,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 			}
 			break;
-			
+
 		case "ERC20TOKEN":
 			logger.debug("ERC20TOKEN transaction started");
 			txStatus = performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null);
@@ -390,7 +390,6 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 
 		return new AsyncResult<Boolean>(false);
-
 
 	}
 

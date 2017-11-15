@@ -108,7 +108,6 @@ public class UrlConstant {
 	public static final String WS_LISTNER_WITHDRAW = "/listner/withdraw";
 
 	
-	
 }
 	
 
