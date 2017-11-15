@@ -47,10 +47,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BTCWalletServiceImpl implements BTCWalletService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BTCWalletServiceImpl.class);
-	
+
 	@Autowired
 	private Erc20TokenService erc20TokenService;
-	
+
 	@Autowired
 	private OrdersService orderService;
 
@@ -59,14 +59,14 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 
 	@Autowired
-	private TransactionRepo transactionRepo; 
-	
+	private TransactionRepo transactionRepo;
+
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
-	
+
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -100,9 +100,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return "";
 	}
-	
-	
-	
 
 	/**
 	 * to get wallet address and QR code
@@ -225,12 +222,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) {
 		Double availableBalance = null;
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
-			availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
+		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
 		double placeOrderVolume = orderService.getPlacedOrderVolume(user);
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
@@ -246,9 +243,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public Transaction setDepositeList(Transaction transaction) {
 		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
-		logger.debug("savedTransaction {}",savedTransaction);
+		logger.debug("savedTransaction {}", savedTransaction);
 		User toUser = userRepository.findByBtcWalletAddress(transaction.getToAddress());
-		if (savedTransaction==null) {
+		if (savedTransaction == null) {
 			transaction.setTransactionType(TransactionType.INCOMING);
 			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
 			transaction.setCurrencyName("BTC");
@@ -256,8 +253,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(transaction);
-		}
-		else {
+		} else {
 			savedTransaction.setTransactionType(TransactionType.INCOMING);
 			savedTransaction.setToUser(toUser);
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
@@ -265,5 +261,5 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
 	}
-	
+
 }

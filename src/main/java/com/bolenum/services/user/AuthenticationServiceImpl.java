@@ -54,7 +54,7 @@ public class AuthenticationServiceImpl implements AuthenticationTokenService {
 		c.add(Calendar.DATE,-7);
 		Date startDate=c.getTime();
 		startDate=(Date)startDate;
-		return authenticationTokenRepo.countAuthenticationTokenByUpdatedOnBetween(startDate, endDate);
+		return authenticationTokenRepo.countAuthenticationTokenByCreatedOnBetween(startDate, endDate);
 		
 	}
 }

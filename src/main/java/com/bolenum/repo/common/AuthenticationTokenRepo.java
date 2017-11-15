@@ -23,7 +23,7 @@ public interface AuthenticationTokenRepo extends JpaRepository<AuthenticationTok
 	List<AuthenticationToken> findByUserAndIsDeletedAndTokentype(User user, boolean isDeleted,TokenType token);
 
 	
-	Long countAuthenticationTokenByUpdatedOnBetween(Date startDate,Date endDate);
+	Long countAuthenticationTokenByCreatedOnBetween(Date startDate,Date endDate);
  	
 
 }
