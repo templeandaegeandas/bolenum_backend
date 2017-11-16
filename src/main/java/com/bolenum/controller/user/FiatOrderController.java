@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.dto.common.AddUserBankDetailsForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.BankAccountDetails;
 import com.bolenum.model.User;
@@ -46,7 +48,7 @@ public class FiatOrderController {
 
 	@Autowired
 	private FiatOrderService fiatOrderService;
-	
+
 	@Autowired
 	private OrdersService ordersService;
 
@@ -74,6 +76,12 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"),
 					null);
 		}
+
+		if (!bankAccountDetailsService.isBankAccountAdded(user)) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("bank.details.not.exist"), null);
+		}
+
 		String balance = fiatOrderService.checkFiatOrderEligibility(user, orders, pairId);
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);
@@ -82,6 +90,12 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
+		if (!(orders.getPair().getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)
+				|| orders.getPair().getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT))) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.not.fiat"),
+					null);
+		}
+
 		orders.setUser(user);
 		Boolean result = fiatOrderService.processFiatOrderList(matchedOrder, orders, orders.getPair());
 		if (result) {
@@ -93,10 +107,19 @@ public class FiatOrderController {
 			}
 			BankAccountDetails accountDetails = bankAccountDetailsService.primaryBankAccountDetails(bankDetails);
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
-					accountDetails);
+					response(accountDetails));
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("order.processed.fail"), null);
 		}
+	}
+
+	private AddUserBankDetailsForm response(BankAccountDetails bank) {
+		AddUserBankDetailsForm form = new AddUserBankDetailsForm();
+		form.setAccountHolderName(bank.getAccountHolderName());
+		form.setAccountNumber(bank.getAccountNumber());
+		form.setIfscCode(bank.getIfscCode());
+		form.setBankName(bank.getBankName());
+		return form;
 	}
 }

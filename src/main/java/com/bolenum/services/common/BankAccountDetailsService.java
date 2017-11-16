@@ -23,5 +23,7 @@ public interface BankAccountDetailsService {
 	public BankAccountDetails findByID(Long id);
 	
 	public BankAccountDetails primaryBankAccountDetails(User user);
+	
+	public boolean isBankAccountAdded(User user);
 
 }

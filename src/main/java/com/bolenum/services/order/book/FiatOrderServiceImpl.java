@@ -93,10 +93,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		// fetching order type BUY or SELL
 		// OrderType orderType = orders.getOrderType();
 		// User buyer, seller;
-		if (!(pair.getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)
-				|| pair.getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT))) {
-			return false;
-		}
+		
 		Double qtyTraded;
 		double remainingVolume = orders.getVolume();
 		logger.debug("process order list remainingVolume: {}", remainingVolume);
@@ -109,6 +106,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			// volume
 			double remain = matchedOrder.getVolume() - remainingVolume;
 			logger.debug("reamining volume: {}", remain);
+			matchedOrder.setOrderStatus(OrderStatus.LOCKED);
 			matchedOrder.setVolume(remain);
 			logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
 			matchedOrder.setLockedVolume(qtyTraded);

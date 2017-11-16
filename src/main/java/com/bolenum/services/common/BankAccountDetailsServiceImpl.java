@@ -56,7 +56,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 		}
 
 		if (editUserBankDetailsForm.getAccountNumber() != null) {
-			bankAccountDetails.setAccountNumber(editUserBankDetailsForm.getAccountNumber());   
+			bankAccountDetails.setAccountNumber(editUserBankDetailsForm.getAccountNumber());
 		}
 
 		if (editUserBankDetailsForm.getBankName() != null) {
@@ -111,6 +111,15 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 			bankAccountDetail = bankAccountDetails.get(0);
 		}
 		return bankAccountDetail;
+	}
+
+	@Override
+	public boolean isBankAccountAdded(User user) {
+		List<BankAccountDetails> bankAccountDetails = bankAccountDetailsRepo.findByUser(user);
+		if (bankAccountDetails.size() > 0) {
+			return true;
+		}
+		return false;
 	}
 
 }
