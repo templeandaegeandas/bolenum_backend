@@ -100,6 +100,7 @@ public class OrdersServiceImpl implements OrdersService {
 		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
 		// getting the user current wallet balance
 		String balance = walletService.getBalance(tickter, currencyType, user);
+
 		balance = balance.replace("BTC", "");
 		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
 			// user must have balance then user is eligible for placing order
@@ -156,6 +157,8 @@ public class OrdersServiceImpl implements OrdersService {
 	 *            order, list of existing orders
 	 * @return #true if user requested order is matched with own existing user else
 	 *         #false
+	 * @return #true if user requested order is matched with own existing user
+	 *         else #false
 	 */
 	private boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
 		if (orderList.size() > 0) {
@@ -212,6 +215,8 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, pair);
 			/**
+			 * checking user self order, return false if self order else
+			 * proceed.
 			 * checking user self order, return false if self order else proceed.
 			 */
 			if (isUsersSelfOrder(orders, buyOrderList)) {
@@ -266,6 +271,7 @@ public class OrdersServiceImpl implements OrdersService {
 			/**
 			 * checking user self order, return false if self order else proceed.
 			 */
+			
 			if (isUsersSelfOrder(orders, sellOrderList)) {
 				return processed;
 			}
@@ -302,6 +308,14 @@ public class OrdersServiceImpl implements OrdersService {
 			if (isUsersSelfOrder(orders, buyOrderList)) {
 				return processed;
 			}
+			/**
+			 * checking user self order, return false if self order else proceed.
+			 */
+			if (isUsersSelfOrder(orders, buyOrderList)) {
+				return processed;
+			}
+			
+			
 			/**
 			 * fetch one best buyer's price from list of buyers, order by price in desc then
 			 * process the order
@@ -632,9 +646,7 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
 	}
 
-	/**
-	 * 
-	 */
+
 	@Override
 	public Long countActiveOpenOrder() {
 
@@ -647,9 +659,7 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.countOrdersByCreatedOnBetween(startDate, endDate);
 	}
 
-	/**
-	 * 
-	 */
+
 	@Override
 	public Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType) {
 		Date endDate = new Date();
@@ -661,9 +671,6 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.countOrderByOrderTypeAndCreatedOnBetween(orderType, startDate, endDate);
 	}
 
-	/**
-	 * 
-	 */
 	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList) {
 		return ordersRepository.totalUserBalanceInBook(user, toCurrencyList, pairedCurrencyList);
 	}

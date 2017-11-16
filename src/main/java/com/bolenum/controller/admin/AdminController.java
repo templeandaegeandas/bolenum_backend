@@ -128,7 +128,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTransactionFees() {
-		// List<TransactionFee> listOfTransactionFee=
+
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.transaction.fees.found.success"), null);
 	}
@@ -164,5 +164,4 @@ public class AdminController {
 				localeService.getMessage("admin.count.user.dashboard.success"), listOfLatestOrders);
 	}
 
-	
 }

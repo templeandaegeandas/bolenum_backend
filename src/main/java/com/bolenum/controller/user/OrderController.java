@@ -109,6 +109,11 @@ public class OrderController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param pairId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("pairId") Long pairId) {
 		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);

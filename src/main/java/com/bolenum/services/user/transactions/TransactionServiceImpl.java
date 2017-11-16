@@ -162,6 +162,7 @@ public class TransactionServiceImpl implements TransactionService {
 				if (receiverUser != null) {
 					transaction.setToUser(receiverUser);
 				}
+
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
@@ -228,6 +229,7 @@ public class TransactionServiceImpl implements TransactionService {
 					if (receiverUser != null) {
 						transaction.setToUser(receiverUser);
 					}
+
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
@@ -283,6 +285,7 @@ public class TransactionServiceImpl implements TransactionService {
 				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
 				if (receiverUser != null) {
 					transaction.setToUser(receiverUser);
+
 				}
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
@@ -306,6 +309,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Async
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller)
 			throws InterruptedException, ExecutionException {
+
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
 		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";

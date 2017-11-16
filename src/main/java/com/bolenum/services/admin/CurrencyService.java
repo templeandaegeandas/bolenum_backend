@@ -29,4 +29,6 @@ public interface CurrencyService {
 	public long countCourencies();
 
 	Currency findByCurrencyAbbreviation(String currencyAbbreviation);
+
+	List<Currency> getCurrencyListForAdmin();
 }

@@ -280,8 +280,7 @@ public class Transaction {
 		this.gasPrice = gasPrice;
 	}
 
-	
-	
+
 	public User getFromUser() {
 		return fromUser;
 	}

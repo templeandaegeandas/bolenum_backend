@@ -52,6 +52,7 @@ public class Orders {
 	
 	@OneToOne
 	private User user;
+	
 	private boolean isLocked;
 	
 	public Long getId() {
