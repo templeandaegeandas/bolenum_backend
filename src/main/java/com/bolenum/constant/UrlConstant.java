@@ -48,6 +48,7 @@ public class UrlConstant {
 	public static final String TRANSACTION_FEES="transaction/fees";
 	public static final String PAIRED_CURRENCY="paired/currency/list";
 	public static final String COUNT_BUYER_SELLER_DASHBOARD = "buyer/seller";
+	public static final String DISPLAY_LATEST_ORDER="latest/order/list";
 	
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "kyc/upload";

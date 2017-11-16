@@ -74,7 +74,6 @@ import com.bolenum.util.EthereumServiceUtil;
 @Service
 @Transactional
 public class TransactionServiceImpl implements TransactionService {
-	
 
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(TransactionServiceImpl.class);
 
@@ -101,7 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private CurrencyService currencyService;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
@@ -161,7 +160,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setCurrencyName("ETH");
 				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
 				if (receiverUser != null) {
-					transaction.setToUser(receiverUser); 
+					transaction.setToUser(receiverUser);
 				}
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
@@ -217,7 +216,8 @@ public class TransactionServiceImpl implements TransactionService {
 				if (transaction == null) {
 					transaction = new Transaction();
 					transaction.setTxHash(txHash);
-					transaction.setFromAddress(fromUser.getBtcWalletUuid());
+					User senderAddress = userRepository.findByBtcWalletAddress(fromUser.getBtcWalletUuid());
+					transaction.setFromAddress(senderAddress.getBtcWalletAddress());
 					transaction.setToAddress(toAddress);
 					transaction.setTxAmount(amount);
 					transaction.setTransactionType(TransactionType.OUTGOING);
@@ -226,7 +226,7 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction.setCurrencyName("BTC");
 					User receiverUser = userRepository.findByBtcWalletAddress(toAddress);
 					if (receiverUser != null) {
-						transaction.setToUser(receiverUser); 
+						transaction.setToUser(receiverUser);
 					}
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
@@ -282,7 +282,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setCurrencyName(tokenName);
 				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
 				if (receiverUser != null) {
-					transaction.setToUser(receiverUser); 
+					transaction.setToUser(receiverUser);
 				}
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
@@ -403,9 +403,9 @@ public class TransactionServiceImpl implements TransactionService {
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		if (transactionStatus.equals(TransactionStatus.WITHDRAW)) {
 			return transactionRepo.findByFromUserAndTransactionStatus(user, transactionStatus, pageRequest);
-		}
-		else {
-			return transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user, transactionStatus, TransactionStatus.WITHDRAW, pageRequest);
+		} else {
+			return transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user, transactionStatus,
+					TransactionStatus.WITHDRAW, pageRequest);
 		}
 
 	}

@@ -38,6 +38,7 @@ public class Orders {
 	
 	@Enumerated(EnumType.STRING)
 	private OrderType orderType; // buy or sell
+	
 	private Date createdOn = new Date();
 	
 	private Date deletedOn;

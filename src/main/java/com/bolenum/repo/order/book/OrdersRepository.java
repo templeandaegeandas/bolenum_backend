@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -76,4 +77,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Long countOrderByOrderTypeAndCreatedOnBetween(OrderType orderType,Date startDate,Date endDate);
 	
 	Long countOrderByUserAndOrderType(User user,OrderType orderType);
+
+	//Page<Orders> findByCreatedOnIsBetween(Date startDate, Date endDate, PageRequest pageRequest);
+
+	Page<Orders> findByCreatedOnBetween(Date startDate, Date endDate, Pageable page);
 }

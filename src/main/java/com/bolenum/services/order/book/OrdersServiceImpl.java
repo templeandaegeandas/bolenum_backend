@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -615,16 +616,25 @@ public class OrdersServiceImpl implements OrdersService {
 		return matchedOrder;
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public void removeOrderFromList(List<Orders> ordersList) {
 		ordersList.remove(0);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus) {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Long countActiveOpenOrder() {
 
@@ -637,6 +647,9 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.countOrdersByCreatedOnBetween(startDate, endDate);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType) {
 		Date endDate = new Date();
@@ -644,21 +657,46 @@ public class OrdersServiceImpl implements OrdersService {
 		c.setTime(endDate);
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
-		startDate = (Date) endDate;
+		startDate = (Date) startDate;
 		return ordersRepository.countOrderByOrderTypeAndCreatedOnBetween(orderType, startDate, endDate);
 	}
 
+	/**
+	 * 
+	 */
 	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList) {
 		return ordersRepository.totalUserBalanceInBook(user, toCurrencyList, pairedCurrencyList);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Long countOrdersByOrderTypeAndUser(User user, OrderType orderType) {
 		return ordersRepository.countOrderByUserAndOrderType(user, orderType);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Orders getOrderDetails(long orderId) {
 		return ordersRepository.getOne(orderId);
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy,
+			String searchData) {
+		Pageable page  = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
+		Date endDate = new Date();
+		Calendar c = Calendar.getInstance();
+		c.setTime(endDate);
+		c.add(Calendar.DATE, -1);
+		Date startDate = c.getTime();
+		startDate = (Date) startDate;
+		return ordersRepository.findByCreatedOnBetween(startDate,endDate,page);
 	}
 }

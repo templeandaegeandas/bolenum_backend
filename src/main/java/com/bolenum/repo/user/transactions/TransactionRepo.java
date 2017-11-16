@@ -22,6 +22,7 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 	 * @description findByTxHash 
 	 * 
 	 */
+	
 	Transaction findByTxHash(String txHash);
 	
 	Page<Transaction> findByFromUserAndTransactionStatus(User fromUser,TransactionStatus transactionStatus, Pageable pageable);
@@ -29,3 +30,5 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 	Page<Transaction> findByToUserAndTransactionStatusOrTransactionStatus(User toUser,TransactionStatus transactionStatus,TransactionStatus transactionStatus1, Pageable pageable);
 
 }
+
+
