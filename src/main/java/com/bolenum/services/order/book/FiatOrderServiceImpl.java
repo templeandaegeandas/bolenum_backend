@@ -3,8 +3,6 @@
  */
 package com.bolenum.services.order.book;
 
-import static org.mockito.Matchers.matches;
-
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -23,6 +21,7 @@ import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.wallet.WalletService;
 
 /**
@@ -43,6 +42,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 	@Autowired
 	private WalletService walletService;
+
+	@Autowired
+	private NotificationService notificationService;
 
 	/**
 	 * to check the eligibility to place an order by checking available balance
@@ -96,9 +98,15 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	public boolean processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair) {
 		// fetching order type BUY or SELL
 		// OrderType orderType = orders.getOrderType();
-		// User buyer, seller;
+		User buyer = null, seller = null;
 
 		Double qtyTraded;
+
+		String msg = "", msg1 = "";
+
+		String toCurrency = pair.getToCurrency().get(0).getCurrencyAbbreviation();
+		String pairCurr = pair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+
 		double remainingVolume = orders.getVolume();
 		logger.debug("process order list remainingVolume: {}", remainingVolume);
 		// process till order size and remaining volume is > 0
@@ -123,14 +131,40 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			logger.debug("orders saving started");
 			if (orders.getOrderType().equals(OrderType.BUY)) {
 				orders.setMatchedOrder(matchedOrder);
+				buyer = orders.getUser();
+				seller = matchedOrder.getUser();
+				msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
+						+ " order has been locked,  quantity: " + qtyTraded + " " + toCurrency + ", on "
+						+ orders.getVolume() * orders.getPrice() + " " + pairCurr + " with " + seller.getFirstName();
+				logger.debug("msg: {}", msg);
+				msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
+						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
+						+ orders.getVolume() * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
+				logger.debug("msg1: {}", msg1);
 			}
 			orders = orderAsyncService.saveOrder(orders);
 			if (orders.getOrderType().equals(OrderType.SELL)) {
 				matchedOrder.setMatchedOrder(orders);
+				buyer = matchedOrder.getUser();
+				seller = orders.getUser();
+
+				msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
+						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
+						+ orders.getVolume() * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
+				logger.debug("msg1: {}", msg1);
+				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
+						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
+						+ orders.getVolume() * orders.getPrice() + " " + pairCurr + " with " + seller.getFirstName();
+				logger.debug("msg: {}", msg);
+
 			}
 			logger.debug("orders saving finished and matched order saving started");
 			orderAsyncService.saveOrder(matchedOrder);
 			logger.debug("matched order saving finished");
+			notificationService.sendNotification(seller, msg1);
+			notificationService.saveNotification(seller, buyer, msg1);
+			notificationService.sendNotification(buyer, msg);
+			notificationService.saveNotification(buyer, seller, msg);
 			return true;
 		}
 		return false;
@@ -183,5 +217,14 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public boolean processConfirmOrder(Orders exitingOrder) {
+		Orders matched = exitingOrder.getMatchedOrder();
+		if (matched != null) {
+			
+		}
+		return false;
 	}
 }

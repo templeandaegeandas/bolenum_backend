@@ -22,4 +22,6 @@ public interface FiatOrderService {
 	double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType, Currency currency);
 
 	public boolean processCancelOrder(Orders order);
+
+	boolean processConfirmOrder(Orders order);
 }

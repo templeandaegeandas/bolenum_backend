@@ -87,6 +87,7 @@ public class UrlConstant {
 	public static final String MY_TRADING_COUNT = "trading/count";
 	public static final String ORDER_BY_ID = "order";
 	public static final String ORDER_FIAT_CANCEL = "order/fiat/cancel";
+	public static final String ORDER_FIAT_PAID = "order/fiat/confirm";
 	
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";
