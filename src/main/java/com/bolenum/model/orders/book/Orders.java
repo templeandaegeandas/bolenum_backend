@@ -48,6 +48,12 @@ public class Orders {
 	@OneToOne
 	private User user;
 	private double lockedVolume;
+	/**
+	 * to keep track of which order is matched with incoming order for fiat
+	 * order
+	 */
+	@OneToOne
+	private Orders matchedOrder;
 
 	public Long getId() {
 		return id;
@@ -159,4 +165,13 @@ public class Orders {
 		this.lockedVolume = lockedVolume;
 	}
 
+	public Orders getMatchedOrder() {
+		return matchedOrder;
+	}
+
+	public void setMatchedOrder(Orders matchedOrder) {
+		this.matchedOrder = matchedOrder;
+	}
+
+	
 }

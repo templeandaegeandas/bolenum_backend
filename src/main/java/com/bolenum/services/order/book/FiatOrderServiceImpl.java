@@ -3,7 +3,11 @@
  */
 package com.bolenum.services.order.book;
 
+import static org.mockito.Matchers.matches;
+
 import java.util.List;
+
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +97,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		// fetching order type BUY or SELL
 		// OrderType orderType = orders.getOrderType();
 		// User buyer, seller;
-		
+
 		Double qtyTraded;
 		double remainingVolume = orders.getVolume();
 		logger.debug("process order list remainingVolume: {}", remainingVolume);
@@ -115,8 +119,15 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			orders.setVolume(remainingVolume);
 			orders.setLockedVolume(qtyTraded);
 			orders.setOrderStatus(OrderStatus.LOCKED);
+
 			logger.debug("orders saving started");
-			orderAsyncService.saveOrder(orders);
+			if (orders.getOrderType().equals(OrderType.BUY)) {
+				orders.setMatchedOrder(matchedOrder);
+			}
+			orders = orderAsyncService.saveOrder(orders);
+			if (orders.getOrderType().equals(OrderType.SELL)) {
+				matchedOrder.setMatchedOrder(orders);
+			}
 			logger.debug("orders saving finished and matched order saving started");
 			orderAsyncService.saveOrder(matchedOrder);
 			logger.debug("matched order saving finished");
@@ -146,5 +157,31 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			total = total + order.getVolume();
 		}
 		return total;
+	}
+
+	@Override
+	@Transactional
+	public boolean processCancelOrder(Orders order) {
+		Orders matched = order.getMatchedOrder();
+		if (matched != null) {
+			matched.setVolume(matched.getVolume() + matched.getLockedVolume());
+			matched.setLockedVolume(0);
+			matched.setOrderStatus(OrderStatus.SUBMITTED);
+		}
+		order.setVolume(order.getVolume() + order.getLockedVolume());
+		order.setLockedVolume(0);
+		order.setMatchedOrder(null);
+		order.setOrderStatus(OrderStatus.CANCELLED);
+		try {
+			logger.debug("matched order saving start");
+			orderAsyncService.saveOrder(matched);
+			logger.debug("matched order saving completed and order saving started");
+			orderAsyncService.saveOrder(order);
+			logger.debug("order saving completed");
+		} catch (Exception e) {
+			logger.error("cancel order saving failed: {}", e.getMessage());
+			return false;
+		}
+		return true;
 	}
 }

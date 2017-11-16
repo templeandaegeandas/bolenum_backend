@@ -122,4 +122,19 @@ public class FiatOrderController {
 		form.setBankName(bank.getBankName());
 		return form;
 	}
+
+	@RequestMapping(value = UrlConstant.ORDER_FIAT_CANCEL, method = RequestMethod.PUT)
+	public ResponseEntity<Object> cancelOrder(@RequestParam("orderId") long orderId) {
+		Orders exitingOrder = ordersService.getOrderDetails(orderId);
+		if (exitingOrder == null) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
+					null);
+		}
+		boolean result = fiatOrderService.processCancelOrder(exitingOrder);
+		if (result) {
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"), null);
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"),
+				null);
+	}
 }

@@ -20,4 +20,6 @@ public interface FiatOrderService {
 	public boolean processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair);
 
 	double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType, Currency currency);
+
+	public boolean processCancelOrder(Orders order);
 }
