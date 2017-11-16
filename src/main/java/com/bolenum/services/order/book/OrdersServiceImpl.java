@@ -207,23 +207,22 @@ public class OrdersServiceImpl implements OrdersService {
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
 				if (isFiat) {
-					remainingVolume = processFiatOrderList(sellOrderList, remainingVolume, orders, pair);
+					processFiatOrderList(sellOrderList.get(0), orders, pair);
 				} else {
 					remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 				}
 			}
-			// if (remainingVolume >= 0) {
-			// orders.setVolume(remainingVolume);
-			// /**
-			// * if all volume traded then change status to completed of order
-			// */
-			// if (remainingVolume == 0) {
-			// orders.setOrderStatus(OrderStatus.COMPLETED);
-			// }
-			// ordersList.add(orders);
-			// logger.debug("qty remaining so added in book: {}",
-			// remainingVolume);
-			// }
+			if (remainingVolume >= 0) {
+				orders.setVolume(remainingVolume);
+				/**
+				 * if all volume traded then change status to completed of order
+				 */
+				if (remainingVolume == 0) {
+					orders.setOrderStatus(OrderStatus.COMPLETED);
+				}
+				ordersList.add(orders);
+				logger.debug("qty remaining so added in book: {}", remainingVolume);
+			}
 			processed = true;
 		} else {
 			List<Orders> buyOrderList = ordersRepository
@@ -235,11 +234,11 @@ public class OrdersServiceImpl implements OrdersService {
 			// if (isUsersSelfOrder(orders, buyOrderList)) {
 			// return processed;
 			// }
-			logger.debug("buyOrderList.size(): {}",buyOrderList.size());
+			logger.debug("buyOrderList.size(): {}", buyOrderList.size());
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
 				if (isFiat) {
-					remainingVolume = processFiatOrderList(buyOrderList, remainingVolume, orders, pair);
+					processFiatOrderList(buyOrderList.get(0), orders, pair);
 				} else {
 					remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
 				}
@@ -366,117 +365,6 @@ public class OrdersServiceImpl implements OrdersService {
 		ordersList.clear();
 		logger.debug("Limit Order: order list saving finished");
 		return processed;
-	}
-
-	/**
-	 * process the buyers and sellers order
-	 * 
-	 * @throws ExecutionException
-	 * @throws InterruptedException
-	 * 
-	 */
-	@Override
-	public Double processFiatOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders,
-			CurrencyPair pair) throws InterruptedException, ExecutionException {
-		// fetching order type BUY or SELL
-		OrderType orderType = orders.getOrderType();
-		User buyer, seller;
-		logger.debug("process order list remainingVolume: {}", remainingVolume);
-		// process till order size and remaining volume is > 0
-		while ((ordersList.size() > 0) && (remainingVolume > 0)) {
-			logger.debug("inner fiat order proccessing while");
-			Double qtyTraded; // total number quantity which is processed
-			// fetch matched order object
-			Orders matchedOrder = matchedOrder(ordersList);
-			// checking selling/buying volume less than matched order volume
-			logger.debug("matched order volume: {}", matchedOrder.getVolume());
-			if (remainingVolume < matchedOrder.getVolume()) {
-				// qtyTraded is total selling/buying volume
-				qtyTraded = remainingVolume;
-				logger.debug("qty traded: {}", qtyTraded);
-				// setting new required SELL/BUY volume is remaining order
-				// volume
-				double remain = matchedOrder.getVolume() - remainingVolume;
-				logger.debug("reamining volume: {}", remain);
-				matchedOrder.setVolume(remain);
-				logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
-				matchedOrder.setLockedVolume(qtyTraded);
-				logger.debug("locked volume after set: {}", matchedOrder.getLockedVolume());
-				// adding matched order in list with remaining volume
-				ordersList.add(matchedOrder);
-				// now selling/buying volume is 0
-				remainingVolume = 0.0;
-			} else {
-				// selling/buying volume greater than matched order volume
-				// qtyTraded is total sellers/buyers volume
-				qtyTraded = matchedOrder.getVolume();
-				logger.debug("qty traded else: {}", qtyTraded);
-				// new selling/buying volume is remainingVolume - qtyTraded
-				remainingVolume = remainingVolume - qtyTraded;
-				logger.debug("remaining volume else: {}", remainingVolume);
-				// removed processed order
-				removeOrderFromList(ordersList);
-				// new volume of processed order is 0
-				matchedOrder.setVolume(0.0);
-				matchedOrder.setLockedVolume(qtyTraded);
-				logger.debug("locked volume after set else: {}", matchedOrder.getLockedVolume());
-				// status of processed order is completed
-				matchedOrder.setOrderStatus(OrderStatus.COMPLETED);
-				// locking coming order matched volume
-				orders.setLockedVolume(qtyTraded);
-				// volume of coming order
-				orders.setVolume(remainingVolume);
-				if (remainingVolume == 0) {
-					orders.setOrderStatus(OrderStatus.COMPLETED);
-				}
-				matchedOrdersList.add(matchedOrder);
-				matchedOrdersList.add(orders);
-				logger.debug("matching buy/sell completed");
-			}
-			// checking the order type BUY
-			if (orderType.equals(OrderType.BUY)) {
-				// buyer is coming order's user
-				buyer = orders.getUser();
-				// seller is matched order's user
-				seller = matchedOrder.getUser();
-			} else {
-				// order type is SELL
-				// buyer is matched order's user
-				buyer = matchedOrder.getUser();
-				// seller is coming order's user
-				seller = orders.getUser();
-			}
-			// buyer and seller must be different user
-			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
-			// saving the processed BUY/SELL order in partial trade
-			PartialTrade trade = new PartialTrade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair,
-					OrderStandard.MARKET);
-			partialTradeList.add(trade);
-			logger.debug("partial Trade added to partial trade list");
-		}
-		logger.debug("order list saving started");
-		ordersList.addAll(matchedOrdersList);
-
-		ObjectMapper map = new ObjectMapper();
-		try {
-			String s = map.writeValueAsString(matchedOrdersList);
-			System.out.println("matched order list: " + s);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		matchedOrdersList.clear();
-		try {
-			String s = map.writeValueAsString(ordersList);
-			System.out.println("order list: " + s);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		orderAsyncServices.saveOrder(ordersList);
-		ordersList.clear();
-		logger.debug("order list saving finished");
-		orderAsyncServices.savePartialTrade(partialTradeList);
-		partialTradeList.clear();
-		return remainingVolume;
 	}
 
 	/**
@@ -852,4 +740,44 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		return total;
 	}
+
+	@Override
+	public boolean processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair) {
+		// fetching order type BUY or SELL
+		// OrderType orderType = orders.getOrderType();
+		// User buyer, seller;
+		if (!(pair.getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)
+				|| pair.getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT))) {
+			return false;
+		}
+		Double qtyTraded;
+		double remainingVolume = orders.getVolume();
+		logger.debug("process order list remainingVolume: {}", remainingVolume);
+		// process till order size and remaining volume is > 0
+		if (remainingVolume == matchedOrder.getVolume()) {
+			// qtyTraded is total selling/buying volume
+			qtyTraded = remainingVolume;
+			logger.debug("qty traded: {}", qtyTraded);
+			// setting new required SELL/BUY volume is remaining order
+			// volume
+			double remain = matchedOrder.getVolume() - remainingVolume;
+			logger.debug("reamining volume: {}", remain);
+			matchedOrder.setVolume(remain);
+			logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
+			matchedOrder.setLockedVolume(qtyTraded);
+			logger.debug("locked volume after set: {}", matchedOrder.getLockedVolume());
+			remainingVolume = 0.0;
+			orders.setVolume(remainingVolume);
+			orders.setLockedVolume(qtyTraded);
+			orders.setOrderStatus(OrderStatus.LOCKED);
+			logger.debug("orders saving started");
+			orderAsyncServices.saveOrder(orders);
+			logger.debug("orders saving finished and matched order saving started");
+			orderAsyncServices.saveOrder(matchedOrder);
+			logger.debug("matched order saving finished");
+			return true;
+		}
+		return false;
+	}
+
 }

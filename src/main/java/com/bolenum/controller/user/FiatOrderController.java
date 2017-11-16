@@ -3,8 +3,8 @@
  */
 package com.bolenum.controller.user;
 
-import java.util.concurrent.ExecutionException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,13 +39,26 @@ public class FiatOrderController {
 
 	@Autowired
 	private LocaleService localeService;
-	
+
 	@Autowired
 	private OrdersService ordersService;
 
+	private Logger logger = LoggerFactory.getLogger(FiatOrderController.class);
+
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.POST)
-	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
+	public ResponseEntity<Object> initializeOrder(@RequestParam("pairId") long pairId,
+			@RequestParam("orderId") long matchedOrderId, @RequestBody Orders orders) {
 		User user = GenericUtils.getLoggedInUser();
+		logger.debug("matched order id: {}", matchedOrderId);
+		Orders matchedOrder = ordersService.getOrderDetails(matchedOrderId);
+		if (matchedOrder == null) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
+					null);
+		}
+		if (matchedOrder.getVolume() <= 0) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
+					null);
+		}
 		boolean kycVerified = userService.isKycVerified(user);
 		if (!kycVerified) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"),
@@ -60,19 +73,14 @@ public class FiatOrderController {
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
 		orders.setUser(user);
-		Boolean result = null;
-		try {
-			result = ordersService.processOrder(orders);
-		} catch (InterruptedException | ExecutionException e) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(e.getMessage()),
-					null);
-		}
+		Boolean result = ordersService.processFiatOrderList(matchedOrder, orders, orders.getPair());
 		if (result) {
+			
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
 					null);
 		} else {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.self.fail"),
-					null);
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("order.processed.fail"), null);
 		}
 	}
 }
