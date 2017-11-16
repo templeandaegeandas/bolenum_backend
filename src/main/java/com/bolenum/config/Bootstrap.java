@@ -334,11 +334,11 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	void saveCurrency() {
 		long count = currencyService.countCourencies();
 		if (count == 0) {
-			Currency currency1 = new Currency("BITCOIN", "BTC", CurrencyType.CRYPTO);
-			Currency currency2 = new Currency("ETHEREUM", "ETH", CurrencyType.CRYPTO);
+			Currency bitcoin = new Currency("BITCOIN", "BTC", CurrencyType.CRYPTO);
+			Currency ethereum = new Currency("ETHEREUM", "ETH", CurrencyType.CRYPTO);
 			Currency ngn = new Currency("NIGERIAN NAIRA", "NGN", CurrencyType.FIAT);
-			currencyService.saveCurrency(currency1);
-			currencyService.saveCurrency(currency2);
+			currencyService.saveCurrency(bitcoin);
+			currencyService.saveCurrency(ethereum);
 			currencyService.saveCurrency(ngn);
 		}
 	}

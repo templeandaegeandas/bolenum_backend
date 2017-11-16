@@ -217,6 +217,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				});
 	}
 
+
 	private void saveTx(User fromUser, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token) {
 		Transaction tx = transactionRepo.findByTxHash(transaction._transactionHash);
 		if (tx == null) {
@@ -232,12 +233,14 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setFromUser(fromUser);
 			User receiverUser = userRepository.findByBtcWalletAddress(tx.getToAddress());
 			if (receiverUser != null) {
-				tx.setToUser(receiverUser);
+				tx.setToUser(receiverUser); 
+
 			}
 			Transaction saved = transactionRepo.saveAndFlush(tx);
 			logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", fromUser.getEmailId());
+
 
 			} else {
 				if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {

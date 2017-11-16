@@ -24,6 +24,7 @@ import com.bolenum.dto.common.AddTransactioFeeAndLimitForm;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
+import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.TransactionFeeService;
 import com.bolenum.services.common.LocaleService;
@@ -153,5 +154,14 @@ public class AdminController {
 				localeService.getMessage("admin.count.user.dashboard.success"), countOfusers);
 	}
 	
-	
+	@RequestMapping(value = UrlConstant.DISPLAY_LATEST_ORDER, method = RequestMethod.GET)
+	public ResponseEntity<Object> getLatestOrderList(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
+			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
+		
+		Page<Orders> listOfLatestOrders=ordersService.getListOfLatestOrders(pageNumber,pageSize,sortBy,sortOrder,searchData);
+		return ResponseHandler.response(HttpStatus.OK, true,
+				localeService.getMessage("admin.count.user.dashboard.success"), listOfLatestOrders);
+	}
+
 }

@@ -80,7 +80,6 @@ public class Transaction {
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
 			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
 			Double gasPrice, User fromUser ,User toUser) {
-
 			
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
