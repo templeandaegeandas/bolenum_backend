@@ -216,8 +216,8 @@ public class TransactionServiceImpl implements TransactionService {
 				if (transaction == null) {
 					transaction = new Transaction();
 					transaction.setTxHash(txHash);
-					User senderAddress = userRepository.findByBtcWalletAddress(fromUser.getBtcWalletUuid());
-					transaction.setFromAddress(senderAddress.getBtcWalletAddress());
+					User senderUser = userRepository.findByBtcWalletAddress(fromUser.getBtcWalletUuid());
+					transaction.setFromAddress(senderUser.getBtcWalletAddress());
 					transaction.setToAddress(toAddress);
 					transaction.setTxAmount(amount);
 					transaction.setTransactionType(TransactionType.OUTGOING);
@@ -404,8 +404,7 @@ public class TransactionServiceImpl implements TransactionService {
 		if (transactionStatus.equals(TransactionStatus.WITHDRAW)) {
 			return transactionRepo.findByFromUserAndTransactionStatus(user, transactionStatus, pageRequest);
 		} else {
-			return transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user, transactionStatus,
-					TransactionStatus.WITHDRAW, pageRequest);
+			return transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user, pageRequest);
 		}
 
 	}
