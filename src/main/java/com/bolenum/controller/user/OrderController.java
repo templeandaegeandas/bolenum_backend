@@ -24,7 +24,7 @@ import com.bolenum.model.BankAccountDetails;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
-import com.bolenum.services.common.BankDetailsService;
+import com.bolenum.services.common.BankAccountDetailsService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.order.book.TradeService;
@@ -55,7 +55,7 @@ public class OrderController {
 	private LocaleService localeService;
 
 	@Autowired
-	private BankDetailsService bankDetailsService;
+	private BankAccountDetailsService bankDetailsService;
 
 	@Autowired
 	private UserService userService;

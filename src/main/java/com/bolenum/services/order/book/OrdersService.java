@@ -65,8 +65,6 @@ public interface OrdersService {
 
 	double getPlacedOrderVolume(User user);
 
-	String checkFiatOrderEligibility(User user, Orders orders, long pairId);
-
-	public boolean processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair);
+	
 
 }

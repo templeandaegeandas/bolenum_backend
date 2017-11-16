@@ -14,10 +14,11 @@ import com.bolenum.repo.common.BankAccountDetailsRepo;
  * 
  * @Author himanshu
  * @Date 22-Sep-2017
+ * @updated Chandan Kumar Singh
  */
 
 @Service
-public class BankDetailsServiceImpl implements BankDetailsService {
+public class BankAccountDetailsServiceImpl implements BankAccountDetailsService {
 
 	@Autowired
 	private BankAccountDetailsRepo bankAccountDetailsRepo;
@@ -94,6 +95,22 @@ public class BankDetailsServiceImpl implements BankDetailsService {
 	@Override
 	public BankAccountDetails findByID(Long id) {
 		return bankAccountDetailsRepo.findById(id);
+	}
+
+	@Override
+	public BankAccountDetails primaryBankAccountDetails(User user) {
+		List<BankAccountDetails> bankAccountDetails = bankAccountDetailsRepo.findByUser(user);
+		BankAccountDetails bankAccountDetail = null;
+		for (BankAccountDetails bank : bankAccountDetails) {
+			if (bank.isPrimary()) {
+				bankAccountDetail = bank;
+				break;
+			}
+		}
+		if (bankAccountDetail == null) {
+			bankAccountDetail = bankAccountDetails.get(0);
+		}
+		return bankAccountDetail;
 	}
 
 }

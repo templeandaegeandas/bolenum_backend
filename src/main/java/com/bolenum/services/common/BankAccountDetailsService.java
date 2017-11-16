@@ -10,7 +10,7 @@ import com.bolenum.model.User;
  * @Author Himanshu
  * @Date 24-Sep-2017
  */
-public interface BankDetailsService {
+public interface BankAccountDetailsService {
 
 	public BankAccountDetails findByAccountNumber(String accountNumber);
 
@@ -21,5 +21,7 @@ public interface BankDetailsService {
 	public List<BankAccountDetails> findByUser(User user);
 
 	public BankAccountDetails findByID(Long id);
+	
+	public BankAccountDetails primaryBankAccountDetails(User user);
 
 }

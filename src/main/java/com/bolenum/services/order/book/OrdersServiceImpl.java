@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +30,6 @@ import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 
@@ -206,11 +203,7 @@ public class OrdersServiceImpl implements OrdersService {
 			// }
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
-				if (isFiat) {
-					processFiatOrderList(sellOrderList.get(0), orders, pair);
-				} else {
-					remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
-				}
+				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 			}
 			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
@@ -237,11 +230,7 @@ public class OrdersServiceImpl implements OrdersService {
 			logger.debug("buyOrderList.size(): {}", buyOrderList.size());
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
-				if (isFiat) {
-					processFiatOrderList(buyOrderList.get(0), orders, pair);
-				} else {
-					remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
-				}
+				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
 			}
 			if (remainingVolume >= 0) {
 				orders.setVolume(remainingVolume);
@@ -676,108 +665,4 @@ public class OrdersServiceImpl implements OrdersService {
 	public Orders getOrderDetails(long orderId) {
 		return ordersRepository.getOne(orderId);
 	}
-
-	/**
-	 * to check the eligibility to place an order by checking available balance
-	 * of crypto currencies #return "proceed" if user have sufficient balance
-	 * #return "Synchronizing" if BTC block chain is syncing with network
-	 */
-	@Override
-	public String checkFiatOrderEligibility(User user, Orders orders, long pairId) {
-		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
-		orders.setPair(currencyPair);
-
-		Currency currency = null;
-		Currency toCurrency = currencyPair.getToCurrency().get(0);
-		if (!(toCurrency.getCurrencyType().equals(CurrencyType.FIAT))) {
-			currency = toCurrency;
-		}
-
-		Currency pairCurrency = currencyPair.getPairedCurrency().get(0);
-		if (!(pairCurrency.getCurrencyType().equals(CurrencyType.FIAT))) {
-			currency = pairCurrency;
-		}
-		String tickter = null, minOrderVol = null, currencyType = null;
-		/**
-		 * if order type is SELL then only checking, user have selling volume
-		 */
-		if (orders.getOrderType().equals(OrderType.SELL)) {
-			minOrderVol = String.valueOf(orders.getVolume());
-		} else {
-			minOrderVol = "0";
-		}
-		tickter = currency.getCurrencyAbbreviation();
-		currencyType = currency.getCurrencyType().toString();
-		double userPlacedOrderVolume = getPlacedOrderVolumeOfCurrency(user, OrderStatus.SUBMITTED, OrderType.SELL,
-				currency);
-		logger.debug("user placed order volume: {} and order volume: {}", userPlacedOrderVolume, minOrderVol);
-		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
-		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
-		// getting the user current wallet balance
-		String balance = walletService.getBalance(tickter, currencyType, user);
-		balance = balance.replace("BTC", "");
-		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
-			// user must have balance then user is eligible for placing order
-			if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
-				balance = "proceed";
-			}
-		}
-		return balance;
-	}
-
-	/**
-	 * @description getPlacedOrderVolumeOfCurrency @param @return
-	 *              double @exception
-	 * 
-	 */
-	private double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType,
-			Currency currency) {
-		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(user, orderStatus,
-				orderType, currency);
-		double total = 0.0;
-		for (Orders order : orders) {
-			total = total + order.getVolume();
-		}
-		return total;
-	}
-
-	@Override
-	public boolean processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair) {
-		// fetching order type BUY or SELL
-		// OrderType orderType = orders.getOrderType();
-		// User buyer, seller;
-		if (!(pair.getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)
-				|| pair.getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT))) {
-			return false;
-		}
-		Double qtyTraded;
-		double remainingVolume = orders.getVolume();
-		logger.debug("process order list remainingVolume: {}", remainingVolume);
-		// process till order size and remaining volume is > 0
-		if (remainingVolume == matchedOrder.getVolume()) {
-			// qtyTraded is total selling/buying volume
-			qtyTraded = remainingVolume;
-			logger.debug("qty traded: {}", qtyTraded);
-			// setting new required SELL/BUY volume is remaining order
-			// volume
-			double remain = matchedOrder.getVolume() - remainingVolume;
-			logger.debug("reamining volume: {}", remain);
-			matchedOrder.setVolume(remain);
-			logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
-			matchedOrder.setLockedVolume(qtyTraded);
-			logger.debug("locked volume after set: {}", matchedOrder.getLockedVolume());
-			remainingVolume = 0.0;
-			orders.setVolume(remainingVolume);
-			orders.setLockedVolume(qtyTraded);
-			orders.setOrderStatus(OrderStatus.LOCKED);
-			logger.debug("orders saving started");
-			orderAsyncServices.saveOrder(orders);
-			logger.debug("orders saving finished and matched order saving started");
-			orderAsyncServices.saveOrder(matchedOrder);
-			logger.debug("matched order saving finished");
-			return true;
-		}
-		return false;
-	}
-
 }

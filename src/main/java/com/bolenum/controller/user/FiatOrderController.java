@@ -15,9 +15,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.enums.OrderType;
+import com.bolenum.model.BankAccountDetails;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
+import com.bolenum.services.common.BankAccountDetailsService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.order.book.FiatOrderService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.GenericUtils;
@@ -41,7 +45,13 @@ public class FiatOrderController {
 	private LocaleService localeService;
 
 	@Autowired
+	private FiatOrderService fiatOrderService;
+	
+	@Autowired
 	private OrdersService ordersService;
+
+	@Autowired
+	private BankAccountDetailsService bankAccountDetailsService;
 
 	private Logger logger = LoggerFactory.getLogger(FiatOrderController.class);
 
@@ -64,7 +74,7 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"),
 					null);
 		}
-		String balance = ordersService.checkFiatOrderEligibility(user, orders, pairId);
+		String balance = fiatOrderService.checkFiatOrderEligibility(user, orders, pairId);
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);
 		}
@@ -73,11 +83,17 @@ public class FiatOrderController {
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
 		orders.setUser(user);
-		Boolean result = ordersService.processFiatOrderList(matchedOrder, orders, orders.getPair());
+		Boolean result = fiatOrderService.processFiatOrderList(matchedOrder, orders, orders.getPair());
 		if (result) {
-			
+			User bankDetails = null;
+			if (orders.getOrderType().equals(OrderType.BUY)) {
+				bankDetails = matchedOrder.getUser();
+			} else {
+				bankDetails = orders.getUser();
+			}
+			BankAccountDetails accountDetails = bankAccountDetailsService.primaryBankAccountDetails(bankDetails);
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
-					null);
+					accountDetails);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("order.processed.fail"), null);
