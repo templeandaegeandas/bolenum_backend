@@ -233,9 +233,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) throws InsufficientBalanceException {
-		Double availableBalance = null;
+		Double availableBalance = 0.0;
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
-			availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
+		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
 		double placeOrderVolume = orderService.totalUserBalanceInBook(user, erc20Token.getCurrency(), erc20Token.getCurrency());
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
@@ -243,7 +243,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return true;
 		}
 		else {
-			availableBalance = availableBalance - withdrawAmount+placeOrderVolume;
 			throw new InsufficientBalanceException(MessageFormat.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
 		}
 	}

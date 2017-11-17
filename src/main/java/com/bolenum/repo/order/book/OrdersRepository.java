@@ -73,6 +73,9 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrency") Currency toCurrency, @Param("pairedCurrency") Currency pairedCurrency);
 
 	//@Query("SELECT e FROM Events e WHERE e.eventsDate BETWEEN :startDate AND :endDate")
+	
+	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairPairedCurrency(User user, OrderStatus orderStatus,OrderType orderType, Currency currency);
+	
 	Long countOrdersByCreatedOnBetween(Date startDate,Date endDate);
 	
 	Long countOrderByOrderTypeAndCreatedOnBetween(OrderType orderType,Date startDate,Date endDate);
@@ -80,8 +83,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Long countOrderByUserAndOrderType(User user,OrderType orderType);
 	
 	Orders findByMatchedOrder(Orders orders);
-
-	//Page<Orders> findByCreatedOnIsBetween(Date startDate, Date endDate, PageRequest pageRequest);
 
 	Page<Orders> findByCreatedOnBetween(Date startDate, Date endDate, Pageable page);
 }

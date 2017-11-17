@@ -16,7 +16,6 @@ import com.bolenum.model.orders.book.Orders;
  */
 public interface FiatOrderService {
 	String checkFiatOrderEligibility(User user, Orders orders, long pairId);
-
 	public Orders processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair);
 
 	double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType, Currency currency);
