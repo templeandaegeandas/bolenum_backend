@@ -65,8 +65,6 @@ public class BTCWalletController {
 	@Autowired
 	private TransactionService transactionService;
 
-
-
 	@Autowired
 	private TransactionFeeService transactionFeeService;
 
@@ -142,7 +140,6 @@ public class BTCWalletController {
 		// marketPriceService.findByCurrencyId(currencyAbbreviation);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
 	}
-
 
 
 	/**
@@ -242,6 +239,12 @@ public class BTCWalletController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"), null);
 	}
 
+	/**
+	 * 
+	 * @param transaction
+	 * @return
+	 * 
+	 */
 
 	@RequestMapping(value = UrlConstant.DEPOSIT_TRANSACTION_STATUS, method = RequestMethod.POST)
 	public ResponseEntity<Object> depositTransactionStatus(@RequestBody Transaction transaction) {
@@ -254,6 +257,5 @@ public class BTCWalletController {
 					localService.getMessage("Deposit saved successfully!"), transactionResponse);
 		}
 	}
-	
 	
 }

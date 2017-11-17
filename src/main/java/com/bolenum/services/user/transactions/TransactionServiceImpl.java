@@ -216,18 +216,28 @@ public class TransactionServiceImpl implements TransactionService {
 				Transaction transaction = transactionRepo.findByTxHash(txHash);
 				if (transaction == null) {
 					transaction = new Transaction();
+					logger.debug("transaction hash inside if condition : {}", txHash);
 					transaction.setTxHash(txHash);
 					User senderUser = userRepository.findByBtcWalletAddress(fromUser.getBtcWalletUuid());
+					logger.debug(senderUser.getBtcWalletAddress());
 					transaction.setFromAddress(senderUser.getBtcWalletAddress());
 					transaction.setToAddress(toAddress);
+					logger.debug("toAddress : {}",toAddress);
 					transaction.setTxAmount(amount);
+					logger.debug("amount to be transferred : {}",amount);
 					transaction.setTransactionType(TransactionType.OUTGOING);
+					logger.debug("TransactionType = : {}",TransactionType.OUTGOING);
 					transaction.setFromUser(fromUser);
+					logger.debug("amount transferred by user : {}",fromUser.getEmailId());
 					transaction.setTransactionStatus(transactionStatus);
+					logger.debug("transactionStatus = : {}",transactionStatus);
 					transaction.setCurrencyName("BTC");
+					logger.debug("Name of Currency to be transferred: {}",transaction.getCurrencyName());
 					User receiverUser = userRepository.findByBtcWalletAddress(toAddress);
 					if (receiverUser != null) {
 						transaction.setToUser(receiverUser);
+						logger.debug("receiver user email id: {}",receiverUser.getEmailId());
+						
 					}
 
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
