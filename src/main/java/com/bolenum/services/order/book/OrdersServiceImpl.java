@@ -17,7 +17,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.UrlConstant;
-import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
@@ -87,6 +86,7 @@ public class OrdersServiceImpl implements OrdersService {
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
+
 		String tickter = null, minOrderVol = null, currencyType = null;
 		Currency currency;
 		/**
@@ -192,11 +192,6 @@ public class OrdersServiceImpl implements OrdersService {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		CurrencyPair pair = orders.getPair();
-		boolean isFiat = false;
-		if (pair.getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)
-				|| pair.getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)) {
-			isFiat = true;
-		}
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		if (orderType.equals(OrderType.BUY)) {
@@ -205,9 +200,9 @@ public class OrdersServiceImpl implements OrdersService {
 			/**
 			 * checking user self order, return false if self order else proceed.
 			 */
-			// if (isUsersSelfOrder(orders, sellOrderList)) {
-			// return processed;
-			// }
+			 if (isUsersSelfOrder(orders, sellOrderList)) {
+			 return processed;
+			 }
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
@@ -232,9 +227,9 @@ public class OrdersServiceImpl implements OrdersService {
 			 * proceed.
 			 * checking user self order, return false if self order else proceed.
 			 */
-			// if (isUsersSelfOrder(orders, buyOrderList)) {
-			// return processed;
-			// }
+			 if (isUsersSelfOrder(orders, buyOrderList)) {
+			 return processed;
+			 }
 			logger.debug("buyOrderList.size(): {}", buyOrderList.size());
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
@@ -633,7 +628,6 @@ public class OrdersServiceImpl implements OrdersService {
 		return wrostSell;
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price) {
 		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
@@ -709,6 +703,9 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.countOrderByUserAndOrderType(user, orderType);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Orders getOrderDetails(long orderId) {
 		return ordersRepository.getOne(orderId);
