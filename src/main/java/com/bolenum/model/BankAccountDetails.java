@@ -43,7 +43,8 @@ public class BankAccountDetails {
 	private Boolean isDeleted = false;
 	private Date onCreated;
 	private Date onUpdated;
-	private boolean isPrimary;
+	
+	private Boolean isPrimary = false;
 	
 	@ManyToOne
 	private User user;
