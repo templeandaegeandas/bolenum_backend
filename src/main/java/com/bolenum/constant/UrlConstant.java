@@ -82,6 +82,7 @@ public class UrlConstant {
 	
 	/******************** ORDER API ******/
 	public static final String CREATE_ORDER = "create/order";
+	public static final String CREATE_ORDER_FIAT = "create/order/fiat";
 	public static final String BUY_ORDER_LIST = "get/buy/orders";
 	public static final String SELL_ORDER_LIST = "get/sell/orders";
 	public static final String MY_ORDER_LIST = "get/my/orders";
@@ -89,6 +90,8 @@ public class UrlConstant {
 	public static final String TRADE_LIST_ALL = "get/trade/list";
 	public static final String MY_TRADING_COUNT = "trading/count";
 	public static final String ORDER_BY_ID = "order";
+	public static final String ORDER_FIAT_CANCEL = "order/fiat/cancel";
+	public static final String ORDER_FIAT_PAID = "order/fiat/confirm";
 	
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";

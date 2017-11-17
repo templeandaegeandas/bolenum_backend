@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.dto.common.EditUserForm;
@@ -23,13 +24,16 @@ import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.OTP;
 import com.bolenum.model.User;
+import com.bolenum.model.UserKyc;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.common.RoleRepo;
 import com.bolenum.repo.user.OTPRepository;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.services.common.KYCService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
+import com.bolenum.util.ResponseHandler;
 import com.bolenum.util.SMSService;
 import com.bolenum.util.TokenGenerator;
 
@@ -68,6 +72,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private FileUploadService fileUploadService;
+
+	@Autowired
+	private KYCService kycService;
 
 	@Value("${bolenum.profile.image.location}")
 	private String uploadedFileLocation;
@@ -297,5 +304,28 @@ public class UserServiceImpl implements UserService {
 
 		}
 		return null;
+	}
+
+	/**
+	 * return true if user's KYC document is verified, else false
+	 * 
+	 * @param user
+	 * 
+	 */
+	@Override
+	public boolean isKycVerified(User user) {
+		List<UserKyc> kycList = kycService.getListOfKycByUser(user);
+		if (kycList == null || kycList.size() < 2) {
+			return false;
+
+		} else {
+			for (int i = 0; i < kycList.size(); i++) {
+				UserKyc userKyc = kycList.get(i);
+				if (!userKyc.getIsVerified()) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

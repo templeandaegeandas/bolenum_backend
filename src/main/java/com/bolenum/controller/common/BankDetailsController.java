@@ -18,7 +18,7 @@ import com.bolenum.dto.common.AddUserBankDetailsForm;
 import com.bolenum.dto.common.EditUserBankDetailsForm;
 import com.bolenum.model.BankAccountDetails;
 import com.bolenum.model.User;
-import com.bolenum.services.common.BankDetailsService;
+import com.bolenum.services.common.BankAccountDetailsService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.ErrorCollectionUtil;
@@ -40,7 +40,7 @@ import io.swagger.annotations.Api;
 public class BankDetailsController {
 
 	@Autowired
-	private BankDetailsService bankDetailsService;
+	private BankAccountDetailsService bankDetailsService;
 
 	@Autowired
 	private LocaleService localService;

@@ -216,18 +216,29 @@ public class TransactionServiceImpl implements TransactionService {
 				Transaction transaction = transactionRepo.findByTxHash(txHash);
 				if (transaction == null) {
 					transaction = new Transaction();
+					logger.debug("transaction hash inside if condition : {}", txHash);
 					transaction.setTxHash(txHash);
 					User senderUser = userRepository.findByBtcWalletAddress(fromUser.getBtcWalletUuid());
+					logger.debug(senderUser.getBtcWalletAddress());
 					transaction.setFromAddress(senderUser.getBtcWalletAddress());
 					transaction.setToAddress(toAddress);
+					logger.debug("toAddress : {}",toAddress);
 					transaction.setTxAmount(amount);
+					logger.debug("amount to be transferred : {}",amount);
 					transaction.setTransactionType(TransactionType.OUTGOING);
+					logger.debug("TransactionType = : {}",TransactionType.OUTGOING);
 					transaction.setFromUser(fromUser);
+					logger.debug("amount transferred by user : {}",fromUser.getEmailId());
 					transaction.setTransactionStatus(transactionStatus);
+					logger.debug("transactionStatus = : {}",transactionStatus);
 					transaction.setCurrencyName("BTC");
+					logger.debug("Name of Currency to be transferred: {}",transaction.getCurrencyName());
 					User receiverUser = userRepository.findByBtcWalletAddress(toAddress);
 					if (receiverUser != null) {
 						transaction.setToUser(receiverUser);
+
+						logger.debug("receiver user email id: {}",receiverUser.getEmailId());
+						
 					}
 
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
@@ -277,7 +288,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
-				transaction.setTxAmount(amount / erc20Token.getDecimalValue());
+				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setFromUser(fromUser);
@@ -293,6 +304,32 @@ public class TransactionServiceImpl implements TransactionService {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
+					return new AsyncResult<Boolean>(true);
+				}
+			}
+			else {
+				logger.debug("transaction else part already saved: {}",transaction.getTxHash());
+				transaction.setTxHash(transactionReceipt.getTransactionHash());
+				transaction.setFromAddress(fromUser.getEthWalletaddress());
+				transaction.setToAddress(toAddress);
+				transaction.setTxAmount(amount);
+				transaction.setTransactionType(TransactionType.OUTGOING);
+				transaction.setTransactionStatus(transactionStatus);
+				transaction.setFromUser(fromUser);
+				transaction.setCurrencyName(tokenName);
+				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
+				logger.debug("receiver else part: {}", receiverUser);
+				if (receiverUser != null) {
+					logger.debug("receiver else part saved with user: {}", receiverUser.getUserId());
+					transaction.setToUser(receiverUser);
+
+				}
+				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				logger.debug("transaction else part saved completed: {}", fromUser.getEmailId());
+				if (saved != null) {
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
+							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("transaction else part saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
 			}

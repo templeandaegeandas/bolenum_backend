@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -35,6 +36,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.Contract;
 
+import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.CurrencyForm;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.TransactionStatus;
@@ -78,6 +80,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private LocaleService localeService;
+	
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
 
 	private static final Logger logger = LoggerFactory.getLogger(Erc20TokenServiceImpl.class);
 
@@ -226,18 +231,50 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
-			tx.setTransactionType(TransactionType.INCOMING);
 			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
-			tx.setCurrencyName(tokenName);
-			tx.setFromUser(fromUser);
-			User receiverUser = userRepository.findByBtcWalletAddress(tx.getToAddress());
+			tx.setTransactionType(TransactionType.INCOMING);
+			User receiverUser = userRepository.findByBtcWalletAddress(transaction._to.getValue());
+			logger.debug("receiver user : {}", receiverUser);
 			if (receiverUser != null) {
+				logger.debug("receiver user id: {}", receiverUser.getUserId());
 				tx.setToUser(receiverUser); 
-
+				tx.setTransactionStatus(TransactionStatus.WITHDRAW);
+				tx.setTransactionType(TransactionType.OUTGOING);
 			}
+			logger.debug("Balance returned by the listner: {}",transaction._value.getValue().doubleValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue());
+			tx.setCurrencyName(tokenName);
+			logger.debug("from user id: {}", fromUser.getUserId());
+			tx.setFromUser(fromUser);
 			Transaction saved = transactionRepo.saveAndFlush(tx);
 			logger.debug("transaction saved completed: {}", fromUser.getEmailId());
+			if (saved != null) {
+				logger.debug("new incoming transaction saved of user: {}", fromUser.getEmailId());
+			}
+		}
+		else {
+			logger.debug("saving else transaction for user: {}", fromUser.getEmailId());
+			tx.setTxHash(transaction._transactionHash);
+			tx.setFromAddress(transaction._from.getValue());
+			tx.setToAddress(transaction._to.getValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue());
+			logger.debug("Balance else part returned by the listner: {}",transaction._value.getValue().doubleValue());
+			tx.setTransactionType(TransactionType.OUTGOING);
+			if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
+				tx.setTransactionType(TransactionType.INCOMING);
+			}
+			tx.setCurrencyName(tokenName);
+			logger.debug("from else user id: {}", fromUser.getUserId());
+			tx.setFromUser(fromUser);
+			User receiverUser = userRepository.findByBtcWalletAddress(tx.getToAddress());
+			logger.debug("receiver else user : {}", receiverUser);
+			if (receiverUser != null) {
+
+				logger.debug("receiver else user id: {}", receiverUser.getUserId());
+				tx.setToUser(receiverUser); 
+			}
+			Transaction saved = transactionRepo.saveAndFlush(tx);
+			logger.debug("transaction else saved completed: {}", fromUser.getEmailId());
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", fromUser.getEmailId());
 
@@ -248,8 +285,11 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				}
 				logger.debug("tx exists: {}", transaction._transactionHash);
 				transactionRepo.saveAndFlush(tx);
+				logger.debug("new incoming else transaction saved of user: {}", fromUser.getEmailId());
 			}
 		}
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+				com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 	}
 
 	Double createDecimals(int decimal) {
