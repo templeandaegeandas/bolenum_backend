@@ -7,7 +7,7 @@ package com.bolenum.enums;
  *
  */
 public enum OrderStatus {
-	SUBMITTED("submitted"), CANCELLED("cancelled"), COMPLETED("completed");
+	SUBMITTED("submitted"), CANCELLED("cancelled"), COMPLETED("completed"), LOCKED("locked");
 
 	private String orderStatus;
 

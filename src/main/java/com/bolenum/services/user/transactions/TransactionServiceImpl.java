@@ -32,6 +32,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
 import com.bolenum.constant.BTCUrlConstant;
+import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Erc20Token;
@@ -98,6 +100,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private CurrencyService currencyService;
+
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
 
 	/**
 	 * to perform in app transaction for ethereum
@@ -151,10 +156,17 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
-				transaction.setUser(fromUser);
+				transaction.setFromUser(fromUser);
 				transaction.setCurrencyName("ETH");
+				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
+				if (receiverUser != null) {
+					transaction.setToUser(receiverUser);
+				}
+
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
+							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
@@ -205,15 +217,23 @@ public class TransactionServiceImpl implements TransactionService {
 				if (transaction == null) {
 					transaction = new Transaction();
 					transaction.setTxHash(txHash);
-					transaction.setFromAddress(fromUser.getBtcWalletUuid());
+					User senderUser = userRepository.findByBtcWalletAddress(fromUser.getBtcWalletUuid());
+					transaction.setFromAddress(senderUser.getBtcWalletAddress());
 					transaction.setToAddress(toAddress);
 					transaction.setTxAmount(amount);
 					transaction.setTransactionType(TransactionType.OUTGOING);
-					transaction.setUser(fromUser);
+					transaction.setFromUser(fromUser);
 					transaction.setTransactionStatus(transactionStatus);
 					transaction.setCurrencyName("BTC");
+					User receiverUser = userRepository.findByBtcWalletAddress(toAddress);
+					if (receiverUser != null) {
+						transaction.setToUser(receiverUser);
+					}
+
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
+						simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
+								com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 						return new AsyncResult<Boolean>(true);
 					}
@@ -243,8 +263,8 @@ public class TransactionServiceImpl implements TransactionService {
 			TransactionStatus transactionStatus) {
 		try {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
-			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, erc20Token, toAddress,
-					amount);
+			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, erc20Token,
+					toAddress, amount);
 			logger.debug("{} transaction send fund completed", tokenName);
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
@@ -257,20 +277,28 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
-				transaction.setTxAmount(amount);
+				transaction.setTxAmount(amount / erc20Token.getDecimalValue());
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
-				transaction.setUser(fromUser);
+				transaction.setFromUser(fromUser);
 				transaction.setCurrencyName(tokenName);
+				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
+				if (receiverUser != null) {
+					transaction.setToUser(receiverUser);
+
+				}
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
+							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException | IOException | CipherException | TransactionException | InterruptedException | ExecutionException e) {
+				| BadPaddingException | IOException | CipherException | TransactionException | InterruptedException
+				| ExecutionException e) {
 			logger.error("{} transaction failed:  {}", tokenName, e.getMessage());
 			e.printStackTrace();
 		}
@@ -279,7 +307,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Async
-	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) throws InterruptedException, ExecutionException {
+	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller)
+			throws InterruptedException, ExecutionException {
+
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
 		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";
@@ -293,7 +323,7 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("BTC transaction started");
 				txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
 						qtyTraded, null);
-				try{
+				try {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
 					if (res) {
@@ -305,12 +335,12 @@ public class TransactionServiceImpl implements TransactionService {
 						logger.debug("Message : {}", msg1);
 						return new AsyncResult<Boolean>(res);
 					}
-				}catch (InterruptedException | ExecutionException e) {
+				} catch (InterruptedException | ExecutionException e) {
 					logger.error("BTC transaction failed: {}", e.getMessage());
 					e.printStackTrace();
 					return new AsyncResult<Boolean>(false);
 				}
-				
+
 			case "ETH":
 				logger.debug("ETH transaction started");
 				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null);
@@ -331,7 +361,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 			}
 			break;
-			
+
 		case "ERC20TOKEN":
 			logger.debug("ERC20TOKEN transaction started");
 			txStatus = performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null);
@@ -357,7 +387,7 @@ public class TransactionServiceImpl implements TransactionService {
 			break;
 		}
 
-	return new AsyncResult<Boolean>(false);
+		return new AsyncResult<Boolean>(false);
 
 	}
 
@@ -375,7 +405,11 @@ public class TransactionServiceImpl implements TransactionService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		return transactionRepo.findByUserAndTransactionStatus(user, transactionStatus, pageRequest);
+		if (transactionStatus.equals(TransactionStatus.WITHDRAW)) {
+			return transactionRepo.findByFromUserAndTransactionStatus(user, transactionStatus, pageRequest);
+		} else {
+			return transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user, pageRequest);
+		}
 
 	}
 

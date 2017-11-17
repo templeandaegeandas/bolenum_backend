@@ -48,6 +48,8 @@ public class UrlConstant {
 	public static final String CURRENCY_PAIR_LIST="currency-pair/list";
 	public static final String TRANSACTION_FEES="transaction/fees";
 	public static final String PAIRED_CURRENCY="paired/currency/list";
+	public static final String COUNT_BUYER_SELLER_DASHBOARD = "buyer/seller";
+	public static final String DISPLAY_LATEST_ORDER="latest/order/list";
 	
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "kyc/upload";
@@ -73,12 +75,14 @@ public class UrlConstant {
 	public static final String DEPOSIT = "deposit";
 	public static final String MARKET_PRICE = "market/price";
 	public static final String WITHDRAW = "withdraw";
+
 	public static final String GET_TRANSACTION_LIST_OF_USER_WITHDRAW="withdraw/list";
 	public static final String GET_TRANSACTION_LIST_OF_USER_DEPOSIT = "deposit/list";
 	public static final String DEPOSIT_TRANSACTION_STATUS="transaction/status/deposit";
 	
 	/******************** ORDER API ******/
 	public static final String CREATE_ORDER = "create/order";
+	public static final String CREATE_ORDER_FIAT = "create/order/fiat";
 	public static final String BUY_ORDER_LIST = "get/buy/orders";
 	public static final String SELL_ORDER_LIST = "get/sell/orders";
 	public static final String MY_ORDER_LIST = "get/my/orders";
@@ -86,6 +90,8 @@ public class UrlConstant {
 	public static final String TRADE_LIST_ALL = "get/trade/list";
 	public static final String MY_TRADING_COUNT = "trading/count";
 	public static final String ORDER_BY_ID = "order";
+	public static final String ORDER_FIAT_CANCEL = "order/fiat/cancel";
+	public static final String ORDER_FIAT_PAID = "order/fiat/confirm";
 	
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";
@@ -103,7 +109,7 @@ public class UrlConstant {
 	public static final String WS_LISTNER_ADMIN = "/listner/admin";
 	public static final String WS_LISTNER_ORDER = "/listner/order";
 	public static final String WS_LISTNER_DEPOSIT = "/listner/deposit";
-	
+	public static final String WS_LISTNER_WITHDRAW = "/listner/withdraw";
 	
 }
 	

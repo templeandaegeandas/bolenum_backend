@@ -32,23 +32,34 @@ public class Orders {
 	private Double totalVolume; // total quantity to keep track of initial
 								// quantity
 	private Double price; // price of 1 UNIT
+	
 	@Enumerated(EnumType.STRING)
 	private OrderStandard orderStandard; // Order is market or limit
+	
 	@Enumerated(EnumType.STRING)
 	private OrderType orderType; // buy or sell
+	
 	private Date createdOn = new Date();
+	
 	private Date deletedOn;
 	private boolean isDeleted;
-	
+
 	@OneToOne
 	private CurrencyPair pair;
-	
+
 	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
+	
 	@OneToOne
 	private User user;
-	private boolean isLocked;
-	
+	private double lockedVolume;
+	/**
+	 * to keep track of which order is matched with incoming order for fiat
+	 * order
+	 */
+	@OneToOne
+	private Orders matchedOrder;
+
 	public Long getId() {
 		return id;
 	}
@@ -146,20 +157,25 @@ public class Orders {
 	}
 
 	/**
-	 * return true if order is locked else false 
-	 * @return the isLocked
+	 * @return the lockedVolume
 	 */
-	public boolean isLocked() {
-		return isLocked;
+	public double getLockedVolume() {
+		return lockedVolume;
 	}
 
 	/**
-	 * @param isLocked
-	 *  the isLocked to set
+	 * @param lockedVolume
 	 */
-	public void setLocked(boolean isLocked) {
-		this.isLocked = isLocked;
+	public void setLockedVolume(double lockedVolume) {
+		this.lockedVolume = lockedVolume;
 	}
-	
-	
+
+	public Orders getMatchedOrder() {
+		return matchedOrder;
+	}
+
+	public void setMatchedOrder(Orders matchedOrder) {
+		this.matchedOrder = matchedOrder;
+	}
+
 }

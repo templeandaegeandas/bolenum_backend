@@ -6,6 +6,7 @@ package com.bolenum.services.user.wallet;
 import java.util.Map;
 
 import com.bolenum.model.User;
+
 import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Transaction;
 

@@ -26,7 +26,8 @@ public interface OrdersService {
 
 	Boolean processLimitOrder(Orders orders) throws InterruptedException, ExecutionException;
 
-	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair) throws InterruptedException, ExecutionException;
+	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair)
+			throws InterruptedException, ExecutionException;
 
 	Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price);
 
@@ -55,12 +56,18 @@ public interface OrdersService {
 	String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded);
 
 	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
+
+	Double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency);
+
+	Long countActiveOpenOrder();
 	
-	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList);
+	Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType);
 
     Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
 	
     public Orders getOrderDetails(long orderId);
     
 	double getPlacedOrderVolume(User user);
+
+	Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy,String searchData);
 }

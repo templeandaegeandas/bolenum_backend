@@ -68,7 +68,10 @@ public class Transaction {
 	}
 
 	@ManyToOne
-	private User user;
+	private User fromUser;
+	
+	@ManyToOne
+	private User toUser;
 
 	public Transaction() {
 
@@ -76,7 +79,7 @@ public class Transaction {
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
 			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
-			Double gasPrice, User user) {
+			Double gasPrice, User fromUser ,User toUser) {
 			
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
@@ -87,7 +90,8 @@ public class Transaction {
 		this.transactionType = transactionType;
 		this.gas = gas;
 		this.gasPrice = gasPrice;
-		this.user = user;
+		this.fromUser = fromUser;
+		this.toUser=toUser;
 	}
 
 	/**
@@ -276,14 +280,23 @@ public class Transaction {
 		this.gasPrice = gasPrice;
 	}
 
-	public User getUser() {
-		return user;
+
+	public User getFromUser() {
+		return fromUser;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setFromUser(User fromUser) {
+		this.fromUser = fromUser;
 	}
-	
+
+	public User getToUser() {
+		return toUser;
+	}
+
+	public void setToUser(User toUser) {
+		this.toUser = toUser;
+	}
+
 	public TransactionStatus getTransactionStatus() {
 		return transactionStatus;
 	}

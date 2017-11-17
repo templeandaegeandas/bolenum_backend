@@ -50,25 +50,27 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BTCWalletServiceImpl implements BTCWalletService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BTCWalletServiceImpl.class);
-	
+
 	@Autowired
 	private Erc20TokenService erc20TokenService;
-	
+
 	@Autowired
 	private OrdersService orderService;
+
 
 	/**
 	 * creating BIP32 hierarchical deterministic (HD) wallets
 	 */
 
 	@Autowired
-	private TransactionRepo transactionRepo; 
-	
+	private TransactionRepo transactionRepo;
+
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
+
 	
 	@Autowired
 	private LocaleService localeService;
@@ -106,9 +108,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return "";
 	}
-	
-	
-	
 
 	/**
 	 * to get wallet address and QR code
@@ -136,7 +135,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				map.put("data", res);
 			}
 		} catch (RestClientException e) {
-			logger.error("get Wallet Address And QrCode exception RCE:  {}", e.getMessage());
+			logger.error("get Wallet Address exception RCE:  {}", e.getMessage());
 			e.printStackTrace();
 		}
 		return map;
@@ -231,13 +230,13 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) throws InsufficientBalanceException {
 		Double availableBalance = null;
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 			availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
-		double placeOrderVolume = orderService.getPlacedOrderVolume(user);
+		double placeOrderVolume = orderService.totalUserBalanceInBook(user, erc20Token.getCurrency(), erc20Token.getCurrency());
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
 		if (availableBalance >= (withdrawAmount+placeOrderVolume)) {
@@ -255,23 +254,23 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public Transaction setDepositeList(Transaction transaction) {
 		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
-		logger.debug("savedTransaction {}",savedTransaction);
-		User user = userRepository.findByBtcWalletAddress(transaction.getToAddress());
-		if (savedTransaction==null) {
+		logger.debug("savedTransaction {}", savedTransaction);
+		User toUser = userRepository.findByBtcWalletAddress(transaction.getToAddress());
+		if (savedTransaction == null) {
 			transaction.setTransactionType(TransactionType.INCOMING);
 			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
 			transaction.setCurrencyName("BTC");
-			transaction.setUser(user);
+			transaction.setToUser(toUser);
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(transaction);
-		}
-		else {
+		} else {
 			savedTransaction.setTransactionType(TransactionType.INCOMING);
+			savedTransaction.setToUser(toUser);
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
 	}
-	
+
 }

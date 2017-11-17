@@ -149,6 +149,7 @@ public class CurrencyController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
 				currencyList);
 	}
+
 	/**
 	 * 
 	 * @param pageNumber

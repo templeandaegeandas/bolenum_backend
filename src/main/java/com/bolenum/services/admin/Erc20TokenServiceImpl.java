@@ -130,7 +130,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	public Erc20Token getById(Long id) {
 		return erc20TokenRepository.findOne(id);
 	}
-	
+
 	@Override
 	public Erc20Token getByCoin(String coin) {
 		return erc20TokenRepository.findByCurrencyCurrencyAbbreviation(coin);
@@ -217,30 +217,38 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				});
 	}
 
-	private void saveTx(User user, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token ) {
+
+	private void saveTx(User fromUser, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token) {
 		Transaction tx = transactionRepo.findByTxHash(transaction._transactionHash);
 		if (tx == null) {
 			tx = new Transaction();
-			logger.debug("saving transaction for user: {}", user.getEmailId());
+			logger.debug("saving transaction for user: {}", fromUser.getEmailId());
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			tx.setTransactionType(TransactionType.INCOMING);
 			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
 			tx.setCurrencyName(tokenName);
-			tx.setUser(user);
+			tx.setFromUser(fromUser);
+			User receiverUser = userRepository.findByBtcWalletAddress(tx.getToAddress());
+			if (receiverUser != null) {
+				tx.setToUser(receiverUser); 
+
+			}
 			Transaction saved = transactionRepo.saveAndFlush(tx);
-			logger.debug("transaction saved completed: {}", user.getEmailId());
+			logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 			if (saved != null) {
-				logger.debug("new incoming transaction saved of user: {}", user.getEmailId());
+				logger.debug("new incoming transaction saved of user: {}", fromUser.getEmailId());
+
+
+			} else {
+				if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
+					tx.setTransactionType(TransactionType.INCOMING);
+				}
+				logger.debug("tx exists: {}", transaction._transactionHash);
+				transactionRepo.saveAndFlush(tx);
 			}
-		} else {
-			if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
-				tx.setTransactionType(TransactionType.INCOMING);
-			}
-			logger.debug("tx exists: {}", transaction._transactionHash);
-			transactionRepo.saveAndFlush(tx);
 		}
 	}
 
