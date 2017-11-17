@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -68,17 +67,15 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 
 	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
 	
-	//@Query("SELECT e FROM Events e WHERE e.eventsDate BETWEEN :startDate AND :endDate")
-	Long countOrdersByCreatedOnBetween(Date startDate,Date endDate);
+	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(User user, OrderStatus orderStatus,OrderType orderType, Currency currency);
 	
-	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
-	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList, @Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
+	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairPairedCurrency(User user, OrderStatus orderStatus,OrderType orderType, Currency currency);
+	
+	Long countOrdersByCreatedOnBetween(Date startDate,Date endDate);
 	
 	Long countOrderByOrderTypeAndCreatedOnBetween(OrderType orderType,Date startDate,Date endDate);
 	
 	Long countOrderByUserAndOrderType(User user,OrderType orderType);
-
-	//Page<Orders> findByCreatedOnIsBetween(Date startDate, Date endDate, PageRequest pageRequest);
 
 	Page<Orders> findByCreatedOnBetween(Date startDate, Date endDate, Pageable page);
 }
