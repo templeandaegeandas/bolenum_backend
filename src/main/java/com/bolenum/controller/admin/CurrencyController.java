@@ -142,6 +142,14 @@ public class CurrencyController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
 				currencyList);
 	}
+	
+	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_ADMIN, method = RequestMethod.GET)
+	public ResponseEntity<Object> getCurrencyListForAdmin() {
+		List<Currency> currencyList = currencyService.getCurrencyListForAdmin();
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
+				currencyList);
+	}
+
 	/**
 	 * 
 	 * @param pageNumber

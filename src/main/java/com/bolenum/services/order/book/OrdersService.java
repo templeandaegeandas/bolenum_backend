@@ -57,14 +57,17 @@ public interface OrdersService {
 
 	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
 
-	Long countOrdersByOrderTypeAndUser(User user, OrderType orderType);
-
-	public Orders getOrderDetails(long orderId);
-
-	double getPlacedOrderVolume(User user);
-
 	Double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency);
 
+	Long countActiveOpenOrder();
 	
+	Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType);
 
+    Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
+	
+    public Orders getOrderDetails(long orderId);
+    
+	double getPlacedOrderVolume(User user);
+
+	Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy,String searchData);
 }

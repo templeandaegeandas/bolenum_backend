@@ -42,11 +42,14 @@ public class UrlConstant {
 	public static final String VIEW_USER_BANK_DETAILS_BY_ADMIN = "admin/bankdetails";
 	public static final String CURRENCY_FOR_TRADING	 = "currency";
 	public static final String CURRENCY_LIST_FOR_TRADING="currency/list";
+	public static final String CURRENCY_LIST_FOR_ADMIN="all/currency/list";
 	public static final String CURRENCY_LIST_FOR_MARKET="currency/list/market";
 	public static final String CURRENCY_PAIR="currency/pair";
 	public static final String CURRENCY_PAIR_LIST="currency-pair/list";
 	public static final String TRANSACTION_FEES="transaction/fees";
 	public static final String PAIRED_CURRENCY="paired/currency/list";
+	public static final String COUNT_BUYER_SELLER_DASHBOARD = "buyer/seller";
+	public static final String DISPLAY_LATEST_ORDER="latest/order/list";
 	
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "kyc/upload";
@@ -72,6 +75,7 @@ public class UrlConstant {
 	public static final String DEPOSIT = "deposit";
 	public static final String MARKET_PRICE = "market/price";
 	public static final String WITHDRAW = "withdraw";
+
 	public static final String GET_TRANSACTION_LIST_OF_USER_WITHDRAW="withdraw/list";
 	public static final String GET_TRANSACTION_LIST_OF_USER_DEPOSIT = "deposit/list";
 	public static final String DEPOSIT_TRANSACTION_STATUS="transaction/status/deposit";
@@ -105,7 +109,7 @@ public class UrlConstant {
 	public static final String WS_LISTNER_ADMIN = "/listner/admin";
 	public static final String WS_LISTNER_ORDER = "/listner/order";
 	public static final String WS_LISTNER_DEPOSIT = "/listner/deposit";
-	
+	public static final String WS_LISTNER_WITHDRAW = "/listner/withdraw";
 	
 }
 	

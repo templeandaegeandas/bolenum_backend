@@ -32,11 +32,15 @@ public class Orders {
 	private Double totalVolume; // total quantity to keep track of initial
 								// quantity
 	private Double price; // price of 1 UNIT
+	
 	@Enumerated(EnumType.STRING)
 	private OrderStandard orderStandard; // Order is market or limit
+	
 	@Enumerated(EnumType.STRING)
 	private OrderType orderType; // buy or sell
+	
 	private Date createdOn = new Date();
+	
 	private Date deletedOn;
 	private boolean isDeleted;
 
@@ -45,6 +49,7 @@ public class Orders {
 
 	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
+	
 	@OneToOne
 	private User user;
 	private double lockedVolume;
@@ -173,5 +178,4 @@ public class Orders {
 		this.matchedOrder = matchedOrder;
 	}
 
-	
 }

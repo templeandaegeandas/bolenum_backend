@@ -81,14 +81,13 @@ public class AuthController {
 			} else {
 				AuthenticationToken token;
 				if (user.getRole().getName().equals(loginForm.getRole())) {
+					try {
+						token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
+								loginForm.getBrowserName(), loginForm.getClientOsName());
+					} catch (UsernameNotFoundException | InvalidPasswordException e) {
+						return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+					}
 					if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.NONE)) {
-						try {
-							token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
-									loginForm.getBrowserName(), loginForm.getClientOsName());
-						} catch (UsernameNotFoundException | InvalidPasswordException e) {
-							return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
-						}
-
 						return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("login.success"),
 								authService.loginResponse(token));
 					}
