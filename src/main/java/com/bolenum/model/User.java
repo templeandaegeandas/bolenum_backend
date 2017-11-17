@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,9 +15,15 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.bolenum.constant.TwoFactorAuthOption;
+import com.bolenum.enums.TwoFactorAuthOption;
 
 import io.swagger.annotations.ApiModelProperty;
+
+/**
+ * 
+ * @Author Himanshu
+ * @Date 13-Oct-2017
+ */
 
 @Entity
 public class User {
@@ -44,9 +52,11 @@ public class User {
 	private String state;
 
 	private String country;
+	
+	private String countryCode;
 
 	private String mobileNumber;
-	
+
 	private Boolean isMobileVerified = false;
 
 	private String gender;
@@ -80,20 +90,31 @@ public class User {
 	@OneToOne
 	private Role role;
 
-	@OneToOne
-	private UserKyc userKyc;
-	
 	private String btcWalletUuid;
-	
+
 	private String ethWalletaddress;
-	
+
 	private String ethWalletPwd;
-	
+
+	private String ethWalletPwdKey;
+
+	private String ethWalletJsonFileName;
+
+	@Enumerated(EnumType.STRING)
 	private TwoFactorAuthOption twoFactorAuthOption = TwoFactorAuthOption.NONE;
-	
+
 	private String google2FaAuthKey;
 	
-	
+	private String btcWalletAddress;
+
+	public String getBtcWalletAddress() {
+		return btcWalletAddress;
+	}
+
+	public void setBtcWalletAddress(String btcWalletAddress) {
+		this.btcWalletAddress = btcWalletAddress;
+	}
+
 	public Long getUserId() {
 		return userId;
 	}
@@ -179,6 +200,14 @@ public class User {
 		this.country = country;
 	}
 
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	public void setCountryCode(String countryCode) {
+		this.countryCode = countryCode;
+	}
+
 	public String getMobileNumber() {
 		return mobileNumber;
 	}
@@ -252,7 +281,7 @@ public class User {
 
 	/**
 	 * @param createdOn
-	 *  the createdOn to set
+	 *            the createdOn to set
 	 */
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
@@ -267,7 +296,7 @@ public class User {
 
 	/**
 	 * @param updatedOn
-	 * the updatedOn to set
+	 *            the updatedOn to set
 	 */
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
@@ -282,7 +311,7 @@ public class User {
 
 	/**
 	 * @param deletedOn
-	 * the deletedOn to set
+	 *            the deletedOn to set
 	 */
 	public void setDeletedOn(Date deletedOn) {
 		this.deletedOn = deletedOn;
@@ -297,19 +326,12 @@ public class User {
 
 	/**
 	 * @param role
-	 * the role to set
+	 *            the role to set
 	 */
 	public void setRole(Role role) {
 		this.role = role;
 	}
 
-	public UserKyc getUserKyc() {
-		return userKyc;
-	}
-
-	public void setUserKyc(UserKyc userKyc) {
-		this.userKyc = userKyc;
-	}
 
 	public String getProfileImage() {
 		return profileImage;
@@ -327,8 +349,8 @@ public class User {
 	}
 
 	/**
-	 * @param btcWalletUuid 
-	 * the btcWalletUuid to set
+	 * @param btcWalletUuid
+	 *            the btcWalletUuid to set
 	 */
 	public void setBtcWalletUuid(String btcWalletUuid) {
 		this.btcWalletUuid = btcWalletUuid;
@@ -342,8 +364,8 @@ public class User {
 	}
 
 	/**
-	 * @param ethWalletaddress 
-	 * the ethWalletaddress to set
+	 * @param ethWalletaddress
+	 *            the ethWalletaddress to set
 	 */
 	public void setEthWalletaddress(String ethWalletaddress) {
 		this.ethWalletaddress = ethWalletaddress;
@@ -357,8 +379,8 @@ public class User {
 	}
 
 	/**
-	 * @param ethWalletPwd 
-	 * the ethWalletPwd to set
+	 * @param ethWalletPwd
+	 *            the ethWalletPwd to set
 	 */
 	public void setEthWalletPwd(String ethWalletPwd) {
 		this.ethWalletPwd = ethWalletPwd;
@@ -379,5 +401,35 @@ public class User {
 	public void setGoogle2FaAuthKey(String google2FaAuthKey) {
 		this.google2FaAuthKey = google2FaAuthKey;
 	}
-	
+
+	/**
+	 * @return the ethWalletPwdKey
+	 */
+	public String getEthWalletPwdKey() {
+		return ethWalletPwdKey;
+	}
+
+	/**
+	 * @param ethWalletPwdKey
+	 *            the ethWalletPwdKey to set
+	 */
+	public void setEthWalletPwdKey(String ethWalletPwdKey) {
+		this.ethWalletPwdKey = ethWalletPwdKey;
+	}
+
+	/**
+	 * @return the ethWalletJsonFileName
+	 */
+	public String getEthWalletJsonFileName() {
+		return ethWalletJsonFileName;
+	}
+
+	/**
+	 * @param ethWalletJsonFileName
+	 *            the ethWalletJsonFileName to set
+	 */
+	public void setEthWalletJsonFileName(String ethWalletJsonFileName) {
+		this.ethWalletJsonFileName = ethWalletJsonFileName;
+	}
+
 }

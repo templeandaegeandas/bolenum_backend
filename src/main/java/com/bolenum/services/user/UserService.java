@@ -2,8 +2,6 @@ package com.bolenum.services.user;
 
 import java.io.IOException;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.exceptions.InvalidOtpException;
@@ -43,7 +41,7 @@ public interface UserService {
 	 * @param user
 	 * @return User
 	 */
-	User addMobileNumber(String mobileNumber, User user) throws PersistenceException;
+	User addMobileNumber(String mobileNumber, String countryCode, User user) throws PersistenceException;
 
 	/**
 	 * 
@@ -60,7 +58,12 @@ public interface UserService {
 	 * @throws Exception
 	 */
 	void resendOTP(User user);
+
 	public User findByUserId(Long id);
-	public User uploadImage(MultipartFile file, Long userId) throws IOException, PersistenceException, MaxSizeExceedException;
+
+	public User uploadImage(String imageBase64, Long userId)
+			throws IOException, PersistenceException, MaxSizeExceedException;
+
+	public boolean isKycVerified(User user);
 
 }

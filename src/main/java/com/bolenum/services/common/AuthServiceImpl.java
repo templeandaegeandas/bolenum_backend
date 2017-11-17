@@ -1,15 +1,18 @@
 package com.bolenum.services.common;
 
 import java.util.Date;
-
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.constant.TokenType;
 import com.bolenum.dto.common.ResetPasswordForm;
+import com.bolenum.enums.TokenType;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
@@ -55,16 +58,19 @@ public class AuthServiceImpl implements AuthService {
 	@Value("${bolenum.api.reset}")
 	private String urlForResetPassword;
 
+	public static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+
 	/**
 	 * For login activity of user
 	 */
 	@Override
-	public AuthenticationToken login(String password, User user, String ipAddress, String browserName, String clientOSName)
-			throws InvalidPasswordException {
+	public AuthenticationToken login(String password, User user, String ipAddress, String browserName,
+			String clientOSName) throws InvalidPasswordException {
 		if (passwordEncoder.matches(password, user.getPassword())) {
 			// Generate Token and Save it for the logged in user
 			AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
 			authToken.setTokentype(TokenType.AUTHENTICATION);
+			
 			AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
 			UserActivity userActivity = new UserActivity(ipAddress, browserName, clientOSName, savedAuthToken);
 			userActivityRepository.save(userActivity);
@@ -73,19 +79,35 @@ public class AuthServiceImpl implements AuthService {
 			throw new InvalidPasswordException(localeService.getMessage("invalid.credential"));
 		}
 	}
+	
+	/**
+	 * 
+	 * @param token
+	 * @return
+	 */
+	@Override
+	public Map<String, Object> loginResponse(AuthenticationToken token) {
+		Map<String, Object> map = new HashMap<>();
+		map.put("userId", token.getUser().getUserId());
+		map.put("fName", token.getUser().getFirstName());
+		map.put("mName", token.getUser().getMiddleName());
+		map.put("lName", token.getUser().getLastName());
+		map.put("name", token.getUser().getFullName());
+		map.put("profilePic", token.getUser().getProfileImage());
+		map.put("email", token.getUser().getEmailId());
+		map.put("role", token.getUser().getRole().getName());
+		map.put("token", token.getToken());
+		return map;
+	}
 
 	/**
 	 * used to validate user for the presence of valid user according to requested
 	 * email
 	 */
 	@Override
-	public boolean validateUser(String email) {
-		User user = userRepository.findByEmailIdIgnoreCase(email);
-		if (user != null) {
-			return true;
+	public User validateUser(String email) {
 
-		}
-		return false;
+		return userRepository.findByEmailId(email);
 	}
 
 	/**
@@ -110,11 +132,9 @@ public class AuthServiceImpl implements AuthService {
 	 * to send token as verification link at the time of reset password
 	 */
 
-	public void sendTokenToResetPassword(String email) {
+	public AuthenticationToken sendTokenToResetPassword(User user) {
 
-		User existingUser = userRepository.findByEmailIdIgnoreCase(email);
-
-		List<AuthenticationToken> previousToken = authenticationTokenRepo.findByUserAndTokentype(existingUser,
+		List<AuthenticationToken> previousToken = authenticationTokenRepo.findByUserAndTokentype(user,
 				TokenType.FORGOT_PASSWORD);
 
 		for (AuthenticationToken token : previousToken) {
@@ -122,13 +142,16 @@ public class AuthServiceImpl implements AuthService {
 				authenticationTokenRepo.delete(token);
 			}
 		}
-		String token = TokenGenerator.generateToken();
-		AuthenticationToken authenticationToken = new AuthenticationToken(token, existingUser);
 
-		emailService.mailSend(email, token, localeService.getMessage("message.subject.forget.password"),
-				serverUrl + urlForResetPassword);
+		String token = TokenGenerator.generateToken();
+
+		AuthenticationToken authenticationToken = new AuthenticationToken(token, user);
+
+		String url = serverUrl + urlForResetPassword + token;
+		emailService.mailSend(user.getEmailId(), localeService.getMessage("message.subject.forget.password"), url);
 		authenticationToken.setTokentype(TokenType.FORGOT_PASSWORD);
-		authenticationTokenRepo.saveAndFlush(authenticationToken);
+		AuthenticationToken savedToken = authenticationTokenRepo.saveAndFlush(authenticationToken);
+		return savedToken;
 
 	}
 
@@ -156,5 +179,5 @@ public class AuthServiceImpl implements AuthService {
 		user.setPassword(passwordEncoder.encode(resetPasswordForm.getNewPassword()));
 		userRepository.save(user);
 	}
-
+	
 }

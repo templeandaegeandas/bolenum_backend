@@ -3,6 +3,7 @@ package com.bolenum.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +14,7 @@ import com.twilio.type.PhoneNumber;
 
 
 @Service
-@EnableAsync
-public class SMSServiceUtil {
+public class SMSServiceImpl implements SMSService{
 	
 	@Value("${bolenum.twilio.account.SID}")
 	String twilioAccountSid;
@@ -23,14 +23,17 @@ public class SMSServiceUtil {
 	@Value("${bolenum.twilio.phone.number}")
 	String twilioMobileNumber;
 	
-	public static final Logger logger = LoggerFactory.getLogger(SMSServiceUtil.class);
+	public static final Logger logger = LoggerFactory.getLogger(SMSServiceImpl.class);
 
-	public void sendMessage(String mobileNumber, String msg) {
+	@Override
+	@Async
+	public void sendMessage(String mobileNumber, String countryCode, String msg) {
 		Twilio.init(twilioAccountSid, twilioAuthToken);
 		try {
-			Message.creator(new PhoneNumber(mobileNumber.toString()), // to
+			Message.creator(new PhoneNumber("+" + countryCode+ mobileNumber.toString()), // to
 					new PhoneNumber(twilioMobileNumber), // from
 					msg).create();
+			logger.info("Message Sent successfully");
 		} catch (ApiException e) {
 			logger.error(e.getMessage());
 		}

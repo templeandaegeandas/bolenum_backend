@@ -7,7 +7,6 @@ import javax.validation.constraints.AssertTrue;
 
 import org.hibernate.validator.constraints.NotBlank;
 
-import com.bolenum.model.Role;
 import com.bolenum.util.GenericUtils;
 
 /**

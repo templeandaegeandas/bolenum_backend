@@ -1,20 +1,21 @@
 package com.bolenum.services.user;
 
-import java.util.Date;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.bolenum.constant.TokenType;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
+import com.bolenum.enums.TokenType;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.exceptions.MaxSizeExceedException;
@@ -22,14 +23,16 @@ import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.OTP;
 import com.bolenum.model.User;
+import com.bolenum.model.UserKyc;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.common.RoleRepo;
 import com.bolenum.repo.user.OTPRepository;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.services.common.KYCService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
-import com.bolenum.util.SMSServiceUtil;
+import com.bolenum.util.SMSService;
 import com.bolenum.util.TokenGenerator;
 
 /**
@@ -60,15 +63,21 @@ public class UserServiceImpl implements UserService {
 	private LocaleService localService;
 
 	@Autowired
-	private SMSServiceUtil smsServiceUtil;
+	private SMSService smsServiceUtil;
 
 	@Autowired
 	private OTPRepository otpRepository;
 
+	@Autowired
 	private FileUploadService fileUploadService;
+
+	@Autowired
+	private KYCService kycService;
 
 	@Value("${bolenum.profile.image.location}")
 	private String uploadedFileLocation;
+
+	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	/**
 	 * to register user if and only if when user details not present in database
@@ -102,7 +111,8 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public User findByEmail(String email) {
-		return userRepository.findByEmailIdIgnoreCase(email);
+		logger.debug("email in findByEmail = {}", email);
+		return userRepository.findByEmailId(email);
 	}
 
 	/**
@@ -187,7 +197,8 @@ public class UserServiceImpl implements UserService {
 		}
 
 		if (editUserForm.getDob() != null) {
-			user.setDob(editUserForm.getDob());
+
+			user.setDob(new Date(editUserForm.getDob()));
 		}
 
 		return userRepository.saveAndFlush(user);
@@ -195,25 +206,28 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User addMobileNumber(String mobileNumber, User user) throws PersistenceException {
+	public User addMobileNumber(String mobileNumber, String countryCode, User user) throws PersistenceException {
 		User existinguser = userRepository.findByMobileNumber(mobileNumber);
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
 		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
+		logger.debug("Otp sent success: {}", code);
 		if (existinguser == null) {
-			smsServiceUtil.sendMessage(mobileNumber, message);
+			smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			if (otpRepository.save(otp) != null) {
+				user.setCountryCode(countryCode);
 				user.setMobileNumber(mobileNumber);
+				user.setIsMobileVerified(false);
 				return userRepository.save(user);
 			} else {
 				return null;
 			}
 		} else {
-			if (existinguser.equals(user) && existinguser.getIsMobileVerified()) {
+			if (existinguser.getUserId().equals(user.getUserId()) && existinguser.getIsMobileVerified()) {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.verified.by.you"));
-			} else if (existinguser.equals(user) && !existinguser.getIsMobileVerified()) {
-				smsServiceUtil.sendMessage(mobileNumber, message);
+			} else if (existinguser.getUserId().equals(user.getUserId()) && !existinguser.getIsMobileVerified()) {
+				smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
 				OTP otp = new OTP(mobileNumber, code, user);
 				otpRepository.save(otp);
 				return existinguser;
@@ -255,10 +269,12 @@ public class UserServiceImpl implements UserService {
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
 		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
-		smsServiceUtil.sendMessage(mobileNumber, message);
+		logger.debug("Otp sent success: {}", code);
+		smsServiceUtil.sendMessage(mobileNumber, user.getCountryCode(), message);
 		OTP otp = new OTP(mobileNumber, code, user);
 		otpRepository.save(otp);
 	}
+
 	/**
 	 * find user with respect to id
 	 */
@@ -272,19 +288,42 @@ public class UserServiceImpl implements UserService {
 	 * to upload profile image with all validation of image file
 	 */
 	@Override
-	public User uploadImage(MultipartFile file, Long userId)
+	public User uploadImage(String imageBase64, Long userId)
 			throws IOException, PersistenceException, MaxSizeExceedException {
 
 		long sizeLimit = 1024 * 1024 * 5L;
 		User user = userRepository.findOne(userId);
-		if (file != null) {
+		if (imageBase64 != null) {
 			String[] validExtentions = { "jpg", "jpeg", "png" };
-			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, validExtentions,
-					sizeLimit);
+			String updatedFileName = fileUploadService.updateUserImage(imageBase64, uploadedFileLocation, user,
+					validExtentions, sizeLimit);
 			user.setProfileImage(updatedFileName);
 			return userRepository.save(user);
 
 		}
 		return null;
+	}
+
+	/**
+	 * return true if user's KYC document is verified, else false
+	 * 
+	 * @param user
+	 * 
+	 */
+	@Override
+	public boolean isKycVerified(User user) {
+		List<UserKyc> kycList = kycService.getListOfKycByUser(user);
+		if (kycList == null || kycList.size() < 2) {
+			return false;
+
+		} else {
+			for (int i = 0; i < kycList.size(); i++) {
+				UserKyc userKyc = kycList.get(i);
+				if (!userKyc.getIsVerified()) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

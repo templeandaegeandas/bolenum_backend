@@ -1,8 +1,11 @@
 package com.bolenum.exceptions;
 
+import java.io.IOException;
+
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolationException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -10,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.ResponseHandler;
 
 /**
@@ -29,11 +34,37 @@ import com.bolenum.util.ResponseHandler;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+	
+	@Autowired
+	private LocaleService localeService;
 
 	public GlobalExceptionHandler() {
 		super();
 	}
 
+	/**
+	 * to handle Illegal Argument Exception
+	 * @param ex
+	 * @param request
+	 * @return ResponseEntity
+	 */
+
+	@ExceptionHandler({ IllegalArgumentException.class })
+	public ResponseEntity<Object> handleIllegalArgumentException(final IllegalArgumentException ex, final WebRequest request) {
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+	}
+	
+	/**
+	 * to handle IOException
+	 * @param ex
+	 * @param request
+	 * @return ResponseEntity
+	 */
+	@ExceptionHandler({ IOException.class })
+	public ResponseEntity<Object> handleIOException(final IOException ex, final WebRequest request) {
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+	}
+	
 	/**
 	 * 
 	 * @param ex
@@ -43,7 +74,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler({ ConstraintViolationException.class })
 	public ResponseEntity<Object> handleBadRequest(final ConstraintViolationException ex, final WebRequest request) {
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("constraint.violent"), null);
 	}
 
 	/**
@@ -55,7 +86,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler({ DataIntegrityViolationException.class })
 	public ResponseEntity<Object> handleBadRequest(final DataIntegrityViolationException ex, final WebRequest request) {
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("constraint.violent"), null);
 	}
 
 	/**
@@ -123,6 +154,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		// );
 	}
 
+	@Override
+	protected ResponseEntity<Object> handleHttpMessageNotWritable(final HttpMessageNotWritableException ex,
+			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+		ex.printStackTrace();
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+		// return new ResponseEntity<Object>(ex.getMessage(), new HttpHeaders(),
+		// );
+	}
 	// 403
 
 	/**
@@ -162,6 +201,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler({ InvalidDataAccessApiUsageException.class, DataAccessException.class })
 	protected ResponseEntity<Object> handleConflict(final RuntimeException ex, final WebRequest request) {
+		ex.printStackTrace();
 		return ResponseHandler.response(HttpStatus.CONFLICT, true, ex.getMessage(), null);
 	}
 
@@ -176,7 +216,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler({ NullPointerException.class, IllegalStateException.class })
+	@ExceptionHandler({ NullPointerException.class, IllegalStateException.class})
 	public ResponseEntity<Object> handleInternal(final RuntimeException ex, final WebRequest request) {
 		logger.error("500 Status Code");
 		ex.printStackTrace();

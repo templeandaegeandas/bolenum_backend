@@ -1,12 +1,16 @@
 package com.bolenum.controller.user;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -15,22 +19,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
+import com.bolenum.enums.OrderType;
+import com.bolenum.enums.TransactionStatus;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
+import com.bolenum.model.Countries;
+import com.bolenum.model.States;
+import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
@@ -62,7 +74,25 @@ public class UserController {
 
 	@Autowired
 	BTCWalletService btcWalletService;
-
+	
+	@Autowired
+	EtherumWalletService etherumWalletService;
+	
+	@Autowired
+	private CountryAndStateService countryAndStateService;
+	
+	@Autowired
+	private TransactionService transactionService;
+	
+	@Autowired
+	private OrdersService orderService;
+	
+    /**
+     * 
+     * @param signupForm
+     * @param result
+     * @return
+     */
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -121,11 +151,14 @@ public class UserController {
 			if(isExpired){
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"), null);
 			}
+			
 		    User user = authenticationToken.getUser();
+		    etherumWalletService.createWallet(user);
 		    String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 		    if (!uuid.isEmpty()) {
 		    	user.setBtcWalletUuid(uuid);
+		    	user.setBtcWalletAddress(btcWalletService.getWalletAddress(uuid));
 				user.setIsEnabled(true);
 				User savedUser = userService.saveUser(user);
 				logger.debug("user mail verify savedUser: {}", savedUser);
@@ -139,7 +172,7 @@ public class UserController {
 			}
 		}
 	}
-
+	
 	/**
 	 * for change password
 	 * 
@@ -210,10 +243,10 @@ public class UserController {
 	}
 
 	@RequestMapping(value = UrlConstant.ADD_MOBILE_NUMBER, method = RequestMethod.PUT)
-	public ResponseEntity<Object> addMobileNumber(@RequestParam("mobileNumber") String mobileNumber)
+	public ResponseEntity<Object> addMobileNumber(@RequestParam("mobileNumber") String mobileNumber, @RequestParam("countryCode") String countryCode)
 			throws PersistenceException {
 		User user = GenericUtils.getLoggedInUser();
-		User response = userService.addMobileNumber(mobileNumber, user);
+		User response = userService.addMobileNumber(mobileNumber, countryCode, user);
 		if (response != null) {
 			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.sent.success"),
 					response);
@@ -223,6 +256,13 @@ public class UserController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param otp
+	 * @return
+	 * @throws PersistenceException
+	 * @throws InvalidOtpException
+	 */
 	@RequestMapping(value = UrlConstant.VERIFY_OTP, method = RequestMethod.PUT)
 	public ResponseEntity<Object> verify(@RequestParam("otp") Integer otp)
 			throws PersistenceException, InvalidOtpException {
@@ -236,6 +276,12 @@ public class UserController {
 		}
 	}
 
+	/**
+	 * 
+	 * @return
+	 * @throws PersistenceException
+	 * @throws InvalidOtpException
+	 */
 	@RequestMapping(value = UrlConstant.RESEND_OTP, method = RequestMethod.POST)
 	public ResponseEntity<Object> resendOtp() throws PersistenceException, InvalidOtpException {
 		User user = GenericUtils.getLoggedInUser();
@@ -252,11 +298,11 @@ public class UserController {
 	 * @throws PersistenceException
 	 * @throws MaxSizeExceedException
 	 */
-	@RequestMapping(value = UrlConstant.UPLOAD_PROFILE_IMAGE, method = RequestMethod.PUT)
-	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file)
+	@RequestMapping(value = UrlConstant.UPLOAD_PROFILE_IMAGE, method = RequestMethod.POST)
+	public ResponseEntity<Object> uploadKycDocument(@RequestParam String profilePic)
 			throws IOException, PersistenceException, MaxSizeExceedException {
 		User user = GenericUtils.getLoggedInUser();
-		User response = userService.uploadImage(file, user.getUserId());
+		User response = userService.uploadImage(profilePic, user.getUserId());
 		if (response != null) {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localService.getMessage("user.image.uploaded.success"), response);
@@ -265,4 +311,68 @@ public class UserController {
 					localService.getMessage("user.image.uploaded.failed"), null);
 		}
 	}
+	
+	/**
+	 * to get list of countries
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.GET_COUNTRIES_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getCountriesList() {
+		List<Countries> list = countryAndStateService.getCountriesList();
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"), list);
+	}
+	
+	/**
+
+	 * to get list of states with respect to specific country 
+	 * 
+	 * @param countryId
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.GET_STATE_BY_COUNTRY_ID, method = RequestMethod.GET)
+	public ResponseEntity<Object> getStatesByCountryId(@RequestParam("countryId") Long countryId) {
+		List<States> list = countryAndStateService.getStatesByCountry(countryId);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("states.list.by.country.id"), list);
+	}
+	
+	
+	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
+	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
+		User user = GenericUtils.getLoggedInUser();
+		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.WITHDRAW,pageNumber,pageSize,sortOrder,sortBy);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("transaction.list.withdraw.success"),listOfUserTransaction);
+	}
+	
+	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
+	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {  
+		User user = GenericUtils.getLoggedInUser();
+		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.DEPOSIT,pageNumber,pageSize,sortOrder,sortBy);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("transaction.list.deposit.success"),listOfUserTransaction);
+	}
+	
+	/**
+	 * to get number of trading buy/sell performed by particular user
+	 * 
+	 * @return
+	 * 
+	 */
+	
+	@RequestMapping(value = UrlConstant.MY_TRADING_COUNT, method = RequestMethod.GET)
+	public ResponseEntity<Object> getUserTradingCount() {  
+		User user = GenericUtils.getLoggedInUser();
+		Long totalNumberOfBuy=orderService.countOrdersByOrderTypeAndUser(user, OrderType.BUY);
+		Long totalNumberOfSell=orderService.countOrdersByOrderTypeAndUser(user, OrderType.SELL);
+		Long totalNumberOfTrading=totalNumberOfBuy+totalNumberOfSell;
+		Map<String,Long> tradingNumber=new HashMap<String,Long>();
+		tradingNumber.put("totalNumberOfBuy", totalNumberOfBuy);
+		tradingNumber.put("totalNumberOfSell", totalNumberOfSell);
+		tradingNumber.put("totalNumberOfTrading",totalNumberOfTrading);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("my.trading.count.success"),tradingNumber);
+	}
+	
 }

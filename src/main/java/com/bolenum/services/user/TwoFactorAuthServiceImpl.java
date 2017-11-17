@@ -5,27 +5,34 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Base64.Encoder;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.constant.TwoFactorAuthOption;
+import com.bolenum.enums.TwoFactorAuthOption;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.model.OTP;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.OTPRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.common.LocaleService;
-import com.bolenum.util.SMSServiceUtil;
+import com.bolenum.util.SMSService;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -50,25 +57,29 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	long lastVerifiedTime = 0; // time of last success
 	final GoogleAuthenticator gAuth = new GoogleAuthenticator();
 	AtomicInteger windowSize = new AtomicInteger(3);
+	
+	@Value("${bolenum.google.qr.code.location}")
+	private String qrCodeLocation;
 
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
 	private OTPRepository otpRepository;
 	@Autowired
-	private SMSServiceUtil smsServiceUtil;
+	private SMSService smsServiceUtil;
 	@Autowired
 	private LocaleService localeService;
+	
+	private static final Logger logger = LoggerFactory.getLogger(TwoFactorAuthServiceImpl.class);
 
 	@Override
 	public Map<String, String> qrCodeGeneration(User user) throws URISyntaxException, WriterException, IOException {
 		String key = getTwoFactorKey(user);
-		String qrCodeLocation = "";
 		String filePath = qrCodeLocation + "/" + user.getUserId() + ".png";
 		String charset = "UTF-8"; // or "ISO-8859-1"
 		Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<EncodeHintType, ErrorCorrectionLevel>();
 		hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-		String keyUri = generateKeyUri("bolenumexchange.com", "bolenum-exchange", key);
+		String keyUri = generateKeyUri("bolenumexchange.com", user.getEmailId(), key);
 
 		String qrCodeData = keyUri;
 		String base64Image = createQRCode(qrCodeData, filePath, charset, hintMap, 200, 200);
@@ -103,7 +114,9 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		int code = (100000 + r.nextInt(900000));
 		if (user.getIsMobileVerified()) {
 			String mobileNumber = user.getMobileNumber();
-			smsServiceUtil.sendMessage(mobileNumber, localeService.getMessage("otp.for.twofa.verification"));
+			String message = localeService.getMessage("otp.for.twofa.verification") + "  " + code;
+			logger.debug("2 FA otp sent success: {}", code);
+			smsServiceUtil.sendMessage(mobileNumber, user.getCountryCode(), message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			return otpRepository.save(otp);
 		} else {
@@ -214,6 +227,24 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		MatrixToImageWriter.writeToFile(matrix, filePath.substring(filePath.lastIndexOf('.') + 1), file);
 		Encoder encoder = Base64.getEncoder();
 		String base64Image = encoder.encodeToString(Files.readAllBytes(file.toPath()));
+		logger.debug("QR code file name: {}",String.valueOf(file));
+		//using PosixFilePermission to set file permissions 777
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        //add owners permission
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        //perms.add(PosixFilePermission.OWNER_EXECUTE);
+        //add group permissions
+        perms.add(PosixFilePermission.GROUP_READ);
+        perms.add(PosixFilePermission.GROUP_WRITE);
+        //perms.add(PosixFilePermission.GROUP_EXECUTE);
+        //add others permissions
+        perms.add(PosixFilePermission.OTHERS_READ);
+        //perms.add(PosixFilePermission.OTHERS_WRITE);
+        //perms.add(PosixFilePermission.OTHERS_EXECUTE);
+        
+        Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
+        logger.info("2FA QR code generated");
 		return "data:image/png;base64," + base64Image;
 	}
 
