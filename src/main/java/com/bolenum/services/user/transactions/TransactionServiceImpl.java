@@ -277,7 +277,7 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
-				transaction.setTxAmount(amount / erc20Token.getDecimalValue());
+				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setFromUser(fromUser);
@@ -297,21 +297,29 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 			}
 			else {
-				logger.debug("transaction already saved: {}",transaction.getTxHash());
+				logger.debug("transaction else part already saved: {}",transaction.getTxHash());
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
-				transaction.setTxAmount(amount / erc20Token.getDecimalValue());
+				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setFromUser(fromUser);
 				transaction.setCurrencyName(tokenName);
 				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
-				logger.debug("receiver: {}", receiverUser);
+				logger.debug("receiver else part: {}", receiverUser);
 				if (receiverUser != null) {
-					logger.debug("receiver saved with user: {}", receiverUser.getUserId());
+					logger.debug("receiver else part saved with user: {}", receiverUser.getUserId());
 					transaction.setToUser(receiverUser);
 
+				}
+				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				logger.debug("transaction else part saved completed: {}", fromUser.getEmailId());
+				if (saved != null) {
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
+							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("transaction else part saved successfully of user: {}", fromUser.getEmailId());
+					return new AsyncResult<Boolean>(true);
 				}
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException

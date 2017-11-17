@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.generated.Uint256;
@@ -35,6 +36,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.Contract;
 
+import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.CurrencyForm;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.TransactionStatus;
@@ -78,6 +80,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private LocaleService localeService;
+	
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
 
 	private static final Logger logger = LoggerFactory.getLogger(Erc20TokenServiceImpl.class);
 
@@ -236,7 +241,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				tx.setTransactionStatus(TransactionStatus.WITHDRAW);
 				tx.setTransactionType(TransactionType.OUTGOING);
 			}
-			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			logger.debug("Balance returned by the listner: {}",transaction._value.getValue().doubleValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue());
 			tx.setCurrencyName(tokenName);
 			logger.debug("from user id: {}", fromUser.getUserId());
 			tx.setFromUser(fromUser);
@@ -251,7 +257,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue());
+			logger.debug("Balance else part returned by the listner: {}",transaction._value.getValue().doubleValue());
 			tx.setTransactionType(TransactionType.OUTGOING);
 			if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
 				tx.setTransactionType(TransactionType.INCOMING);
@@ -271,6 +278,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				logger.debug("new incoming else transaction saved of user: {}", fromUser.getEmailId());
 			}
 		}
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+				com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 	}
 
 	Double createDecimals(int decimal) {
