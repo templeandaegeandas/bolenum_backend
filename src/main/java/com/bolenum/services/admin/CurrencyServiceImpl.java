@@ -71,6 +71,11 @@ public class CurrencyServiceImpl implements CurrencyService {
 	public List<Currency> getCurrencyList() {
 		return currencyRepo.findByCurrencyTypeNotIn(CurrencyType.FIAT);
 	}
+	
+	@Override
+	public List<Currency> getCurrencyListForAdmin() {
+		return currencyRepo.findAll();
+	}
 
 	@Override
 	public List<Currency> getCurrencyListForMarket() {

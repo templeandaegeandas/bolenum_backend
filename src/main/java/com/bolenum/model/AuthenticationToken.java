@@ -37,6 +37,7 @@ public class AuthenticationToken {
 	private String token;
 	@CreationTimestamp
 	private Date createdOn;
+	
 	@UpdateTimestamp
 	private Date updatedOn;
 	

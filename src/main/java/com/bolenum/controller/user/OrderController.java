@@ -99,6 +99,11 @@ public class OrderController {
 		}
 	}
 
+	/**
+	 * 
+	 * @param pairId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("pairId") Long pairId) {
 		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);
@@ -138,7 +143,6 @@ public class OrderController {
 		List<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
-
 	@RequestMapping(value = UrlConstant.ORDER_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrderDetails(@RequestParam("orderId") long orderId) {
 		User user = GenericUtils.getLoggedInUser();
@@ -154,7 +158,7 @@ public class OrderController {
 			bankAccountDetails = banks.get(0);
 		}
 		Orders orders = ordersService.getOrderDetails(orderId);
-		Map<String, Object> map = new HashMap();
+		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("bankDetails", bankAccountDetails);
 		map.put("orderDetails", orders);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);

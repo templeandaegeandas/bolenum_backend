@@ -7,5 +7,7 @@ public interface AuthenticationTokenService {
 	AuthenticationToken findByToken(String token);
 
 	boolean isTokenExpired(AuthenticationToken verificationTokenToCheck);
+
+	Long countActiveUsers();
 	
 }

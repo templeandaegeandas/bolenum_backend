@@ -1,5 +1,6 @@
 package com.bolenum.repo.order.book;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -69,9 +70,18 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(User user, OrderStatus orderStatus,OrderType orderType, Currency currency);
 	
 	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
-	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList, @Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
+	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrency") Currency toCurrency, @Param("pairedCurrency") Currency pairedCurrency);
 
+	//@Query("SELECT e FROM Events e WHERE e.eventsDate BETWEEN :startDate AND :endDate")
+	Long countOrdersByCreatedOnBetween(Date startDate,Date endDate);
+	
+	Long countOrderByOrderTypeAndCreatedOnBetween(OrderType orderType,Date startDate,Date endDate);
+	
 	Long countOrderByUserAndOrderType(User user,OrderType orderType);
 	
 	Orders findByMatchedOrder(Orders orders);
+
+	//Page<Orders> findByCreatedOnIsBetween(Date startDate, Date endDate, PageRequest pageRequest);
+
+	Page<Orders> findByCreatedOnBetween(Date startDate, Date endDate, Pageable page);
 }

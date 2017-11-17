@@ -150,7 +150,6 @@ public class TransactionFee {
 	public void setMinimumLimitToSendForFIAT(Double minimumLimitToSendForFIAT) {
 		this.minimumLimitToSendForFIAT = minimumLimitToSendForFIAT;
 	}
-    
-   
+
      	
 }
