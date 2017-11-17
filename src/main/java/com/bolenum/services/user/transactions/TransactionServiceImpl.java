@@ -292,6 +292,7 @@ public class TransactionServiceImpl implements TransactionService {
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);;
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
@@ -318,6 +319,7 @@ public class TransactionServiceImpl implements TransactionService {
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);;
 					logger.debug("transaction else part saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
