@@ -226,28 +226,49 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
-			tx.setTransactionType(TransactionType.INCOMING);
 			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
-			tx.setCurrencyName(tokenName);
-			tx.setFromUser(fromUser);
-			User receiverUser = userRepository.findByBtcWalletAddress(tx.getToAddress());
+			tx.setTransactionType(TransactionType.INCOMING);
+			User receiverUser = userRepository.findByBtcWalletAddress(transaction._to.getValue());
+			logger.debug("receiver user : {}", receiverUser);
 			if (receiverUser != null) {
+				logger.debug("receiver user id: {}", receiverUser.getUserId());
 				tx.setToUser(receiverUser); 
-
+				tx.setTransactionStatus(TransactionStatus.WITHDRAW);
+				tx.setTransactionType(TransactionType.OUTGOING);
 			}
+			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			tx.setCurrencyName(tokenName);
+			logger.debug("from user id: {}", fromUser.getUserId());
+			tx.setFromUser(fromUser);
 			Transaction saved = transactionRepo.saveAndFlush(tx);
 			logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", fromUser.getEmailId());
-
-
-			} else {
-				if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
-					tx.setTransactionType(TransactionType.INCOMING);
-				}
-				logger.debug("tx exists: {}", transaction._transactionHash);
-				transactionRepo.saveAndFlush(tx);
+			}
+		}
+		else {
+			logger.debug("saving else transaction for user: {}", fromUser.getEmailId());
+			tx.setTxHash(transaction._transactionHash);
+			tx.setFromAddress(transaction._from.getValue());
+			tx.setToAddress(transaction._to.getValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			tx.setTransactionType(TransactionType.OUTGOING);
+			if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
+				tx.setTransactionType(TransactionType.INCOMING);
+			}
+			tx.setCurrencyName(tokenName);
+			logger.debug("from else user id: {}", fromUser.getUserId());
+			tx.setFromUser(fromUser);
+			User receiverUser = userRepository.findByBtcWalletAddress(tx.getToAddress());
+			logger.debug("receiver else user : {}", receiverUser);
+			if (receiverUser != null) {
+				logger.debug("receiver else user id: {}", receiverUser.getUserId());
+				tx.setToUser(receiverUser); 
+			}
+			Transaction saved = transactionRepo.saveAndFlush(tx);
+			logger.debug("transaction else saved completed: {}", fromUser.getEmailId());
+			if (saved != null) {
+				logger.debug("new incoming else transaction saved of user: {}", fromUser.getEmailId());
 			}
 		}
 	}

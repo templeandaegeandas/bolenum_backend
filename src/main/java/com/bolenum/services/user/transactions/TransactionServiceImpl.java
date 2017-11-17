@@ -296,6 +296,24 @@ public class TransactionServiceImpl implements TransactionService {
 					return new AsyncResult<Boolean>(true);
 				}
 			}
+			else {
+				logger.debug("transaction already saved: {}",transaction.getTxHash());
+				transaction.setTxHash(transactionReceipt.getTransactionHash());
+				transaction.setFromAddress(fromUser.getEthWalletaddress());
+				transaction.setToAddress(toAddress);
+				transaction.setTxAmount(amount / erc20Token.getDecimalValue());
+				transaction.setTransactionType(TransactionType.OUTGOING);
+				transaction.setTransactionStatus(transactionStatus);
+				transaction.setFromUser(fromUser);
+				transaction.setCurrencyName(tokenName);
+				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
+				logger.debug("receiver: {}", receiverUser);
+				if (receiverUser != null) {
+					logger.debug("receiver saved with user: {}", receiverUser.getUserId());
+					transaction.setToUser(receiverUser);
+
+				}
+			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException | IOException | CipherException | TransactionException | InterruptedException
 				| ExecutionException e) {
