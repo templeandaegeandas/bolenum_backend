@@ -191,6 +191,16 @@ public class BTCWalletController {
 					transactionService.performBtcTransaction(user, withdrawBalanceForm.getToAddress(),
 							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 				}
+				if (!validAvailableWalletBalance) {
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+							localService.getMessage("withdraw.invalid.available.balance"), null);
+				}
+
+				if (!validWithdrawAmount) {
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+							localService.getMessage("withdraw.invalid.amount"), null);
+
+				}
 				break;
 
 			case "ETH":
@@ -205,6 +215,16 @@ public class BTCWalletController {
 					transactionService.performEthTransaction(user, withdrawBalanceForm.getToAddress(),
 							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 				}
+				if (!validAvailableWalletBalance) {
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+							localService.getMessage("withdraw.invalid.available.balance"), null);
+				}
+
+				if (!validWithdrawAmount) {
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+							localService.getMessage("withdraw.invalid.amount"), null);
+
+				}
 				break;
 
 			default:
@@ -217,10 +237,13 @@ public class BTCWalletController {
 			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode,
 					withdrawBalanceForm.getWithdrawAmount());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
-			if (validWithdrawAmount) {
+			if (!validWithdrawAmount) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+						localService.getMessage("withdraw.invalid.amount"), null);
+
+			}
 				transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
-			}
 			break;
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
@@ -230,16 +253,6 @@ public class BTCWalletController {
 					null);
 		}
 
-		if (!validAvailableWalletBalance) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
-					localService.getMessage("withdraw.invalid.available.balance"), null);
-		}
-
-		if (!validWithdrawAmount) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
-					localService.getMessage("withdraw.invalid.amount"), null);
-
-		}
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"), null);
 	}
 
