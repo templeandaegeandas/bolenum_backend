@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.dto.common.EditUserForm;
@@ -33,7 +32,6 @@ import com.bolenum.services.common.KYCService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
-import com.bolenum.util.ResponseHandler;
 import com.bolenum.util.SMSService;
 import com.bolenum.util.TokenGenerator;
 
