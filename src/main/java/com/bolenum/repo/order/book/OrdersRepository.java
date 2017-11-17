@@ -23,7 +23,6 @@ import com.bolenum.model.orders.book.Orders;
  *
  */
 public interface OrdersRepository extends JpaRepository<Orders, Long> {
-	// Double getSumVolumeByPairId(Long pairId);
 
 	List<Orders> findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType ordertype,
 			OrderStatus orderStatus, CurrencyPair pair, Double price);
@@ -50,39 +49,47 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Double getWrostSell(@Param("pair") CurrencyPair pair);
 
 	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED' and o.pair= :pair and o.price >= :price")
-	Long countOrderByOrderTypeAndPriceGreaterThan(@Param("orderType") OrderType orderType, @Param("pair") CurrencyPair pair,
-			@Param("price") Double price);
+	Long countOrderByOrderTypeAndPriceGreaterThan(@Param("orderType") OrderType orderType,
+			@Param("pair") CurrencyPair pair, @Param("price") Double price);
 
 	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED' and o.pair= :pair and o.price <= :price")
-	Long countOrderByOrderTypeAndPriceLessThan(@Param("orderType") OrderType orderType, @Param("pair") CurrencyPair pair, @Param("price") Double price);
+	Long countOrderByOrderTypeAndPriceLessThan(@Param("orderType") OrderType orderType,
+			@Param("pair") CurrencyPair pair, @Param("price") Double price);
 
 	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED'")
 	Long countOrderByOrderType(@Param("orderType") OrderType orderType);
-	
+
 	@Query("select o from Orders o where o.pair = :pair and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price asc")
-	Page<Orders> findBuyOrderList(@Param("pair")CurrencyPair pair, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
-	
+	Page<Orders> findBuyOrderList(@Param("pair") CurrencyPair pair, @Param("orderType") OrderType orderType,
+			@Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
+
 	@Query("select o from Orders o where o.pair = :pair and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price desc")
-	Page<Orders> findSellOrderList(@Param("pair")CurrencyPair pair, @Param("orderType") OrderType orderType, @Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
+	Page<Orders> findSellOrderList(@Param("pair") CurrencyPair pair, @Param("orderType") OrderType orderType,
+			@Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 
 	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
-	
-	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(User user, OrderStatus orderStatus,OrderType orderType, Currency currency);
-	
-	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
-	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrency") Currency toCurrency, @Param("pairedCurrency") Currency pairedCurrency);
 
-	//@Query("SELECT e FROM Events e WHERE e.eventsDate BETWEEN :startDate AND :endDate")
-	
-	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairPairedCurrency(User user, OrderStatus orderStatus,OrderType orderType, Currency currency);
-	
-	Long countOrdersByCreatedOnBetween(Date startDate,Date endDate);
-	
-	Long countOrderByOrderTypeAndCreatedOnBetween(OrderType orderType,Date startDate,Date endDate);
-	
-	Long countOrderByUserAndOrderType(User user,OrderType orderType);
-	
+	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(User user, OrderStatus orderStatus,
+			OrderType orderType, Currency currency);
+
+	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
+	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrency") Currency toCurrency,
+			@Param("pairedCurrency") Currency pairedCurrency);
+
+	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairPairedCurrency(User user, OrderStatus orderStatus,
+			OrderType orderType, Currency currency);
+
+	Long countOrdersByCreatedOnBetween(Date startDate, Date endDate);
+
+	Long countOrderByOrderTypeAndCreatedOnBetween(OrderType orderType, Date startDate, Date endDate);
+
+	Long countOrderByUserAndOrderType(User user, OrderType orderType);
+
 	Orders findByMatchedOrder(Orders orders);
 
 	Page<Orders> findByCreatedOnBetween(Date startDate, Date endDate, Pageable page);
+
+	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
+	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList,
+			@Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
 }

@@ -35,28 +35,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	 * @param pageable
 	 * @return List of users who have kyc documents status is submitted
 	 */
-	
-	// @Query("select u from User u where (u.firstName like %:searchData% or
-	// u.lastName like %:searchData% or u.emailId like %:searchData%) and
-	// u.userKyc.documentStatus = :documentStatus and u.isDeleted = false")
-	// public Page<User> getNewlySubmittedKycListWIthSearch(@Param("searchData")
-	// String searchData,
-	// @Param("documentStatus") DocumentStatus documentStatus, Pageable pageable);
-
-	// @Query("select distinct u from User u inner join u.userKyc k where
-	// k.documentStatus=:documentStatus")
-	// List<User> getUserByKycStatus(@Param("documentStatus") DocumentStatus
-	// documentStatus);
-	//
-
-	
-	//@Query("select u from User u where (u.firstName like %:searchData% or u.lastName like %:searchData% or u.emailId like %:searchData%) and u.userKyc.documentStatus = :documentStatus and u.isDeleted = false")
-	//public Page<User> getNewlySubmittedKycListWIthSearch(@Param("searchData") String searchData,
-			//@Param("documentStatus") DocumentStatus documentStatus, Pageable pageable);
-		
-	//@Query("select distinct u from User u inner join u.userKyc k where (u.firstName like %:searchData% or u.lastName like %:searchData% or u.emailId like %:searchData%) and k.documentStatus=:documentStatus and u.isDeleted = false")
-	//Page<User> getUserByKycStatus(@Param("searchData") String searchData, @Param("documentStatus") DocumentStatus documentStatus, Pageable pageable);
-	
 	public User findByUserId(Long id);
 
 	public User findByMobileNumber(String mobileNumber);

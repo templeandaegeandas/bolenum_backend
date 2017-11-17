@@ -21,18 +21,16 @@ import com.bolenum.model.User;
 public interface TransactionRepo extends JpaRepository<Transaction, Serializable> {
 
 	/**
-	 * @description findByTxHash 
+	 * @description findByTxHash
 	 * 
 	 */
-	
+
 	Transaction findByTxHash(String txHash);
-	
-	Page<Transaction> findByFromUserAndTransactionStatus(User fromUser,TransactionStatus transactionStatus, Pageable pageable);
+
+	Page<Transaction> findByFromUserAndTransactionStatus(User fromUser, TransactionStatus transactionStatus,
+			Pageable pageable);
 
 	@Query("select t from Transaction t where t.toUser=:toUser and (t.transactionStatus='WITHDRAW' or t.transactionStatus='DEPOSIT')")
-	Page<Transaction> findByToUserAndTransactionStatusOrTransactionStatus(@Param("toUser")User toUser, Pageable pageable);
-
-
+	Page<Transaction> findByToUserAndTransactionStatusOrTransactionStatus(@Param("toUser") User toUser,
+			Pageable pageable);
 }
-
-

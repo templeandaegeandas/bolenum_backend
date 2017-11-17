@@ -27,6 +27,7 @@ public class Erc20Token {
 	private String contractAddress;
 	@OneToOne
 	private Currency currency;
+
 	private Double decimalValue;
 	private Boolean isDeleted = false;
 	private Date createdDate = new Date();

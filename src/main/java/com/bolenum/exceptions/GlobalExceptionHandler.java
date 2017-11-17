@@ -55,6 +55,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 	
 	/**
+<<<<<<< HEAD
 	 * to handle IOException
 	 * @param ex
 	 * @param request
@@ -66,6 +67,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 	
 	/**
+=======
+>>>>>>> 00b389e80ca195c913eeaad89ee7c31737c44140
 	 * 
 	 * @param ex
 	 * @param request

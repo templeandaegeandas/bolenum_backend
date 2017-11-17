@@ -42,7 +42,6 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 	 */
 	@Override
 	public Double getOtherCryptoFee(Double amount) {
-
 		if (amount != null) {
 			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
 			if (transactionFee.getFeeOther() != null) {
@@ -100,29 +99,6 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 		return transactionFeeRepo.saveAndFlush(existingTransactionFee);
 	}
 
-//	@Override
-//	public Double getBTCFee(Double amount) {
-//		if (amount != null) {
-//			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
-//			if (transactionFee.getFeeBTC() != null) {
-//				return (transactionFee.getFeeBTC() * amount);
-//			}
-//		}
-//		return null;
-//	}
-//
-//	@Override
-//	public Double getOtherCryptoFee(Double amount) {
-//		if (amount != null) {
-//			TransactionFee transactionFee = transactionFeeRepo.getOne(1L);
-//			if (transactionFee.getFeeOther() != null) {
-//				return (transactionFee.getFeeOther() * amount);
-//			}
-//		}
-//		return null;
-//	}
-	
-
 	public TransactionFee saveTransactionFee(AddTransactioFeeAndLimitForm addTransactioFeeAndLimitForm) {
 
 		List<TransactionFee> listOfTransactionFee = transactionFeeRepo.findAll();
@@ -131,9 +107,7 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 			listOfTransactionFee = transactionFeeRepo.findAll();
 
 		}
-
 		TransactionFee transactionFee = listOfTransactionFee.get(0);
-		
 		if (addTransactioFeeAndLimitForm.getFeeBTC() != null) {
 			transactionFee.setFeeBTC(addTransactioFeeAndLimitForm.getFeeBTC());
 		}
@@ -141,17 +115,21 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 			transactionFee.setFeeOther(addTransactioFeeAndLimitForm.getFeeOther());
 		}
 		if (addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForBTC() != null) {
-			transactionFee.setAvailableBalanceLimitToWithdrawForBTC(addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForBTC());
+			transactionFee.setAvailableBalanceLimitToWithdrawForBTC(
+					addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForBTC());
 		}
 		if (addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForETH() != null) {
-			transactionFee.setAvailableBalanceLimitToWithdrawForETH(addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForETH());
+			transactionFee.setAvailableBalanceLimitToWithdrawForETH(
+					addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForETH());
 		}
 		if (addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForERC20() != null) {
-			transactionFee.setAvailableBalanceLimitToWithdrawForERC20(addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForERC20());
+			transactionFee.setAvailableBalanceLimitToWithdrawForERC20(
+					addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForERC20());
 		}
 
 		if (addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForFIAT() != null) {
-			transactionFee.setAvailableBalanceLimitToWithdrawForFiat(addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForFIAT());
+			transactionFee.setAvailableBalanceLimitToWithdrawForFiat(
+					addTransactioFeeAndLimitForm.getAvailableBalanceLimitToWithdrawForFIAT());
 		}
 
 		if (addTransactioFeeAndLimitForm.getMinimumLimitToSendForBTC() != null) {
@@ -174,29 +152,13 @@ public class TransactionFeeServiceImpl implements TransactionFeeService {
 		return transactionFeeRepo.saveAndFlush(transactionFee);
 	}
 
-	/*
-	 * @Override public Double getBTCFee(Double amount) { if (amount > 0) {
-	 * TransactionFee transactionFee = transactionFeeRepo.getOne(1L); return
-	 * (transactionFee.getFeeBTC() * amount); } return null; }
-	 */
-
-	/*
-	 * @Override public Double getOtherCryptoFee() { if (amount > 0) {
-	 * TransactionFee transactionFee = transactionFeeRepo.getOne(1L); return
-	 * (transactionFee.getFeeOther() * amount); } return null; }
-	 */
-	
 	@Override
 	public TransactionFee getTransactionFeeDetails() {
-
 		List<TransactionFee> listOfTransactionFee = transactionFeeRepo.findAll();
 		if (listOfTransactionFee.size() == 0) {
 			transactionFeeRepo.save(new TransactionFee());
 			listOfTransactionFee = transactionFeeRepo.findAll();
-
 		}
 		return listOfTransactionFee.get(0);
-		
 	}
-	
 }

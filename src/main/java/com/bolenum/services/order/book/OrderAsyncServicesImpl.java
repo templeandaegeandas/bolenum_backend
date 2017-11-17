@@ -24,13 +24,11 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 	@Autowired
 	private PartialTradeRepository partialTradeRepository;
 
-	// @Async
 	@Override
 	public List<Orders> saveOrder(List<Orders> ordersList) {
 		return ordersRepository.save(ordersList);
 	}
 
-	// @Async
 	@Override
 	public List<Trade> saveTrade(List<Trade> tradeList) {
 		return tradeRepository.save(tradeList);

@@ -31,7 +31,11 @@ public class MarketPrice {
 
 	@OneToOne
 	private Currency currency;
-	
+
+	private Double priceUSD;
+
+	private Double priceBTC;
+
 	@ApiModelProperty(hidden = true)
 	@CreationTimestamp
 	private Date createdOn;
@@ -72,6 +76,35 @@ public class MarketPrice {
 		this.currency = currency;
 	}
 
+	/**
+	 * @return the priceUSD
+	 */
+	public Double getPriceUSD() {
+		return priceUSD;
+	}
+
+	/**
+	 * @param priceUSD
+	 *            the priceUSD to set
+	 */
+	public void setPriceUSD(Double priceUSD) {
+		this.priceUSD = priceUSD;
+	}
+
+	/**
+	 * @return the price_BTC
+	 */
+	public Double getPriceBTC() {
+		return priceBTC;
+	}
+
+	/**
+	 * @param price_BTC
+	 *            the price_BTC to set
+	 */
+	public void setPriceBTC(Double price_BTC) {
+		this.priceBTC = price_BTC;
+	}
 
 	/**
 	 * @return the createdOn

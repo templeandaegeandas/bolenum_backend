@@ -324,7 +324,10 @@ public class UserController {
 	}
 	
 	/**
+<<<<<<< HEAD
 
+=======
+>>>>>>> 00b389e80ca195c913eeaad89ee7c31737c44140
 	 * to get list of states with respect to specific country 
 	 * 
 	 * @param countryId
@@ -359,7 +362,10 @@ public class UserController {
 	 * to get number of trading buy/sell performed by particular user
 	 * 
 	 * @return
+<<<<<<< HEAD
 	 * 
+=======
+>>>>>>> 00b389e80ca195c913eeaad89ee7c31737c44140
 	 */
 	
 	@RequestMapping(value = UrlConstant.MY_TRADING_COUNT, method = RequestMethod.GET)
