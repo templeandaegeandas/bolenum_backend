@@ -668,7 +668,16 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Override
 	public Double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency) {
-		return ordersRepository.totalUserBalanceInBook(user, toCurrency, pairedCurrency);
+		List<Orders> toOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(user, OrderStatus.SUBMITTED, OrderType.SELL, toCurrency);
+		List<Orders> fromOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairPairedCurrency(user, OrderStatus.SUBMITTED, OrderType.SELL, pairedCurrency);
+		double total =0.0;
+		for (Orders orders : toOrders) {
+			total = total + orders.getVolume();
+		}
+		for (Orders orders : fromOrders) {
+			total = total + orders.getVolume();
+		}
+		return total;
 	}
 
 	@Override
