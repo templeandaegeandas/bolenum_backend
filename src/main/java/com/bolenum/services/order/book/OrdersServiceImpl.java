@@ -61,6 +61,9 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Autowired
 	private TransactionService transactionService;
+	
+	@Autowired
+	private FiatOrderService fiatOrderService;
 
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
@@ -83,21 +86,22 @@ public class OrdersServiceImpl implements OrdersService {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
 		String tickter = null, minOrderVol = null, currencyType = null;
+		Currency currency;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
 		 */
 		if (orders.getOrderType().equals(OrderType.SELL)) {
-			Currency currency = currencyPair.getToCurrency().get(0);
+			currency = currencyPair.getToCurrency().get(0);
 			tickter = currency.getCurrencyAbbreviation();
 			currencyType = currency.getCurrencyType().toString();
 			minOrderVol = String.valueOf(orders.getVolume());
 		} else {
 			minOrderVol = getPairedBalance(orders, currencyPair, orders.getVolume());
-			Currency currency = currencyPair.getPairedCurrency().get(0);
+			currency = currencyPair.getPairedCurrency().get(0);
 			tickter = currency.getCurrencyAbbreviation();
 			currencyType = currency.getCurrencyType().toString();
 		}
-		double userPlacedOrderVolume = getPlacedOrderVolume(user);
+		double userPlacedOrderVolume = fiatOrderService.getPlacedOrderVolumeOfCurrency(user, OrderStatus.SUBMITTED, OrderType.SELL, currency);
 		logger.debug("user placed order volume: {} and order volume: {}", userPlacedOrderVolume, minOrderVol);
 		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
 		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
@@ -652,8 +656,9 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
 	}
 
-	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList) {
-		return ordersRepository.totalUserBalanceInBook(user, toCurrencyList, pairedCurrencyList);
+	@Override
+	public Double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency) {
+		return ordersRepository.totalUserBalanceInBook(user, toCurrency, pairedCurrency);
 	}
 
 	@Override

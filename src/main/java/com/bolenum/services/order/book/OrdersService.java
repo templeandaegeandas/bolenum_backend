@@ -57,13 +57,13 @@ public interface OrdersService {
 
 	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
 
-	public Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList);
-
 	Long countOrdersByOrderTypeAndUser(User user, OrderType orderType);
 
 	public Orders getOrderDetails(long orderId);
 
 	double getPlacedOrderVolume(User user);
+
+	Double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency);
 
 	
 

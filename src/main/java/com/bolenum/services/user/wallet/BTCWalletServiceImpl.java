@@ -231,7 +231,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		Double availableBalance = null;
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 			availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
-		double placeOrderVolume = orderService.getPlacedOrderVolume(user);
+		double placeOrderVolume = orderService.totalUserBalanceInBook(user, erc20Token.getCurrency(), erc20Token.getCurrency());
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
 		if (availableBalance >= withdrawAmount) {
