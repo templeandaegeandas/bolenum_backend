@@ -17,7 +17,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.UrlConstant;
-import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
@@ -193,11 +192,6 @@ public class OrdersServiceImpl implements OrdersService {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		CurrencyPair pair = orders.getPair();
-		boolean isFiat = false;
-		if (pair.getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)
-				|| pair.getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)) {
-			isFiat = true;
-		}
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		if (orderType.equals(OrderType.BUY)) {

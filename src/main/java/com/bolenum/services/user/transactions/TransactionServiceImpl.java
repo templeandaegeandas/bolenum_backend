@@ -218,9 +218,8 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction = new Transaction();
 					logger.debug("transaction hash inside if condition : {}", txHash);
 					transaction.setTxHash(txHash);
-					User senderUser = userRepository.findByBtcWalletAddress(fromUser.getBtcWalletUuid());
-					logger.debug(senderUser.getBtcWalletAddress());
-					transaction.setFromAddress(senderUser.getBtcWalletAddress());
+					logger.debug(fromUser.getBtcWalletAddress());
+					transaction.setFromAddress(fromUser.getBtcWalletAddress());
 					transaction.setToAddress(toAddress);
 					logger.debug("toAddress : {}",toAddress);
 					transaction.setTxAmount(amount);
