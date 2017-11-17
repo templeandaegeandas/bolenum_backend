@@ -17,11 +17,13 @@ import com.bolenum.model.orders.book.Orders;
 public interface FiatOrderService {
 	String checkFiatOrderEligibility(User user, Orders orders, long pairId);
 
-	public boolean processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair);
+	public Orders processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair);
 
 	double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType, Currency currency);
 
 	public boolean processCancelOrder(Orders order);
 
-	boolean processConfirmOrder(Orders order);
+	public boolean buyerPaidConfirmtion(Orders order);
+
+	public boolean processTransactionFiatOrders(Orders order);
 }

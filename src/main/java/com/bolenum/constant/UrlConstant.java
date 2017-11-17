@@ -88,6 +88,7 @@ public class UrlConstant {
 	public static final String ORDER_BY_ID = "order";
 	public static final String ORDER_FIAT_CANCEL = "order/fiat/cancel";
 	public static final String ORDER_FIAT_PAID = "order/fiat/confirm";
+	public static final String ORDER_FIAT_TX = "order/fiat/tx";
 	
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";
@@ -105,6 +106,7 @@ public class UrlConstant {
 	public static final String WS_LISTNER_ADMIN = "/listner/admin";
 	public static final String WS_LISTNER_ORDER = "/listner/order";
 	public static final String WS_LISTNER_DEPOSIT = "/listner/deposit";
+	public static final String WS_LISTNER_ORDER_CONFIRM = "/listner/order/confirm";
 	
 	
 }

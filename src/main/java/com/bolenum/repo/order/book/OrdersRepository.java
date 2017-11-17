@@ -72,4 +72,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList, @Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
 
 	Long countOrderByUserAndOrderType(User user,OrderType orderType);
+	
+	Orders findByMatchedOrder(Orders orders);
 }
