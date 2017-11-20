@@ -40,9 +40,14 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 	public List<PartialTrade> savePartialTrade(List<PartialTrade> tradeList) {
 		return partialTradeRepository.save(tradeList);
 	}
-	
+
 	@Override
-	public Orders saveOrder(Orders orders){
+	public Orders saveOrder(Orders orders) {
 		return ordersRepository.save(orders);
+	}
+
+	@Override
+	public Trade saveTrade(Trade trade) {
+		return tradeRepository.save(trade);
 	}
 }

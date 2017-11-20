@@ -165,10 +165,9 @@ public class OrdersServiceImpl implements OrdersService {
 	 *            order, list of existing orders
 	 * @return #true if user requested order is matched with own existing user
 	 *         else #false
-	 * @return #true if user requested order is matched with own existing user
-	 *         else #false
 	 */
-	private boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
+	@Override
+	public boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
 		if (orderList.size() > 0) {
 			Orders matchedOrder = matchedOrder(orderList);
 			long matchedUserId = matchedOrder.getUser().getUserId();

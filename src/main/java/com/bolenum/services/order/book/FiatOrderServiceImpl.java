@@ -13,17 +13,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.MessageType;
+import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
+import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.user.notification.NotificationService;
@@ -162,13 +165,12 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 				msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
 						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
-						+ orders.getVolume() * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
+						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
 				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
 						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
-						+ orders.getVolume() * orders.getPrice() + " " + pairCurr + " with " + seller.getFirstName();
+						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + seller.getFirstName();
 				logger.debug("msg: {}", msg);
-
 			}
 			logger.debug("orders saving finished and matched order saving started");
 			orderAsyncService.saveOrder(matchedOrder);
@@ -251,17 +253,20 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				notificationService.saveNotification(seller, buyer, msg);
 				matched.setConfirm(true);
 				ordersRepository.save(matched);
-				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_CONFIRM,
+				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_BUYER_CONFIRM,
 						MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
+				return true;
 			} else {
-
+				logger.error("order is of SELL type");
 			}
-			return true;
+
 		}
 		return false;
 	}
 
 	@Override
+	@Transactional
+	@Async
 	public boolean processTransactionFiatOrders(Orders sellerOrder) {
 		Orders buyersOrder = ordersRepository.findByMatchedOrder(sellerOrder);
 		String currencyAbr = null;
@@ -289,6 +294,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 					ordersRepository.save(sellerOrder);
 					ordersRepository.save(buyersOrder);
+					Trade trade = new Trade(buyersOrder.getPrice(), qtyTraded, buyer, seller, sellerOrder.getPair(),
+							sellerOrder.getOrderStandard());
+					orderAsyncService.saveTrade(trade);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error("perform fiat transaction failed: {}", e.getMessage());
