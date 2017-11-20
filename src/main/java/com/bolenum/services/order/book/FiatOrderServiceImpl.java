@@ -3,6 +3,7 @@
  */
 package com.bolenum.services.order.book;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -305,5 +306,11 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public List<Orders> existingOrders(Orders order) {
+		List<Orders> list = new ArrayList();
+		return null;
 	}
 }

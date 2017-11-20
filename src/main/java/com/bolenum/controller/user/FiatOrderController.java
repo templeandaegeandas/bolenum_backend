@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,13 +66,19 @@ public class FiatOrderController {
 
 	@Autowired
 	private NotificationService notificationService;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
 	private Logger logger = LoggerFactory.getLogger(FiatOrderController.class);
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.POST)
+	public ResponseEntity<Object> createFiateOrder(@RequestBody Orders orders) {
+		orders.getVolume();
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"), Optional.empty());
+	}
+
+	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> initializeOrder(@RequestParam("pairId") long pairId,
 			@RequestParam("orderId") long matchedOrderId, @RequestBody Orders orders) {
 		User user = GenericUtils.getLoggedInUser();
@@ -139,7 +146,8 @@ public class FiatOrderController {
 				notificationService.sendNotification(matchedOrder.getUser(), msg);
 				notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg);
 				map.put("orderId", order.getId());
-				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_SELLER_CONFIRM,
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_SELLER_CONFIRM,
 						MessageType.ORDER_CONFIRMATION + "#" + matchedOrder.getId());
 			}
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
