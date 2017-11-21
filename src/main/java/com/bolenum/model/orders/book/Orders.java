@@ -53,6 +53,9 @@ public class Orders {
 	@OneToOne
 	private User user;
 	private double lockedVolume;
+
+	private boolean isConfirm;
+
 	/**
 	 * to keep track of which order is matched with incoming order for fiat
 	 * order
@@ -178,4 +181,20 @@ public class Orders {
 		this.matchedOrder = matchedOrder;
 	}
 
+	/**
+	 * this will return true if buyer has confirmed that fiat currency has been
+	 * deposited to seller account, then seller will get notification.
+	 */
+	public boolean isConfirm() {
+		return isConfirm;
+	}
+
+	/**
+	 * set true when buyer paid FIAT to seller bank account, default false
+	 * 
+	 * @param true
+	 */
+	public void setConfirm(boolean isConfirm) {
+		this.isConfirm = isConfirm;
+	}
 }

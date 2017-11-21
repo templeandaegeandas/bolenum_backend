@@ -3,6 +3,9 @@
  */
 package com.bolenum.controller.user;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,8 +100,8 @@ public class FiatOrderController {
 		}
 
 		orders.setUser(user);
-		Boolean result = fiatOrderService.processFiatOrderList(matchedOrder, orders, orders.getPair());
-		if (result) {
+		Orders order = fiatOrderService.processFiatOrderList(matchedOrder, orders, orders.getPair());
+		if (order.getId() != null) {
 			User bankDetails = null;
 			if (orders.getOrderType().equals(OrderType.BUY)) {
 				bankDetails = matchedOrder.getUser();
@@ -106,8 +109,11 @@ public class FiatOrderController {
 				bankDetails = orders.getUser();
 			}
 			BankAccountDetails accountDetails = bankAccountDetailsService.primaryBankAccountDetails(bankDetails);
+			Map<String, Object> map = new HashMap<>();
+			map.put("accountDetails", response(accountDetails));
+			map.put("orderId", order.getId());
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
-					response(accountDetails));
+					map);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("order.processed.fail"), null);
@@ -122,22 +128,29 @@ public class FiatOrderController {
 		form.setBankName(bank.getBankName());
 		return form;
 	}
-	
+
+	/**
+	 * buyer has paid the amount to seller and sending confirmation
+	 * 
+	 * @param orderId
+	 *            of buyer
+	 *
+	 */
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_PAID, method = RequestMethod.PUT)
-	public ResponseEntity<Object> confirmOrder(@RequestParam("orderId") long orderId) {
+	public ResponseEntity<Object> confirmFiatPaidOrder(@RequestParam("orderId") long orderId) {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
 		if (exitingOrder == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					null);
 		}
-		boolean result = fiatOrderService.processConfirmOrder(exitingOrder);
+		boolean result = fiatOrderService.buyerPaidConfirmtion(exitingOrder);
 		if (result) {
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"), null);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.seller.notified"),
+					null);
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"),
-				null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"), null);
 	}
-	
+
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_CANCEL, method = RequestMethod.PUT)
 	public ResponseEntity<Object> cancelOrder(@RequestParam("orderId") long orderId) {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
@@ -151,5 +164,28 @@ public class FiatOrderController {
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"),
 				null);
+	}
+
+	/**
+	 * 
+	 * this process confirmation of Seller
+	 * 
+	 * @param orderId
+	 *            of seller
+	 *
+	 */
+	@RequestMapping(value = UrlConstant.ORDER_FIAT_TX, method = RequestMethod.PUT)
+	public ResponseEntity<Object> processTransactionFiatOrders(@RequestParam("orderId") long orderId) {
+		Orders exitingOrder = ordersService.getOrderDetails(orderId);
+		if (exitingOrder == null) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
+					null);
+		}
+		boolean result = fiatOrderService.processTransactionFiatOrders(exitingOrder);
+		if (result) {
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.transaction.success"),
+					null);
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"), null);
 	}
 }

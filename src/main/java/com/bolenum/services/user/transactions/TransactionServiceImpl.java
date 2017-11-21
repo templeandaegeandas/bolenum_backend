@@ -218,9 +218,8 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction = new Transaction();
 					logger.debug("transaction hash inside if condition : {}", txHash);
 					transaction.setTxHash(txHash);
-					User senderUser = userRepository.findByBtcWalletAddress(fromUser.getBtcWalletUuid());
-					logger.debug(senderUser.getBtcWalletAddress());
-					transaction.setFromAddress(senderUser.getBtcWalletAddress());
+					logger.debug(fromUser.getBtcWalletAddress());
+					transaction.setFromAddress(fromUser.getBtcWalletAddress());
 					transaction.setToAddress(toAddress);
 					logger.debug("toAddress : {}",toAddress);
 					transaction.setTxAmount(amount);
@@ -303,6 +302,7 @@ public class TransactionServiceImpl implements TransactionService {
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);;
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
@@ -329,6 +329,7 @@ public class TransactionServiceImpl implements TransactionService {
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);;
 					logger.debug("transaction else part saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
