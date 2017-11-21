@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -74,8 +74,14 @@ public class FiatOrderController {
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.POST)
 	public ResponseEntity<Object> createFiateOrder(@RequestBody Orders orders) {
-		orders.getVolume();
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"), Optional.empty());
+		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10);
+		if (page.getTotalElements() > 0) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.exist.fiat"),
+					page);
+		}
+		orders = fiatOrderService.createOrders(orders);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"),
+				orders.getId());
 	}
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.PUT)

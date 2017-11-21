@@ -3,7 +3,7 @@
  */
 package com.bolenum.services.order.book;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
@@ -17,7 +17,10 @@ import com.bolenum.model.orders.book.Orders;
  * @date 16-Nov-2017
  */
 public interface FiatOrderService {
-	String checkFiatOrderEligibility(User user, Orders orders, long pairId);
+	
+	public Orders createOrders(Orders orders); 
+	
+	public String checkFiatOrderEligibility(User user, Orders orders, long pairId);
 
 	public Orders processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair);
 
@@ -29,5 +32,5 @@ public interface FiatOrderService {
 
 	public boolean processTransactionFiatOrders(Orders order);
 
-	public List<Orders> existingOrders(Orders order);
+	public Page<Orders> existingOrders(Orders order, int page, int size);
 }

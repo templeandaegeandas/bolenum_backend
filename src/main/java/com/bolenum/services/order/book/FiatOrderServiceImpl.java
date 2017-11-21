@@ -3,7 +3,6 @@
  */
 package com.bolenum.services.order.book;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -13,6 +12,10 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -20,7 +23,6 @@ import org.springframework.stereotype.Service;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.MessageType;
-import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.Currency;
@@ -61,6 +63,11 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 	@Autowired
 	private TransactionService transactionService;
+
+	@Override
+	public Orders createOrders(Orders orders) {
+		return ordersRepository.save(orders);
+	}
 
 	/**
 	 * to check the eligibility to place an order by checking available balance
@@ -309,8 +316,13 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	}
 
 	@Override
-	public List<Orders> existingOrders(Orders order) {
-		List<Orders> list = new ArrayList();
-		return null;
+	public Page<Orders> existingOrders(Orders order, int page, int size) {
+		OrderType orderType = OrderType.BUY;
+		if (order.getOrderType().equals(OrderType.BUY)) {
+			orderType = OrderType.SELL;
+		}
+		Pageable pageable = new PageRequest(page, size, Direction.ASC, "price");
+		return ordersRepository.findByVolumeLessThanEqualAndPriceLessThanEqualAndOrderTypeAndOrderStatusAndPair(
+				order.getVolume(), order.getPrice(), orderType, OrderStatus.SUBMITTED, order.getPair(), pageable);
 	}
 }
