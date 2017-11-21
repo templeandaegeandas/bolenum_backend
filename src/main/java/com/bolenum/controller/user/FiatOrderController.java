@@ -113,9 +113,11 @@ public class FiatOrderController {
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);
 		}
-		if (!balance.equals("proceed")) {
-			return ResponseHandler.response(HttpStatus.OK, false,
-					localeService.getMessage("order.insufficient.balance"), null);
+		if (orders.getOrderType().equals(OrderType.SELL)) {
+            if (!balance.equals("proceed")) {
+                    return ResponseHandler.response(HttpStatus.OK, false,
+                                    localeService.getMessage("order.insufficient.balance"), null);
+            }
 		}
 		boolean toType = orders.getPair().getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT);
 		boolean pairType = orders.getPair().getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT);
