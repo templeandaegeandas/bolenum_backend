@@ -47,13 +47,12 @@ public class AuthController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private TwoFactorAuthService twoFactorAuthService;
 
 	@Autowired
 	private LocaleService localeService;
-
 
 	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -90,15 +89,13 @@ public class AuthController {
 					if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.NONE)) {
 						return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("login.success"),
 								authService.loginResponse(token));
-					}
-					else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
+					} else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
 						twoFactorAuthService.sendOtpForTwoFactorAuth(user);
-						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
-								user.getTwoFactorAuthOption());
-					}
-					else {
-						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
-								user.getTwoFactorAuthOption());
+						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
+								localeService.getMessage("login.success"), user.getTwoFactorAuthOption());
+					} else {
+						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
+								localeService.getMessage("login.success"), user.getTwoFactorAuthOption());
 					}
 				} else {
 					return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
@@ -107,7 +104,6 @@ public class AuthController {
 			}
 		}
 	}
-
 
 	/**
 	 * controller that respond when hit comes for logout activity of user
@@ -160,6 +156,7 @@ public class AuthController {
 	 * @param resetPasswordForm
 	 * @param result
 	 * @return
+	 * 
 	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS_VERIFY, method = RequestMethod.PUT)
 	public ResponseEntity<Object> resetPassword(@RequestParam String token,
@@ -173,12 +170,10 @@ public class AuthController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("token.invalid"),
 					null);
 		}
-        if(result.hasErrors())
-        {
-        	return ResponseHandler.response(HttpStatus.CONFLICT,true,
-					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());        	
-        }
-		else if (!result.hasErrors() && verifiedUser != null) {
+		if (result.hasErrors()) {
+			return ResponseHandler.response(HttpStatus.CONFLICT, true,
+					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());
+		} else if (!result.hasErrors() && verifiedUser != null) {
 			authService.resetPassword(verifiedUser, resetPasswordForm);
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("user.password.change.success"), verifiedUser.getEmailId());

@@ -171,5 +171,9 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.latest.orders.list.success"), listOfLatestOrders);
 	}
+	
+	
+	
+	
 
 }

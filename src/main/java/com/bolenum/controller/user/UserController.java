@@ -113,12 +113,12 @@ public class UserController {
 					return ResponseHandler.response(HttpStatus.CONFLICT, false,
 							localService.getMessage("email.already.exist"), isUserExist.getEmailId());
 				} else {
-					User user = signupForm.copy(new User());
-					requestObj = mapper.writeValueAsString(user);
-					logger.debug("Requested Object for Re Register", user);
-					userService.reRegister(user);
+					//User user = signupForm.copy(new User());
+					//requestObj = mapper.writeValueAsString(user);
+					//logger.debug("Requested Object for Re Register", user);
+					userService.reRegister(signupForm);
 					return ResponseHandler.response(HttpStatus.OK, false,
-							localService.getMessage("user.registarion.success"), user.getEmailId());
+							localService.getMessage("user.registarion.success"), signupForm.getEmailId());
 				}
 			} catch (JsonProcessingException e) {
 				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
