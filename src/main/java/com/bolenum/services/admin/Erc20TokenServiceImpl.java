@@ -241,8 +241,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				tx.setTransactionStatus(TransactionStatus.WITHDRAW);
 				tx.setTransactionType(TransactionType.OUTGOING);
 			}
-			logger.debug("Balance returned by the listner: {}",transaction._value.getValue().doubleValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue());
+			logger.debug("Balance returned by the listner: {}",transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
 			tx.setCurrencyName(tokenName);
 			logger.debug("from user id: {}", fromUser.getUserId());
 			tx.setFromUser(fromUser);
@@ -257,8 +257,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue());
-			logger.debug("Balance else part returned by the listner: {}",transaction._value.getValue().doubleValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
+			logger.debug("Balance else part returned by the listner: {}",transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
 			tx.setTransactionType(TransactionType.OUTGOING);
 			if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
 				tx.setTransactionType(TransactionType.INCOMING);
@@ -280,6 +280,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		}
 		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
 				com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
+		logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 	}
 
 	Double createDecimals(int decimal) {
