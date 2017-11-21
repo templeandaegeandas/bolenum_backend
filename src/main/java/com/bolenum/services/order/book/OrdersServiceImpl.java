@@ -725,8 +725,7 @@ public class OrdersServiceImpl implements OrdersService {
 	 * 
 	 */
 	@Override
-	public Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy,
-			String searchData) {
+	public Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy) {
 		Pageable page  = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
 		Date endDate = new Date();
 		Calendar c = Calendar.getInstance();
@@ -734,6 +733,7 @@ public class OrdersServiceImpl implements OrdersService {
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
 		startDate = (Date) startDate;
-		return ordersRepository.findByCreatedOnBetween(startDate,endDate,page);
+		//return ordersRepository.findByCreatedOnBetween(page,startDate,endDate);
+		return ordersRepository.findByCreatedOnBetween( startDate, endDate,page);
 	}
 }

@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.dto.common.EditUserForm;
@@ -33,7 +32,6 @@ import com.bolenum.services.common.KYCService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.PasswordEncoderUtil;
-import com.bolenum.util.ResponseHandler;
 import com.bolenum.util.SMSService;
 import com.bolenum.util.TokenGenerator;
 
@@ -89,6 +87,7 @@ public class UserServiceImpl implements UserService {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		user.setRole(roleRepo.findByNameIgnoreCase("ROLE_USER"));
 		userRepository.save(user);
+		logger.debug("saved new user= {}", user.getEmailId());
 		AuthenticationToken authenticationToken = mailVerification(user);
 		authenticationToken.setTokentype(TokenType.REGISTRATION);
 		authenticationTokenRepo.saveAndFlush(authenticationToken);
@@ -131,9 +130,8 @@ public class UserServiceImpl implements UserService {
 	 * 
 	 */
 	@Override
-	public void reRegister(User isUserExist) {
-
-		List<AuthenticationToken> verificationToken = authenticationTokenRepo.findByUserAndTokentype(isUserExist,
+	public void reRegister(User user) {
+		List<AuthenticationToken> verificationToken = authenticationTokenRepo.findByUserAndTokentype(user,
 				TokenType.REGISTRATION);
 
 		for (AuthenticationToken token : verificationToken) {
@@ -141,8 +139,11 @@ public class UserServiceImpl implements UserService {
 				authenticationTokenRepo.delete(token);
 			}
 		}
+		User isUserExist=userRepository.findByEmailId(user.getEmailId());
+		isUserExist.setFirstName(user.getFirstName());
+		isUserExist.setLastName(user.getLastName());
+        isUserExist.setPassword(user.getPassword());		
 		registerUser(isUserExist);
-
 	}
 
 	/**

@@ -69,5 +69,5 @@ public interface OrdersService {
     
 	double getPlacedOrderVolume(User user);
 
-	Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy,String searchData);
+	Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy);
 }

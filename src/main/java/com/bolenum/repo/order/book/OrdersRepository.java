@@ -77,7 +77,10 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	
 	Long countOrderByUserAndOrderType(User user,OrderType orderType);
 
-	Page<Orders> findByCreatedOnBetween(Date startDate, Date endDate, Pageable page);
+	@Query("Select o from Orders o where o.createdOn <= :endDate and o.createdOn >= :startDate")
+	Page<Orders> findByCreatedOnBetween(@Param("startDate")Date startDate,@Param("endDate") Date endDate,Pageable page);
+	
+	
 
 	//Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList);
 }
