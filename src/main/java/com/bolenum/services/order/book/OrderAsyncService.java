@@ -14,6 +14,8 @@ public interface OrderAsyncService {
 
 	List<Trade> saveTrade(List<Trade> tradeList);
 	
+	Trade saveTrade(Trade trade);
+	
 	List<PartialTrade> savePartialTrade(List<PartialTrade> tradeList);
 
 }

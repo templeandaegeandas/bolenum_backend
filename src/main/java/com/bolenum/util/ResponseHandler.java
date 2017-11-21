@@ -33,7 +33,6 @@ public class ResponseHandler {
 			map.put("data", responseObject);
 			return new ResponseEntity<Object>(map, httpStatus);
 		} catch (Exception e) {
-			System.out.println("erooooooooooooooooooooooooooooooo");
 			map.clear();
 			map.put("timestamp", new Date().getTime());
 			map.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
