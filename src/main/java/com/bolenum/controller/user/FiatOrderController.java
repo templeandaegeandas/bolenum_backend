@@ -117,8 +117,9 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
-		if (!(orders.getPair().getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)
-				|| orders.getPair().getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT))) {
+		boolean toType = orders.getPair().getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT);
+		boolean pairType = orders.getPair().getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT);
+		if (!(toType || pairType)) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.not.fiat"),
 					null);
 		}
@@ -137,9 +138,15 @@ public class FiatOrderController {
 				bankDetailsUser = matchedOrder.getUser();
 				BankAccountDetails accountDetails = bankAccountDetailsService
 						.primaryBankAccountDetails(bankDetailsUser);
+				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(user,
+						order.getPair());
 				map.put("accountDetails", response(accountDetails));
 				map.put("orderId", order.getId());
-
+				map.put("totalPrice", order.getLockedVolume() * order.getPrice());
+				map.put("sellerName", bankDetailsUser.getFirstName());
+				map.put("orderVolume", order.getLockedVolume());
+				map.put("walletAddress", userAddress.get("address"));
+				map.put("currencyAbr", userAddress.get("currencyAbbr"));
 			} else {
 				bankDetailsUser = orders.getUser();
 				BankAccountDetails accountDetails = bankAccountDetailsService

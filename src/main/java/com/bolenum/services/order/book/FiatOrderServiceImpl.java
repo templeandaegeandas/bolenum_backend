@@ -3,7 +3,9 @@
  */
 package com.bolenum.services.order.book;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -324,5 +326,24 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		Pageable pageable = new PageRequest(page, size, Direction.ASC, "price");
 		return ordersRepository.findByVolumeLessThanEqualAndPriceLessThanEqualAndOrderTypeAndOrderStatusAndPair(
 				order.getVolume(), order.getPrice(), orderType, OrderStatus.SUBMITTED, order.getPair(), pageable);
+	}
+
+	@Override
+	public Map<String, String> byersWalletAddressAndCurrencyAbbr(User user, CurrencyPair pair) {
+		Map<String, String> map = new HashMap();
+		String currencyAbbr = "";
+		if (pair.getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT)) {
+			map.put("currencyAbbr", pair.getPairedCurrency().get(0).getCurrencyAbbreviation());
+			currencyAbbr = pair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		} else {
+			map.put("currencyAbbr", pair.getToCurrency().get(0).getCurrencyAbbreviation());
+			currencyAbbr = pair.getToCurrency().get(0).getCurrencyAbbreviation();
+		}
+		if (currencyAbbr.equals("BTC")) {
+			map.put("address", user.getBtcWalletAddress());
+		} else {
+			map.put("address", user.getEthWalletaddress());
+		}
+		return map;
 	}
 }
