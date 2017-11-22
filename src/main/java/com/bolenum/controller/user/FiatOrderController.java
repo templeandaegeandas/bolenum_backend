@@ -72,6 +72,14 @@ public class FiatOrderController {
 
 	private Logger logger = LoggerFactory.getLogger(FiatOrderController.class);
 
+	/**
+	 * to create a Fiat order, if order based on volume and price does not match
+	 * any existing order then only it will be saved. Otherwise existing order
+	 * list will be returned
+	 * 
+	 * @param Order
+	 * @return list of order/ created order id
+	 */
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.POST)
 	public ResponseEntity<Object> createFiateOrder(@RequestBody Orders orders) {
 		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10);
@@ -240,4 +248,19 @@ public class FiatOrderController {
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"), null);
 	}
+
+	/**
+	 * get list of orders against type of Orders(SELL/BUY), If requested order
+	 * is BUY then it will return SELL order list, and for SELL order return BUY
+	 * order list
+	 * 
+	 * @param order
+	 * @return list or orders
+	 */
+	@RequestMapping(value = UrlConstant.ORDER_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getOrdersList(@RequestBody Orders orders) {
+		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"), page);
+	}
+
 }
