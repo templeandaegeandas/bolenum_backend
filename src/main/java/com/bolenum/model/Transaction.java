@@ -51,6 +51,7 @@ public class Transaction {
 	
 	@Enumerated(EnumType.STRING)
 	private TransactionType transactionType;
+	
 	@Enumerated(EnumType.STRING)
 	private TransactionStatus transactionStatus;
 	private Double gas;

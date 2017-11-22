@@ -113,9 +113,9 @@ public class UserController {
 					return ResponseHandler.response(HttpStatus.CONFLICT, false,
 							localService.getMessage("email.already.exist"), isUserExist.getEmailId());
 				} else {
-					//User user = signupForm.copy(new User());
-					//requestObj = mapper.writeValueAsString(user);
-					//logger.debug("Requested Object for Re Register", user);
+					// User user = signupForm.copy(new User());
+					// requestObj = mapper.writeValueAsString(user);
+					// logger.debug("Requested Object for Re Register", user);
 					userService.reRegister(signupForm);
 					return ResponseHandler.response(HttpStatus.OK, false,
 							localService.getMessage("user.registarion.success"), signupForm.getEmailId());
@@ -131,6 +131,7 @@ public class UserController {
 	 * for mail verify at the time of sign up user as well as re register
 	 * 
 	 * @param token
+	 * 
 	 * @return
 	 * 
 	 */
@@ -146,6 +147,7 @@ public class UserController {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"),
 						null);
 			}
+
 			boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
 			logger.debug("user mail verify token expired: {}", isExpired);
 			if (isExpired) {
@@ -154,9 +156,15 @@ public class UserController {
 			}
 
 			User user = authenticationToken.getUser();
+			if (user.getIsEnabled()) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+						localService.getMessage("link.already.verified"), null);
+			}
+
 			etherumWalletService.createWallet(user);
 			String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", uuid);
+
 			if (!uuid.isEmpty()) {
 				user.setBtcWalletUuid(uuid);
 				user.setBtcWalletAddress(btcWalletService.getWalletAddress(uuid));
