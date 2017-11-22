@@ -63,7 +63,7 @@ public class OrderController {
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
 		// can not place order on 0 prize
-		if (orders.getOrderStandard().equals(OrderStandard.LIMIT) && orders.getPrice() <= 0) {
+		if (OrderStandard.LIMIT.equals(orders.getOrderStandard()) && orders.getPrice() <= 0) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"),
 					null);
 		}

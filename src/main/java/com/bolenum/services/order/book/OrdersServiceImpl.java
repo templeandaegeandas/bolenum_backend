@@ -91,7 +91,7 @@ public class OrdersServiceImpl implements OrdersService {
 		/**
 		 * if order type is SELL then only checking, user have selling volume
 		 */
-		if (orders.getOrderType().equals(OrderType.SELL)) {
+		if (OrderType.SELL.equals(orders.getOrderType())) {
 			currency = currencyPair.getToCurrency().get(0);
 			tickter = currency.getCurrencyAbbreviation();
 			currencyType = currency.getCurrencyType().toString();
@@ -138,7 +138,7 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException {
 		Boolean status;
-		if (orders.getOrderStandard().equals(OrderStandard.MARKET)) {
+		if (OrderStandard.MARKET.equals(orders.getOrderStandard())) {
 			logger.debug("Processing market order");
 			status = processMarketOrder(orders);
 		} else {
@@ -193,7 +193,7 @@ public class OrdersServiceImpl implements OrdersService {
 		CurrencyPair pair = orders.getPair();
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
-		if (orderType.equals(OrderType.BUY)) {
+		if (OrderType.BUY.equals(orderType)) {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			/**
@@ -280,7 +280,7 @@ public class OrdersServiceImpl implements OrdersService {
 		CurrencyPair pair = orders.getPair();
 		logger.debug("Order type is equal with buy: {}", orderType.equals(OrderType.BUY));
 		// checking the order type is BUY
-		if (orderType.equals(OrderType.BUY)) {
+		if (OrderType.BUY.equals(orderType)) {
 			// fetching the seller list whose selling price is less than equal
 			// to buying price
 			List<Orders> sellOrderList = ordersRepository
@@ -322,13 +322,6 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, pair, price);
-			/**
-			 * checking user self order, return false if self order else
-			 * proceed.
-			 */
-			if (isUsersSelfOrder(orders, buyOrderList)) {
-				return processed;
-			}
 			/**
 			 * checking user self order, return false if self order else
 			 * proceed.
@@ -425,7 +418,7 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("matching buy/sell completed");
 			}
 			// checking the order type BUY
-			if (orderType.equals(OrderType.BUY)) {
+			if (OrderType.BUY.equals(orderType)) {
 				// buyer is coming order's user
 				buyer = orders.getUser();
 				// seller is matched order's user
@@ -475,7 +468,7 @@ public class OrdersServiceImpl implements OrdersService {
 		String qtr = getPairedBalance(matchedOrder, currencyPair, qtyTraded);
 		logger.debug("paired currency volume: {}, {}", qtr, tickters[1]);
 		// checking the order type BUY
-		if (orders.getOrderType().equals(OrderType.BUY)) {
+		if (OrderType.BUY.equals(orders.getOrderType())) {
 			logger.debug("BUY Order");
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
 					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
@@ -523,7 +516,7 @@ public class OrdersServiceImpl implements OrdersService {
 		 * market price, for Limit order user should have volume (volume *
 		 * price), price limit given by user
 		 */
-		if (orders.getOrderStandard().equals(OrderStandard.LIMIT)) {
+		if (OrderStandard.LIMIT.equals(orders.getOrderStandard())) {
 			logger.debug("limit order buy on price: {}, {} and quantity traded: {}, {} ", orders.getPrice(),
 					currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation(), qtyTraded,
 					currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());

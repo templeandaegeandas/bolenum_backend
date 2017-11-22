@@ -50,7 +50,7 @@ public class MarketPriceServiceImpl implements MarketPriceService {
 	public void priceFromCoinMarketCap() {
 		loadCurrecy();
 		// logger.debug("every 20 sec :{}", new Date());
-		String url = "https://api.coinmarketcap.com/v1/ticker/";
+		String url = "https://api.coinmarketcap.com/v1/ticker/?start=0&limit=600";
 		RestTemplate restTemplate = new RestTemplate();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
 		String res = restTemplate.getForObject(builder.toUriString(), String.class);

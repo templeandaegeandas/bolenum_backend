@@ -93,7 +93,7 @@ public class KYCServiceImpl implements KYCService {
 				Iterator<UserKyc> iterator = listOfUserKyc.iterator();
 				while (iterator.hasNext()) {
 					UserKyc userKyc = iterator.next();
-					if (userKyc.getDocumentType().equals(documentType)) {
+					if (documentType.equals(userKyc.getDocumentType())) {
 						userKyc.setDocument(updatedFileName);
 						userKyc.setDocumentType(documentType);
 						userKyc.setIsVerified(false);
@@ -133,7 +133,7 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.APPROVED);
 		userKyc.setRejectionMessage(null);
 		User user=userKyc.getUser();
-		if (userKyc.getDocumentType().equals(DocumentType.NATIONAL_ID)) {
+		if (DocumentType.NATIONAL_ID.equals(userKyc.getDocumentType())) {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.approve.user.kyc.nationalId"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
 					localeService.getMessage("email.text.approve.user.kyc.nationalId"));
@@ -157,7 +157,7 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
 		User user = userKyc.getUser();
-		if (userKyc.getDocumentType().equals(DocumentType.NATIONAL_ID)) {
+		if (DocumentType.NATIONAL_ID.equals(userKyc.getDocumentType())) {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
 					localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
@@ -195,7 +195,7 @@ public class KYCServiceImpl implements KYCService {
 	@Override
 	public DocumentType validateDocumentType(String documentType) {
 		for (DocumentType documentTypeToMatch : DocumentType.values()) {
-			if (documentTypeToMatch.toString().equals(documentType)) {
+			if (documentType.equals(documentTypeToMatch.toString())) {
 				return documentTypeToMatch;
 			}
 		}
