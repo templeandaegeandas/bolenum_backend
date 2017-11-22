@@ -260,7 +260,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setTxAmount(transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
 			logger.debug("Balance else part returned by the listner: {}",transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
 			tx.setTransactionType(TransactionType.OUTGOING);
-			if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
+			if (TransactionStatus.WITHDRAW.equals(tx.getTransactionStatus())) {
 				tx.setTransactionType(TransactionType.INCOMING);
 			}
 			tx.setCurrencyName(tokenName);

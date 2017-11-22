@@ -444,7 +444,7 @@ public class TransactionServiceImpl implements TransactionService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		if (transactionStatus.equals(TransactionStatus.WITHDRAW)) {
+		if (TransactionStatus.WITHDRAW.equals(transactionStatus)) {
 			return transactionRepo.findByFromUserAndTransactionStatus(user, transactionStatus, pageRequest);
 		} else {
 			return transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user, pageRequest);
