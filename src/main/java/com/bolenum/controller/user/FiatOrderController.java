@@ -100,7 +100,7 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.exist.fiat"),
 					page);
 		}
-		if (orders.getOrderType().equals(OrderType.SELL)) {
+		if (OrderType.SELL.equals(orders.getOrderType())) {
 			String balance = fiatOrderService.checkFiatOrderEligibility(user, orders, pairId);
 			if (!balance.equals("proceed")) {
 				return ResponseHandler.response(HttpStatus.OK, false,
@@ -141,14 +141,14 @@ public class FiatOrderController {
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), Optional.empty());
 		}
-		if (orders.getOrderType().equals(OrderType.SELL)) {
+		if (OrderType.SELL.equals(orders.getOrderType())) {
 			if (!balance.equals("proceed")) {
-				return ResponseHandler.response(HttpStatus.OK, false,
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 						localeService.getMessage("order.insufficient.balance"), Optional.empty());
 			}
 		}
-		boolean toType = orders.getPair().getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT);
-		boolean pairType = orders.getPair().getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT);
+		boolean toType = CurrencyType.FIAT.equals(orders.getPair().getToCurrency().get(0).getCurrencyType());
+		boolean pairType = CurrencyType.FIAT.equals(orders.getPair().getPairedCurrency().get(0).getCurrencyType());
 		if (!(toType || pairType)) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.not.fiat"),
 					Optional.empty());
@@ -164,7 +164,7 @@ public class FiatOrderController {
 		if (order.getId() != null) {
 			User bankDetailsUser = null;
 			Map<String, Object> map = new HashMap<>();
-			if (orders.getOrderType().equals(OrderType.BUY)) {
+			if (OrderType.BUY.equals(orders.getOrderType())) {
 				bankDetailsUser = matchedOrder.getUser();
 				BankAccountDetails accountDetails = bankAccountDetailsService
 						.primaryBankAccountDetails(bankDetailsUser);
@@ -189,6 +189,7 @@ public class FiatOrderController {
 				notificationService.sendNotification(matchedOrder.getUser(), msg);
 				notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg);
 				map.put("orderId", order.getId());
+				map.put("accountDetails", accountDetails);
 				simpMessagingTemplate.convertAndSend(
 						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_SELLER_CONFIRM,
 						MessageType.ORDER_CONFIRMATION + "#" + matchedOrder.getId());
