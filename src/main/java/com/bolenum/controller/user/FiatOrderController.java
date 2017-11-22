@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,15 +78,34 @@ public class FiatOrderController {
 	 * any existing order then only it will be saved. Otherwise existing order
 	 * list will be returned
 	 * 
-	 * @param Order
+	 * @param Order,
+	 * @param pairid
 	 * @return list of order/ created order id
 	 */
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.POST)
-	public ResponseEntity<Object> createFiateOrder(@RequestBody Orders orders) {
+	public ResponseEntity<Object> createFiateOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
+		User user = GenericUtils.getLoggedInUser();
+		boolean kycVerified = userService.isKycVerified(user);
+		if (!kycVerified) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"),
+					Optional.empty());
+		}
+
+		if (!bankAccountDetailsService.isBankAccountAdded(user)) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("bank.details.not.exist"), Optional.empty());
+		}
 		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10);
 		if (page.getTotalElements() > 0) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.exist.fiat"),
 					page);
+		}
+		if (orders.getOrderType().equals(OrderType.SELL)) {
+			String balance = fiatOrderService.checkFiatOrderEligibility(user, orders, pairId);
+			if (!balance.equals("proceed")) {
+				return ResponseHandler.response(HttpStatus.OK, false,
+						localeService.getMessage("order.insufficient.balance"), Optional.empty());
+			}
 		}
 		orders = fiatOrderService.createOrders(orders);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"),
@@ -100,45 +120,45 @@ public class FiatOrderController {
 		Orders matchedOrder = ordersService.getOrderDetails(matchedOrderId);
 		if (matchedOrder == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
-					null);
+					Optional.empty());
 		}
 		if (matchedOrder.getVolume() <= 0) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
-					null);
+					Optional.empty());
 		}
 		boolean kycVerified = userService.isKycVerified(user);
 		if (!kycVerified) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"),
-					null);
+					Optional.empty());
 		}
 
 		if (!bankAccountDetailsService.isBankAccountAdded(user)) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localeService.getMessage("bank.details.not.exist"), null);
+					localeService.getMessage("bank.details.not.exist"), Optional.empty());
 		}
 
 		String balance = fiatOrderService.checkFiatOrderEligibility(user, orders, pairId);
 		if (balance.equals("Synchronizing")) {
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), Optional.empty());
 		}
 		if (orders.getOrderType().equals(OrderType.SELL)) {
-            if (!balance.equals("proceed")) {
-                    return ResponseHandler.response(HttpStatus.OK, false,
-                                    localeService.getMessage("order.insufficient.balance"), null);
-            }
+			if (!balance.equals("proceed")) {
+				return ResponseHandler.response(HttpStatus.OK, false,
+						localeService.getMessage("order.insufficient.balance"), Optional.empty());
+			}
 		}
 		boolean toType = orders.getPair().getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT);
 		boolean pairType = orders.getPair().getPairedCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT);
 		if (!(toType || pairType)) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.not.fiat"),
-					null);
+					Optional.empty());
 		}
 		List<Orders> list = new ArrayList<>();
 		list.add(matchedOrder);
 		orders.setUser(user);
 		if (ordersService.isUsersSelfOrder(orders, list)) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.self.fail"),
-					null);
+					Optional.empty());
 		}
 		Orders order = fiatOrderService.processFiatOrderList(matchedOrder, orders, orders.getPair());
 		if (order.getId() != null) {
@@ -178,7 +198,7 @@ public class FiatOrderController {
 
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localeService.getMessage("order.processed.fail"), null);
+					localeService.getMessage("order.processed.fail"), Optional.empty());
 		}
 	}
 
@@ -203,14 +223,14 @@ public class FiatOrderController {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
 		if (exitingOrder == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
-					null);
+					Optional.empty());
 		}
 		boolean result = fiatOrderService.buyerPaidConfirmtion(exitingOrder);
 		if (result) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.seller.notified"),
-					null);
+					Optional.empty());
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"), null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"), Optional.empty());
 	}
 
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_CANCEL, method = RequestMethod.PUT)
@@ -218,14 +238,14 @@ public class FiatOrderController {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
 		if (exitingOrder == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
-					null);
+					Optional.empty());
 		}
 		boolean result = fiatOrderService.processCancelOrder(exitingOrder);
 		if (result) {
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"), null);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"), Optional.empty());
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"),
-				null);
+				Optional.empty());
 	}
 
 	/**
@@ -241,14 +261,14 @@ public class FiatOrderController {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
 		if (exitingOrder == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
-					null);
+					Optional.empty());
 		}
 		boolean result = fiatOrderService.processTransactionFiatOrders(exitingOrder);
 		if (result) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.transaction.success"),
-					null);
+					Optional.empty());
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"), null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"), Optional.empty());
 	}
 
 	/**
