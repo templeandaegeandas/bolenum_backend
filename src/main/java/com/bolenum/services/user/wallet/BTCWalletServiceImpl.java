@@ -55,7 +55,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	private Erc20TokenService erc20TokenService;
 
 	@Autowired
-	private OrdersService orderService;
+	private OrdersService ordersService;
 
 
 	/**
@@ -236,7 +236,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		Double availableBalance = 0.0;
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
-		double placeOrderVolume = orderService.totalUserBalanceInBook(user, erc20Token.getCurrency(), erc20Token.getCurrency());
+		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, erc20Token.getCurrency(), erc20Token.getCurrency());
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
 		if (availableBalance >= (withdrawAmount+placeOrderVolume)) {

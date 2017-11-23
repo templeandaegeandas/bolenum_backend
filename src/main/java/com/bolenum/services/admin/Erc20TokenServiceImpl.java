@@ -269,12 +269,22 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			User receiverUser = userRepository.findByBtcWalletAddress(tx.getToAddress());
 			logger.debug("receiver else user : {}", receiverUser);
 			if (receiverUser != null) {
+
 				logger.debug("receiver else user id: {}", receiverUser.getUserId());
 				tx.setToUser(receiverUser); 
 			}
 			Transaction saved = transactionRepo.saveAndFlush(tx);
 			logger.debug("transaction else saved completed: {}", fromUser.getEmailId());
 			if (saved != null) {
+				logger.debug("new incoming transaction saved of user: {}", fromUser.getEmailId());
+
+
+			} else {
+				if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
+					tx.setTransactionType(TransactionType.INCOMING);
+				}
+				logger.debug("tx exists: {}", transaction._transactionHash);
+				transactionRepo.saveAndFlush(tx);
 				logger.debug("new incoming else transaction saved of user: {}", fromUser.getEmailId());
 			}
 		}

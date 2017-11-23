@@ -154,14 +154,26 @@ public class AdminController {
 				localeService.getMessage("admin.count.user.dashboard.success"), countOfusers);
 	}
 	
+	/**
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortOrder
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.DISPLAY_LATEST_ORDER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getLatestOrderList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
-			@RequestParam("sortOrder") String sortOrder, @RequestParam("searchData") String searchData) {
+			@RequestParam("sortOrder") String sortOrder) {
 		
-		Page<Orders> listOfLatestOrders=ordersService.getListOfLatestOrders(pageNumber,pageSize,sortBy,sortOrder,searchData);
+		Page<Orders> listOfLatestOrders=ordersService.getListOfLatestOrders(pageNumber,pageSize,sortBy,sortOrder);
 		return ResponseHandler.response(HttpStatus.OK, true,
-				localeService.getMessage("admin.count.user.dashboard.success"), listOfLatestOrders);
+				localeService.getMessage("admin.latest.orders.list.success"), listOfLatestOrders);
 	}
+	
+	
+	
+	
 
 }

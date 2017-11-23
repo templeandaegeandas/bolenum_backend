@@ -209,6 +209,7 @@ public class TransactionServiceImpl implements TransactionService {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
 				JSONObject responseJson = new JSONObject(txRes.getBody());
+				
 				logger.debug("json object of response: {}", responseJson);
 				JSONObject data = (JSONObject) responseJson.get("data");
 				String txHash = (String) data.get("transactionHash");
@@ -235,6 +236,7 @@ public class TransactionServiceImpl implements TransactionService {
 					User receiverUser = userRepository.findByBtcWalletAddress(toAddress);
 					if (receiverUser != null) {
 						transaction.setToUser(receiverUser);
+
 						logger.debug("receiver user email id: {}",receiverUser.getEmailId());
 						
 					}

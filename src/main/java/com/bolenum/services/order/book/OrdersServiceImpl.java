@@ -664,8 +664,9 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
 	}
 
+
 	@Override
-	public Double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency) {
+	public double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency) {
 		List<Orders> toOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(user,
 				OrderStatus.SUBMITTED, OrderType.SELL, toCurrency);
 		List<Orders> fromOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairPairedCurrency(user,
@@ -720,15 +721,17 @@ public class OrdersServiceImpl implements OrdersService {
 	 * 
 	 */
 	@Override
-	public Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy,
-			String searchData) {
-		Pageable page = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
+	public Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy) {
+		Pageable page  = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
+
 		Date endDate = new Date();
 		Calendar c = Calendar.getInstance();
 		c.setTime(endDate);
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
 		startDate = (Date) startDate;
-		return ordersRepository.findByCreatedOnBetween(startDate, endDate, page);
+		//return ordersRepository.findByCreatedOnBetween(page,startDate,endDate);
+		return ordersRepository.findByCreatedOnBetween( startDate, endDate,page);
+
 	}
 }
