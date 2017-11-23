@@ -318,14 +318,17 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	}
 
 	@Override
-	public Page<Orders> existingOrders(Orders order, int page, int size) {
+	public Page<Orders> existingOrders(Orders order, long pairId, int page, int size) {
 		OrderType orderType = OrderType.BUY;
+		Pageable pageable = new PageRequest(page, size, Direction.ASC, "price");
 		if (OrderType.BUY.equals(order.getOrderType())) {
 			orderType = OrderType.SELL;
+			pageable = new PageRequest(page, size, Direction.DESC, "price");
+			return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
+					order.getPrice(), orderType, OrderStatus.SUBMITTED, pairId, pageable);
 		}
-		Pageable pageable = new PageRequest(page, size, Direction.ASC, "price");
-		return ordersRepository.findByVolumeLessThanEqualAndPriceLessThanEqualAndOrderTypeAndOrderStatusAndPair(
-				order.getVolume(), order.getPrice(), orderType, OrderStatus.SUBMITTED, order.getPair(), pageable);
+		return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
+				order.getPrice(), orderType, OrderStatus.SUBMITTED, pairId, pageable);
 	}
 
 	@Override

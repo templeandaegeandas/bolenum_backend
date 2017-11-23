@@ -90,6 +90,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 
 	Page<Orders> findByCreatedOnBetween(Date startDate, Date endDate, Pageable page);
 
-	Page<Orders> findByVolumeLessThanEqualAndPriceLessThanEqualAndOrderTypeAndOrderStatusAndPair(Double volume, Double price, OrderType orderType, OrderStatus orderStatus, CurrencyPair currencyPair,Pageable page);
+	Page<Orders> findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(Double price, OrderType orderType, OrderStatus orderStatus, long pairId, Pageable page);
+	
+	Page<Orders> findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(Double price, OrderType orderType, OrderStatus orderStatus, long pairId, Pageable page);
 
 }

@@ -34,7 +34,7 @@ public interface FiatOrderService {
 
 	public boolean processTransactionFiatOrders(Orders order);
 
-	public Page<Orders> existingOrders(Orders order, int page, int size);
+	public Page<Orders> existingOrders(Orders order, long pairId, int page, int size);
 
 	Map<String, String> byersWalletAddressAndCurrencyAbbr(User user, CurrencyPair pair);
 }
