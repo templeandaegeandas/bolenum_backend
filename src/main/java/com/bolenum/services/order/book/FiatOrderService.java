@@ -4,6 +4,7 @@
 package com.bolenum.services.order.book;
 
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.springframework.data.domain.Page;
 
@@ -32,7 +33,7 @@ public interface FiatOrderService {
 
 	public boolean buyerPaidConfirmtion(Orders order);
 
-	public boolean processTransactionFiatOrders(Orders order);
+	public Future<Boolean> processTransactionFiatOrders(Orders order, String currencyAbr);
 
 	public Page<Orders> existingOrders(Orders order, long pairId, int page, int size);
 

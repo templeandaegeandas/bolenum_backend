@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,7 @@ import io.swagger.annotations.Api;
 
 /**
  * @author chandan kumar singh
+ * @modified Vishal Kumar
  * @date 15-Nov-2017
  */
 @RestController
@@ -118,6 +121,8 @@ public class FiatOrderController {
 				orders.getId());
 	}
 
+	// @changed by vishal kumar: unrelated response removed
+	
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> initializeOrder(@RequestParam("pairId") long pairId,
 			@RequestParam("orderId") long matchedOrderId, @RequestBody Orders orders) {
@@ -173,17 +178,7 @@ public class FiatOrderController {
 			Map<String, Object> map = new HashMap<>();
 			if (OrderType.BUY.equals(orders.getOrderType())) {
 				bankDetailsUser = matchedOrder.getUser();
-				BankAccountDetails accountDetails = bankAccountDetailsService
-						.primaryBankAccountDetails(bankDetailsUser);
-				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(user,
-						order.getPair());
-				map.put("accountDetails", response(accountDetails));
 				map.put("orderId", order.getId());
-				map.put("totalPrice", order.getLockedVolume() * order.getPrice());
-				map.put("sellerName", bankDetailsUser.getFirstName());
-				map.put("orderVolume", order.getLockedVolume());
-				map.put("walletAddress", userAddress.get("address"));
-				map.put("currencyAbr", userAddress.get("currencyAbbr"));
 			} else {
 				bankDetailsUser = orders.getUser();
 				BankAccountDetails accountDetails = bankAccountDetailsService
@@ -196,7 +191,6 @@ public class FiatOrderController {
 				notificationService.sendNotification(matchedOrder.getUser(), msg);
 				notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg);
 				map.put("orderId", order.getId());
-				map.put("accountDetails", accountDetails);
 				simpMessagingTemplate.convertAndSend(
 						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_SELLER_CONFIRM,
 						MessageType.ORDER_CONFIRMATION + "#" + matchedOrder.getId());
@@ -273,15 +267,35 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}
-		boolean result = fiatOrderService.processTransactionFiatOrders(exitingOrder);
-		if (result) {
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.transaction.success"),
+		String currencyAbr;
+		if (!(CurrencyType.FIAT.equals(exitingOrder.getPair().getToCurrency().get(0).getCurrencyType()))) {
+			currencyAbr = exitingOrder.getPair().getToCurrency().get(0).getCurrencyAbbreviation();
+		} else {
+			currencyAbr = exitingOrder.getPair().getPairedCurrency().get(0).getCurrencyAbbreviation();
+		}
+		Future<Boolean> result = fiatOrderService.processTransactionFiatOrders(exitingOrder, currencyAbr);
+		boolean res;
+		try {
+			res = result.get();
+			if (res) {
+				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.transaction.success"),
+						Optional.empty());
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}
+		
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 				Optional.empty());
 	}
 
+	/**
+	 * get order by order id
+	 * @param orderId
+	 * @param orderType
+	 * @return single order
+	 */
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrders(@RequestParam("orderId") long orderId, @RequestParam("orderType") OrderType orderType) {
 		Map<String, Object> map = new HashMap<>();
