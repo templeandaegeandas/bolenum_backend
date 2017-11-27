@@ -28,4 +28,5 @@ public class WebSocketMessage {
 	public void setMessageType(MessageType messageType) {
 		this.messageType = messageType;
 	}
+	
 }

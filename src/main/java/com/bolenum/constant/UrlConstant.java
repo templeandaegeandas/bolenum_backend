@@ -6,7 +6,9 @@ package com.bolenum.constant;
  * @Date 04-Sep-2017
  */
 public class UrlConstant {
+	
 	private UrlConstant() {
+		
 	}
 
 	public static final String BASE_URI_V1 = "/api/v1/";
