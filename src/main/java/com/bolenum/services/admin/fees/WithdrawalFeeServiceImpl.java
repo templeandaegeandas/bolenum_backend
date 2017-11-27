@@ -39,7 +39,15 @@ public class WithdrawalFeeServiceImpl implements WithdrawalFeeService {
 			if (withdrawalFee.getErc20Token() != null) {
 				withdrawal.setErc20Token(withdrawalFee.getErc20Token());
 			}
-
+			if (withdrawalFee.getMinWithDrawAmountBtc() != null) {
+				withdrawal.setMinWithDrawAmountBtc(withdrawalFee.getMinWithDrawAmountBtc());
+			}
+			if (withdrawalFee.getMinWithDrawAmountEth() != null) {
+				withdrawal.setMinWithDrawAmountEth(withdrawalFee.getMinWithDrawAmountEth());
+			}
+			if (withdrawalFee.getMinWithDrawAmountErc20Token() != null) {
+				withdrawal.setMinWithDrawAmountErc20Token(withdrawalFee.getMinWithDrawAmountErc20Token());
+			}
 			withdrawal = withdrawalFeeRepo.saveAndFlush(withdrawal);
 		} else {
 			withdrawal = withdrawalFeeRepo.saveAndFlush(withdrawalFee);

@@ -21,9 +21,11 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.User;
 import com.bolenum.model.fees.TradingFee;
+import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.fees.TradingFeeService;
+import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
@@ -36,6 +38,7 @@ import io.swagger.annotations.Api;
  * @Author Himanshu Kumar
  *
  * @Date 05-Sep-2017
+ * @modified chandan kumar singh
  */
 @RestController
 @RequestMapping(value = UrlConstant.BASE_ADMIN_URI_V1)
@@ -56,6 +59,9 @@ public class AdminController {
 
 	@Autowired
 	private AuthenticationTokenService authenticationTokenService;
+
+	@Autowired
+	private WithdrawalFeeService withdrawalFeeService;
 
 	public static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
@@ -95,22 +101,21 @@ public class AdminController {
 	}
 
 	/**
-	 * to add transaction fees for transaction done by user and deducted fees
-	 * will be store in Admin wallet
+	 * to add trading fees for transaction done by user and deducted fees will
+	 * be store in Admin wallet
 	 * 
-	 * @param transactionFee
-	 * @param result
+	 * @param tradingFee
 	 * @return
 	 */
-	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.POST)
-	public ResponseEntity<Object> addTransactionFees(@RequestBody TradingFee tradingFee) {
+	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.POST)
+	public ResponseEntity<Object> addTradingFees(@RequestBody TradingFee tradingFee) {
 		TradingFee savedTradingFee = tradingFeeService.saveTradingFee(tradingFee);
 		if (savedTradingFee != null) {
-			return ResponseHandler.response(HttpStatus.OK, false,
-					localeService.getMessage("admin.trnsactionfee.add.success"), savedTradingFee);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("tradefee.success"),
+					savedTradingFee);
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-				localeService.getMessage("admin.transactionfee.add.error"), Optional.empty());
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("tradefee.error"),
+				Optional.empty());
 	}
 
 	/**
@@ -118,11 +123,28 @@ public class AdminController {
 	 * 
 	 * @return transaction fee
 	 */
-	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.GET)
-	public ResponseEntity<Object> getTransactionFees() {
+	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.GET)
+	public ResponseEntity<Object> getTradingFees() {
 		TradingFee fee = tradingFeeService.getTradingFee();
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.transaction.fees.found.success"), fee);
+	}
+
+	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.POST)
+	public ResponseEntity<Object> saveWithdrawlFees(@RequestBody WithdrawalFee withdrawalFee) {
+		WithdrawalFee savedWithdrawalFee = withdrawalFeeService.saveWithdrawalFee(withdrawalFee);
+		if (savedWithdrawalFee != null) {
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("withdrawfee.success"),
+					savedWithdrawalFee);
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("withdrawfee.error"),
+				Optional.empty());
+	}
+
+	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.GET)
+	public ResponseEntity<Object> getWithdrawlFees() {
+		WithdrawalFee fee = withdrawalFeeService.getWithdrawalFee();
+		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"), fee);
 	}
 
 	/**

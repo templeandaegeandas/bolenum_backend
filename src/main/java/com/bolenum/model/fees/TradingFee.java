@@ -17,10 +17,10 @@ public class TradingFee {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	private Double btc = 0.0;
-	private Double eth = 0.0;
-	private Double erc20Token = 0.0;
-	private Double fiat = 0.0;
+	private Double btc;
+	private Double eth;
+	private Double erc20Token;
+	private Double fiat;
 
 	public Long getId() {
 		return id;
