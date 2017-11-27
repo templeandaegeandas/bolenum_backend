@@ -93,6 +93,7 @@ public class UrlConstant {
 	public static final String TRADE_LIST_ALL = "get/trade/list";
 	public static final String MY_TRADING_COUNT = "trading/count";
 	public static final String ORDER_BY_ID = "order";
+	public static final String ORDER_FIAT_BY_ID = "order/fiat";
 	public static final String ORDER_FIAT_CANCEL = "order/fiat/cancel";
 	public static final String ORDER_FIAT_PAID = "order/fiat/confirm";
 	public static final String ORDER_FIAT_TX = "order/fiat/tx";

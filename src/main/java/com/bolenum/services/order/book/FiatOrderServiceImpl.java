@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.UrlConstant;
@@ -224,15 +225,16 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		if (matched != null) {
 			matched.setVolume(matched.getVolume() + matched.getLockedVolume());
 			matched.setLockedVolume(0);
+			matched.setMatchedOrder(null);
 			matched.setOrderStatus(OrderStatus.SUBMITTED);
+			logger.debug("matched order saving start");
+			orderAsyncService.saveOrder(matched);
 		}
 		order.setVolume(order.getVolume() + order.getLockedVolume());
 		order.setLockedVolume(0);
 		order.setMatchedOrder(null);
 		order.setOrderStatus(OrderStatus.CANCELLED);
 		try {
-			logger.debug("matched order saving start");
-			orderAsyncService.saveOrder(matched);
 			logger.debug("matched order saving completed and order saving started");
 			orderAsyncService.saveOrder(order);
 			logger.debug("order saving completed");
@@ -251,6 +253,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		Orders matched = exitingOrder.getMatchedOrder();
 		String msg = "";
 		User buyer = null, seller = null;
+		System.out.println(matched);
 		if (matched != null) {
 			if (OrderType.BUY.equals(exitingOrder.getOrderType())) {
 				buyer = exitingOrder.getUser();
@@ -265,6 +268,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				ordersRepository.save(matched);
 				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_BUYER_CONFIRM,
 						MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
+				System.out.println(MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
 				return true;
 			} else {
 				logger.error("order is of SELL type");
@@ -277,14 +281,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	@Override
 	@Transactional
 	@Async
-	public boolean processTransactionFiatOrders(Orders sellerOrder) {
+	public Future<Boolean> processTransactionFiatOrders(Orders sellerOrder, String currencyAbr) {
 		Orders buyersOrder = ordersRepository.findByMatchedOrder(sellerOrder);
-		String currencyAbr = null;
-		if (!(CurrencyType.FIAT.equals(sellerOrder.getPair().getToCurrency().get(0).getCurrencyType()))) {
-			currencyAbr = sellerOrder.getPair().getToCurrency().get(0).getCurrencyAbbreviation();
-		} else {
-			currencyAbr = sellerOrder.getPair().getPairedCurrency().get(0).getCurrencyAbbreviation();
-		}
 		if (buyersOrder != null) {
 			User buyer = buyersOrder.getUser();
 			User seller = sellerOrder.getUser();
@@ -295,12 +293,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				logger.debug("perform fiat transaction result: {} of sell order id: {} and buy order id:{}", res,
 						sellerOrder.getId(), buyersOrder.getId());
 				if (res) {
-					buyersOrder.setLockedVolume(0);
-					buyersOrder.setMatchedOrder(null);
-					buyersOrder.setOrderStatus(OrderStatus.COMPLETED);
-
 					sellerOrder.setOrderStatus(OrderStatus.COMPLETED);
 					sellerOrder.setLockedVolume(0);
+					sellerOrder.setConfirm(true);
 
 					ordersRepository.save(sellerOrder);
 					ordersRepository.save(buyersOrder);
@@ -312,20 +307,23 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				logger.error("perform fiat transaction failed: {}", e.getMessage());
 				e.printStackTrace();
 			}
-			return true;
+			return new AsyncResult<Boolean>(true);
 		}
-		return false;
+		return new AsyncResult<Boolean>(false);
 	}
 
 	@Override
-	public Page<Orders> existingOrders(Orders order, int page, int size) {
+	public Page<Orders> existingOrders(Orders order, long pairId, int page, int size) {
 		OrderType orderType = OrderType.BUY;
+		Pageable pageable = new PageRequest(page, size, Direction.DESC, "price");
 		if (OrderType.BUY.equals(order.getOrderType())) {
 			orderType = OrderType.SELL;
+			pageable = new PageRequest(page, size, Direction.ASC, "price");
+			return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
+					order.getPrice(), orderType, OrderStatus.SUBMITTED, pairId, pageable);
 		}
-		Pageable pageable = new PageRequest(page, size, Direction.ASC, "price");
-		return ordersRepository.findByVolumeLessThanEqualAndPriceLessThanEqualAndOrderTypeAndOrderStatusAndPair(
-				order.getVolume(), order.getPrice(), orderType, OrderStatus.SUBMITTED, order.getPair(), pageable);
+		return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
+				order.getPrice(), orderType, OrderStatus.SUBMITTED, pairId, pageable);
 	}
 
 	@Override
