@@ -4,64 +4,65 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+
 /**
  * 
- * @Author himanshu
+ * @Author Himanshu Kumar
  * @Date 01-Nov-2017
  */
 @Entity
 public class TransactionFee {
-	
+
 	/**
-	 *  transaction fee for BTC in case of deposit and withdrawal  
+	 * transaction fee for BTC in case of deposit and withdrawal
 	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
-    private Double feeBTC;
-     
-    private Double feeOther;
-    
-    private Double availableBalanceLimitToWithdrawForBTC;
-    
-    private Double availableBalanceLimitToWithdrawForETH;
-    
-    private Double availableBalanceLimitToWithdrawForERC20;
-    
-    private Double availableBalanceLimitToWithdrawForFiat;
-    
-    private Double minimumLimitToSendForBTC;
-    
-    private Double minimumLimitToSendForETH;
-    
-    private Double minimumLimitToSendForERC20;
-    
-    private Double minimumLimitToSendForFIAT;
-    
-    public TransactionFee()
-    {    	
-    	feeBTC=0.00;
-    	
-    	feeOther=0.00;
-    	
-    	availableBalanceLimitToWithdrawForBTC=0.00;
-    	
-    	availableBalanceLimitToWithdrawForETH=0.00;
-    	
-    	availableBalanceLimitToWithdrawForERC20=0.00;
-    	
-    	availableBalanceLimitToWithdrawForFiat=0.00;
-    	
-    	minimumLimitToSendForBTC=0.00;
-        
-        minimumLimitToSendForETH=0.00;
-        
-        minimumLimitToSendForERC20=0.00;
-        
-        minimumLimitToSendForFIAT=0.00;
-        
-    }
+
+	private Double feeBTC;
+
+	private Double feeOther;
+
+	private Double availableBalanceLimitToWithdrawForBTC;
+
+	private Double availableBalanceLimitToWithdrawForETH;
+
+	private Double availableBalanceLimitToWithdrawForERC20;
+
+	private Double availableBalanceLimitToWithdrawForFiat;
+
+	private Double minimumLimitToSendForBTC;
+
+	private Double minimumLimitToSendForETH;
+
+	private Double minimumLimitToSendForERC20;
+
+	private Double minimumLimitToSendForFIAT;
+
+	public TransactionFee() {
+		feeBTC = 0.00;
+
+		feeOther = 0.00;
+
+		availableBalanceLimitToWithdrawForBTC = 0.00;
+
+		availableBalanceLimitToWithdrawForETH = 0.00;
+
+		availableBalanceLimitToWithdrawForERC20 = 0.00;
+
+		availableBalanceLimitToWithdrawForFiat = 0.00;
+
+		minimumLimitToSendForBTC = 0.00;
+
+		minimumLimitToSendForETH = 0.00;
+
+		minimumLimitToSendForERC20 = 0.00;
+
+		minimumLimitToSendForFIAT = 0.00;
+
+	}
 
 	public Long getId() {
 		return id;
@@ -151,5 +152,4 @@ public class TransactionFee {
 		this.minimumLimitToSendForFIAT = minimumLimitToSendForFIAT;
 	}
 
-     	
 }

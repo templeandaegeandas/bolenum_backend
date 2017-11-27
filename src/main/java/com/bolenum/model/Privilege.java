@@ -7,6 +7,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
+/**
+ * 
+ * @author Himanshu Kumar
+ *
+ */
 @Entity
 public class Privilege {
 

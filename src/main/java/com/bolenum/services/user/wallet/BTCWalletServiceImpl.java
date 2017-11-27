@@ -75,6 +75,10 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Autowired
 	private LocaleService localeService;
 	
+	/**
+	 * used to create hot wallet for Bitcoin
+	 * 
+	 */
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -142,7 +146,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	/**
-	 * to get bitcoin wallet balance
+	 * to get Bitcoin wallet balance
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -202,6 +206,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	/**
+	 * used to validate available balance in wallet in case of doing transaction during
+	 * trading and withdrawal
 	 * 
 	 * @param availableBalance
 	 * @param availableBalanceLimitToWithdraw
@@ -219,6 +225,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	/**
 	 * 
+	 * 
 	 * @param availableBalance
 	 * @param withdrawAmount
 	 * @return
@@ -231,6 +238,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		return false;
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) throws InsufficientBalanceException {
 		Double availableBalance = 0.0;
