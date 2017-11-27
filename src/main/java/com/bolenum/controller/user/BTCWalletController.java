@@ -22,15 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
 import com.bolenum.enums.TransactionStatus;
-import com.bolenum.model.Currency;
 import com.bolenum.exceptions.InsufficientBalanceException;
+import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
-import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
-import com.bolenum.services.admin.TransactionFeeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
@@ -66,9 +64,6 @@ public class BTCWalletController {
 
 	@Autowired
 	private TransactionService transactionService;
-
-	@Autowired
-	private TransactionFeeService transactionFeeService;
 
 	private Logger logger = LoggerFactory.getLogger(BTCWalletController.class);
 
@@ -142,14 +137,13 @@ public class BTCWalletController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), marketPrice);
 	}
 
-
 	/**
 	 * 
 	 * @param currencyType
 	 * @param withdrawBalanceForm
 	 * @param coinCode
 	 * @return
-	 * @throws InsufficientBalanceException 
+	 * @throws InsufficientBalanceException
 	 */
 	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmountFromWallet(@RequestParam(name = "currencyType") String currencyType,
@@ -163,7 +157,6 @@ public class BTCWalletController {
 		if (coinCode == null || coinCode.isEmpty()) {
 			throw new IllegalArgumentException(localService.getMessage("invalid.coin.code"));
 		}
-		TransactionFee transactionFee = transactionFeeService.getTransactionFeeDetails();
 
 		User user = GenericUtils.getLoggedInUser(); // logged in user
 		boolean validAvailableWalletBalance = false;
@@ -178,7 +171,6 @@ public class BTCWalletController {
 				balanceBTC = balanceBTC.trim();
 				availableBTCBalance = Double.valueOf(balanceBTC);
 				validAvailableWalletBalance = btcWalletService.validateAvailableWalletBalance(availableBTCBalance,
-						transactionFee.getAvailableBalanceLimitToWithdrawForBTC(),
 						withdrawBalanceForm.getWithdrawAmount());
 				validWithdrawAmount = btcWalletService.validateWithdrawAmount(availableBTCBalance,
 						withdrawBalanceForm.getWithdrawAmount());
@@ -203,7 +195,6 @@ public class BTCWalletController {
 			case "ETH":
 				Double availableETHBalance = etherumWalletService.getWalletBalance(user);
 				validAvailableWalletBalance = btcWalletService.validateAvailableWalletBalance(availableETHBalance,
-						transactionFee.getAvailableBalanceLimitToWithdrawForETH(),
 						withdrawBalanceForm.getWithdrawAmount());
 
 				validWithdrawAmount = btcWalletService.validateWithdrawAmount(availableETHBalance,
@@ -239,8 +230,8 @@ public class BTCWalletController {
 						localService.getMessage("withdraw.invalid.amount"), null);
 
 			}
-				transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
-						withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
+			transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
+					withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 			break;
 		case "FIAT":
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
@@ -271,5 +262,5 @@ public class BTCWalletController {
 					localService.getMessage("Deposit saved successfully!"), transactionResponse);
 		}
 	}
-	
+
 }

@@ -57,7 +57,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Autowired
 	private OrdersService ordersService;
 
-
 	/**
 	 * creating BIP32 hierarchical deterministic (HD) wallets
 	 */
@@ -71,10 +70,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
-	
 	@Autowired
 	private LocaleService localeService;
-	
+
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -209,9 +207,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * @return
 	 */
 	@Override
-	public boolean validateAvailableWalletBalance(Double availableBalance, Double availableBalanceLimitToWithdraw,
-			Double withdrawAmount) {
-		if (availableBalance >= withdrawAmount && availableBalance >= availableBalanceLimitToWithdraw) {
+	public boolean validateAvailableWalletBalance(Double availableBalance, Double withdrawAmount) {
+		if (availableBalance >= withdrawAmount) {
 			return true;
 		}
 		return false;
@@ -232,18 +229,20 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	@Override
-	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) throws InsufficientBalanceException {
+	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount)
+			throws InsufficientBalanceException {
 		Double availableBalance = 0.0;
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
-		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, erc20Token.getCurrency(), erc20Token.getCurrency());
+		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, erc20Token.getCurrency(),
+				erc20Token.getCurrency());
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
-		if (availableBalance >= (withdrawAmount+placeOrderVolume)) {
+		if (availableBalance >= (withdrawAmount + placeOrderVolume)) {
 			return true;
-		}
-		else {
-			throw new InsufficientBalanceException(MessageFormat.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
+		} else {
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
 		}
 	}
 
