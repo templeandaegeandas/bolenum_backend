@@ -48,4 +48,7 @@ public interface BTCWalletService {
 			throws InsufficientBalanceException;
 
 	Transaction setDepositeList(Transaction transaction);
+
+	boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount)
+			throws InsufficientBalanceException;
 }

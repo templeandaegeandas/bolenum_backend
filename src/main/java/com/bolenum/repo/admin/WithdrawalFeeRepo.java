@@ -17,4 +17,5 @@ import com.bolenum.model.fees.WithdrawalFee;
 @Repository
 public interface WithdrawalFeeRepo extends JpaRepository<WithdrawalFee, Serializable> {
 
+	WithdrawalFee findByCurrencyCurrencyId(long currencyId);
 }

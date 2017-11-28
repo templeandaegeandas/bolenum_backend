@@ -16,5 +16,5 @@ public interface WithdrawalFeeService {
 
 	public WithdrawalFee saveWithdrawalFee(WithdrawalFee withdrawalFee);
 
-	public WithdrawalFee getWithdrawalFee();
+	public WithdrawalFee getWithdrawalFee(long currencyId);
 }

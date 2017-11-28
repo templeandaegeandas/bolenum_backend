@@ -142,8 +142,8 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.GET)
-	public ResponseEntity<Object> getWithdrawlFees() {
-		WithdrawalFee fee = withdrawalFeeService.getWithdrawalFee();
+	public ResponseEntity<Object> getWithdrawlFees(@RequestParam("currencyId") long currencyId) {
+		WithdrawalFee fee = withdrawalFeeService.getWithdrawalFee(currencyId);
 		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"), fee);
 	}
 

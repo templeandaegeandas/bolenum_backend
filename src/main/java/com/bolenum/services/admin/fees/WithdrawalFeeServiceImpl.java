@@ -28,25 +28,13 @@ public class WithdrawalFeeServiceImpl implements WithdrawalFeeService {
 
 	@Override
 	public WithdrawalFee saveWithdrawalFee(WithdrawalFee withdrawalFee) {
-		WithdrawalFee withdrawal = withdrawalFeeRepo.findOne(1L);
+		WithdrawalFee withdrawal = withdrawalFeeRepo.findByCurrencyCurrencyId(withdrawalFee.getCurrency().getCurrencyId());
 		if (withdrawal != null) {
-			if (withdrawalFee.getBtc() != null) {
-				withdrawal.setBtc(withdrawalFee.getBtc());
+			if (withdrawalFee.getFee() != null) {
+				withdrawal.setFee(withdrawalFee.getFee());
 			}
-			if (withdrawalFee.getEth() != null) {
-				withdrawal.setEth(withdrawalFee.getEth());
-			}
-			if (withdrawalFee.getErc20Token() != null) {
-				withdrawal.setErc20Token(withdrawalFee.getErc20Token());
-			}
-			if (withdrawalFee.getMinWithDrawAmountBtc() != null) {
-				withdrawal.setMinWithDrawAmountBtc(withdrawalFee.getMinWithDrawAmountBtc());
-			}
-			if (withdrawalFee.getMinWithDrawAmountEth() != null) {
-				withdrawal.setMinWithDrawAmountEth(withdrawalFee.getMinWithDrawAmountEth());
-			}
-			if (withdrawalFee.getMinWithDrawAmountErc20Token() != null) {
-				withdrawal.setMinWithDrawAmountErc20Token(withdrawalFee.getMinWithDrawAmountErc20Token());
+			if (withdrawalFee.getMinWithDrawAmount() != null) {
+				withdrawal.setMinWithDrawAmount(withdrawalFee.getMinWithDrawAmount());
 			}
 			withdrawal = withdrawalFeeRepo.saveAndFlush(withdrawal);
 		} else {
@@ -57,8 +45,8 @@ public class WithdrawalFeeServiceImpl implements WithdrawalFeeService {
 	}
 
 	@Override
-	public WithdrawalFee getWithdrawalFee() {
-		return withdrawalFeeRepo.findOne(1L);
+	public WithdrawalFee getWithdrawalFee(long currencyId) {
+		return withdrawalFeeRepo.findByCurrencyCurrencyId(currencyId);
 	}
 
 }
