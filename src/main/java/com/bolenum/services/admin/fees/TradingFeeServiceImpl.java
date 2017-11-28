@@ -29,14 +29,8 @@ public class TradingFeeServiceImpl implements TradingFeeService {
 	public TradingFee saveTradingFee(TradingFee tradingFee) {
 		TradingFee trading = tradingFeeRepo.findOne(1L);
 		if (trading != null) {
-			if (tradingFee.getBTC() != null) {
-				trading.setBTC(tradingFee.getBTC());
-			}
-			if (tradingFee.getETH() != null) {
-				trading.setETH(tradingFee.getETH());
-			}
-			if (tradingFee.getErc20Token() != null) {
-				trading.setErc20Token(tradingFee.getErc20Token());
+			if (tradingFee.getFee() != null) {
+				trading.setFee(tradingFee.getFee());
 			}
 			if (tradingFee.getFiat() != null) {
 				trading.setFiat(tradingFee.getFiat());

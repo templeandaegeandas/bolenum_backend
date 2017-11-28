@@ -53,10 +53,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BTCWalletServiceImpl implements BTCWalletService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BTCWalletServiceImpl.class);
-
+	
 	@Autowired
 	private Erc20TokenService erc20TokenService;
-
+	
 	@Autowired
 	private OrdersService ordersService;
 	
@@ -208,34 +208,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param availableBalance
-	 * @param availableBalanceLimitToWithdraw
-	 * @param withdrawAmount
-	 * @return
-	 */
-	@Override
-	public boolean validateAvailableWalletBalance(Double availableBalance, Double withdrawAmount) {
-		if (availableBalance >= withdrawAmount) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * 
-	 * @param availableBalance
-	 * @param withdrawAmount
-	 * @return
-	 */
-	@Override
-	public boolean validateWithdrawAmount(Double availableBalance, Double withdrawAmount) {
-		if (availableBalance >= withdrawAmount) {
-			return true;
-		}
-		return false;
-	}
 	
 	@Override
 	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount)
@@ -307,5 +279,4 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
 	}
-
 }

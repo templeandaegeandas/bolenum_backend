@@ -664,7 +664,6 @@ public class OrdersServiceImpl implements OrdersService {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
 	}
 
-
 	@Override
 	public double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency) {
 		List<Orders> toOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(user,
@@ -732,6 +731,5 @@ public class OrdersServiceImpl implements OrdersService {
 		startDate = (Date) startDate;
 		//return ordersRepository.findByCreatedOnBetween(page,startDate,endDate);
 		return ordersRepository.findByCreatedOnBetween( startDate, endDate,page);
-
 	}
 }

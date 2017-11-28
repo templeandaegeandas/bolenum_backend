@@ -17,62 +17,37 @@ public class TradingFee {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	private Double btc;
-	private Double eth;
-	private Double erc20Token;
+	private Double fee;
 	private Double fiat;
 
+	/**
+	 * @return the id
+	 */
 	public Long getId() {
 		return id;
 	}
 
+	/**
+	 * @param id
+	 *            the id to set
+	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
 	/**
-	 * @return the bTC
+	 * @return the btc
 	 */
-	public Double getBTC() {
-		return btc;
+	public Double getFee() {
+		return fee;
 	}
 
 	/**
-	 * @param bTC
-	 *            the bTC to set
+	 * @param btc
+	 *            the btc to set
 	 */
-	public void setBTC(Double bTC) {
-		btc = bTC;
-	}
-
-	/**
-	 * @return the eTH
-	 */
-	public Double getETH() {
-		return eth;
-	}
-
-	/**
-	 * @param eTH
-	 *            the eTH to set
-	 */
-	public void setETH(Double eTH) {
-		eth = eTH;
-	}
-
-	/**
-	 * @return the erc20Token
-	 */
-	public Double getErc20Token() {
-		return erc20Token;
-	}
-
-	/**
-	 * @param erc20Token
-	 *            the erc20Token to set
-	 */
-	public void setErc20Token(Double erc20Token) {
-		this.erc20Token = erc20Token;
+	public void setFee(Double fee) {
+		this.fee = fee;
 	}
 
 	/**

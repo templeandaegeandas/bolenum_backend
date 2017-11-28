@@ -240,7 +240,6 @@ public class TransactionServiceImpl implements TransactionService {
 						logger.debug("receiver user email id: {}",receiverUser.getEmailId());
 						
 					}
-
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
@@ -346,9 +345,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Async
-	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller)
-			throws InterruptedException, ExecutionException {
-
+	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
 		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
 				+ " have been processed successfully!";
@@ -362,7 +359,7 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("BTC transaction started");
 				txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
 						qtyTraded, null);
-				try {
+				try{
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
 					if (res) {
@@ -374,12 +371,11 @@ public class TransactionServiceImpl implements TransactionService {
 						logger.debug("Message : {}", msg1);
 						return new AsyncResult<Boolean>(res);
 					}
-				} catch (InterruptedException | ExecutionException e) {
+				}catch (InterruptedException | ExecutionException e) {
 					logger.error("BTC transaction failed: {}", e.getMessage());
 					e.printStackTrace();
 					return new AsyncResult<Boolean>(false);
 				}
-
 			case "ETH":
 				logger.debug("ETH transaction started");
 				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null);
@@ -414,20 +410,17 @@ public class TransactionServiceImpl implements TransactionService {
 					notificationService.saveNotification(buyer, seller, msg1);
 					logger.debug("Message : {}", msg);
 					logger.debug("Message : {}", msg1);
+					return new AsyncResult<Boolean>(res);
 				}
-				return new AsyncResult<Boolean>(res);
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error("ERC20TOKEN transaction failed: {}", e.getMessage());
 				e.printStackTrace();
 				return new AsyncResult<Boolean>(false);
 			}
-
 		default:
 			break;
 		}
-
 		return new AsyncResult<Boolean>(false);
-
 	}
 
 	/**
