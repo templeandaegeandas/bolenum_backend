@@ -11,6 +11,7 @@ import javax.persistence.Id;
  * @Author Himanshu Kumar
  * @Date 01-Nov-2017
  */
+
 @Entity
 public class TransactionFee {
 

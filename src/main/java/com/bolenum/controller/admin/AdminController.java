@@ -124,11 +124,13 @@ public class AdminController {
 
 	/**
 	 * 
+	 * 
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTransactionFees() {
 
+		
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.transaction.fees.found.success"), null);
 	}

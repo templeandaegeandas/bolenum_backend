@@ -38,6 +38,7 @@ public class UrlConstant {
 	public static final String GET_COUNTRIES_LIST = "countries/list";
 	public static final String GET_STATE_BY_COUNTRY_ID = "states";
 	
+	
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";
 	public static final String GET_USER_BY_ID = "user/{userId}";
@@ -118,6 +119,11 @@ public class UrlConstant {
 	public static final String WS_LISTNER_ORDER_SELLER_CONFIRM = "/listner/order/confirm";
 	public static final String WS_LISTNER_WITHDRAW = "/listner/withdraw";
 
+	
+	/******************************* Dispute API *****************************/
+	public static final String UPLOAD_PROOF_DOCUMENT_FOR_DISPUTE="document/proof/dispute";
+	
+	public static final String RAISE_DISPUTE="raise/dispute";
 	
 }
 	

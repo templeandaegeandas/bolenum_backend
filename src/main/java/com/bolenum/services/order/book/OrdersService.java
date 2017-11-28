@@ -60,16 +60,17 @@ public interface OrdersService {
 	double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency);
 
 	Long countActiveOpenOrder();
-	
+
 	Long getTotalCountOfNewerBuyerAndSeller(OrderType orderType);
 
-    Long countOrdersByOrderTypeAndUser(User user,OrderType orderType);
-	
-    public Orders getOrderDetails(long orderId);
-    
+	Long countOrdersByOrderTypeAndUser(User user, OrderType orderType);
+
+	public Orders getOrderDetails(long orderId);
+
 	double getPlacedOrderVolume(User user);
 
 	Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy);
 
 	public boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList);
+
 }

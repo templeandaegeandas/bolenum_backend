@@ -43,8 +43,8 @@ public class FileUploadServiceImpl implements FileUploadService {
 	private static final Logger logger = LoggerFactory.getLogger(FileUploadServiceImpl.class);
 
 	@Override
-	public String uploadFile(MultipartFile multipartFile, String storageLocation, User user, DocumentType documentType, String[] validExtentions,
-			long maxSize) throws IOException, PersistenceException, MaxSizeExceedException {
+	public String uploadFile(MultipartFile multipartFile, String storageLocation, User user, DocumentType documentType,
+			String[] validExtentions, long maxSize) throws IOException, PersistenceException, MaxSizeExceedException {
 		if (multipartFile.getSize() > maxSize) {
 			throw new MaxSizeExceedException(localeService.getMessage("max.file.size.exceeds"));
 		}
@@ -54,42 +54,47 @@ public class FileUploadServiceImpl implements FileUploadService {
 		if (!Arrays.asList(validExtentions).contains(extension.toLowerCase())) {
 			throw new PersistenceException(localeService.getMessage("valid.image.extention.error"));
 		}
-		String updatedFileName = documentType + "_" + user.getUserId() + "." + extension;
+
+		String updatedFileName = "";
+		if (documentType == null) {
+			updatedFileName = user.getUserId() + "_dispute" + "." + extension;
+		} else {
+			updatedFileName = documentType + "_" + user.getUserId() + "." + extension;
+		}
 		InputStream inputStream = multipartFile.getInputStream();
 		byte[] buf = new byte[1024];
 		File file = new File(storageLocation + updatedFileName);
 		FileOutputStream fileOutputStream = new FileOutputStream(file);
-		int numRead=0;
+		int numRead = 0;
 		while ((numRead = inputStream.read(buf)) >= 0) {
-				fileOutputStream.write(buf, 0, numRead);
+			fileOutputStream.write(buf, 0, numRead);
 		}
 		inputStream.close();
 		fileOutputStream.close();
-		logger.debug("user uploaded file name: {}",String.valueOf(file));
-		//using PosixFilePermission to set file permissions 777
-        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-        //add owners permission
-        perms.add(PosixFilePermission.OWNER_READ);
-        perms.add(PosixFilePermission.OWNER_WRITE);
-        //perms.add(PosixFilePermission.OWNER_EXECUTE);
-        //add group permissions
-        perms.add(PosixFilePermission.GROUP_READ);
-        perms.add(PosixFilePermission.GROUP_WRITE);
-        //perms.add(PosixFilePermission.GROUP_EXECUTE);
-        //add others permissions
-        perms.add(PosixFilePermission.OTHERS_READ);
-        //perms.add(PosixFilePermission.OTHERS_WRITE);
-        //perms.add(PosixFilePermission.OTHERS_EXECUTE);
-        
-        Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
-        logger.info("kyc doc uploaded success");
+		logger.debug("user uploaded file name: {}", String.valueOf(file));
+		// using PosixFilePermission to set file permissions 777
+		Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+		// add owners permission
+		perms.add(PosixFilePermission.OWNER_READ);
+		perms.add(PosixFilePermission.OWNER_WRITE);
+		// perms.add(PosixFilePermission.OWNER_EXECUTE);
+		// add group permissions
+		perms.add(PosixFilePermission.GROUP_READ);
+		perms.add(PosixFilePermission.GROUP_WRITE);
+		// perms.add(PosixFilePermission.GROUP_EXECUTE);
+		// add others permissions
+		perms.add(PosixFilePermission.OTHERS_READ);
+		// perms.add(PosixFilePermission.OTHERS_WRITE);
+		// perms.add(PosixFilePermission.OTHERS_EXECUTE);
+
+		Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
 		return updatedFileName;
 	}
-	
+
 	@Override
 	public String updateUserImage(String imageBase64, String storageLocation, User user, String[] validExtentions,
 			long maxSize) throws IOException, MaxSizeExceedException, PersistenceException {
-		logger.debug("Profile pic size: {}",imageBase64.length());
+		logger.debug("Profile pic size: {}", imageBase64.length());
 		logger.debug("Allowed maximum size: {}", maxSize);
 
 		if (imageBase64.length() > maxSize) {
@@ -108,24 +113,24 @@ public class FileUploadServiceImpl implements FileUploadService {
 			BufferedImage imageFromConvert = ImageIO.read(in);
 			File file = new File(storageLocation + updatedFileName);
 			ImageIO.write(imageFromConvert, extension, file);
-			logger.debug("user uploaded file name: {}",String.valueOf(file));
-			//using PosixFilePermission to set file permissions 777
-	        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-	        //add owners permission
-	        perms.add(PosixFilePermission.OWNER_READ);
-	        perms.add(PosixFilePermission.OWNER_WRITE);
-	        //perms.add(PosixFilePermission.OWNER_EXECUTE);
-	        //add group permissions
-	        perms.add(PosixFilePermission.GROUP_READ);
-	        perms.add(PosixFilePermission.GROUP_WRITE);
-	        //perms.add(PosixFilePermission.GROUP_EXECUTE);
-	        //add others permissions
-	        perms.add(PosixFilePermission.OTHERS_READ);
-	        //perms.add(PosixFilePermission.OTHERS_WRITE);
-	        //perms.add(PosixFilePermission.OTHERS_EXECUTE);
-	        
-	        Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
-	        logger.info("profile pic uploaded success");
+			logger.debug("user uploaded file name: {}", String.valueOf(file));
+			// using PosixFilePermission to set file permissions 777
+			Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+			// add owners permission
+			perms.add(PosixFilePermission.OWNER_READ);
+			perms.add(PosixFilePermission.OWNER_WRITE);
+			// perms.add(PosixFilePermission.OWNER_EXECUTE);
+			// add group permissions
+			perms.add(PosixFilePermission.GROUP_READ);
+			perms.add(PosixFilePermission.GROUP_WRITE);
+			// perms.add(PosixFilePermission.GROUP_EXECUTE);
+			// add others permissions
+			perms.add(PosixFilePermission.OTHERS_READ);
+			// perms.add(PosixFilePermission.OTHERS_WRITE);
+			// perms.add(PosixFilePermission.OTHERS_EXECUTE);
+
+			Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
+			logger.info("profile pic uploaded success");
 			return updatedFileName;
 		}
 		return null;

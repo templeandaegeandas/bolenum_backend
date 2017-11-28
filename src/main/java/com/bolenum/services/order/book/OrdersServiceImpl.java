@@ -32,12 +32,14 @@ import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
 
+
 /**
  * 
  * @author Vishal Kumar
  * @date 06-Oct-2017
  * @modified Chandan Kumar Singh
  */
+
 @Service
 public class OrdersServiceImpl implements OrdersService {
 
@@ -163,8 +165,8 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @description to check user requested order and existing order
 	 * @param requested
 	 *            order, list of existing orders
-	 * @return #true if user requested order is matched with own existing user
-	 *         else #false
+	 * @return #true if user requested order is matched with own existing user else
+	 *         #false
 	 */
 	@Override
 	public boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
@@ -197,8 +199,7 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			/**
-			 * checking user self order, return false if self order else
-			 * proceed.
+			 * checking user self order, return false if self order else proceed.
 			 */
 
 			if (isUsersSelfOrder(orders, sellOrderList)) {
@@ -224,9 +225,8 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, pair);
 			/**
-			 * checking user self order, return false if self order else
-			 * proceed. checking user self order, return false if self order
-			 * else proceed.
+			 * checking user self order, return false if self order else proceed. checking
+			 * user self order, return false if self order else proceed.
 			 */
 			if (isUsersSelfOrder(orders, buyOrderList)) {
 				return processed;
@@ -251,8 +251,8 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		logger.debug("MarketOrder: Order list saving started");
 		/**
-		 * if any exception occurs then clear list, otherwise double order will
-		 * be placed
+		 * if any exception occurs then clear list, otherwise double order will be
+		 * placed
 		 */
 		try {
 			orderAsyncServices.saveOrder(ordersList);
@@ -287,16 +287,15 @@ public class OrdersServiceImpl implements OrdersService {
 					.findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
-			 * checking user self order, return false if self order else
-			 * proceed.
+			 * checking user self order, return false if self order else proceed.
 			 */
 
 			if (isUsersSelfOrder(orders, sellOrderList)) {
 				return processed;
 			}
 			/**
-			 * fetch one best seller's price from list of sellers, order by
-			 * price in ASC then process the order
+			 * fetch one best seller's price from list of sellers, order by price in ASC
+			 * then process the order
 			 */
 			while (sellOrderList.size() > 0 && (remainingVolume > 0) && (price >= getBestBuy(sellOrderList))) {
 				logger.debug("inner buy while loop for buyers and remaining volume: {}", remainingVolume);
@@ -316,23 +315,21 @@ public class OrdersServiceImpl implements OrdersService {
 			processed = true;
 		} else {
 			/**
-			 * fetching the list of BUYERS whose buy price is greater than sell
-			 * price
+			 * fetching the list of BUYERS whose buy price is greater than sell price
 			 */
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
-			 * checking user self order, return false if self order else
-			 * proceed.
+			 * checking user self order, return false if self order else proceed.
 			 */
 			if (isUsersSelfOrder(orders, buyOrderList)) {
 				return processed;
 			}
 
 			/**
-			 * fetch one best buyer's price from list of buyers, order by price
-			 * in desc then process the order
+			 * fetch one best buyer's price from list of buyers, order by price in desc then
+			 * process the order
 			 */
 			while (buyOrderList.size() > 0 && (remainingVolume > 0) && (price <= buyOrderList.get(0).getPrice())) {
 				logger.debug("inner sell while loop for seller and remaining volume: {}", remainingVolume);
@@ -512,9 +509,9 @@ public class OrdersServiceImpl implements OrdersService {
 	public String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded) {
 		String minBalance = null;
 		/**
-		 * if order type is BUY then for Market order, user should have total
-		 * market price, for Limit order user should have volume (volume *
-		 * price), price limit given by user
+		 * if order type is BUY then for Market order, user should have total market
+		 * price, for Limit order user should have volume (volume * price), price limit
+		 * given by user
 		 */
 		if (OrderStandard.LIMIT.equals(orders.getOrderStandard())) {
 			logger.debug("limit order buy on price: {}, {} and quantity traded: {}, {} ", orders.getPrice(),
@@ -529,17 +526,16 @@ public class OrdersServiceImpl implements OrdersService {
 			// MarketPrice marketPrice =
 			// marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
 			/**
-			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
-			 * BTC, this will update according to order selling book
+			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560 BTC, this will
+			 * update according to order selling book
 			 */
 			double buyingCurrencyValue = currencyPair.getPairedCurrency().get(0).getPriceBTC();
 			logger.debug("order value : {}, buyingCurrencyValue: {}", qtyTraded, buyingCurrencyValue);
 			if (buyingCurrencyValue > 0) {
 				/**
-				 * user must have this balance to give market order, Example
-				 * user want to BUY 3 BTC on market price, at this moment 1 ETH
-				 * = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC, then user
-				 * must have 51.852876106 ETH to buy 3 BTC
+				 * user must have this balance to give market order, Example user want to BUY 3
+				 * BTC on market price, at this moment 1 ETH = 0.0578560 BTC then for 3 BTC
+				 * (3/0.0578560) BTC, then user must have 51.852876106 ETH to buy 3 BTC
 				 */
 				minBalance = String.valueOf(qtyTraded / buyingCurrencyValue);
 			}
@@ -566,8 +562,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the lowest selling price, thats why it is best buy
-	 * for buyers
+	 * this will calculate the lowest selling price, thats why it is best buy for
+	 * buyers
 	 */
 	@Override
 	public Double getBestBuy(List<Orders> sellOrderList) {
@@ -581,8 +577,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the highest selling price, thats why it is worst buy
-	 * for buyers
+	 * this will calculate the highest selling price, thats why it is worst buy for
+	 * buyers
 	 */
 	@Override
 	public Double getWorstBuy(List<Orders> sellOrderList) {
@@ -596,8 +592,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the highest buying price, thats why it is best sell
-	 * for seller
+	 * this will calculate the highest buying price, thats why it is best sell for
+	 * seller
 	 */
 	@Override
 	public Double getBestSell(List<Orders> buyOrderList) {
@@ -612,8 +608,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the lowest buying price, thats why it is worst sell
-	 * for seller
+	 * this will calculate the lowest buying price, thats why it is worst sell for
+	 * seller
 	 */
 	@Override
 	public Double getWorstSell(List<Orders> buyOrderList) {
@@ -663,7 +659,6 @@ public class OrdersServiceImpl implements OrdersService {
 	public List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus) {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
 	}
-
 
 	@Override
 	public double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency) {
@@ -722,7 +717,7 @@ public class OrdersServiceImpl implements OrdersService {
 	 */
 	@Override
 	public Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy) {
-		Pageable page  = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
+		Pageable page = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
 
 		Date endDate = new Date();
 		Calendar c = Calendar.getInstance();
@@ -730,8 +725,10 @@ public class OrdersServiceImpl implements OrdersService {
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
 		startDate = (Date) startDate;
-		//return ordersRepository.findByCreatedOnBetween(page,startDate,endDate);
-		return ordersRepository.findByCreatedOnBetween( startDate, endDate,page);
+		// return ordersRepository.findByCreatedOnBetween(page,startDate,endDate);
+		return ordersRepository.findByCreatedOnBetween(startDate, endDate, page);
 
 	}
 }
+
+	

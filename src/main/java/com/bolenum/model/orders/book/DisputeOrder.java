@@ -2,7 +2,14 @@ package com.bolenum.model.orders.book;
 
 import java.util.Date;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.bolenum.enums.DisputeStatus;
 import com.bolenum.model.User;
@@ -13,8 +20,13 @@ import com.bolenum.model.User;
  *
  */
 
+@Entity
 public class DisputeOrder {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+	
 	@ManyToOne
 	private User disputeRaiser;
 
@@ -28,7 +40,27 @@ public class DisputeOrder {
 
 	private String comment;
 
+	@CreationTimestamp
 	private Date createdOn;
+	
+	@UpdateTimestamp
+	private Date updatedOn;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Date getUpdatedOn() {
+		return updatedOn;
+	}
+
+	public void setUpdatedOn(Date updatedOn) {
+		this.updatedOn = updatedOn;
+	}
 
 	public String getFirstdocumenForProofToDispute() {
 		return firstdocumenForProofToDispute;
