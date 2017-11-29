@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -52,14 +53,17 @@ import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.wallet.BTCWalletService;
@@ -103,6 +107,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
+
+	@Autowired
+	private WithdrawalFeeService withdrawalFeeService;
 
 	/**
 	 * to perform in app transaction for ethereum
@@ -191,6 +198,18 @@ public class TransactionServiceImpl implements TransactionService {
 	@Async
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
 			TransactionStatus transactionStatus) {
+		Currency currency = currencyService.findByCurrencyAbbreviation("BTC");
+		WithdrawalFee fee = null;
+		double txFeePerKb = 0.001;
+		if (currency != null) {
+			fee = withdrawalFeeService.getWithdrawalFee(currency.getCurrencyId());
+		}
+		if (fee != null) {
+			txFeePerKb = fee.getFee();
+		}
+		DecimalFormat df = new DecimalFormat("0");
+		df.setMaximumFractionDigits(8);
+		logger.debug("perform btc trnsaction with fee/KB: {}", df.format(txFeePerKb));
 		RestTemplate restTemplate = new RestTemplate();
 		String url = BTCUrlConstant.CREATE_TX;
 		HttpHeaders headers = new HttpHeaders();
@@ -200,6 +219,7 @@ public class TransactionServiceImpl implements TransactionService {
 			request.put("walletId", fromUser.getBtcWalletUuid());
 			request.put("transactionTradeAmount", String.valueOf(amount));
 			request.put("receiverAddress", toAddress);
+			request.put("transactionFee", txFeePerKb);
 		} catch (JSONException e) {
 			logger.error("json parse error: {}", e.getMessage());
 			e.printStackTrace();
@@ -209,36 +229,39 @@ public class TransactionServiceImpl implements TransactionService {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
 				JSONObject responseJson = new JSONObject(txRes.getBody());
-				
+
 				logger.debug("json object of response: {}", responseJson);
 				JSONObject data = (JSONObject) responseJson.get("data");
 				String txHash = (String) data.get("transactionHash");
 				logger.debug("transaction hash: {}", txHash);
+				String txFee = (String) data.get("transactionFee");
+				logger.debug("transaction fee: {}", txFee);
 				Transaction transaction = transactionRepo.findByTxHash(txHash);
 				if (transaction == null) {
 					transaction = new Transaction();
+					transaction.setTxFee((txFee != null) ? Double.parseDouble(txFee) : 0);
 					logger.debug("transaction hash inside if condition : {}", txHash);
 					transaction.setTxHash(txHash);
 					logger.debug(fromUser.getBtcWalletAddress());
 					transaction.setFromAddress(fromUser.getBtcWalletAddress());
 					transaction.setToAddress(toAddress);
-					logger.debug("toAddress : {}",toAddress);
+					logger.debug("toAddress : {}", toAddress);
 					transaction.setTxAmount(amount);
-					logger.debug("amount to be transferred : {}",amount);
+					logger.debug("amount to be transferred : {}", amount);
 					transaction.setTransactionType(TransactionType.OUTGOING);
-					logger.debug("TransactionType = : {}",TransactionType.OUTGOING);
+					logger.debug("TransactionType = : {}", TransactionType.OUTGOING);
 					transaction.setFromUser(fromUser);
-					logger.debug("amount transferred by user : {}",fromUser.getEmailId());
+					logger.debug("amount transferred by user : {}", fromUser.getEmailId());
 					transaction.setTransactionStatus(transactionStatus);
-					logger.debug("transactionStatus = : {}",transactionStatus);
+					logger.debug("transactionStatus = : {}", transactionStatus);
 					transaction.setCurrencyName("BTC");
-					logger.debug("Name of Currency to be transferred: {}",transaction.getCurrencyName());
+					logger.debug("Name of Currency to be transferred: {}", transaction.getCurrencyName());
 					User receiverUser = userRepository.findByBtcWalletAddress(toAddress);
 					if (receiverUser != null) {
 						transaction.setToUser(receiverUser);
 
-						logger.debug("receiver user email id: {}",receiverUser.getEmailId());
-						
+						logger.debug("receiver user email id: {}", receiverUser.getEmailId());
+
 					}
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
@@ -247,6 +270,8 @@ public class TransactionServiceImpl implements TransactionService {
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 						return new AsyncResult<Boolean>(true);
 					}
+				} else {
+					logger.debug(" transaction exist hash: {}", transaction.getTxHash());
 				}
 			}
 		} catch (JSONException e) {
@@ -302,13 +327,13 @@ public class TransactionServiceImpl implements TransactionService {
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
-					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);;
+					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					;
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
-			}
-			else {
-				logger.debug("transaction else part already saved: {}",transaction.getTxHash());
+			} else {
+				logger.debug("transaction else part already saved: {}", transaction.getTxHash());
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
@@ -329,7 +354,8 @@ public class TransactionServiceImpl implements TransactionService {
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
-					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);;
+					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					;
 					logger.debug("transaction else part saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
@@ -359,7 +385,7 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("BTC transaction started");
 				txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
 						qtyTraded, null);
-				try{
+				try {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
 					if (res) {
@@ -371,7 +397,7 @@ public class TransactionServiceImpl implements TransactionService {
 						logger.debug("Message : {}", msg1);
 						return new AsyncResult<Boolean>(res);
 					}
-				}catch (InterruptedException | ExecutionException e) {
+				} catch (InterruptedException | ExecutionException e) {
 					logger.error("BTC transaction failed: {}", e.getMessage());
 					e.printStackTrace();
 					return new AsyncResult<Boolean>(false);
