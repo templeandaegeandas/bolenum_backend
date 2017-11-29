@@ -229,39 +229,28 @@ public class TransactionServiceImpl implements TransactionService {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
 				JSONObject responseJson = new JSONObject(txRes.getBody());
-
 				logger.debug("json object of response: {}", responseJson);
 				JSONObject data = (JSONObject) responseJson.get("data");
 				String txHash = (String) data.get("transactionHash");
 				logger.debug("transaction hash: {}", txHash);
-				String txFee = (String) data.get("transactionFee");
+				String txFee = String.valueOf(data.get("transactionFee"));
 				logger.debug("transaction fee: {}", txFee);
 				Transaction transaction = transactionRepo.findByTxHash(txHash);
 				if (transaction == null) {
 					transaction = new Transaction();
 					transaction.setTxFee((txFee != null) ? Double.parseDouble(txFee) : 0);
-					logger.debug("transaction hash inside if condition : {}", txHash);
 					transaction.setTxHash(txHash);
-					logger.debug(fromUser.getBtcWalletAddress());
 					transaction.setFromAddress(fromUser.getBtcWalletAddress());
 					transaction.setToAddress(toAddress);
-					logger.debug("toAddress : {}", toAddress);
 					transaction.setTxAmount(amount);
-					logger.debug("amount to be transferred : {}", amount);
 					transaction.setTransactionType(TransactionType.OUTGOING);
-					logger.debug("TransactionType = : {}", TransactionType.OUTGOING);
 					transaction.setFromUser(fromUser);
-					logger.debug("amount transferred by user : {}", fromUser.getEmailId());
 					transaction.setTransactionStatus(transactionStatus);
-					logger.debug("transactionStatus = : {}", transactionStatus);
 					transaction.setCurrencyName("BTC");
-					logger.debug("Name of Currency to be transferred: {}", transaction.getCurrencyName());
 					User receiverUser = userRepository.findByBtcWalletAddress(toAddress);
 					if (receiverUser != null) {
 						transaction.setToUser(receiverUser);
-
 						logger.debug("receiver user email id: {}", receiverUser.getEmailId());
-
 					}
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
