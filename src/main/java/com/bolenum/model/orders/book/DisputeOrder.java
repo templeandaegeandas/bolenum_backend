@@ -18,6 +18,8 @@ import com.bolenum.model.User;
  * 
  * @author Himanshu Kumar
  *
+ * used to raise dispute by buyer user when buyer does not get currency 
+ * against his order after pay for that 
  */
 
 @Entity

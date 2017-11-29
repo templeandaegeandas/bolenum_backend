@@ -14,10 +14,12 @@ public interface DisputeService {
 	DisputeOrder uploadProofDocument(MultipartFile file, Long disputeId, Long userId)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException;
 
-	Boolean checkEligibilityToDispute(Long orderId);
+	Boolean checkExpiryToDispute(Long orderId);
 
 	DisputeOrder raiseDispute(Long orderId, Long transactionid, String comment);
 
 	Boolean isAlreadyDisputed(Long orderId , Long transactionId);
+
+	Boolean checkEligibilityToDispute(Long orderId);
 
 }

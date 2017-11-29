@@ -54,20 +54,26 @@ public class DisputeController {
 	public ResponseEntity<Object> requestDisputeOrder(@RequestParam Long orderId, @RequestParam Long transactionId,
 			@RequestParam String comment) {
 
-		Boolean isEligible = disputeService.checkEligibilityToDispute(orderId);
-		if (isEligible) {
+		Boolean isExpired = disputeService.checkExpiryToDispute(orderId);
 
+		Boolean isEligible = disputeService.checkEligibilityToDispute(orderId);
+
+		if (!isEligible) {
+			return ResponseHandler.response(HttpStatus.CONFLICT, true, localeService.getMessage("dispute.not.eligible"),
+					null);
+		}
+
+		if (!isExpired) {
 			Boolean isExistDisputeOrder = disputeService.isAlreadyDisputed(orderId, transactionId);
 			if (!isExistDisputeOrder) {
-				
-				return ResponseHandler.response(HttpStatus.CONFLICT, true, localeService.getMessage("dispute.already.raised"),
-						null);
 
+				return ResponseHandler.response(HttpStatus.CONFLICT, true,
+						localeService.getMessage("dispute.already.raised"), null);
 			}
 			DisputeOrder response = disputeService.raiseDispute(orderId, transactionId, comment);
 
 			if (response != null) {
-				return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("dispute.raised.succes"),
+				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
 			}
 		} else {

@@ -69,16 +69,16 @@ public class DisputeServiceImpl implements DisputeService {
 	}
 
 	@Override
-	public Boolean checkEligibilityToDispute(Long orderId) {
+	public Boolean checkExpiryToDispute(Long orderId) {
 		Orders order = ordersRepository.findOne(orderId);
 
 		Date previous = order.getCreatedOn();
 		Date now = new Date();
 		if (now.getTime() - previous.getTime() <= 15 * 60 * 1000) {
-			return true;
+			return false;
 
 		}
-		return false;
+		return true;
 	}
 
 	@Override
@@ -101,9 +101,17 @@ public class DisputeServiceImpl implements DisputeService {
 
 	@Override
 	public Boolean isAlreadyDisputed(Long orderId, Long transactionId) {
-
 		DisputeOrder disputeOrder = disputeOrderRepo.findByOrderIdAndTransactionId(orderId, transactionId);
 		if (disputeOrder == null) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public Boolean checkEligibilityToDispute(Long orderId) {
+		Orders order = ordersRepository.findOne(orderId);
+		if (order.getOrderType().equals(OrderType.BUY)) {
 			return true;
 		}
 		return false;
