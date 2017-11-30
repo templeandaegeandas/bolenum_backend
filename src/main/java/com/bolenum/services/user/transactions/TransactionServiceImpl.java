@@ -360,12 +360,17 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Async
-	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller) {
+	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
+			boolean isFee) {
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
-		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
-				+ " have been processed successfully!";
-		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying " + qtyTraded + " " + currencyAbr
-				+ " have been processed successfully!";
+		String msg = "", msg1 = "";
+		logger.debug("perform transaction for admin fee: {}", isFee);
+		if (!isFee) {
+			msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
+					+ " have been processed successfully!";
+			msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying " + qtyTraded + " " + currencyAbr
+					+ " have been processed successfully!";
+		}
 		Future<Boolean> txStatus;
 		switch (currencyType) {
 		case "CRYPTO":
@@ -377,7 +382,7 @@ public class TransactionServiceImpl implements TransactionService {
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
-					if (res) {
+					if (res && !isFee) {
 						notificationService.sendNotification(seller, msg);
 						notificationService.saveNotification(buyer, seller, msg);
 						notificationService.sendNotification(buyer, msg1);
@@ -397,13 +402,15 @@ public class TransactionServiceImpl implements TransactionService {
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is ETH transaction successed: {}", res);
-					notificationService.sendNotification(seller, msg);
-					notificationService.saveNotification(buyer, seller, msg);
-					notificationService.sendNotification(buyer, msg1);
-					notificationService.saveNotification(buyer, seller, msg1);
-					logger.debug("Message : {}", msg);
-					logger.debug("Message : {}", msg1);
-					return new AsyncResult<Boolean>(res);
+					if (res && !isFee) {
+						notificationService.sendNotification(seller, msg);
+						notificationService.saveNotification(buyer, seller, msg);
+						notificationService.sendNotification(buyer, msg1);
+						notificationService.saveNotification(buyer, seller, msg1);
+						logger.debug("Message : {}", msg);
+						logger.debug("Message : {}", msg1);
+						return new AsyncResult<Boolean>(res);
+					}
 				} catch (InterruptedException | ExecutionException e) {
 					logger.error("ETH transaction failed: {}", e.getMessage());
 					e.printStackTrace();
@@ -418,7 +425,7 @@ public class TransactionServiceImpl implements TransactionService {
 			try {
 				boolean res = txStatus.get();
 				logger.debug("is ERC20TOKEN transaction successed: {}", res);
-				if (res) {
+				if (res && !isFee) {
 					notificationService.sendNotification(seller, msg);
 					notificationService.saveNotification(buyer, seller, msg);
 					notificationService.sendNotification(buyer, msg1);

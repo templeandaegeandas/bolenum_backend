@@ -48,4 +48,13 @@ public class TradingFeeServiceImpl implements TradingFeeService {
 		return tradingFeeRepo.findOne(1L);
 	}
 
+	@Override
+	public double calculateFee(double amount) {
+		double fee = 0.15;
+		if (tradingFeeRepo.findOne(1L) != null) {
+			fee = tradingFeeRepo.findOne(1L).getFee();
+
+		}
+		return (amount * fee) / 100;
+	}
 }

@@ -37,15 +37,20 @@ public class Trade {
 	@Enumerated(EnumType.STRING)
 	private OrderStandard orderStandard;
 	private Date createdOn = new Date();
-
-	public Trade(Double price, Double volume, User buyer, User seller, CurrencyPair pair, 
-			OrderStandard orderStandard) {
+	private Double buyerTradeFee;
+	private Double sellerTradeFee;
+	private Boolean isFeeDeducted;
+	
+	public Trade(Double price, Double volume, User buyer, User seller, CurrencyPair pair, OrderStandard orderStandard,
+			Double buyerTradeFee, Double sellerTradeFee) {
 		this.price = price;
 		this.volume = volume;
 		this.buyer = buyer;
 		this.seller = seller;
 		this.pair = pair;
 		this.orderStandard = orderStandard;
+		this.buyerTradeFee = buyerTradeFee;
+		this.sellerTradeFee = sellerTradeFee;
 	}
 
 	public Trade() {
@@ -115,4 +120,48 @@ public class Trade {
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
 	}
+
+	/**
+	 * @return the buyerTradeFee
+	 */
+	public Double getBuyerTradeFee() {
+		return buyerTradeFee;
+	}
+
+	/**
+	 * @param buyerTradeFee the buyerTradeFee to set
+	 */
+	public void setBuyerTradeFee(Double buyerTradeFee) {
+		this.buyerTradeFee = buyerTradeFee;
+	}
+
+	/**
+	 * @return the sellerTradeFee
+	 */
+	public Double getSellerTradeFee() {
+		return sellerTradeFee;
+	}
+
+	/**
+	 * @param sellerTradeFee the sellerTradeFee to set
+	 */
+	public void setSellerTradeFee(Double sellerTradeFee) {
+		this.sellerTradeFee = sellerTradeFee;
+	}
+
+	/**
+	 * @return the isFeeDeducted
+	 */
+	public Boolean getIsFeeDeducted() {
+		return isFeeDeducted;
+	}
+
+	/**
+	 * @param isFeeDeducted the isFeeDeducted to set
+	 */
+	public void setIsFeeDeducted(Boolean isFeeDeducted) {
+		this.isFeeDeducted = isFeeDeducted;
+	}
+	
+	
 }

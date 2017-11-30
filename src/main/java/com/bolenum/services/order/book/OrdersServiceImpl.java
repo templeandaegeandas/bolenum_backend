@@ -28,6 +28,8 @@ import com.bolenum.model.orders.book.PartialTrade;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.services.admin.fees.TradingFeeService;
+import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
@@ -50,9 +52,8 @@ public class OrdersServiceImpl implements OrdersService {
 	@Autowired
 	private CurrencyPairService currencyPairService;
 
-	/*
-	 * @Autowired private MarketPriceService marketPriceService;
-	 */
+	@Autowired
+	private TradingFeeService tradingFeeService;
 
 	@Autowired
 	private WalletService walletService;
@@ -68,6 +69,9 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
+
+	@Autowired
+	private UserService userService;
 
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
@@ -375,6 +379,7 @@ public class OrdersServiceImpl implements OrdersService {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
 		User buyer, seller;
+		double buyerTradeFee, sellerTradeFee;
 		logger.debug("process order list remainingVolume: {}", remainingVolume);
 		// process till order size and remaining volume is > 0
 		while ((ordersList.size() > 0) && (remainingVolume > 0)) {
@@ -423,21 +428,29 @@ public class OrdersServiceImpl implements OrdersService {
 				buyer = orders.getUser();
 				// seller is matched order's user
 				seller = matchedOrder.getUser();
+				buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * orders.getPrice());
+				sellerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
+
 			} else {
 				// order type is SELL
 				// buyer is matched order's user
 				buyer = matchedOrder.getUser();
 				// seller is coming order's user
 				seller = orders.getUser();
+				buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
+				sellerTradeFee = tradingFeeService.calculateFee(qtyTraded * orders.getPrice());
 			}
 			// buyer and seller must be different user
 			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
 			if (buyer.getUserId() != seller.getUserId()) {
 				// saving the processed BUY/SELL order in trade
-				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT);
+				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT,
+						buyerTradeFee, sellerTradeFee);
 				tradeList.add(trade);
 				logger.debug("trade added to tradelist");
-				processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume);
+				logger.debug("buyer trade fee: {} and seller trade fee: {}", buyerTradeFee, sellerTradeFee);
+				processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume, buyerTradeFee,
+						sellerTradeFee);
 			}
 		}
 		logger.debug("tradeList saving started");
@@ -454,7 +467,8 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @throws InterruptedException
 	 */
 	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller,
-			double remainingVolume) throws InterruptedException, ExecutionException {
+			double remainingVolume, double buyerTradeFee, double sellerTradeFee)
+			throws InterruptedException, ExecutionException {
 		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
@@ -492,13 +506,17 @@ public class OrdersServiceImpl implements OrdersService {
 
 		if (qtr != null && Double.valueOf(qtr) > 0) {
 			// process tx buyers and sellers
-			transactionService.performTransaction(tickters[0], qtyTraded, buyer, seller);
+			transactionService.performTransaction(tickters[0], qtyTraded, buyer, seller, false);
 			sendNotification(seller, msg1);
 			notificationService.saveNotification(seller, buyer, msg1);
 			// process tx sellers and buyers
-			transactionService.performTransaction(tickters[1], Double.valueOf(qtr), seller, buyer);
+			transactionService.performTransaction(tickters[1], Double.valueOf(qtr), seller, buyer, false);
 			sendNotification(buyer, msg);
 			notificationService.saveNotification(buyer, seller, msg);
+			// fee deduction for admin
+			User admin = userService.findByEmail("admin@bolenum.com");
+			transactionService.performTransaction(tickters[0], sellerTradeFee, admin, seller, true);
+			transactionService.performTransaction(tickters[1], buyerTradeFee, buyer, admin, true);
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
 		}
@@ -721,7 +739,7 @@ public class OrdersServiceImpl implements OrdersService {
 	 */
 	@Override
 	public Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy) {
-		Pageable page  = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
+		Pageable page = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
 
 		Date endDate = new Date();
 		Calendar c = Calendar.getInstance();
@@ -729,7 +747,8 @@ public class OrdersServiceImpl implements OrdersService {
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
 		startDate = (Date) startDate;
-		//return ordersRepository.findByCreatedOnBetween(page,startDate,endDate);
-		return ordersRepository.findByCreatedOnBetween( startDate, endDate,page);
+		// return
+		// ordersRepository.findByCreatedOnBetween(page,startDate,endDate);
+		return ordersRepository.findByCreatedOnBetween(startDate, endDate, page);
 	}
 }
