@@ -18,8 +18,8 @@ import com.bolenum.model.User;
  * 
  * @author Himanshu Kumar
  *
- * used to raise dispute by buyer user when buyer does not get currency 
- * against his order after pay for that 
+ *         used to raise dispute by buyer user when buyer does not get currency
+ *         against his order after pay for that
  */
 
 @Entity
@@ -28,23 +28,30 @@ public class DisputeOrder {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
 	@ManyToOne
 	private User disputeRaiser;
+
+	@ManyToOne
+	private User disputeRaisedAgainst;
 
 	private Long orderId;
 
 	private Long transactionId;
 
-	private String firstdocumenForProofToDispute;
+	private String firstDocumenForProofToDispute;
 
-	private String seconddocumenForProofToDispute;
+	private String secondDocumenForProofToDispute;
+
+	private Date deletedOn;
+
+	private DisputeStatus disputeStatus;
 
 	private String comment;
 
 	@CreationTimestamp
 	private Date createdOn;
-	
+
 	@UpdateTimestamp
 	private Date updatedOn;
 
@@ -56,44 +63,20 @@ public class DisputeOrder {
 		this.id = id;
 	}
 
-	public Date getUpdatedOn() {
-		return updatedOn;
-	}
-
-	public void setUpdatedOn(Date updatedOn) {
-		this.updatedOn = updatedOn;
-	}
-
-	public String getFirstdocumenForProofToDispute() {
-		return firstdocumenForProofToDispute;
-	}
-
-	public void setFirstdocumenForProofToDispute(String firstdocumenForProofToDispute) {
-		this.firstdocumenForProofToDispute = firstdocumenForProofToDispute;
-	}
-
-	public String getSeconddocumenForProofToDispute() {
-		return seconddocumenForProofToDispute;
-	}
-
-	public void setSeconddocumenForProofToDispute(String seconddocumenForProofToDispute) {
-		this.seconddocumenForProofToDispute = seconddocumenForProofToDispute;
-	}
-
-	private Date deletedOn;
-
-	private DisputeStatus disputeStatus;
-
-	public DisputeOrder() {
-
-	}
-
 	public User getDisputeRaiser() {
 		return disputeRaiser;
 	}
 
 	public void setDisputeRaiser(User disputeRaiser) {
 		this.disputeRaiser = disputeRaiser;
+	}
+
+	public User getDisputeRaisedAgainst() {
+		return disputeRaisedAgainst;
+	}
+
+	public void setDisputeRaisedAgainst(User disputeRaisedAgainst) {
+		this.disputeRaisedAgainst = disputeRaisedAgainst;
 	}
 
 	public Long getOrderId() {
@@ -112,20 +95,20 @@ public class DisputeOrder {
 		this.transactionId = transactionId;
 	}
 
-	public String getComment() {
-		return comment;
+	public String getFirstDocumenForProofToDispute() {
+		return firstDocumenForProofToDispute;
 	}
 
-	public void setComment(String comment) {
-		this.comment = comment;
+	public void setFirstDocumenForProofToDispute(String firstDocumenForProofToDispute) {
+		this.firstDocumenForProofToDispute = firstDocumenForProofToDispute;
 	}
 
-	public Date getCreatedOn() {
-		return createdOn;
+	public String getSecondDocumenForProofToDispute() {
+		return secondDocumenForProofToDispute;
 	}
 
-	public void setCreatedOn(Date createdOn) {
-		this.createdOn = createdOn;
+	public void setSecondDocumenForProofToDispute(String secondDocumenForProofToDispute) {
+		this.secondDocumenForProofToDispute = secondDocumenForProofToDispute;
 	}
 
 	public Date getDeletedOn() {
@@ -142,6 +125,30 @@ public class DisputeOrder {
 
 	public void setDisputeStatus(DisputeStatus disputeStatus) {
 		this.disputeStatus = disputeStatus;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
+	}
+
+	public Date getUpdatedOn() {
+		return updatedOn;
+	}
+
+	public void setUpdatedOn(Date updatedOn) {
+		this.updatedOn = updatedOn;
 	}
 
 }

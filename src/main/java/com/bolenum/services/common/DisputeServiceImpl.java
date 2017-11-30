@@ -5,6 +5,10 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,14 +23,16 @@ import com.bolenum.model.orders.book.DisputeOrder;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.repo.order.book.DisputeOrderRepo;
 import com.bolenum.repo.order.book.OrdersRepository;
-import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.user.FileUploadService;
+
+/**
+ * 
+ * @author Himanshu Kumar
+ *
+ */
 
 @Service
 public class DisputeServiceImpl implements DisputeService {
-
-	@Autowired
-	private UserRepository userRepository;
 
 	@Autowired
 	private DisputeOrderRepo disputeOrderRepo;
@@ -48,17 +54,16 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public DisputeOrder uploadProofDocument(MultipartFile file, Long disputeId, Long userId)
+	public DisputeOrder uploadProofDocument(MultipartFile file, DisputeOrder disputeOrder, User disputeRaiser)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
+
 		long sizeLimit = 1024 * 1024 * 10L;
-		User user = userRepository.findOne(userId);
-		DisputeOrder disputeOrder = disputeOrderRepo.findOne(disputeId);
 		DisputeOrder savedDispute = null;
 		if (file != null) {
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
-			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, null,
+			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, disputeRaiser, null,
 					validExtentions, sizeLimit);
-			disputeOrder.setFirstdocumenForProofToDispute(updatedFileName);
+			disputeOrder.setFirstDocumenForProofToDispute(updatedFileName);
 			savedDispute = disputeOrderRepo.saveAndFlush(disputeOrder);
 			return savedDispute;
 
@@ -68,6 +73,9 @@ public class DisputeServiceImpl implements DisputeService {
 
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Boolean checkExpiryToDispute(Long orderId) {
 		Orders order = ordersRepository.findOne(orderId);
@@ -81,24 +89,40 @@ public class DisputeServiceImpl implements DisputeService {
 		return true;
 	}
 
+	/**
+	 * 
+	 */
 	@Override
-	public DisputeOrder raiseDispute(Long orderId, Long transactionId, String comment) {
+	public DisputeOrder raiseDispute(Long orderId, Long transactionId, String comment, MultipartFile file)
+			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
+
 		Orders order = ordersRepository.findOne(orderId);
+
+		Orders matchedOrder = order.getMatchedOrder();
+
+		User disputeRaisedAgainst = matchedOrder.getUser();
+
 		if (order != null && OrderStatus.LOCKED.equals(order.getOrderStatus())
 				&& OrderType.BUY.equals(order.getOrderType())) {
+
 			User disputeRaiser = order.getUser();
 			DisputeOrder disputeOrder = new DisputeOrder();
 			disputeOrder.setDisputeRaiser(disputeRaiser);
 			disputeOrder.setDisputeStatus(DisputeStatus.RAISED);
 			disputeOrder.setComment(comment);
 			disputeOrder.setTransactionId(transactionId);
-
-			return disputeOrderRepo.saveAndFlush(disputeOrder);
+			disputeOrder.setDisputeRaisedAgainst(disputeRaisedAgainst);
+			DisputeOrder response = uploadProofDocument(file, disputeOrder, disputeRaiser);
+			return response;
+			// return disputeOrderRepo.saveAndFlush(disputeOrder);
 
 		}
 		return null;
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Boolean isAlreadyDisputed(Long orderId, Long transactionId) {
 		DisputeOrder disputeOrder = disputeOrderRepo.findByOrderIdAndTransactionId(orderId, transactionId);
@@ -108,13 +132,41 @@ public class DisputeServiceImpl implements DisputeService {
 		return false;
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	public Boolean checkEligibilityToDispute(Long orderId) {
 		Orders order = ordersRepository.findOne(orderId);
-		if (order.getOrderType().equals(OrderType.BUY)) {
+		if (OrderType.BUY.equals(order.getOrderType())) {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public Page<DisputeOrder> getListOfDisputeOrder(int pageNumber, int pageSize, String sortBy, String sortOrder,
+			DisputeStatus disputeStatus) {
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+
+		return disputeOrderRepo.findByDisputeStatus(disputeStatus, pageRequest);
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public DisputeOrder getDisputeOrderByID(Long disputeId) {
+		return disputeOrderRepo.findOne(disputeId);
 	}
 
 }
