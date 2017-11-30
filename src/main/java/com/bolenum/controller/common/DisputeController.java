@@ -158,14 +158,36 @@ public class DisputeController {
 				localeService.getMessage("dispute.order.not.found"), null);
 	}
 
+	/**
+	 * 
+	 * @param disputeId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.RAISED_DISPUTE_ORDER, method = RequestMethod.POST)
-	public ResponseEntity<Object> performActionOnRaisedDispute(@RequestParam("disputeId") Long disputeId) {
-		DisputeOrder disputeOrder = disputeService.getDisputeOrderByID(disputeId);
-		if (disputeOrder != null) {
+	public ResponseEntity<Object> actionOnRaisedDispute(@RequestParam("disputeId") Long disputeId,
+			@RequestParam("commentByAdmin") String commentByAdmin) {
 
+		DisputeOrder disputeOrder = disputeService.getDisputeOrderByID(disputeId);
+
+		if (disputeOrder == null) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("dispute.order.not.found"), null);
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-				localeService.getMessage("dispute.order.not.found"), null);
+
+		if (DisputeStatus.COMPLETED.equals(disputeOrder.getDisputeStatus())) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("dispute.order.already.completed"), null);
+		}
+
+		DisputeOrder response = disputeService.performActionOnRaisedDispute(disputeOrder, commentByAdmin);
+
+		if (response != null) {
+			return ResponseHandler.response(HttpStatus.OK, false,
+					localeService.getMessage("dispute.order.action.success"), null);
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("dispute.order.action.failed"), null);
+		}
 	}
 
 }

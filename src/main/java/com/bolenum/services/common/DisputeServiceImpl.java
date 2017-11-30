@@ -169,4 +169,21 @@ public class DisputeServiceImpl implements DisputeService {
 		return disputeOrderRepo.findOne(disputeId);
 	}
 
+	/**
+	 * 
+	 */
+	@Override
+	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentByAdmin) {
+
+		if (DisputeStatus.RAISED.equals(disputeOrder.getDisputeStatus())) {
+			disputeOrder.setDisputeStatus(DisputeStatus.INPROCESS);
+			disputeOrder.setCommentByAdmin(commentByAdmin);
+		}
+		if (DisputeStatus.INPROCESS.equals(disputeOrder.getDisputeStatus())) {
+			disputeOrder.setDisputeStatus(DisputeStatus.COMPLETED);
+			disputeOrder.setCommentByAdmin(commentByAdmin);
+		}
+		return disputeOrderRepo.saveAndFlush(disputeOrder);
+	}
+
 }

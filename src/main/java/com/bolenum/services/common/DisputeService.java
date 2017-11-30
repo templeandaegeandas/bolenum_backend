@@ -36,4 +36,7 @@ public interface DisputeService {
 
 	DisputeOrder getDisputeOrderByID(Long disputeId);
 
+
+	DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentByAdmin);
+
 }

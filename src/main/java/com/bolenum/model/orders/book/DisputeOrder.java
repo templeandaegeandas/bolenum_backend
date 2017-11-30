@@ -48,6 +48,8 @@ public class DisputeOrder {
 	private DisputeStatus disputeStatus;
 
 	private String comment;
+	
+	private String commentByAdmin;
 
 	@CreationTimestamp
 	private Date createdOn;
@@ -149,6 +151,14 @@ public class DisputeOrder {
 
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
+	}
+	
+	public String getCommentByAdmin() {
+		return commentByAdmin;
+	}
+
+	public void setCommentByAdmin(String commentByAdmin) {
+		this.commentByAdmin = commentByAdmin;
 	}
 
 }
