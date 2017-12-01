@@ -36,7 +36,9 @@ public interface DisputeService {
 
 	DisputeOrder getDisputeOrderByID(Long disputeId);
 
-
-	DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentByAdmin);
+	DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentByAdmin,
+			DisputeStatus disputeStatus);
+	
+	void sendDisputeNotification(DisputeOrder disputeOrder, User disputeRaiser,User disputeRaisedAgainst);
 
 }

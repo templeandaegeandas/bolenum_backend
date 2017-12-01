@@ -143,6 +143,7 @@ public class OrderController {
 		List<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
+
 	@RequestMapping(value = UrlConstant.ORDER_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrderDetails(@RequestParam("orderId") long orderId) {
 		User user = GenericUtils.getLoggedInUser();

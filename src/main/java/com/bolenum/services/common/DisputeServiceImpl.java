@@ -24,6 +24,7 @@ import com.bolenum.model.orders.book.Orders;
 import com.bolenum.repo.order.book.DisputeOrderRepo;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.user.FileUploadService;
+import com.bolenum.services.user.notification.NotificationService;
 
 /**
  * 
@@ -42,6 +43,9 @@ public class DisputeServiceImpl implements DisputeService {
 
 	@Autowired
 	private OrdersRepository ordersRepository;
+
+	@Autowired
+	private NotificationService notificationService;
 
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
@@ -173,17 +177,44 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentByAdmin) {
+	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentByAdmin,
+			DisputeStatus disputeStatus) {
 
-		if (DisputeStatus.RAISED.equals(disputeOrder.getDisputeStatus())) {
-			disputeOrder.setDisputeStatus(DisputeStatus.INPROCESS);
+		if (DisputeStatus.RAISED.equals(disputeOrder.getDisputeStatus())
+				&& disputeStatus.equals(DisputeStatus.INPROCESS)) {
+			disputeOrder.setDisputeStatus(disputeStatus);
 			disputeOrder.setCommentByAdmin(commentByAdmin);
+
 		}
-		if (DisputeStatus.INPROCESS.equals(disputeOrder.getDisputeStatus())) {
-			disputeOrder.setDisputeStatus(DisputeStatus.COMPLETED);
+		if (DisputeStatus.INPROCESS.equals(disputeOrder.getDisputeStatus())
+				&& disputeStatus.equals(DisputeStatus.COMPLETED)) {
+			disputeOrder.setDisputeStatus(disputeStatus);
 			disputeOrder.setCommentByAdmin(commentByAdmin);
 		}
 		return disputeOrderRepo.saveAndFlush(disputeOrder);
+	}
+
+	/**
+	 * used to send dispute notification to buyer and seller with admin comment
+	 */
+	@Override
+	public void sendDisputeNotification(DisputeOrder disputeOrder, User disputeRaiser, User disputeRaisedAgainst) {
+
+		String messageForDisputeRaiser = "hi , " + "  " + disputeRaiser.getFirstName() + '\n'
+				+ "your have requested to dispute your order against " + disputeRaisedAgainst.getFirstName()
+				+ ".your order id is" + disputeOrder.getOrderId() + "and your dispute is "
+				+ disputeOrder.getDisputeStatus() + disputeOrder.getCommentByAdmin();
+
+		notificationService.sendNotificationForDispute(disputeRaiser, messageForDisputeRaiser);
+
+		String messageForDisputeRaisedAgainst = "hi , " + disputeRaisedAgainst.getFirstName() + '\n'
+				+ disputeRaiser.getFirstName() + "has raised dispute against you for order id "
+				+ disputeOrder.getOrderId() + disputeOrder.getCommentByAdmin();
+
+		notificationService.sendNotificationForDispute(disputeRaisedAgainst, messageForDisputeRaisedAgainst);
+
+		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getCommentByAdmin());
+
 	}
 
 }

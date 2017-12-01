@@ -20,6 +20,7 @@ import com.bolenum.enums.DisputeStatus;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;
+import com.bolenum.model.User;
 import com.bolenum.model.orders.book.DisputeOrder;
 import com.bolenum.services.common.DisputeService;
 import com.bolenum.services.common.LocaleService;
@@ -165,7 +166,8 @@ public class DisputeController {
 	 */
 	@RequestMapping(value = UrlConstant.RAISED_DISPUTE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> actionOnRaisedDispute(@RequestParam("disputeId") Long disputeId,
-			@RequestParam("commentByAdmin") String commentByAdmin) {
+			@RequestParam("commentByAdmin") String commentByAdmin,
+			@RequestParam("disputeStatus") DisputeStatus disputeStatus) {
 
 		DisputeOrder disputeOrder = disputeService.getDisputeOrderByID(disputeId);
 
@@ -179,11 +181,15 @@ public class DisputeController {
 					localeService.getMessage("dispute.order.already.completed"), null);
 		}
 
-		DisputeOrder response = disputeService.performActionOnRaisedDispute(disputeOrder, commentByAdmin);
+		DisputeOrder response = disputeService.performActionOnRaisedDispute(disputeOrder, commentByAdmin,
+				disputeStatus);
 
 		if (response != null) {
+			User disputeRaiser = response.getDisputeRaiser();
+			User disputeRaisedAgainst = response.getDisputeRaisedAgainst();
+			disputeService.sendDisputeNotification(response,disputeRaiser, disputeRaisedAgainst);
 			return ResponseHandler.response(HttpStatus.OK, false,
-					localeService.getMessage("dispute.order.action.success"), null);
+					localeService.getMessage("dispute.order.action.success"), response);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.order.action.failed"), null);
