@@ -78,6 +78,7 @@ public class DisputeController {
 				return ResponseHandler.response(HttpStatus.CONFLICT, true,
 						localeService.getMessage("dispute.already.raised"), null);
 			}
+
 			DisputeOrder response = disputeService.raiseDispute(orderId, transactionId, comment, file);
 
 			// DisputeOrder responseOfProofUpload =disputeService.uploadProofDocument(file,
@@ -108,6 +109,7 @@ public class DisputeController {
 	 * @throws MobileNotVerifiedException
 	 * 
 	 */
+
 	/*
 	 * @RequestMapping(value = UrlConstant.UPLOAD_PROOF_DOCUMENT_FOR_DISPUTE, method
 	 * = RequestMethod.POST) public ResponseEntity<Object>
@@ -167,7 +169,7 @@ public class DisputeController {
 	 * @param disputeStatus
 	 * @return
 	 */
-	@RequestMapping(value = UrlConstant.RAISED_DISPUTE_ORDER, method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstant.ACTION_ON_RAISED_DISPUTE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> actionOnRaisedDispute(@RequestParam("disputeId") Long disputeId,
 			@RequestParam("commentForDisputeRaiser") String commentForDisputeRaiser,
 			@RequestParam("commentForDisputeRaisedAgainst") String commentForDisputeRaisedAgainst,

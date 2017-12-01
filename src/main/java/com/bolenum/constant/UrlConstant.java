@@ -125,6 +125,7 @@ public class UrlConstant {
 	public static final String RAISE_DISPUTE="raise/dispute";
 	public static final String RAISED_DISPUTE_ORDER="raised/dispute";
 	public static final String RAISED_DISPUTE_LIST="raised/dispute/list";
+	public static final String ACTION_ON_RAISED_DISPUTE_ORDER="action/raised/dispute";
 	
 }
 	

@@ -193,7 +193,7 @@ public class DisputeServiceImpl implements DisputeService {
 			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
 			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
 		}
-		return disputeOrderRepo.saveAndFlush(disputeOrder);
+		return disputeOrderRepo.save(disputeOrder);
 	}
 
 	/**
