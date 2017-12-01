@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.orders.book.Orders;
+import com.bolenum.model.orders.book.Trade;
 
 /**
  * @author chandan kumar singh
@@ -32,5 +34,9 @@ public interface TransactionService {
 
 	Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus);
+
+	public Future<Boolean> processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer,
+			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade)
+			throws InterruptedException, ExecutionException;
 
 }

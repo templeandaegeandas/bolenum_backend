@@ -1,5 +1,6 @@
 package com.bolenum.services.order.book;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,8 +30,6 @@ import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.admin.fees.TradingFeeService;
-import com.bolenum.services.user.UserService;
-import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
 
@@ -59,9 +58,6 @@ public class OrdersServiceImpl implements OrdersService {
 	private WalletService walletService;
 
 	@Autowired
-	private NotificationService notificationService;
-
-	@Autowired
 	private TransactionService transactionService;
 
 	@Autowired
@@ -70,24 +66,22 @@ public class OrdersServiceImpl implements OrdersService {
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
-	@Autowired
-	private UserService userService;
-
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
 	List<Orders> ordersList = new ArrayList<>();
 
 	List<Orders> matchedOrdersList = new ArrayList<>();
 
-	List<Trade> tradeList = new ArrayList<>();
-
 	List<PartialTrade> partialTradeList = new ArrayList<>();
+
+	private DecimalFormat decimalFormat = new DecimalFormat("0");
 
 	/**
 	 * this will check user wallet balance to get place an order
 	 */
 	@Override
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
+		decimalFormat.setMaximumFractionDigits(8);
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
 		String tickter = null, minOrderVol = null, currencyType = null;
@@ -101,7 +95,7 @@ public class OrdersServiceImpl implements OrdersService {
 			currencyType = currency.getCurrencyType().toString();
 			minOrderVol = String.valueOf(orders.getVolume());
 		} else {
-			minOrderVol = getPairedBalance(orders, currencyPair, orders.getVolume());
+			minOrderVol = walletService.getPairedBalance(orders, currencyPair, orders.getVolume());
 			currency = currencyPair.getPairedCurrency().get(0);
 			tickter = currency.getCurrencyAbbreviation();
 			currencyType = currency.getCurrencyType().toString();
@@ -428,141 +422,31 @@ public class OrdersServiceImpl implements OrdersService {
 				buyer = orders.getUser();
 				// seller is matched order's user
 				seller = matchedOrder.getUser();
-				buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * orders.getPrice());
-				sellerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
-
 			} else {
 				// order type is SELL
 				// buyer is matched order's user
 				buyer = matchedOrder.getUser();
 				// seller is coming order's user
 				seller = orders.getUser();
-				buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
-				sellerTradeFee = tradingFeeService.calculateFee(qtyTraded * orders.getPrice());
 			}
 			// buyer and seller must be different user
 			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
 			if (buyer.getUserId() != seller.getUserId()) {
+				buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
+				sellerTradeFee = tradingFeeService.calculateFee(qtyTraded);
+				logger.info("buyer trade fee: {} seller trade fee: {}", decimalFormat.format(buyerTradeFee),
+						decimalFormat.format(sellerTradeFee));
 				// saving the processed BUY/SELL order in trade
 				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT,
 						buyerTradeFee, sellerTradeFee);
-				tradeList.add(trade);
-				logger.debug("trade added to tradelist");
-				logger.debug("buyer trade fee: {} and seller trade fee: {}", buyerTradeFee, sellerTradeFee);
-				processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume, buyerTradeFee,
-						sellerTradeFee);
+				trade = orderAsyncServices.saveTrade(trade);
+				// tradeList.add(trade);
+				logger.debug("trade saved: {}", trade.getId());
+				transactionService.processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume,
+						buyerTradeFee, sellerTradeFee, trade);
 			}
 		}
-		logger.debug("tradeList saving started");
-		orderAsyncServices.saveTrade(tradeList);
-		tradeList.clear();
-		logger.debug("tradeList saving finished");
 		return remainingVolume;
-	}
-
-	/**
-	 * @description processTransaction
-	 * @param orders,qtyTraded,buyer,seller
-	 * @throws ExecutionException
-	 * @throws InterruptedException
-	 */
-	private void processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer, User seller,
-			double remainingVolume, double buyerTradeFee, double sellerTradeFee)
-			throws InterruptedException, ExecutionException {
-		String msg = "", msg1 = "";
-		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
-				matchedOrder.getId());
-		// finding currency pair
-		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(matchedOrder.getPair().getPairId());
-		String[] tickters = new String[2];
-		// finding the currency abbreviations
-		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
-		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
-		// fetching the limit price of order
-		String qtr = getPairedBalance(matchedOrder, currencyPair, qtyTraded);
-		logger.debug("paired currency volume: {}, {}", qtr, tickters[1]);
-		// checking the order type BUY
-		if (OrderType.BUY.equals(orders.getOrderType())) {
-			logger.debug("BUY Order");
-			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
-			logger.debug("msg: {}", msg);
-			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been initiated, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
-					+ tickters[0] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[1];
-			logger.debug("msg1: {}", msg1);
-		} else {
-			logger.debug("SELL Order");
-			msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
-			logger.debug("msg1: {}", msg1);
-			msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been initiated, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
-					+ tickters[0] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[1];
-			logger.debug("msg: {}", msg);
-		}
-
-		if (qtr != null && Double.valueOf(qtr) > 0) {
-			// process tx buyers and sellers
-			transactionService.performTransaction(tickters[0], qtyTraded, buyer, seller, false);
-			sendNotification(seller, msg1);
-			notificationService.saveNotification(seller, buyer, msg1);
-			// process tx sellers and buyers
-			transactionService.performTransaction(tickters[1], Double.valueOf(qtr), seller, buyer, false);
-			sendNotification(buyer, msg);
-			notificationService.saveNotification(buyer, seller, msg);
-			// fee deduction for admin
-			User admin = userService.findByEmail("admin@bolenum.com");
-			transactionService.performTransaction(tickters[0], sellerTradeFee, admin, seller, true);
-			transactionService.performTransaction(tickters[1], buyerTradeFee, buyer, admin, true);
-		} else {
-			logger.debug("transaction processing failed due to paired currency volume");
-		}
-	}
-
-	private boolean sendNotification(User user, String msg) {
-		return notificationService.sendNotification(user, msg);
-	}
-
-	@Override
-	public String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded) {
-		String minBalance = null;
-		/**
-		 * if order type is BUY then for Market order, user should have total
-		 * market price, for Limit order user should have volume (volume *
-		 * price), price limit given by user
-		 */
-		if (OrderStandard.LIMIT.equals(orders.getOrderStandard())) {
-			logger.debug("limit order buy on price: {}, {} and quantity traded: {}, {} ", orders.getPrice(),
-					currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation(), qtyTraded,
-					currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
-			minBalance = String.valueOf(qtyTraded * orders.getPrice());
-		} else {
-			/**
-			 * fetching the market BTC price of buying currency
-			 */
-
-			// MarketPrice marketPrice =
-			// marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
-			/**
-			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
-			 * BTC, this will update according to order selling book
-			 */
-			double buyingCurrencyValue = currencyPair.getPairedCurrency().get(0).getPriceBTC();
-			logger.debug("order value : {}, buyingCurrencyValue: {}", qtyTraded, buyingCurrencyValue);
-			if (buyingCurrencyValue > 0) {
-				/**
-				 * user must have this balance to give market order, Example
-				 * user want to BUY 3 BTC on market price, at this moment 1 ETH
-				 * = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC, then user
-				 * must have 51.852876106 ETH to buy 3 BTC
-				 */
-				minBalance = String.valueOf(qtyTraded / buyingCurrencyValue);
-			}
-		}
-		return minBalance;
 	}
 
 	@Override
