@@ -67,4 +67,6 @@ public interface UserService {
 
 	public boolean isKycVerified(User user);
 
+	
+
 }

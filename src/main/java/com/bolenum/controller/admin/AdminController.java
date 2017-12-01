@@ -101,8 +101,8 @@ public class AdminController {
 	}
 
 	/**
-	 * to add trading fees for transaction done by user and deducted fees will
-	 * be store in Admin wallet
+	 * to add trading fees for transaction done by user and deducted fees will be
+	 * store in Admin wallet
 	 * 
 	 * @param tradingFee
 	 * @return
@@ -120,7 +120,7 @@ public class AdminController {
 
 	/**
 	 * to get the fee details of system
-	 * 
+	 *
 	 * @return transaction fee
 	 */
 	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.GET)
@@ -148,8 +148,8 @@ public class AdminController {
 	}
 
 	/**
-	 * to count number of new buyers/sellers and active users and active orders
-	 * that will be shown on Admin dashboard
+	 * to count number of new buyers/sellers and active users and active orders that
+	 * will be shown on Admin dashboard
 	 * 
 	 * @return
 	 */
