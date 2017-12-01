@@ -663,6 +663,16 @@ public class OrdersServiceImpl implements OrdersService {
 	public List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus) {
 		return ordersRepository.findByUserAndOrderStatus(user, orderStatus);
 	}
+	
+	@Override
+	public Page<Orders> findOrdersListByUserAndOrderStatus(int pageNumber, int pageSize,String sortOrder, String sortBy, User user, OrderStatus orderStatus) {
+		Direction sort = Direction.DESC;
+		if ("asc".equals(sortOrder)) {
+			sort = Direction.ASC;
+		}
+		Pageable pageable = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		return ordersRepository.findByUserAndOrderStatus(user, orderStatus, pageable);
+	}
 
 	@Override
 	public double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency) {
