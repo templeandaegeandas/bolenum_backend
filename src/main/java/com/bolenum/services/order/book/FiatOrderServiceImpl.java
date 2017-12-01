@@ -319,10 +319,10 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		if (OrderType.BUY.equals(order.getOrderType())) {
 			orderType = OrderType.SELL;
 			pageable = new PageRequest(page, size, Direction.ASC, "price");
-			return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
+			return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
 					order.getPrice(), orderType, OrderStatus.SUBMITTED, pairId, pageable);
 		}
-		return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
+		return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
 				order.getPrice(), orderType, OrderStatus.SUBMITTED, pairId, pageable);
 	}
 

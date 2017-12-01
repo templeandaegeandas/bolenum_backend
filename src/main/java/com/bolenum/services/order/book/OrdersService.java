@@ -73,4 +73,7 @@ public interface OrdersService {
 
 	public boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList);
 
+	Page<Orders> findOrdersListByUserAndOrderStatus(int pageNumber, int pageSize, String sortOrder, String sortBy,
+			User user, OrderStatus orderStatus);
+
 }

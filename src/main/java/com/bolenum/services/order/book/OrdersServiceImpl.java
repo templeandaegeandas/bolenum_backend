@@ -32,7 +32,6 @@ import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
 
-
 /**
  * 
  * @author Vishal Kumar
@@ -661,6 +660,17 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
+	public Page<Orders> findOrdersListByUserAndOrderStatus(int pageNumber, int pageSize, String sortOrder,
+			String sortBy, User user, OrderStatus orderStatus) {
+		Direction sort = Direction.DESC;
+		if ("asc".equals(sortOrder)) {
+			sort = Direction.ASC;
+		}
+		Pageable pageable = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		return ordersRepository.findByUserAndOrderStatus(user, orderStatus, pageable);
+	}
+
+	@Override
 	public double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency) {
 		List<Orders> toOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(user,
 				OrderStatus.SUBMITTED, OrderType.SELL, toCurrency);
@@ -725,10 +735,8 @@ public class OrdersServiceImpl implements OrdersService {
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
 		startDate = (Date) startDate;
+
 		// return ordersRepository.findByCreatedOnBetween(page,startDate,endDate);
 		return ordersRepository.findByCreatedOnBetween(startDate, endDate, page);
-
 	}
 }
-
-	

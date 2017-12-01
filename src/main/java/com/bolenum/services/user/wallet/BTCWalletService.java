@@ -17,42 +17,34 @@ import com.bolenum.model.Transaction;
 public interface BTCWalletService {
 
 	/**
-	 * @description createHotWallet
-	 * @param 
-	 * @return String
-	 * @exception 
+	 * @description createHotWallet @param @return String @exception
 	 * 
 	 */
 	String createHotWallet(String uuid);
-	
+
 	/**
-	 * @description getWalletAddressAndQrCode
-	 * @param 
-	 * @return List<String>
-	 * @exception 
+	 * @description getWalletAddressAndQrCode @param @return
+	 * List<String> @exception
 	 *
 	 */
 	Map<String, Object> getWalletAddressAndQrCode(String uuid);
-	
+
 	String getWalletBalnce(String uuid);
 
 	/**
-	 * @description getWalletAddress
-	 * @param 
-	 * @return Map<String,Object>
-	 * @exception 
+	 * @description getWalletAddress @param @return
+	 * Map<String,Object> @exception
 	 * 
 	 */
 	String getWalletAddress(String walletUuid);
-	
-    boolean validateAddresss(String btcWalletUuid, String toAddress) ;
 
-	boolean validateWithdrawAmount(Double availableBTCBalance, Double withdrawAmount);
+	boolean validateAddresss(String btcWalletUuid, String toAddress);
 
-	boolean validateAvailableWalletBalance(Double availableBalance, Double availableBalanceLimitToWithdraw,
-			Double withdrawAmount);
-
-	boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) throws InsufficientBalanceException;
+	boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount)
+			throws InsufficientBalanceException;
 
 	Transaction setDepositeList(Transaction transaction);
+
+	boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount)
+			throws InsufficientBalanceException;
 }

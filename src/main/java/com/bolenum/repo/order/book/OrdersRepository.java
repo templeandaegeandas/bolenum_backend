@@ -69,6 +69,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 			@Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 
 	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
+	
+	Page<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus, Pageable pageable);
 
 	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(User user, OrderStatus orderStatus,
 			OrderType orderType, Currency currency);
@@ -96,5 +98,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Page<Orders> findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(Double price, OrderType orderType, OrderStatus orderStatus, long pairId, Pageable page);
 	
 	Page<Orders> findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(Double price, OrderType orderType, OrderStatus orderStatus, long pairId, Pageable page);
-
+	
+	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
+	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList, @Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
 }
