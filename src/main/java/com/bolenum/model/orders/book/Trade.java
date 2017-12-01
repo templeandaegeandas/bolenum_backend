@@ -39,7 +39,8 @@ public class Trade {
 	private Date createdOn = new Date();
 	private Double buyerTradeFee;
 	private Double sellerTradeFee;
-	private Boolean isFeeDeducted;
+	private Boolean isFeeDeductedBuyer;
+	private Boolean isFeeDeductedSeller;
 	
 	public Trade(Double price, Double volume, User buyer, User seller, CurrencyPair pair, OrderStandard orderStandard,
 			Double buyerTradeFee, Double sellerTradeFee) {
@@ -150,17 +151,31 @@ public class Trade {
 	}
 
 	/**
-	 * @return the isFeeDeducted
+	 * @return the isFeeDeductedBuyer
 	 */
-	public Boolean getIsFeeDeducted() {
-		return isFeeDeducted;
+	public Boolean getIsFeeDeductedBuyer() {
+		return isFeeDeductedBuyer;
 	}
 
 	/**
-	 * @param isFeeDeducted the isFeeDeducted to set
+	 * @param isFeeDeductedBuyer the isFeeDeductedBuyer to set
 	 */
-	public void setIsFeeDeducted(Boolean isFeeDeducted) {
-		this.isFeeDeducted = isFeeDeducted;
+	public void setIsFeeDeductedBuyer(Boolean isFeeDeductedBuyer) {
+		this.isFeeDeductedBuyer = isFeeDeductedBuyer;
+	}
+
+	/**
+	 * @return the isFeeDeductedSeller
+	 */
+	public Boolean getIsFeeDeductedSeller() {
+		return isFeeDeductedSeller;
+	}
+
+	/**
+	 * @param isFeeDeductedSeller the isFeeDeductedSeller to set
+	 */
+	public void setIsFeeDeductedSeller(Boolean isFeeDeductedSeller) {
+		this.isFeeDeductedSeller = isFeeDeductedSeller;
 	}
 	
 	
