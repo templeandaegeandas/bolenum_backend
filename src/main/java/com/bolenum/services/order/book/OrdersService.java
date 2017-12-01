@@ -72,4 +72,5 @@ public interface OrdersService {
 	Page<Orders> getListOfLatestOrders(int pageNumber, int pageSize, String sortOrder, String sortBy);
 
 	public boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList);
+	
 }

@@ -29,9 +29,13 @@ import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.model.fees.TradingFee;
+import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.admin.fees.TradingFeeService;
+import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
@@ -50,19 +54,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	@Autowired
 	private RoleService roleService;
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private PrivilegeService privilegeService;
-	
+
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
 	@Autowired
 	private PasswordEncoderUtil passwordEncoder;
-	
+
 	@Autowired
 	private Environment environment;
 
@@ -80,16 +84,16 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Value("${bolenum.google.qr.code.location}")
 	private String googleQrCodeLocation;
-	
+
 	@Value("${bolenum.deployed.contract.address}")
 	private String contractAddress;
 
 	@Value("${bolenum.deployed.contract.wallet.address}")
 	private String walletAddress;
-	
+
 	@Value("${bolenum.deployed.contract.currency.name}")
 	private String currencyName;
-	
+
 	@Value("${bolenum.deployed.contract.currency.abbreviation}")
 	private String currencyAbbreviation;
 
@@ -101,9 +105,15 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;
-	
+
 	@Autowired
 	private BTCWalletService btcWalletService;
+
+	@Autowired
+	private TradingFeeService tradingFeeService;
+
+	@Autowired
+	private WithdrawalFeeService withdrawalFeeService;
 
 	private Set<Privilege> privileges = new HashSet<>();
 
@@ -130,7 +140,18 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createProfilePicDirectories();
 		createDocumentsDirectories();
 		createGoogleAuthQrCodeDirectories();
+		saveInitialFee();
 
+	}
+
+	private void saveInitialFee() {
+		TradingFee fee = tradingFeeService.getTradingFee();
+		if (fee == null) {
+			fee = new TradingFee();
+			fee.setFee(0.15);
+			fee.setFiat(0.0);
+			tradingFeeService.saveTradingFee(fee);
+		}
 	}
 
 	/**
@@ -235,7 +256,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		Role roleAdmin = roleService.findOrCreate(r);
 		User admin = userService.findByEmail("admin@bolenum.com");
 		String activeProfile = environment.getActiveProfiles()[0];
-		logger.debug("Currently active profile: {}",activeProfile);
+		logger.debug("Currently active profile: {}", activeProfile);
 		if (admin == null) {
 			User form = new User();
 			form.setIsEnabled(true);
@@ -243,11 +264,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			form.setEmailId("admin@bolenum.com");
 			if (activeProfile.equals("prod")) {
 				form.setPassword(passwordEncoder.encode("m@n!@b0l3num!@#"));
-			}
-			else if (activeProfile.equals("stag")) {
+			} else if (activeProfile.equals("stag")) {
 				form.setPassword(passwordEncoder.encode("bolenum@oodles"));
-			}
-			else {
+			} else {
 				form.setPassword(passwordEncoder.encode("12345"));
 			}
 			form.setRole(roleAdmin);
@@ -321,9 +340,16 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			List<Erc20Token> erc20Tokens = new ArrayList<>();
 			erc20Tokens.add(erc20TokenBLN);
 			erc20TokenService.saveInitialErc20Token(erc20Tokens);
-
-		}
-		else {
+			List<WithdrawalFee> wFee;
+			wFee = withdrawalFeeService.getAllWithdrawalFee();
+			if (wFee.size() == 2) {
+				WithdrawalFee wfBln = new WithdrawalFee();
+				wfBln.setCurrency(currencyBLN);
+				wfBln.setFee(0.01);
+				wfBln.setMinWithDrawAmount(0.01);
+				withdrawalFeeService.saveWithdrawalFee(wfBln);
+			}
+		} else {
 			logger.info("Tokens already saved!");
 		}
 	}
@@ -337,9 +363,26 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			Currency bitcoin = new Currency("BITCOIN", "BTC", CurrencyType.CRYPTO);
 			Currency ethereum = new Currency("ETHEREUM", "ETH", CurrencyType.CRYPTO);
 			Currency ngn = new Currency("NIGERIAN NAIRA", "NGN", CurrencyType.FIAT);
-			currencyService.saveCurrency(bitcoin);
-			currencyService.saveCurrency(ethereum);
-			currencyService.saveCurrency(ngn);
+			bitcoin = currencyService.saveCurrency(bitcoin);
+			ethereum = currencyService.saveCurrency(ethereum);
+			ngn = currencyService.saveCurrency(ngn);
+			List<WithdrawalFee> wFee;
+			wFee = withdrawalFeeService.getAllWithdrawalFee();
+			if (wFee.isEmpty()) {
+				WithdrawalFee wfBitcoin = new WithdrawalFee();
+				wfBitcoin.setCurrency(bitcoin);
+				wfBitcoin.setFee(0.001);
+				wfBitcoin.setMinWithDrawAmount(0.005);
+
+				WithdrawalFee wfEthereum = new WithdrawalFee();
+				wfEthereum.setCurrency(ethereum);
+				wfEthereum.setFee(0.01);
+				wfEthereum.setMinWithDrawAmount(0.005);
+
+				withdrawalFeeService.saveWithdrawalFee(wfEthereum);
+				withdrawalFeeService.saveWithdrawalFee(wfBitcoin);
+			}
+
 		}
 	}
 }

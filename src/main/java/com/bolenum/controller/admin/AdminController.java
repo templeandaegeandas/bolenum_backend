@@ -2,8 +2,7 @@ package com.bolenum.controller.admin;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.validation.Valid;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,13 +18,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
-import com.bolenum.dto.common.AddTransactioFeeAndLimitForm;
 import com.bolenum.enums.OrderType;
-import com.bolenum.model.TransactionFee;
 import com.bolenum.model.User;
+import com.bolenum.model.fees.TradingFee;
+import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.admin.AdminService;
-import com.bolenum.services.admin.TransactionFeeService;
+import com.bolenum.services.admin.fees.TradingFeeService;
+import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
@@ -39,6 +38,7 @@ import io.swagger.annotations.Api;
  * @Author Himanshu Kumar
  *
  * @Date 05-Sep-2017
+ * @modified chandan kumar singh
  */
 @RestController
 @RequestMapping(value = UrlConstant.BASE_ADMIN_URI_V1)
@@ -52,14 +52,17 @@ public class AdminController {
 	private LocaleService localeService;
 
 	@Autowired
-	private TransactionFeeService transactionFeeService;
-	
+	private TradingFeeService tradingFeeService;
+
 	@Autowired
 	private OrdersService ordersService;
-	
+
 	@Autowired
 	private AuthenticationTokenService authenticationTokenService;
-	
+
+	@Autowired
+	private WithdrawalFeeService withdrawalFeeService;
+
 	public static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
 	@RequestMapping()
@@ -98,62 +101,74 @@ public class AdminController {
 	}
 
 	/**
-	 * to add transaction fees for transaction done by user and deducted fees will
+	 * to add trading fees for transaction done by user and deducted fees will
 	 * be store in Admin wallet
 	 * 
-	 * @param transactionFee
-	 * @param result
+	 * @param tradingFee
 	 * @return
 	 */
-	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.POST)
-	public ResponseEntity<Object> addTransactionFees(@Valid @RequestBody AddTransactioFeeAndLimitForm addTransactioFeeAndLimitForm,
-			BindingResult result) {
-		if (result.hasErrors()) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localeService.getMessage("admin.transactionfee.add.error"), null);
-		} else {
-			TransactionFee savedTransactionFee = transactionFeeService.saveTransactionFee(addTransactioFeeAndLimitForm);
-			if (savedTransactionFee != null) {
-				return ResponseHandler.response(HttpStatus.OK, false,
-						localeService.getMessage("admin.trnsactionfee.add.success"), savedTransactionFee);
-			}
-			return ResponseHandler.response(HttpStatus.FORBIDDEN, true,
-					localeService.getMessage("admin.transactionfee.add.error"), null);
+	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.POST)
+	public ResponseEntity<Object> addTradingFees(@RequestBody TradingFee tradingFee) {
+		TradingFee savedTradingFee = tradingFeeService.saveTradingFee(tradingFee);
+		if (savedTradingFee != null) {
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("tradefee.success"),
+					savedTradingFee);
 		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("tradefee.error"),
+				Optional.empty());
 	}
 
 	/**
+	 * to get the fee details of system
 	 * 
-	 * @return
+	 * @return transaction fee
 	 */
-	@RequestMapping(value = UrlConstant.TRANSACTION_FEES, method = RequestMethod.GET)
-	public ResponseEntity<Object> getTransactionFees() {
-
+	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.GET)
+	public ResponseEntity<Object> getTradingFees() {
+		TradingFee fee = tradingFeeService.getTradingFee();
 		return ResponseHandler.response(HttpStatus.OK, true,
-				localeService.getMessage("admin.transaction.fees.found.success"), null);
+				localeService.getMessage("admin.transaction.fees.found.success"), fee);
 	}
-	
+
+	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.POST)
+	public ResponseEntity<Object> saveWithdrawlFees(@RequestBody WithdrawalFee withdrawalFee) {
+		WithdrawalFee savedWithdrawalFee = withdrawalFeeService.saveWithdrawalFee(withdrawalFee);
+		if (savedWithdrawalFee != null) {
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("withdrawfee.success"),
+					savedWithdrawalFee);
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("withdrawfee.error"),
+				Optional.empty());
+	}
+
+	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.GET)
+	public ResponseEntity<Object> getWithdrawlFees(@RequestParam("currencyId") long currencyId) {
+		WithdrawalFee fee = withdrawalFeeService.getWithdrawalFee(currencyId);
+		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"), fee);
+	}
+
 	/**
-	 *  to count number of new buyers/sellers and active users and active orders that will be 
-	 *  shown on Admin dashboard
+	 * to count number of new buyers/sellers and active users and active orders
+	 * that will be shown on Admin dashboard
+	 * 
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.COUNT_BUYER_SELLER_DASHBOARD, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTotalOfBuyerAndSeller() {
-		
-        Long newBuyers=ordersService.getTotalCountOfNewerBuyerAndSeller(OrderType.BUY);
-        Long newSellers=ordersService.getTotalCountOfNewerBuyerAndSeller(OrderType.SELL);
-        Long activeUsers=authenticationTokenService.countActiveUsers();
-        Long activeOrders=ordersService.countActiveOpenOrder();
-        Map<String,Long> countOfusers=new HashMap<String,Long>();
-        countOfusers.put("newBuyers", newBuyers);
-        countOfusers.put("newSellers", newSellers);
-        countOfusers.put("activeUsers", activeUsers);
-        countOfusers.put("activeOrders", activeOrders);
+
+		Long newBuyers = ordersService.getTotalCountOfNewerBuyerAndSeller(OrderType.BUY);
+		Long newSellers = ordersService.getTotalCountOfNewerBuyerAndSeller(OrderType.SELL);
+		Long activeUsers = authenticationTokenService.countActiveUsers();
+		Long activeOrders = ordersService.countActiveOpenOrder();
+		Map<String, Long> countOfusers = new HashMap<String, Long>();
+		countOfusers.put("newBuyers", newBuyers);
+		countOfusers.put("newSellers", newSellers);
+		countOfusers.put("activeUsers", activeUsers);
+		countOfusers.put("activeOrders", activeOrders);
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.count.user.dashboard.success"), countOfusers);
 	}
-	
+
 	/**
 	 * 
 	 * @param pageNumber
@@ -166,14 +181,10 @@ public class AdminController {
 	public ResponseEntity<Object> getLatestOrderList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
 			@RequestParam("sortOrder") String sortOrder) {
-		
-		Page<Orders> listOfLatestOrders=ordersService.getListOfLatestOrders(pageNumber,pageSize,sortBy,sortOrder);
+
+		Page<Orders> listOfLatestOrders = ordersService.getListOfLatestOrders(pageNumber, pageSize, sortBy, sortOrder);
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.latest.orders.list.success"), listOfLatestOrders);
 	}
-	
-	
-	
-	
 
 }

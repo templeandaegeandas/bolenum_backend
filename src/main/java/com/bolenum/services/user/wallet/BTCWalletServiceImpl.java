@@ -29,12 +29,15 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.exceptions.InsufficientBalanceException;
+import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
+import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -50,13 +53,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BTCWalletServiceImpl implements BTCWalletService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BTCWalletServiceImpl.class);
-
+	
 	@Autowired
 	private Erc20TokenService erc20TokenService;
-
+	
 	@Autowired
 	private OrdersService ordersService;
-
+	
+	@Autowired
+	private CurrencyService currencyService;
+	
+	@Autowired
+	private WithdrawalFeeService withdrawalFeeService;
 
 	/**
 	 * creating BIP32 hierarchical deterministic (HD) wallets
@@ -71,10 +79,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
-	
 	@Autowired
 	private LocaleService localeService;
-	
+
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -201,49 +208,50 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param availableBalance
-	 * @param availableBalanceLimitToWithdraw
-	 * @param withdrawAmount
-	 * @return
-	 */
+	
 	@Override
-	public boolean validateAvailableWalletBalance(Double availableBalance, Double availableBalanceLimitToWithdraw,
-			Double withdrawAmount) {
-		if (availableBalance >= withdrawAmount && availableBalance >= availableBalanceLimitToWithdraw) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * 
-	 * @param availableBalance
-	 * @param withdrawAmount
-	 * @return
-	 */
-	@Override
-	public boolean validateWithdrawAmount(Double availableBalance, Double withdrawAmount) {
-		if (availableBalance >= withdrawAmount) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) throws InsufficientBalanceException {
+	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount)
+			throws InsufficientBalanceException {
 		Double availableBalance = 0.0;
-		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
-		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
-		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, erc20Token.getCurrency(), erc20Token.getCurrency());
+		Currency currency = currencyService.findByCurrencyAbbreviation(tokenName);
+		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(currency.getCurrencyId()).getMinWithDrawAmount();
+		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
+			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
+		}
+		String balance = getWalletBalnce(user.getBtcWalletUuid());
+		balance = balance.replace("BTC", "");
+		balance = balance.trim();
+		availableBalance = Double.valueOf(balance);
+		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, currency, currency);
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
-		if (availableBalance >= (withdrawAmount+placeOrderVolume)) {
+		if (availableBalance >= (withdrawAmount + placeOrderVolume)) {
 			return true;
+		} else {
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
 		}
-		else {
-			throw new InsufficientBalanceException(MessageFormat.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
+	}
+
+	@Override
+	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount)
+			throws InsufficientBalanceException {
+		Double availableBalance = 0.0;
+		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
+		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(erc20Token.getCurrency().getCurrencyId()).getMinWithDrawAmount();
+		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
+			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
+		}
+		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
+		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, erc20Token.getCurrency(),
+				erc20Token.getCurrency());
+		logger.debug("Available balance: {}", availableBalance);
+		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
+		if (availableBalance >= (withdrawAmount + placeOrderVolume)) {
+			return true;
+		} else {
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
 		}
 	}
 
@@ -271,5 +279,4 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
 	}
-
 }
