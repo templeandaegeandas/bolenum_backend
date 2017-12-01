@@ -162,11 +162,15 @@ public class DisputeController {
 	/**
 	 * 
 	 * @param disputeId
+	 * @param commentForDisputeRaiser
+	 * @param commentForDisputeRaisedAgainst
+	 * @param disputeStatus
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.RAISED_DISPUTE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> actionOnRaisedDispute(@RequestParam("disputeId") Long disputeId,
-			@RequestParam("commentByAdmin") String commentByAdmin,
+			@RequestParam("commentForDisputeRaiser") String commentForDisputeRaiser,
+			@RequestParam("commentForDisputeRaisedAgainst") String commentForDisputeRaisedAgainst,
 			@RequestParam("disputeStatus") DisputeStatus disputeStatus) {
 
 		DisputeOrder disputeOrder = disputeService.getDisputeOrderByID(disputeId);
@@ -181,13 +185,13 @@ public class DisputeController {
 					localeService.getMessage("dispute.order.already.completed"), null);
 		}
 
-		DisputeOrder response = disputeService.performActionOnRaisedDispute(disputeOrder, commentByAdmin,
-				disputeStatus);
+		DisputeOrder response = disputeService.performActionOnRaisedDispute(disputeOrder, commentForDisputeRaiser,
+				commentForDisputeRaisedAgainst, disputeStatus);
 
 		if (response != null) {
 			User disputeRaiser = response.getDisputeRaiser();
 			User disputeRaisedAgainst = response.getDisputeRaisedAgainst();
-			disputeService.sendDisputeNotification(response,disputeRaiser, disputeRaisedAgainst);
+			disputeService.sendDisputeNotification(response, disputeRaiser, disputeRaisedAgainst);
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("dispute.order.action.success"), response);
 		} else {

@@ -97,7 +97,8 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public DisputeOrder raiseDispute(Long orderId, Long transactionId, String comment, MultipartFile file)
+	public DisputeOrder raiseDispute(Long orderId, Long transactionId, String commentByDisputeRaiser,
+			MultipartFile file)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 
 		Orders order = ordersRepository.findOne(orderId);
@@ -113,7 +114,7 @@ public class DisputeServiceImpl implements DisputeService {
 			DisputeOrder disputeOrder = new DisputeOrder();
 			disputeOrder.setDisputeRaiser(disputeRaiser);
 			disputeOrder.setDisputeStatus(DisputeStatus.RAISED);
-			disputeOrder.setComment(comment);
+			disputeOrder.setCommentByDisputeRaiser(commentByDisputeRaiser);
 			disputeOrder.setTransactionId(transactionId);
 			disputeOrder.setDisputeRaisedAgainst(disputeRaisedAgainst);
 			DisputeOrder response = uploadProofDocument(file, disputeOrder, disputeRaiser);
@@ -177,19 +178,20 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentByAdmin,
-			DisputeStatus disputeStatus) {
+	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentForDisputeRaiser,
+			String commentForDisputeRaisedAgainst, DisputeStatus disputeStatus) {
 
 		if (DisputeStatus.RAISED.equals(disputeOrder.getDisputeStatus())
 				&& disputeStatus.equals(DisputeStatus.INPROCESS)) {
 			disputeOrder.setDisputeStatus(disputeStatus);
-			disputeOrder.setCommentByAdmin(commentByAdmin);
+			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
+			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
 
-		}
-		if (DisputeStatus.INPROCESS.equals(disputeOrder.getDisputeStatus())
+		} else if (DisputeStatus.INPROCESS.equals(disputeOrder.getDisputeStatus())
 				&& disputeStatus.equals(DisputeStatus.COMPLETED)) {
 			disputeOrder.setDisputeStatus(disputeStatus);
-			disputeOrder.setCommentByAdmin(commentByAdmin);
+			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
+			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
 		}
 		return disputeOrderRepo.saveAndFlush(disputeOrder);
 	}
@@ -203,17 +205,17 @@ public class DisputeServiceImpl implements DisputeService {
 		String messageForDisputeRaiser = "hi , " + "  " + disputeRaiser.getFirstName() + '\n'
 				+ "your have requested to dispute your order against " + disputeRaisedAgainst.getFirstName()
 				+ ".your order id is" + disputeOrder.getOrderId() + "and your dispute is "
-				+ disputeOrder.getDisputeStatus() + disputeOrder.getCommentByAdmin();
+				+ disputeOrder.getDisputeStatus() + disputeOrder.getCommentForDisputeRaiser();
 
 		notificationService.sendNotificationForDispute(disputeRaiser, messageForDisputeRaiser);
 
 		String messageForDisputeRaisedAgainst = "hi , " + disputeRaisedAgainst.getFirstName() + '\n'
 				+ disputeRaiser.getFirstName() + "has raised dispute against you for order id "
-				+ disputeOrder.getOrderId() + disputeOrder.getCommentByAdmin();
+				+ disputeOrder.getOrderId() + disputeOrder.getCommentForDisputeRaisedAgainst();
 
 		notificationService.sendNotificationForDispute(disputeRaisedAgainst, messageForDisputeRaisedAgainst);
 
-		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getCommentByAdmin());
+		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getReason());
 
 	}
 

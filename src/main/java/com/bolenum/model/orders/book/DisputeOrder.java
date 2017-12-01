@@ -2,6 +2,7 @@ package com.bolenum.model.orders.book;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -47,9 +48,20 @@ public class DisputeOrder {
 
 	private DisputeStatus disputeStatus;
 
-	private String comment;
-	
-	private String commentByAdmin;
+	@Column(length = 1337)
+	private String commentByDisputeRaiser;
+
+	@Column(length = 1337)
+	private String commentByDisputeRaisedAgainst;
+
+	@Column(length = 1337)
+	private String commentForDisputeRaiser;
+
+	@Column(length = 1337)
+	private String commentForDisputeRaisedAgainst;
+
+	@Column(length = 1337)
+	private String reason;
 
 	@CreationTimestamp
 	private Date createdOn;
@@ -129,12 +141,44 @@ public class DisputeOrder {
 		this.disputeStatus = disputeStatus;
 	}
 
-	public String getComment() {
-		return comment;
+	public String getCommentByDisputeRaiser() {
+		return commentByDisputeRaiser;
 	}
 
-	public void setComment(String comment) {
-		this.comment = comment;
+	public void setCommentByDisputeRaiser(String commentByDisputeRaiser) {
+		this.commentByDisputeRaiser = commentByDisputeRaiser;
+	}
+
+	public String getCommentByDisputeRaisedAgainst() {
+		return commentByDisputeRaisedAgainst;
+	}
+
+	public void setCommentByDisputeRaisedAgainst(String commentByDisputeRaisedAgainst) {
+		this.commentByDisputeRaisedAgainst = commentByDisputeRaisedAgainst;
+	}
+
+	public String getCommentForDisputeRaiser() {
+		return commentForDisputeRaiser;
+	}
+
+	public void setCommentForDisputeRaiser(String commentForDisputeRaiser) {
+		this.commentForDisputeRaiser = commentForDisputeRaiser;
+	}
+
+	public String getCommentForDisputeRaisedAgainst() {
+		return commentForDisputeRaisedAgainst;
+	}
+
+	public void setCommentForDisputeRaisedAgainst(String commentForDisputeRaisedAgainst) {
+		this.commentForDisputeRaisedAgainst = commentForDisputeRaisedAgainst;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
 	}
 
 	public Date getCreatedOn() {
@@ -151,14 +195,6 @@ public class DisputeOrder {
 
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
-	}
-	
-	public String getCommentByAdmin() {
-		return commentByAdmin;
-	}
-
-	public void setCommentByAdmin(String commentByAdmin) {
-		this.commentByAdmin = commentByAdmin;
 	}
 
 }
