@@ -8,7 +8,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import org.hibernate.annotations.CreationTimestamp;
-
+/**
+ * 
+ * @author Himanshu Kumar
+ *
+ */
 @Entity
 public class Error {
 

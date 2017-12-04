@@ -19,4 +19,6 @@ public interface NotificationService {
 
 	public Page<Notification> getNotification(User receiver, int pageNumber, int pageSize);
 
+	boolean sendNotificationForDispute(User user, String message);
+
 }

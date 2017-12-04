@@ -232,6 +232,7 @@ public class TransactionServiceImpl implements TransactionService {
 		if (fee != null) {
 			txFeePerKb = fee.getFee();
 		}
+		logger.debug("perform btc trnsaction with fee/KB: {}", decimalFormat.format(txFeePerKb));
 		RestTemplate restTemplate = new RestTemplate();
 		String url = BTCUrlConstant.CREATE_TX;
 		HttpHeaders headers = new HttpHeaders();
@@ -384,6 +385,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Async
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
 			boolean isFee) {
+
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
 		String msg = "", msg1 = "";
 		logger.debug("perform transaction for admin fee: {}", isFee);

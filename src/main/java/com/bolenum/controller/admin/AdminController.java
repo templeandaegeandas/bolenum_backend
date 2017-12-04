@@ -120,7 +120,7 @@ public class AdminController {
 
 	/**
 	 * to get the fee details of system
-	 * 
+	 *
 	 * @return transaction fee
 	 */
 	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.GET)

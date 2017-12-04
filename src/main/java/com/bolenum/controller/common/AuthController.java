@@ -38,7 +38,12 @@ import io.swagger.annotations.Api;
 /**
  * @author chandan kumar singh
  * @date 13-Sep-2017
+ * 
+ * Auth controller contains all functionality which requires authentication  like login, logout, 
+ * and functionality used for reset password
  */
+
+
 @RestController
 @Api(value = "Authentication Controller")
 public class AuthController {
@@ -124,7 +129,7 @@ public class AuthController {
 	}
 
 	/**
-	 * for forget password
+	 * used for forget password
 	 * 
 	 * @param email
 	 * @return
@@ -165,11 +170,14 @@ public class AuthController {
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localeService.getMessage("token.invalid"));
 		}
+
 		User verifiedUser = authService.verifyTokenForResetPassword(token);
+		
 		if (verifiedUser == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("token.invalid"),
 					null);
 		}
+		
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.CONFLICT, true,
 					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());

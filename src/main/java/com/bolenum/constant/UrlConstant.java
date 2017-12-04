@@ -6,7 +6,9 @@ package com.bolenum.constant;
  * @Date 04-Sep-2017
  */
 public class UrlConstant {
+	
 	private UrlConstant() {
+		
 	}
 
 	public static final String BASE_URI_V1 = "/api/v1/";
@@ -35,6 +37,7 @@ public class UrlConstant {
 	public static final String RESEND_OTP = "resend/otp";
 	public static final String GET_COUNTRIES_LIST = "countries/list";
 	public static final String GET_STATE_BY_COUNTRY_ID = "states";
+	
 	
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";
@@ -117,6 +120,13 @@ public class UrlConstant {
 	public static final String WS_LISTNER_ORDER_SELLER_CONFIRM = "/listner/order/confirm";
 	public static final String WS_LISTNER_WITHDRAW = "/listner/withdraw";
 
+	
+	/******************************* Dispute API *****************************/
+	public static final String UPLOAD_PROOF_DOCUMENT_FOR_DISPUTE="document/proof/dispute";
+	public static final String RAISE_DISPUTE="raise/dispute";
+	public static final String RAISED_DISPUTE_ORDER="raised/dispute";
+	public static final String RAISED_DISPUTE_LIST="raised/dispute/list";
+	public static final String ACTION_ON_RAISED_DISPUTE_ORDER="action/raised/dispute";
 	
 }
 	

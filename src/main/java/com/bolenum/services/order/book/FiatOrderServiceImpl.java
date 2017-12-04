@@ -323,7 +323,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
 					orderType, OrderStatus.SUBMITTED, pairId, pageable);
 		}
-		return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
+		return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
 				orderType, OrderStatus.SUBMITTED, pairId, pageable);
 	}
 

@@ -11,6 +11,11 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import org.hibernate.validator.constraints.NotBlank;
 
+/**
+ * 
+ * @author Himanshu Kumar
+ *
+ */
 @Entity
 public class Role {
 

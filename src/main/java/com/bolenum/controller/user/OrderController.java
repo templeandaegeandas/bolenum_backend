@@ -140,9 +140,10 @@ public class OrderController {
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		List<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
+		Page<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(pageNumber, pageSize, sortOrder, sortBy, user, OrderStatus.SUBMITTED);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
+
 	@RequestMapping(value = UrlConstant.ORDER_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrderDetails(@RequestParam("orderId") long orderId) {
 		User user = GenericUtils.getLoggedInUser();
