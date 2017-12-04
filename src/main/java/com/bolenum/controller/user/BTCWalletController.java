@@ -85,9 +85,13 @@ public class BTCWalletController {
 		Map<String, Object> map = new HashMap<>();
 		switch (currencyType) {
 		case "CRYPTO":
+
 			switch (coinCode) {
 			case "BTC":
-				map = btcWalletService.getWalletAddressAndQrCode(user.getBtcWalletUuid());
+				Map<String, Object> mapAddressAndBal = new HashMap<>();
+				mapAddressAndBal.put("address", btcWalletService.getWalletAddress(user.getBtcWalletUuid()));
+				mapAddressAndBal.put("balance", btcWalletService.getWalletBalnce(user.getBtcWalletUuid()));
+				map.put("data", mapAddressAndBal);
 				break;
 			case "ETH":
 				Double balance = etherumWalletService.getWalletBalance(user);

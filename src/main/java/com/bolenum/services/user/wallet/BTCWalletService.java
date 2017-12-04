@@ -3,12 +3,9 @@
  */
 package com.bolenum.services.user.wallet;
 
-import java.util.Map;
-
-import com.bolenum.model.User;
-
 import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Transaction;
+import com.bolenum.model.User;
 
 /**
  * @author chandan kumar singh
@@ -21,13 +18,6 @@ public interface BTCWalletService {
 	 * 
 	 */
 	String createHotWallet(String uuid);
-
-	/**
-	 * @description getWalletAddressAndQrCode @param @return
-	 * List<String> @exception
-	 *
-	 */
-	Map<String, Object> getWalletAddressAndQrCode(String uuid);
 
 	String getWalletBalnce(String uuid);
 
