@@ -232,7 +232,6 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		}
 		order.setVolume(order.getVolume() + order.getLockedVolume());
 		order.setLockedVolume(0);
-		order.setMatchedOrder(null);
 		order.setOrderStatus(OrderStatus.CANCELLED);
 		try {
 			logger.debug("matched order saving completed and order saving started");
