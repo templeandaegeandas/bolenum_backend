@@ -129,10 +129,10 @@ public class UserServiceImpl implements UserService {
 	 * to re register user if already details present in user table
 	 * 
 	 */
-	
+
 	@Override
 	public void reRegister(UserSignupForm userSignupForm) {
-		User user=userRepository.findByEmailId(userSignupForm.getEmailId());
+		User user = userRepository.findByEmailId(userSignupForm.getEmailId());
 		List<AuthenticationToken> verificationToken = authenticationTokenRepo.findByUserAndTokentype(user,
 				TokenType.REGISTRATION);
 
@@ -177,9 +177,14 @@ public class UserServiceImpl implements UserService {
 			user.setMiddleName(editUserForm.getMiddleName());
 		}
 
-		if (editUserForm.getLastName() != null) {
-			user.setLastName(editUserForm.getLastName());
-		}
+		user.setLastName(editUserForm.getLastName());
+
+		// if (editUserForm.getLastName() != null) {
+		// user.setLastName(editUserForm.getLastName());
+		// } else if (editUserForm.getLastName() == null && user.getLastName() == null)
+		// {
+		// user.setLastName(editUserForm.getLastName());
+		// }
 
 		if (editUserForm.getAddress() != null) {
 			user.setAddress(editUserForm.getAddress());
@@ -331,4 +336,5 @@ public class UserServiceImpl implements UserService {
 		}
 		return true;
 	}
+
 }

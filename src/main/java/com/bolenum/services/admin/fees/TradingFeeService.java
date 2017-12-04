@@ -17,4 +17,6 @@ public interface TradingFeeService {
 	public TradingFee saveTradingFee(TradingFee tradingFee);
 
 	public TradingFee getTradingFee();
+	
+	public double calculateFee(double amount);
 }

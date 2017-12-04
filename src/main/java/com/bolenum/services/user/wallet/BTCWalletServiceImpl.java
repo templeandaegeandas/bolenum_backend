@@ -53,16 +53,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BTCWalletServiceImpl implements BTCWalletService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BTCWalletServiceImpl.class);
-	
+
 	@Autowired
 	private Erc20TokenService erc20TokenService;
-	
+
 	@Autowired
 	private OrdersService ordersService;
-	
+
 	@Autowired
 	private CurrencyService currencyService;
-	
+
 	@Autowired
 	private WithdrawalFeeService withdrawalFeeService;
 
@@ -82,6 +82,10 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Autowired
 	private LocaleService localeService;
 
+	/**
+	 * used to create hot wallet for Bitcoin
+	 * 
+	 */
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -149,7 +153,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	/**
-	 * to get bitcoin wallet balance
+	 * to get Bitcoin wallet balance
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -208,13 +212,22 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		return false;
 	}
 
-	
+	/**
+	 * used to validate available balance in wallet in case of doing transaction
+	 * during trading and withdrawal
+	 * 
+	 * @param availableBalance
+	 * @param availableBalanceLimitToWithdraw
+	 * @param withdrawAmount
+	 * @return
+	 */
 	@Override
 	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount)
 			throws InsufficientBalanceException {
 		Double availableBalance = 0.0;
 		Currency currency = currencyService.findByCurrencyAbbreviation(tokenName);
-		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(currency.getCurrencyId()).getMinWithDrawAmount();
+		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(currency.getCurrencyId())
+				.getMinWithDrawAmount();
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
@@ -238,7 +251,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			throws InsufficientBalanceException {
 		Double availableBalance = 0.0;
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
-		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(erc20Token.getCurrency().getCurrencyId()).getMinWithDrawAmount();
+		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(erc20Token.getCurrency().getCurrencyId())
+				.getMinWithDrawAmount();
+
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}

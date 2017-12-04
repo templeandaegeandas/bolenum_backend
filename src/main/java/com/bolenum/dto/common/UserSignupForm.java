@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @date 12-Sep-2017
  */
 public class UserSignupForm {
-	
+
 	@ApiModelProperty(hidden = true)
 	private Long userId;
 
@@ -38,9 +38,9 @@ public class UserSignupForm {
 	@Pattern(regexp = "(^[a-zA-Z]{3,}$)", message = "Last name must be valid & 3 characters and above")
 	private String lastName;
 
-	@NotBlank(message="Please enter email id")
+	@NotBlank(message = "Please enter email id")
 	private String emailId;
-	
+
 	@NotNull
 	@Length(min = 8, max = 64, message = "password length must be between 8 and 64 character")
 	@Pattern.List({ @Pattern(regexp = "(?=.*[0-9]).+", message = "Password must contain one digit."),
@@ -66,7 +66,7 @@ public class UserSignupForm {
 	private String gender;
 
 	private Date dob;
-	
+
 	private Boolean termsConditions;
 
 	/**
@@ -228,7 +228,7 @@ public class UserSignupForm {
 
 	/**
 	 * @param mobileNumber
-	 * the mobileNumber to set
+	 *            the mobileNumber to set
 	 */
 	public void setMobileNumber(String mobileNumber) {
 		this.mobileNumber = mobileNumber;
@@ -278,13 +278,12 @@ public class UserSignupForm {
 		return check;
 	}
 
-
 	@AssertTrue(message = "enter valid email")
 	private boolean isMailValid() {
 		boolean check = GenericUtils.isValidMail(this.emailId);
 		return check;
 	}
-	
+
 	public User copy(User user) {
 		user.setFirstName(this.firstName);
 		user.setMiddleName(this.middleName);

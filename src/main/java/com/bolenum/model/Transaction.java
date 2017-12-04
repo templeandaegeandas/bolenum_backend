@@ -59,15 +59,6 @@ public class Transaction {
 	
 	private String currencyName;
 	
-
-	public String getCurrencyName() {
-		return currencyName;
-	}
-
-	public void setCurrencyName(String currencyName) {
-		this.currencyName = currencyName;
-	}
-
 	@ManyToOne
 	private User fromUser;
 	
@@ -117,6 +108,15 @@ public class Transaction {
 	public Date getCreatedOn() {
 		return createdOn;
 	}
+	
+	public String getCurrencyName() {
+		return currencyName;
+	}
+
+	public void setCurrencyName(String currencyName) {
+		this.currencyName = currencyName;
+	}
+
 
 	/**
 	 * the createdOn to set
