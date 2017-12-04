@@ -252,7 +252,6 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		Orders matched = exitingOrder.getMatchedOrder();
 		String msg = "";
 		User buyer = null, seller = null;
-		System.out.println(matched);
 		if (matched != null) {
 			if (OrderType.BUY.equals(exitingOrder.getOrderType())) {
 				buyer = exitingOrder.getUser();
@@ -267,7 +266,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				ordersRepository.save(matched);
 				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_BUYER_CONFIRM,
 						MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
-				System.out.println(MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
+				logger.debug("WebSocket message: {}", MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
 				return true;
 			} else {
 				logger.error("order is of SELL type");
