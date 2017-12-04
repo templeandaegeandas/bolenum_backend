@@ -276,10 +276,15 @@ public class UserController {
 	 * @throws InvalidOtpException
 	 */
 	@RequestMapping(value = UrlConstant.VERIFY_OTP, method = RequestMethod.PUT)
-	public ResponseEntity<Object> verify(@RequestParam("otp") Integer otp)
-			throws PersistenceException, InvalidOtpException {
+	public ResponseEntity<Object> verify(@RequestParam("otp") Integer otp) {
 		User user = GenericUtils.getLoggedInUser();
-		Boolean response = userService.verifyOTP(otp, user);
+		Boolean response = null;
+		try {
+			response = userService.verifyOTP(otp, user);
+		} catch (InvalidOtpException e) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage(e.getMessage()),
+					response);
+		}
 		if (response) {
 			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.verified"), null);
 		} else {
