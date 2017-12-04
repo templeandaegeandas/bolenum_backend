@@ -86,7 +86,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * used to create hot wallet for Bitcoin
 	 * 
 	 */
-
 	@Override
 	public String createHotWallet(String uuid) {
 		String url = BTCUrlConstant.HOT_WALLET;
@@ -222,7 +221,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * @param withdrawAmount
 	 * @return
 	 */
-
 	@Override
 	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount)
 			throws InsufficientBalanceException {
@@ -233,7 +231,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
-
 		String balance = getWalletBalnce(user.getBtcWalletUuid());
 		balance = balance.replace("BTC", "");
 		balance = balance.trim();
@@ -249,9 +246,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 	}
 
-	/**
-	 * 
-	 */
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount)
 			throws InsufficientBalanceException {
@@ -259,6 +253,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(erc20Token.getCurrency().getCurrencyId())
 				.getMinWithDrawAmount();
+
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
