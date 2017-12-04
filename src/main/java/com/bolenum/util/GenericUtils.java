@@ -57,7 +57,7 @@ public class GenericUtils {
 		return amountInEther.doubleValue();
 	}
 
-	public double getEstimetedFeeEthereum() {
+	public static double getEstimetedFeeEthereum() {
 		DecimalFormat df = new DecimalFormat("0");
 		df.setMaximumFractionDigits(8);
 		Web3j web = EthereumServiceUtil.getWeb3jInstance();

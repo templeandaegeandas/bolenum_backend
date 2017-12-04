@@ -33,6 +33,7 @@ import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.CurrencyService;
@@ -40,6 +41,7 @@ import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
+import com.bolenum.util.GenericUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -197,15 +199,19 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount)
 			throws InsufficientBalanceException {
-		Double availableBalance = 0.0;
+		Double availableBalance = 0.0, minWithdrawAmount = 0.0, bolenumFee = 0.0, networkFee = 0.0;
 		Currency currency = currencyService.findByCurrencyAbbreviation(tokenName);
 		/**
 		 * getting currency minimum withdraw amount
 		 */
-		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(currency.getCurrencyId())
-				.getMinWithDrawAmount();
-
-		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
+		WithdrawalFee withdrawalFee = withdrawalFeeService.getWithdrawalFee(currency.getCurrencyId());
+		if (withdrawalFee != null) {
+			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
+			bolenumFee = withdrawalFee.getFee();
+		}
+		logger.debug("Minimum withdraw ammount:{} Withdraw fee:{} of currency:{}", minWithdrawAmount, bolenumFee,
+				currency.getCurrencyName());
+		if (withdrawAmount < (minWithdrawAmount + bolenumFee)) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
 		if ("BTC".equals(tokenName)) {
@@ -215,11 +221,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			availableBalance = Double.valueOf(balance);
 		} else {
 			availableBalance = etherumWalletService.getWalletBalance(user);
+			networkFee = GenericUtils.getEstimetedFeeEthereum();
 		}
+		logger.debug("Available balance: {} estimeted network fee: {}", availableBalance, networkFee);
 		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, currency, currency);
-		logger.debug("Available balance: {}", availableBalance);
-		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
-		if (availableBalance >= (withdrawAmount + placeOrderVolume)) {
+		logger.debug("Order Book balance:{} of user: {}", placeOrderVolume, user.getEmailId());
+		if (availableBalance >= (withdrawAmount + placeOrderVolume + bolenumFee + networkFee)) {
 			return true;
 		} else {
 			throw new InsufficientBalanceException(MessageFormat
