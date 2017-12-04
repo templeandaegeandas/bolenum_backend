@@ -208,7 +208,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 		ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-		System.out.println("hiiii" + txRes);
+		logger.debug("Transaction response: {}", txRes);
 		return false;
 	}
 

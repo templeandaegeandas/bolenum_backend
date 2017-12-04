@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -288,19 +289,18 @@ public class UserController {
 	@RequestMapping(value = UrlConstant.VERIFY_OTP, method = RequestMethod.PUT)
 	public ResponseEntity<Object> verify(@RequestParam("otp") Integer otp) {
 		User user = GenericUtils.getLoggedInUser();
-		Boolean response = null;
+		Boolean response;
 		try {
 			response = userService.verifyOTP(otp, user);
+			if (response) {
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.verified"), null);
+			}
 		} catch (InvalidOtpException e) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage(e.getMessage()),
-					response);
-		}
-		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.verified"), null);
-		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("otp.not.verified"),
-					response);
+					Optional.empty());
 		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("otp.not.verified"),
+				Optional.empty());
 	}
 
 	/**
