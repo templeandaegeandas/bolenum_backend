@@ -2,15 +2,15 @@ package com.bolenum.enums;
 
 public enum DisputeStatus {
 
-	RAISED("raised"), COMPLETED("completed"), INPROCESS("inprocess");
+	RAISED("raised"), COMPLETED("completed"), INPROCESS("inprocess"),CANCELED("canceled");
 
-	private String disputeStatus;
+	private String dispute;
 
-	private DisputeStatus(String disputeStatus) {
-		this.disputeStatus = disputeStatus;
+	private DisputeStatus(String dispute) {
+		this.dispute = dispute;
 	}
 
 	public String getDocumentType() {
-		return disputeStatus;
+		return dispute;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.bolenum.enums.TokenType;
 import com.bolenum.model.AuthenticationToken;
@@ -22,8 +23,7 @@ public interface AuthenticationTokenRepo extends JpaRepository<AuthenticationTok
 	List<AuthenticationToken> findByUserAndIsDeleted(User user, boolean isDeleted);
 	List<AuthenticationToken> findByUserAndIsDeletedAndTokentype(User user, boolean isDeleted,TokenType token);
 
-	
-	Long countAuthenticationTokenByCreatedOnBetween(Date startDate,Date endDate);
+	@Query("Select count(distinct a.user) from AuthenticationToken a where a.tokentype=?1 and a.createdOn <= ?2 and a.createdOn >= ?3")
+	Long countAuthenticationTokenByTokentypeCreatedOnBetween(TokenType tokentype ,Date startDate,Date endDate);
  	
-
 }

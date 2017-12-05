@@ -83,8 +83,6 @@ public class DisputeController {
 
 			DisputeOrder response = disputeService.raiseDispute(orderId, transactionId, commentByDisputeRaiser, file);
 
-			// DisputeOrder responseOfProofUpload =disputeService.uploadProofDocument(file,
-			// response.getId(), user.getUserId());
 			if (response != null) {
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
@@ -98,36 +96,6 @@ public class DisputeController {
 				null);
 
 	}
-
-	/**
-	 * 
-	 * @param disputeId
-	 * @param file
-	 * @param documentType
-	 * @return
-	 * @throws IOException
-	 * @throws PersistenceException
-	 * @throws MaxSizeExceedException
-	 * @throws MobileNotVerifiedException
-	 * 
-	 */
-
-	/*
-	 * @RequestMapping(value = UrlConstant.UPLOAD_PROOF_DOCUMENT_FOR_DISPUTE, method
-	 * = RequestMethod.POST) public ResponseEntity<Object>
-	 * uploadProofDocumentForDispute(@RequestParam("disputeId") Long disputeId,
-	 * 
-	 * @RequestParam("file") MultipartFile file, @RequestParam String documentType)
-	 * throws IOException, PersistenceException, MaxSizeExceedException,
-	 * MobileNotVerifiedException {
-	 * 
-	 * User user = GenericUtils.getLoggedInUser(); DisputeOrder response =
-	 * disputeService.uploadProofDocument(file, disputeId, user.getUserId()); if
-	 * (response != null) { return ResponseHandler.response(HttpStatus.OK, false,
-	 * localeService.getMessage("dispute.proof.uploaded.success"), response); } else
-	 * { return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-	 * localeService.getMessage("dispute.proof.uploaded.failed"), null); } }
-	 */
 
 	/**
 	 * 
