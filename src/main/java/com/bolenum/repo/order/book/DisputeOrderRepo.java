@@ -9,7 +9,7 @@ import com.bolenum.model.orders.book.DisputeOrder;
 
 public interface DisputeOrderRepo extends JpaRepository<DisputeOrder, Long> {
 
-	DisputeOrder findByOrderIdAndTransactionId(Long orderId, Long transactionId);
+	DisputeOrder findByOrderIdOrTransactionId(Long orderId, Long transactionId);
 
 	Page<DisputeOrder> findByDisputeStatus(DisputeStatus disputeStatus, Pageable pageRequest);
 

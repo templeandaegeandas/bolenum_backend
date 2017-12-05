@@ -130,7 +130,7 @@ public class DisputeServiceImpl implements DisputeService {
 	 */
 	@Override
 	public Boolean isAlreadyDisputed(Long orderId, Long transactionId) {
-		DisputeOrder disputeOrder = disputeOrderRepo.findByOrderIdAndTransactionId(orderId, transactionId);
+		DisputeOrder disputeOrder = disputeOrderRepo.findByOrderIdOrTransactionId(orderId, transactionId);
 		if (disputeOrder == null) {
 			return true;
 		}
