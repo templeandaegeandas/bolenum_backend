@@ -36,6 +36,7 @@ import io.swagger.annotations.Api;
 
 @RestController
 @Api(value = "Dispute Controller")
+@RequestMapping(value = UrlConstant.BASE_URI_V1)
 public class DisputeController {
 
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -59,8 +60,9 @@ public class DisputeController {
 	 * @throws MobileNotVerifiedException
 	 */
 	@RequestMapping(value = UrlConstant.RAISE_DISPUTE, method = RequestMethod.POST)
-	public ResponseEntity<Object> requestDisputeOrder(@RequestParam Long orderId, @RequestParam Long transactionId,
-			@RequestParam("file") MultipartFile file, @RequestParam String comment)
+	public ResponseEntity<Object> requestDisputeOrder(@RequestParam("orderId") Long orderId,
+			@RequestParam(required = false) Long transactionId, @RequestParam("file") MultipartFile file,
+			@RequestParam("commentByDisputeRaiser") String commentByDisputeRaiser)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 
 		Boolean isEligible = disputeService.checkEligibilityToDispute(orderId);
@@ -79,7 +81,7 @@ public class DisputeController {
 						localeService.getMessage("dispute.already.raised"), null);
 			}
 
-			DisputeOrder response = disputeService.raiseDispute(orderId, transactionId, comment, file);
+			DisputeOrder response = disputeService.raiseDispute(orderId, transactionId, commentByDisputeRaiser, file);
 
 			// DisputeOrder responseOfProofUpload =disputeService.uploadProofDocument(file,
 			// response.getId(), user.getUserId());
