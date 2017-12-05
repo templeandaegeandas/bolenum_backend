@@ -60,8 +60,9 @@ public class DisputeController {
 	 * @throws MobileNotVerifiedException
 	 */
 	@RequestMapping(value = UrlConstant.RAISE_DISPUTE, method = RequestMethod.POST)
-	public ResponseEntity<Object> requestDisputeOrder(@RequestParam Long orderId, @RequestParam(required = false) Long transactionId,
-			@RequestParam("file") MultipartFile file, @RequestParam String commentByDisputeRaiser)
+	public ResponseEntity<Object> requestDisputeOrder(@RequestParam("orderId") Long orderId,
+			@RequestParam(required = false) Long transactionId, @RequestParam("file") MultipartFile file,
+			@RequestParam("commentByDisputeRaiser") String commentByDisputeRaiser)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 
 		Boolean isEligible = disputeService.checkEligibilityToDispute(orderId);
