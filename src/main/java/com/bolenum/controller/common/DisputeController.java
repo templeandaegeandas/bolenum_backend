@@ -36,6 +36,7 @@ import io.swagger.annotations.Api;
 
 @RestController
 @Api(value = "Dispute Controller")
+@RequestMapping(value = UrlConstant.BASE_URI_V1)
 public class DisputeController {
 
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -59,7 +60,7 @@ public class DisputeController {
 	 * @throws MobileNotVerifiedException
 	 */
 	@RequestMapping(value = UrlConstant.RAISE_DISPUTE, method = RequestMethod.POST)
-	public ResponseEntity<Object> requestDisputeOrder(@RequestParam Long orderId, @RequestParam Long transactionId,
+	public ResponseEntity<Object> requestDisputeOrder(@RequestParam Long orderId, @RequestParam(required = false) Long transactionId,
 			@RequestParam("file") MultipartFile file, @RequestParam String comment)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 
