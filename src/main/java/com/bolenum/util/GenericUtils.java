@@ -53,7 +53,7 @@ public class GenericUtils {
 		BigDecimal balance = new BigDecimal(amount);
 		BigDecimal conversionRate = new BigDecimal(new BigInteger("1000000000000000000"));
 		BigDecimal amountInEther = balance.divide(conversionRate);
-		logger.debug("amount in eth: {}", amountInEther.doubleValue());
+		logger.debug("amount in eth: {}", getDecimalFormat().format(amountInEther));
 		return amountInEther.doubleValue();
 	}
 
@@ -73,5 +73,18 @@ public class GenericUtils {
 			e.printStackTrace();
 		}
 		return estimedtedFee;
+	}
+
+	public static DecimalFormat getDecimalFormat() {
+		DecimalFormat df = new DecimalFormat("0");
+		df.setMaximumFractionDigits(8);
+		return df;
+	}
+	
+	public static double getDecimalFormat(double amount) {
+		DecimalFormat df = new DecimalFormat("0");
+		df.setMaximumFractionDigits(8);
+		String formate = df.format(amount); 
+		return Double.parseDouble(formate);
 	}
 }

@@ -41,7 +41,7 @@ public class WalletServiceImpl implements WalletService {
 		case "CRYPTO":
 			switch (ticker) {
 			case "BTC":
-				balance = btcWalletService.getWalletBalnce(user.getBtcWalletUuid());
+				balance = btcWalletService.getWalletBalance(user.getBtcWalletUuid());
 				break;
 			case "ETH":
 				balance = String.valueOf(etherumWalletService.getWalletBalance(user));
