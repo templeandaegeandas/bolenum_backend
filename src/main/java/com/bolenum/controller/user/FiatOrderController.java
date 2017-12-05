@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.AddUserBankDetailsForm;
+import com.bolenum.dto.orders.OrdersDTO;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.MessageType;
 import com.bolenum.enums.OrderType;
@@ -39,6 +43,7 @@ import com.bolenum.services.order.book.FiatOrderService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.notification.NotificationService;
+import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
@@ -71,7 +76,7 @@ public class FiatOrderController {
 
 	@Autowired
 	private NotificationService notificationService;
-	
+
 	@Autowired
 	private CurrencyPairService currencyPairService;
 
@@ -122,10 +127,16 @@ public class FiatOrderController {
 	}
 
 	// @changed by vishal kumar: unrelated response removed
-	
+
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> initializeOrder(@RequestParam("pairId") long pairId,
-			@RequestParam("orderId") long matchedOrderId, @RequestBody Orders orders) {
+			@RequestParam("orderId") long matchedOrderId, @Valid @RequestBody OrdersDTO ordersDTO,
+			BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(bindingResult),
+					ErrorCollectionUtil.getErrorMap(bindingResult));
+		}
+		Orders orders = ordersDTO.copy(new Orders());
 		User user = GenericUtils.getLoggedInUser();
 		logger.debug("matched order id: {}", matchedOrderId);
 		Orders matchedOrder = ordersService.getOrderDetails(matchedOrderId);
@@ -278,26 +289,28 @@ public class FiatOrderController {
 		try {
 			res = result.get();
 			if (res) {
-				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.transaction.success"),
-						Optional.empty());
+				return ResponseHandler.response(HttpStatus.OK, false,
+						localeService.getMessage("order.transaction.success"), Optional.empty());
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}
-		
+
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 				Optional.empty());
 	}
 
 	/**
 	 * get order by order id
+	 * 
 	 * @param orderId
 	 * @param orderType
 	 * @return single order
 	 */
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_BY_ID, method = RequestMethod.GET)
-	public ResponseEntity<Object> getOrders(@RequestParam("orderId") long orderId, @RequestParam("orderType") OrderType orderType) {
+	public ResponseEntity<Object> getOrders(@RequestParam("orderId") long orderId,
+			@RequestParam("orderType") OrderType orderType) {
 		Map<String, Object> map = new HashMap<>();
 		Orders orders = ordersService.getOrderDetails(orderId);
 		if (orders != null) {
@@ -315,8 +328,7 @@ public class FiatOrderController {
 				map.put("walletAddress", userAddress.get("address"));
 				map.put("currencyAbr", userAddress.get("currencyAbbr"));
 				map.put("orderStatus", orders.getOrderStatus());
-			}
-			else {
+			} else {
 				BankAccountDetails accountDetails = bankAccountDetailsService
 						.primaryBankAccountDetails(orders.getUser());
 				map.put("accountDetails", response(accountDetails));
@@ -326,9 +338,11 @@ public class FiatOrderController {
 				map.put("orderVolume", orders.getLockedVolume());
 				map.put("orderStatus", orders.getOrderStatus());
 			}
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"), map);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"),
+					map);
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localeService.getMessage("order.create.success"), Optional.empty());
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localeService.getMessage("order.create.success"),
+				Optional.empty());
 	}
 
 	/**
@@ -340,7 +354,9 @@ public class FiatOrderController {
 	 * @return list or orders
 	 */
 	@RequestMapping(value = UrlConstant.ORDER_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getOrdersList(@RequestParam("volume") double volume, @RequestParam("price") double price, @RequestParam("orderType") OrderType orderType, @RequestParam("pairId") long pairId) {
+	public ResponseEntity<Object> getOrdersList(@RequestParam("volume") double volume,
+			@RequestParam("price") double price, @RequestParam("orderType") OrderType orderType,
+			@RequestParam("pairId") long pairId) {
 		Orders orders = new Orders();
 		orders.setVolume(volume);
 		orders.setPrice(price);
