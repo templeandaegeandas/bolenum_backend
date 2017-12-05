@@ -6,10 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.bolenum.enums.DisputeStatus;
 import com.bolenum.model.orders.book.DisputeOrder;
+import com.bolenum.model.orders.book.Orders;
 
 public interface DisputeOrderRepo extends JpaRepository<DisputeOrder, Long> {
 
-	DisputeOrder findByOrderIdOrTransactionId(Long orderId, Long transactionId);
+	DisputeOrder findByOrdersOrTransactionId(Orders order, Long transactionId);
 
 	Page<DisputeOrder> findByDisputeStatus(DisputeStatus disputeStatus, Pageable pageRequest);
 

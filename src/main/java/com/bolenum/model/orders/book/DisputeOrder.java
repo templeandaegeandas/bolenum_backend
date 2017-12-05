@@ -36,7 +36,8 @@ public class DisputeOrder {
 	@ManyToOne
 	private User disputeRaisedAgainst;
 
-	private Long orderId;
+	@ManyToOne
+	private Orders orders;
 
 	private Long transactionId;
 
@@ -93,12 +94,12 @@ public class DisputeOrder {
 		this.disputeRaisedAgainst = disputeRaisedAgainst;
 	}
 
-	public Long getOrderId() {
-		return orderId;
+	public Orders getOrders() {
+		return orders;
 	}
 
-	public void setOrderId(Long orderId) {
-		this.orderId = orderId;
+	public void setOrders(Orders orders) {
+		this.orders = orders;
 	}
 
 	public Long getTransactionId() {

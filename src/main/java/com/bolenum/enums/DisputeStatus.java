@@ -2,7 +2,7 @@ package com.bolenum.enums;
 
 public enum DisputeStatus {
 
-	RAISED("raised"), COMPLETED("completed"), INPROCESS("inprocess");
+	RAISED("raised"), COMPLETED("completed"), INPROCESS("inprocess"), CANCELLED("cancelled");
 
 	private String disputeStatus;
 

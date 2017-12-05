@@ -81,10 +81,8 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public Boolean checkExpiryToDispute(Long orderId) {
-		Orders order = ordersRepository.findOne(orderId);
-
-		Date previous = order.getCreatedOn();
+	public Boolean checkExpiryToDispute(Orders orders) {
+		Date previous = orders.getCreatedOn();
 		Date now = new Date();
 		if (now.getTime() - previous.getTime() <= 15 * 60 * 1000) {
 			return false;
@@ -97,30 +95,23 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public DisputeOrder raiseDispute(Long orderId, Long transactionId, String commentByDisputeRaiser,
+	public DisputeOrder raiseDispute(Orders order, Long transactionId, String commentByDisputeRaiser,
 			MultipartFile file)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
-
-		Orders order = ordersRepository.findOne(orderId);
-
 		Orders matchedOrder = order.getMatchedOrder();
-
 		User disputeRaisedAgainst = matchedOrder.getUser();
-
 		if (order != null && OrderStatus.LOCKED.equals(order.getOrderStatus())
 				&& OrderType.BUY.equals(order.getOrderType())) {
 
 			User disputeRaiser = order.getUser();
 			DisputeOrder disputeOrder = new DisputeOrder();
+			disputeOrder.setOrders(order);
 			disputeOrder.setDisputeRaiser(disputeRaiser);
 			disputeOrder.setDisputeStatus(DisputeStatus.RAISED);
 			disputeOrder.setCommentByDisputeRaiser(commentByDisputeRaiser);
 			disputeOrder.setTransactionId(transactionId);
 			disputeOrder.setDisputeRaisedAgainst(disputeRaisedAgainst);
-			DisputeOrder response = uploadProofDocument(file, disputeOrder, disputeRaiser);
-			return response;
-			// return disputeOrderRepo.saveAndFlush(disputeOrder);
-
+			return uploadProofDocument(file, disputeOrder, disputeRaiser);
 		}
 		return null;
 	}
@@ -129,8 +120,8 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public Boolean isAlreadyDisputed(Long orderId, Long transactionId) {
-		DisputeOrder disputeOrder = disputeOrderRepo.findByOrderIdOrTransactionId(orderId, transactionId);
+	public Boolean isAlreadyDisputed(Orders orders, Long transactionId) {
+		DisputeOrder disputeOrder = disputeOrderRepo.findByOrdersOrTransactionId(orders, transactionId);
 		if (disputeOrder == null) {
 			return true;
 		}
@@ -141,20 +132,19 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public Boolean checkEligibilityToDispute(Long orderId) {
+	public Orders checkEligibilityToDispute(Long orderId) {
 		Orders order = ordersRepository.findOne(orderId);
 		if (OrderType.BUY.equals(order.getOrderType())) {
-			return true;
+			return order;
 		}
-		return false;
+		return null;
 	}
 
 	/**
 	 * 
 	 */
 	@Override
-	public Page<DisputeOrder> getListOfDisputeOrder(int pageNumber, int pageSize, String sortBy, String sortOrder,
-			DisputeStatus disputeStatus) {
+	public Page<DisputeOrder> getListOfDisputeOrder(int pageNumber, int pageSize, String sortBy, String sortOrder) {
 		Direction sort;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;
@@ -163,7 +153,7 @@ public class DisputeServiceImpl implements DisputeService {
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 
-		return disputeOrderRepo.findByDisputeStatus(disputeStatus, pageRequest);
+		return disputeOrderRepo.findAll(pageRequest);
 	}
 
 	/**
@@ -204,14 +194,14 @@ public class DisputeServiceImpl implements DisputeService {
 
 		String messageForDisputeRaiser = "hi , " + "  " + disputeRaiser.getFirstName() + '\n'
 				+ "your have requested to dispute your order against " + disputeRaisedAgainst.getFirstName()
-				+ ".your order id is" + disputeOrder.getOrderId() + "and your dispute is "
+				+ ".your order id is" + disputeOrder.getOrders().getId() + "and your dispute is "
 				+ disputeOrder.getDisputeStatus() + disputeOrder.getCommentForDisputeRaiser();
 
 		notificationService.sendNotificationForDispute(disputeRaiser, messageForDisputeRaiser);
 
 		String messageForDisputeRaisedAgainst = "hi , " + disputeRaisedAgainst.getFirstName() + '\n'
 				+ disputeRaiser.getFirstName() + "has raised dispute against you for order id "
-				+ disputeOrder.getOrderId() + disputeOrder.getCommentForDisputeRaisedAgainst();
+				+ disputeOrder.getOrders().getId() + disputeOrder.getCommentForDisputeRaisedAgainst();
 
 		notificationService.sendNotificationForDispute(disputeRaisedAgainst, messageForDisputeRaisedAgainst);
 
