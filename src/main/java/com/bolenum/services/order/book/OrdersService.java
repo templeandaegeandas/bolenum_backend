@@ -53,8 +53,6 @@ public interface OrdersService {
 
 	String checkOrderEligibility(User user, Orders order, Long pairId);
 
-	String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded);
-
 	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
 
 	double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency);
@@ -75,5 +73,4 @@ public interface OrdersService {
 
 	Page<Orders> findOrdersListByUserAndOrderStatus(int pageNumber, int pageSize, String sortOrder, String sortBy,
 			User user, OrderStatus orderStatus);
-
 }
