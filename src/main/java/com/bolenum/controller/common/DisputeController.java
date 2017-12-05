@@ -61,7 +61,7 @@ public class DisputeController {
 	 */
 	@RequestMapping(value = UrlConstant.RAISE_DISPUTE, method = RequestMethod.POST)
 	public ResponseEntity<Object> requestDisputeOrder(@RequestParam Long orderId, @RequestParam(required = false) Long transactionId,
-			@RequestParam("file") MultipartFile file, @RequestParam String comment)
+			@RequestParam("file") MultipartFile file, @RequestParam String commentByDisputeRaiser)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 
 		Boolean isEligible = disputeService.checkEligibilityToDispute(orderId);
@@ -80,7 +80,7 @@ public class DisputeController {
 						localeService.getMessage("dispute.already.raised"), null);
 			}
 
-			DisputeOrder response = disputeService.raiseDispute(orderId, transactionId, comment, file);
+			DisputeOrder response = disputeService.raiseDispute(orderId, transactionId, commentByDisputeRaiser, file);
 
 			// DisputeOrder responseOfProofUpload =disputeService.uploadProofDocument(file,
 			// response.getId(), user.getUserId());
