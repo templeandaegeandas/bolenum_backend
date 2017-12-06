@@ -23,6 +23,7 @@ import com.bolenum.model.orders.book.Orders;
  *
  */
 public interface OrdersRepository extends JpaRepository<Orders, Long> {
+	// Double getSumVolumeByPairId(Long pairId);
 
 	List<Orders> findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType ordertype,
 			OrderStatus orderStatus, CurrencyPair pair, Double price);
@@ -68,6 +69,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 			@Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 
 	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
+	
+	Page<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus, Pageable pageable);
 
 	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(User user, OrderStatus orderStatus,
 			OrderType orderType, Currency currency);
@@ -87,9 +90,15 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 
 	Orders findByMatchedOrder(Orders orders);
 
-	Page<Orders> findByCreatedOnBetween(Date startDate, Date endDate, Pageable page);
+	@Query("Select o from Orders o where o.createdOn <= :endDate and o.createdOn >= :startDate")
+	Page<Orders> findByCreatedOnBetween(@Param("startDate")Date startDate,@Param("endDate") Date endDate,Pageable page);
+	
+	//Double totalUserBalanceInBook(User user, List<Currency> toCurrencyList, List<Currency> pairedCurrencyList);
 
+	Page<Orders> findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(Double price, OrderType orderType, OrderStatus orderStatus, long pairId, Pageable page);
+	
+	Page<Orders> findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(Double price, OrderType orderType, OrderStatus orderStatus, long pairId, Pageable page);
+	
 	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
-	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList,
-			@Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
+	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList, @Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
 }

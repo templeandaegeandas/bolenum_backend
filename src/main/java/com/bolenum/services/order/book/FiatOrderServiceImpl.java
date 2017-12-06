@@ -3,7 +3,9 @@
  */
 package com.bolenum.services.order.book;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -12,7 +14,13 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.UrlConstant;
@@ -24,6 +32,7 @@ import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
+import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.user.notification.NotificationService;
@@ -58,6 +67,11 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	@Autowired
 	private TransactionService transactionService;
 
+	@Override
+	public Orders createOrders(Orders orders) {
+		return ordersRepository.save(orders);
+	}
+
 	/**
 	 * to check the eligibility to place an order by checking available balance
 	 * of crypto currencies #return "proceed" if user have sufficient balance
@@ -70,19 +84,19 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 		Currency currency = null;
 		Currency toCurrency = currencyPair.getToCurrency().get(0);
-		if (!(toCurrency.getCurrencyType().equals(CurrencyType.FIAT))) {
+		if (!(CurrencyType.FIAT.equals(toCurrency.getCurrencyType()))) {
 			currency = toCurrency;
 		}
 
 		Currency pairCurrency = currencyPair.getPairedCurrency().get(0);
-		if (!(pairCurrency.getCurrencyType().equals(CurrencyType.FIAT))) {
+		if (!(CurrencyType.FIAT.equals(pairCurrency.getCurrencyType()))) {
 			currency = pairCurrency;
 		}
 		String tickter = null, minOrderVol = null, currencyType = null;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
 		 */
-		if (orders.getOrderType().equals(OrderType.SELL)) {
+		if (OrderType.SELL.equals(orders.getOrderType())) {
 			minOrderVol = String.valueOf(orders.getVolume());
 		} else {
 			minOrderVol = "0";
@@ -141,7 +155,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			orders.setOrderStatus(OrderStatus.LOCKED);
 
 			logger.debug("orders saving started");
-			if (orders.getOrderType().equals(OrderType.BUY)) {
+			if (OrderType.BUY.equals(orders.getOrderType())) {
 				orders.setMatchedOrder(matchedOrder);
 				buyer = orders.getUser();
 				seller = matchedOrder.getUser();
@@ -155,20 +169,19 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				logger.debug("msg1: {}", msg1);
 			}
 			orders = orderAsyncService.saveOrder(orders);
-			if (orders.getOrderType().equals(OrderType.SELL)) {
+			if (OrderType.SELL.equals(orders.getOrderType())) {
 				matchedOrder.setMatchedOrder(orders);
 				buyer = matchedOrder.getUser();
 				seller = orders.getUser();
 
 				msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
 						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
-						+ orders.getVolume() * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
+						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
 				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
 						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
-						+ orders.getVolume() * orders.getPrice() + " " + pairCurr + " with " + seller.getFirstName();
+						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + seller.getFirstName();
 				logger.debug("msg: {}", msg);
-
 			}
 			logger.debug("orders saving finished and matched order saving started");
 			orderAsyncService.saveOrder(matchedOrder);
@@ -212,15 +225,15 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		if (matched != null) {
 			matched.setVolume(matched.getVolume() + matched.getLockedVolume());
 			matched.setLockedVolume(0);
+			matched.setMatchedOrder(null);
 			matched.setOrderStatus(OrderStatus.SUBMITTED);
+			logger.debug("matched order saving start");
+			orderAsyncService.saveOrder(matched);
 		}
 		order.setVolume(order.getVolume() + order.getLockedVolume());
 		order.setLockedVolume(0);
-		order.setMatchedOrder(null);
 		order.setOrderStatus(OrderStatus.CANCELLED);
 		try {
-			logger.debug("matched order saving start");
-			orderAsyncService.saveOrder(matched);
 			logger.debug("matched order saving completed and order saving started");
 			orderAsyncService.saveOrder(order);
 			logger.debug("order saving completed");
@@ -240,7 +253,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		String msg = "";
 		User buyer = null, seller = null;
 		if (matched != null) {
-			if (exitingOrder.getOrderType().equals(OrderType.BUY)) {
+			if (OrderType.BUY.equals(exitingOrder.getOrderType())) {
 				buyer = exitingOrder.getUser();
 				seller = matched.getUser();
 				msg = "Hi " + matched.getUser().getFirstName() + " your " + matched.getOrderType() + " is in process, "
@@ -251,51 +264,83 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				notificationService.saveNotification(seller, buyer, msg);
 				matched.setConfirm(true);
 				ordersRepository.save(matched);
-				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_CONFIRM,
+				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_BUYER_CONFIRM,
 						MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
+				logger.debug("WebSocket message: {}", MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
+				return true;
 			} else {
-
+				logger.error("order is of SELL type");
 			}
-			return true;
+
 		}
 		return false;
 	}
 
 	@Override
-	public boolean processTransactionFiatOrders(Orders sellerOrder) {
+	@Transactional
+	@Async
+	public Future<Boolean> processTransactionFiatOrders(Orders sellerOrder, String currencyAbr) {
 		Orders buyersOrder = ordersRepository.findByMatchedOrder(sellerOrder);
-		String currencyAbr = null;
-		if (!(sellerOrder.getPair().getToCurrency().get(0).getCurrencyType().equals(CurrencyType.FIAT))) {
-			currencyAbr = sellerOrder.getPair().getToCurrency().get(0).getCurrencyAbbreviation();
-		} else {
-			currencyAbr = sellerOrder.getPair().getPairedCurrency().get(0).getCurrencyAbbreviation();
-		}
 		if (buyersOrder != null) {
 			User buyer = buyersOrder.getUser();
 			User seller = sellerOrder.getUser();
 			double qtyTraded = sellerOrder.getLockedVolume();
 			try {
-				Future<Boolean> result = transactionService.performTransaction(currencyAbr, qtyTraded, buyer, seller);
+				Future<Boolean> result = transactionService.performTransaction(currencyAbr, qtyTraded, buyer, seller,
+						false);
 				boolean res = result.get();
 				logger.debug("perform fiat transaction result: {} of sell order id: {} and buy order id:{}", res,
 						sellerOrder.getId(), buyersOrder.getId());
 				if (res) {
-					buyersOrder.setLockedVolume(0);
-					buyersOrder.setMatchedOrder(null);
-					buyersOrder.setOrderStatus(OrderStatus.COMPLETED);
-
 					sellerOrder.setOrderStatus(OrderStatus.COMPLETED);
 					sellerOrder.setLockedVolume(0);
+					sellerOrder.setConfirm(true);
 
 					ordersRepository.save(sellerOrder);
 					ordersRepository.save(buyersOrder);
+					Trade trade = new Trade(buyersOrder.getPrice(), qtyTraded, buyer, seller, sellerOrder.getPair(),
+							sellerOrder.getOrderStandard(), 0.0, 0.0);
+					orderAsyncService.saveTrade(trade);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error("perform fiat transaction failed: {}", e.getMessage());
 				e.printStackTrace();
 			}
-			return true;
+			return new AsyncResult<Boolean>(true);
 		}
-		return false;
+		return new AsyncResult<Boolean>(false);
+	}
+
+	@Override
+	public Page<Orders> existingOrders(Orders order, long pairId, int page, int size) {
+		OrderType orderType = OrderType.BUY;
+		Pageable pageable = new PageRequest(page, size, Direction.DESC, "price");
+		if (OrderType.BUY.equals(order.getOrderType())) {
+			orderType = OrderType.SELL;
+			pageable = new PageRequest(page, size, Direction.ASC, "price");
+			return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
+					orderType, OrderStatus.SUBMITTED, pairId, pageable);
+		}
+		return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
+				orderType, OrderStatus.SUBMITTED, pairId, pageable);
+	}
+
+	@Override
+	public Map<String, String> byersWalletAddressAndCurrencyAbbr(User user, CurrencyPair pair) {
+		Map<String, String> map = new HashMap<String, String>();
+		String currencyAbbr = "";
+		if (CurrencyType.FIAT.equals(pair.getToCurrency().get(0).getCurrencyType())) {
+			map.put("currencyAbbr", pair.getPairedCurrency().get(0).getCurrencyAbbreviation());
+			currencyAbbr = pair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		} else {
+			map.put("currencyAbbr", pair.getToCurrency().get(0).getCurrencyAbbreviation());
+			currencyAbbr = pair.getToCurrency().get(0).getCurrencyAbbreviation();
+		}
+		if (currencyAbbr.equals("BTC")) {
+			map.put("address", user.getBtcWalletAddress());
+		} else {
+			map.put("address", user.getEthWalletaddress());
+		}
+		return map;
 	}
 }

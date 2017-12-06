@@ -2,7 +2,11 @@ package com.bolenum.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-
+/**
+ * 
+ * @author Vishal Kumar
+ *
+ */
 @Entity
 public class States {
 

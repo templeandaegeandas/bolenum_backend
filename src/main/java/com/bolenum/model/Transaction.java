@@ -48,28 +48,20 @@ public class Transaction {
 	private Double txFee;
 	private Double txAmount;
 	private String txDescription;
-	
+
 	@Enumerated(EnumType.STRING)
 	private TransactionType transactionType;
+
 	@Enumerated(EnumType.STRING)
 	private TransactionStatus transactionStatus;
 	private Double gas;
 	private Double gasPrice;
-	
+
 	private String currencyName;
-	
-
-	public String getCurrencyName() {
-		return currencyName;
-	}
-
-	public void setCurrencyName(String currencyName) {
-		this.currencyName = currencyName;
-	}
 
 	@ManyToOne
 	private User fromUser;
-	
+
 	@ManyToOne
 	private User toUser;
 
@@ -79,8 +71,8 @@ public class Transaction {
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
 			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
-			Double gasPrice, User fromUser ,User toUser) {
-			
+			Double gasPrice, User fromUser, User toUser) {
+
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
@@ -91,7 +83,7 @@ public class Transaction {
 		this.gas = gas;
 		this.gasPrice = gasPrice;
 		this.fromUser = fromUser;
-		this.toUser=toUser;
+		this.toUser = toUser;
 	}
 
 	/**
@@ -115,6 +107,14 @@ public class Transaction {
 	 */
 	public Date getCreatedOn() {
 		return createdOn;
+	}
+
+	public String getCurrencyName() {
+		return currencyName;
+	}
+
+	public void setCurrencyName(String currencyName) {
+		this.currencyName = currencyName;
 	}
 
 	/**
@@ -235,7 +235,7 @@ public class Transaction {
 	}
 
 	/**
-
+	 * 
 	 * @return the transactionType
 	 */
 	public TransactionType getTransactionType() {

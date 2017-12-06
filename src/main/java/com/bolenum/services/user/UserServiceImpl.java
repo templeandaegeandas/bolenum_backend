@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
+import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.enums.TokenType;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
@@ -87,10 +88,10 @@ public class UserServiceImpl implements UserService {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		user.setRole(roleRepo.findByNameIgnoreCase("ROLE_USER"));
 		userRepository.save(user);
+		logger.debug("saved new user= {}", user.getEmailId());
 		AuthenticationToken authenticationToken = mailVerification(user);
 		authenticationToken.setTokentype(TokenType.REGISTRATION);
 		authenticationTokenRepo.saveAndFlush(authenticationToken);
-
 	}
 
 	/**
@@ -128,10 +129,11 @@ public class UserServiceImpl implements UserService {
 	 * to re register user if already details present in user table
 	 * 
 	 */
-	@Override
-	public void reRegister(User isUserExist) {
 
-		List<AuthenticationToken> verificationToken = authenticationTokenRepo.findByUserAndTokentype(isUserExist,
+	@Override
+	public void reRegister(UserSignupForm userSignupForm) {
+		User user = userRepository.findByEmailId(userSignupForm.getEmailId());
+		List<AuthenticationToken> verificationToken = authenticationTokenRepo.findByUserAndTokentype(user,
 				TokenType.REGISTRATION);
 
 		for (AuthenticationToken token : verificationToken) {
@@ -139,8 +141,11 @@ public class UserServiceImpl implements UserService {
 				authenticationTokenRepo.delete(token);
 			}
 		}
+		User isUserExist = userRepository.findByEmailId(userSignupForm.getEmailId());
+		isUserExist.setFirstName(userSignupForm.getFirstName());
+		isUserExist.setLastName(userSignupForm.getLastName());
+		isUserExist.setPassword(userSignupForm.getPassword());
 		registerUser(isUserExist);
-
 	}
 
 	/**
@@ -172,9 +177,15 @@ public class UserServiceImpl implements UserService {
 			user.setMiddleName(editUserForm.getMiddleName());
 		}
 
-		if (editUserForm.getLastName() != null) {
-			user.setLastName(editUserForm.getLastName());
-		}
+		user.setLastName(editUserForm.getLastName());
+
+		// if (editUserForm.getLastName() != null) {
+		// user.setLastName(editUserForm.getLastName());
+		// } else if (editUserForm.getLastName() == null && user.getLastName()
+		// == null)
+		// {
+		// user.setLastName(editUserForm.getLastName());
+		// }
 
 		if (editUserForm.getAddress() != null) {
 			user.setAddress(editUserForm.getAddress());

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
+import com.bolenum.dto.common.UserSignupForm;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.exceptions.MaxSizeExceedException;
@@ -23,7 +24,7 @@ public interface UserService {
 
 	public User findByEmail(String email);
 
-	public void reRegister(User isUserExist);
+	public void reRegister(UserSignupForm signupForm);
 
 	/**
 	 * 
@@ -65,5 +66,4 @@ public interface UserService {
 			throws IOException, PersistenceException, MaxSizeExceedException;
 
 	public boolean isKycVerified(User user);
-
 }

@@ -80,7 +80,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private LocaleService localeService;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
@@ -146,9 +146,10 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		erc20TokenRepository.save(erc20Tokens);
 	}
 
-	private Credentials getCredentials(User user) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
+	private Credentials getCredentials(User user) throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
 		File file = new File(ethWalletLocation);
-		File jsonFile = new File(file+ "/" + user.getEthWalletJsonFileName());
+		File jsonFile = new File(file + "/" + user.getEthWalletJsonFileName());
 		logger.debug("JSON file of the user is: {}", user.getEthWalletJsonFileName());
 		String passwordKey = user.getEthWalletPwdKey();
 		String decPwd = CryptoUtil.decrypt(user.getEthWalletPwd(), passwordKey);
@@ -221,60 +222,61 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				});
 	}
 
-
-	private void saveTx(User fromUser, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token) {
+	private void saveTx(User toUser, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token) {
 		Transaction tx = transactionRepo.findByTxHash(transaction._transactionHash);
 		if (tx == null) {
 			tx = new Transaction();
-			logger.debug("saving transaction for user: {}", fromUser.getEmailId());
+			logger.debug("saving transaction for user: {}", toUser.getEmailId());
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
 			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
 			tx.setTransactionType(TransactionType.INCOMING);
-			User receiverUser = userRepository.findByBtcWalletAddress(transaction._to.getValue());
-			logger.debug("receiver user : {}", receiverUser);
-			if (receiverUser != null) {
-				logger.debug("receiver user id: {}", receiverUser.getUserId());
-				tx.setToUser(receiverUser); 
+			User senderUser = userRepository.findByBtcWalletAddress(transaction._from.getValue());
+			logger.debug("receiver user : {}", toUser);
+			logger.debug("receiver user id: {}", toUser.getUserId());
+			tx.setToUser(toUser);
+			logger.debug("Balance returned by the listner: {}",
+					transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			tx.setCurrencyName(tokenName);
+			if (senderUser != null) {
 				tx.setTransactionStatus(TransactionStatus.WITHDRAW);
 				tx.setTransactionType(TransactionType.OUTGOING);
+				logger.debug("from user id: {}", senderUser.getUserId());
+				tx.setFromUser(senderUser);
 			}
-			logger.debug("Balance returned by the listner: {}",transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
-			tx.setCurrencyName(tokenName);
-			logger.debug("from user id: {}", fromUser.getUserId());
-			tx.setFromUser(fromUser);
 			Transaction saved = transactionRepo.saveAndFlush(tx);
-			logger.debug("transaction saved completed: {}", fromUser.getEmailId());
+			logger.debug("transaction saved completed: {}", senderUser.getEmailId());
 			if (saved != null) {
-				logger.debug("new incoming transaction saved of user: {}", fromUser.getEmailId());
+				logger.debug("new incoming transaction saved of user: {}", senderUser.getEmailId());
 			}
-		}
-		else {
-			logger.debug("saving else transaction for user: {}", fromUser.getEmailId());
+		} else {
+			logger.debug("saving else transaction for user: {}", toUser.getEmailId());
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
-			logger.debug("Balance else part returned by the listner: {}",transaction._value.getValue().doubleValue()/erc20Token.getDecimalValue());
+			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			logger.debug("Balance else part returned by the listner: {}",
+					transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			tx.setTransactionType(TransactionType.OUTGOING);
-			if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
+			if (TransactionStatus.WITHDRAW.equals(tx.getTransactionStatus())) {
 				tx.setTransactionType(TransactionType.INCOMING);
 			}
 			tx.setCurrencyName(tokenName);
-			logger.debug("from else user id: {}", fromUser.getUserId());
-			tx.setFromUser(fromUser);
-			User receiverUser = userRepository.findByBtcWalletAddress(tx.getToAddress());
-			logger.debug("receiver else user : {}", receiverUser);
-			if (receiverUser != null) {
-				logger.debug("receiver else user id: {}", receiverUser.getUserId());
-				tx.setToUser(receiverUser); 
-			}
+			logger.debug("from else user id: {}", toUser.getUserId());
+			tx.setToUser(toUser);
 			Transaction saved = transactionRepo.saveAndFlush(tx);
-			logger.debug("transaction else saved completed: {}", fromUser.getEmailId());
 			if (saved != null) {
-				logger.debug("new incoming else transaction saved of user: {}", fromUser.getEmailId());
+				logger.debug("new incoming transaction saved of user: {}", toUser.getEmailId());
+
+			} else {
+				if (tx.getTransactionStatus().equals(TransactionStatus.WITHDRAW)) {
+					tx.setTransactionType(TransactionType.INCOMING);
+				}
+				logger.debug("tx exists: {}", transaction._transactionHash);
+				transactionRepo.saveAndFlush(tx);
+				logger.debug("new incoming else transaction saved of user: {}", toUser.getEmailId());
 			}
 		}
 		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,

@@ -63,7 +63,7 @@ public class OrderController {
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
 		// can not place order on 0 prize
-		if (orders.getOrderStandard().equals(OrderStandard.LIMIT) && orders.getPrice() <= 0) {
+		if (OrderStandard.LIMIT.equals(orders.getOrderStandard()) && orders.getPrice() <= 0) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"),
 					null);
 		}
@@ -140,9 +140,11 @@ public class OrderController {
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		List<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
+		Page<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(pageNumber, pageSize, sortOrder, sortBy,
+				user, OrderStatus.SUBMITTED);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
+
 	@RequestMapping(value = UrlConstant.ORDER_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrderDetails(@RequestParam("orderId") long orderId) {
 		User user = GenericUtils.getLoggedInUser();
@@ -163,5 +165,4 @@ public class OrderController {
 		map.put("orderDetails", orders);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
 	}
-
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -74,25 +75,25 @@ public class UserController {
 
 	@Autowired
 	BTCWalletService btcWalletService;
-	
+
 	@Autowired
 	EtherumWalletService etherumWalletService;
-	
+
 	@Autowired
 	private CountryAndStateService countryAndStateService;
-	
+
 	@Autowired
 	private TransactionService transactionService;
-	
+
 	@Autowired
 	private OrdersService orderService;
-	
-    /**
-     * 
-     * @param signupForm
-     * @param result
-     * @return
-     */
+
+	/**
+	 * 
+	 * @param signupForm
+	 * @param result
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -105,21 +106,20 @@ public class UserController {
 				logger.debug("Requested Object:" + requestObj);
 				User isUserExist = userService.findByEmail(signupForm.getEmailId());
 				if (isUserExist == null) {
-					User user = signupForm.copy(new User());
-					userService.registerUser(user);
+					User newUser = signupForm.copy(new User());
+					userService.registerUser(newUser);
 					return ResponseHandler.response(HttpStatus.OK, false,
-							localService.getMessage("user.registarion.success"), user.getEmailId());
+							localService.getMessage("user.registarion.success"), newUser.getEmailId());
 				} else if (isUserExist != null && isUserExist.getIsEnabled()) {
 					return ResponseHandler.response(HttpStatus.CONFLICT, false,
 							localService.getMessage("email.already.exist"), isUserExist.getEmailId());
 				} else {
-					User user = signupForm.copy(new User());
-					user.setUserId(isUserExist.getUserId());
-					requestObj = mapper.writeValueAsString(user);
-					logger.debug("Requested Object for Re Register", user);
-					userService.reRegister(user);
+					// User user = signupForm.copy(new User());
+					// requestObj = mapper.writeValueAsString(user);
+					// logger.debug("Requested Object for Re Register", user);
+					userService.reRegister(signupForm);
 					return ResponseHandler.response(HttpStatus.OK, false,
-							localService.getMessage("user.registarion.success"), user.getEmailId());
+							localService.getMessage("user.registarion.success"), signupForm.getEmailId());
 				}
 			} catch (JsonProcessingException e) {
 				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
@@ -132,7 +132,9 @@ public class UserController {
 	 * for mail verify at the time of sign up user as well as re register
 	 * 
 	 * @param token
+	 * 
 	 * @return
+	 * 
 	 */
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
 	public ResponseEntity<Object> userMailVerfy(@RequestParam("token") String token) {
@@ -146,33 +148,44 @@ public class UserController {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"),
 						null);
 			}
+
 			boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
 			logger.debug("user mail verify token expired: {}", isExpired);
-			if(isExpired){
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"), null);
+			if (isExpired) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"),
+						null);
 			}
-			
-		    User user = authenticationToken.getUser();
-		    etherumWalletService.createWallet(user);
-		    String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
+
+			User user = authenticationToken.getUser();
+			if (user.getIsEnabled()) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+						localService.getMessage("link.already.verified"), null);
+			}
+
+			etherumWalletService.createWallet(user);
+			String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", uuid);
-		    if (!uuid.isEmpty()) {
-		    	user.setBtcWalletUuid(uuid);
-		    	user.setBtcWalletAddress(btcWalletService.getWalletAddress(uuid));
+
+			if (!uuid.isEmpty()) {
+				user.setBtcWalletUuid(uuid);
+				user.setBtcWalletAddress(btcWalletService.getWalletAddress(uuid));
 				user.setIsEnabled(true);
 				User savedUser = userService.saveUser(user);
 				logger.debug("user mail verify savedUser: {}", savedUser);
 				if (savedUser != null) {
-					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
-				}else {
-					return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true, localService.getMessage("message.error"), null);
+					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
+							null);
+				} else {
+					return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+							localService.getMessage("message.error"), null);
 				}
-			}else {
-				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true, localService.getMessage("message.error"), null);
+			} else {
+				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+						localService.getMessage("message.error"), null);
 			}
 		}
 	}
-	
+
 	/**
 	 * for change password
 	 * 
@@ -233,6 +246,7 @@ public class UserController {
 	}
 
 	/**
+	 * used to find out current logged in user
 	 * 
 	 * @return
 	 */
@@ -242,9 +256,18 @@ public class UserController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), user);
 	}
 
+	/**
+	 * used to add mobile number at the time of providing profile information by
+	 * user
+	 * 
+	 * @param mobileNumber
+	 * @param countryCode
+	 * @return
+	 * @throws PersistenceException
+	 */
 	@RequestMapping(value = UrlConstant.ADD_MOBILE_NUMBER, method = RequestMethod.PUT)
-	public ResponseEntity<Object> addMobileNumber(@RequestParam("mobileNumber") String mobileNumber, @RequestParam("countryCode") String countryCode)
-			throws PersistenceException {
+	public ResponseEntity<Object> addMobileNumber(@RequestParam("mobileNumber") String mobileNumber,
+			@RequestParam("countryCode") String countryCode) throws PersistenceException {
 		User user = GenericUtils.getLoggedInUser();
 		User response = userService.addMobileNumber(mobileNumber, countryCode, user);
 		if (response != null) {
@@ -257,6 +280,7 @@ public class UserController {
 	}
 
 	/**
+	 * used for verification of OTP
 	 * 
 	 * @param otp
 	 * @return
@@ -264,19 +288,25 @@ public class UserController {
 	 * @throws InvalidOtpException
 	 */
 	@RequestMapping(value = UrlConstant.VERIFY_OTP, method = RequestMethod.PUT)
-	public ResponseEntity<Object> verify(@RequestParam("otp") Integer otp)
-			throws PersistenceException, InvalidOtpException {
+	public ResponseEntity<Object> verify(@RequestParam("otp") Integer otp) {
 		User user = GenericUtils.getLoggedInUser();
-		Boolean response = userService.verifyOTP(otp, user);
-		if (response) {
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.verified"), null);
-		} else {
+		Boolean response;
+		try {
+			response = userService.verifyOTP(otp, user);
+			if (response) {
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.verified"), null);
+			}
+		} catch (InvalidOtpException e) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("otp.not.verified"),
-					response);
+					Optional.empty());
 		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("otp.not.verified"),
+				Optional.empty());
 	}
 
 	/**
+	 * 
+	 * used to authenticate user via OTP
 	 * 
 	 * @return
 	 * @throws PersistenceException
@@ -288,7 +318,7 @@ public class UserController {
 		userService.resendOTP(user);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.resend"), null);
 	}
-	
+
 	/**
 	 * to upload user profile image
 	 * 
@@ -311,7 +341,7 @@ public class UserController {
 					localService.getMessage("user.image.uploaded.failed"), null);
 		}
 	}
-	
+
 	/**
 	 * to get list of countries
 	 * 
@@ -322,13 +352,10 @@ public class UserController {
 		List<Countries> list = countryAndStateService.getCountriesList();
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"), list);
 	}
-	
-	/**
-<<<<<<< HEAD
 
-=======
->>>>>>> 00b389e80ca195c913eeaad89ee7c31737c44140
-	 * to get list of states with respect to specific country 
+	/**
+	 * 
+	 * to get list of states with respect to specific country
 	 * 
 	 * @param countryId
 	 * @return
@@ -336,49 +363,70 @@ public class UserController {
 	@RequestMapping(value = UrlConstant.GET_STATE_BY_COUNTRY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getStatesByCountryId(@RequestParam("countryId") Long countryId) {
 		List<States> list = countryAndStateService.getStatesByCountry(countryId);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("states.list.by.country.id"), list);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("states.list.by.country.id"),
+				list);
 	}
-	
-	
+
+	/**
+	 * used to get list of transaction done by a particular user, user can only
+	 * see his own transactions at the time of deposited to his wallet
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortOrder
+	 * @param sortBy
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.WITHDRAW,pageNumber,pageSize,sortOrder,sortBy);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("transaction.list.withdraw.success"),listOfUserTransaction);
+		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,
+				TransactionStatus.WITHDRAW, pageNumber, pageSize, sortOrder, sortBy);
+		return ResponseHandler.response(HttpStatus.OK, false,
+				localService.getMessage("transaction.list.withdraw.success"), listOfUserTransaction);
 	}
-	
+
+	/**
+	 * used to get list of transaction done by a particular user, user can only
+	 * see his own transactions at the time of deposited to his wallet
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortOrder
+	 * @param sortBy
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
-			@RequestParam("sortBy") String sortBy) {  
+			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,TransactionStatus.DEPOSIT,pageNumber,pageSize,sortOrder,sortBy);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("transaction.list.deposit.success"),listOfUserTransaction);
+		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,
+				TransactionStatus.DEPOSIT, pageNumber, pageSize, sortOrder, sortBy);
+		return ResponseHandler.response(HttpStatus.OK, false,
+				localService.getMessage("transaction.list.deposit.success"), listOfUserTransaction);
 	}
-	
+
 	/**
 	 * to get number of trading buy/sell performed by particular user
 	 * 
 	 * @return
-<<<<<<< HEAD
-	 * 
-=======
->>>>>>> 00b389e80ca195c913eeaad89ee7c31737c44140
 	 */
-	
+
 	@RequestMapping(value = UrlConstant.MY_TRADING_COUNT, method = RequestMethod.GET)
-	public ResponseEntity<Object> getUserTradingCount() {  
+	public ResponseEntity<Object> getUserTradingCount() {
 		User user = GenericUtils.getLoggedInUser();
-		Long totalNumberOfBuy=orderService.countOrdersByOrderTypeAndUser(user, OrderType.BUY);
-		Long totalNumberOfSell=orderService.countOrdersByOrderTypeAndUser(user, OrderType.SELL);
-		Long totalNumberOfTrading=totalNumberOfBuy+totalNumberOfSell;
-		Map<String,Long> tradingNumber=new HashMap<String,Long>();
+		Long totalNumberOfBuy = orderService.countOrdersByOrderTypeAndUser(user, OrderType.BUY);
+		Long totalNumberOfSell = orderService.countOrdersByOrderTypeAndUser(user, OrderType.SELL);
+		Long totalNumberOfTrading = totalNumberOfBuy + totalNumberOfSell;
+		Map<String, Long> tradingNumber = new HashMap<String, Long>();
 		tradingNumber.put("totalNumberOfBuy", totalNumberOfBuy);
 		tradingNumber.put("totalNumberOfSell", totalNumberOfSell);
-		tradingNumber.put("totalNumberOfTrading",totalNumberOfTrading);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("my.trading.count.success"),tradingNumber);
+		tradingNumber.put("totalNumberOfTrading", totalNumberOfTrading);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("my.trading.count.success"),
+				tradingNumber);
 	}
-	
+
 }

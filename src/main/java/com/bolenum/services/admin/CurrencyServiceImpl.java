@@ -23,8 +23,9 @@ import com.bolenum.repo.common.CurrencyRepo;
  */
 @Service
 public class CurrencyServiceImpl implements CurrencyService {
-
+	
 	public static final Logger logger = LoggerFactory.getLogger(CurrencyServiceImpl.class);
+
 
 	@Autowired
 	private CurrencyRepo currencyRepo;
@@ -71,7 +72,6 @@ public class CurrencyServiceImpl implements CurrencyService {
 	public List<Currency> getCurrencyList() {
 		return currencyRepo.findByCurrencyTypeNotIn(CurrencyType.FIAT);
 	}
-
 	@Override
 	public List<Currency> getCurrencyListForAdmin() {
 		return currencyRepo.findAll();

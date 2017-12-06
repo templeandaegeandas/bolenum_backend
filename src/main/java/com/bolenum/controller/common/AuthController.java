@@ -4,6 +4,7 @@
 package com.bolenum.controller.common;
 
 import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,12 @@ import io.swagger.annotations.Api;
 /**
  * @author chandan kumar singh
  * @date 13-Sep-2017
+ * 
+ *       Auth controller contains all functionality which requires
+ *       authentication like login, logout, and functionality used for reset
+ *       password
  */
+
 @RestController
 @Api(value = "Authentication Controller")
 public class AuthController {
@@ -47,13 +53,12 @@ public class AuthController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private TwoFactorAuthService twoFactorAuthService;
 
 	@Autowired
 	private LocaleService localeService;
-
 
 	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -81,25 +86,23 @@ public class AuthController {
 			} else {
 				AuthenticationToken token;
 				if (user.getRole().getName().equals(loginForm.getRole())) {
-						try {
-							token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
-									loginForm.getBrowserName(), loginForm.getClientOsName());
-						} catch (UsernameNotFoundException | InvalidPasswordException e) {
-							return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
-						}
+					try {
+						token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
+								loginForm.getBrowserName(), loginForm.getClientOsName());
+					} catch (UsernameNotFoundException | InvalidPasswordException e) {
+						return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+					}
 
 					if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.NONE)) {
 						return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("login.success"),
 								authService.loginResponse(token));
-					}
-					else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
+					} else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
 						twoFactorAuthService.sendOtpForTwoFactorAuth(user);
-						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
-								user.getTwoFactorAuthOption());
-					}
-					else {
-						return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage("login.success"),
-								user.getTwoFactorAuthOption());
+						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
+								localeService.getMessage("login.success"), user.getTwoFactorAuthOption());
+					} else {
+						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
+								localeService.getMessage("login.success"), user.getTwoFactorAuthOption());
 					}
 				} else {
 					return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
@@ -108,7 +111,6 @@ public class AuthController {
 			}
 		}
 	}
-
 
 	/**
 	 * controller that respond when hit comes for logout activity of user
@@ -129,7 +131,7 @@ public class AuthController {
 	}
 
 	/**
-	 * for forget password
+	 * used for forget password
 	 * 
 	 * @param email
 	 * @return
@@ -161,6 +163,7 @@ public class AuthController {
 	 * @param resetPasswordForm
 	 * @param result
 	 * @return
+	 * 
 	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS_VERIFY, method = RequestMethod.PUT)
 	public ResponseEntity<Object> resetPassword(@RequestParam String token,
@@ -169,17 +172,18 @@ public class AuthController {
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localeService.getMessage("token.invalid"));
 		}
+
 		User verifiedUser = authService.verifyTokenForResetPassword(token);
+
 		if (verifiedUser == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("token.invalid"),
 					null);
 		}
-        if(result.hasErrors())
-        {
-        	return ResponseHandler.response(HttpStatus.CONFLICT,true,
-					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());        	
-        }
-		else if (!result.hasErrors() && verifiedUser != null) {
+
+		if (result.hasErrors()) {
+			return ResponseHandler.response(HttpStatus.CONFLICT, true,
+					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());
+		} else if (!result.hasErrors() && verifiedUser != null) {
 			authService.resetPassword(verifiedUser, resetPasswordForm);
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("user.password.change.success"), verifiedUser.getEmailId());

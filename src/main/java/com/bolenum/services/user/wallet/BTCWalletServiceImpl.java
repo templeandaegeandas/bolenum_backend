@@ -11,6 +11,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,19 +25,22 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.exceptions.InsufficientBalanceException;
+import com.bolenum.model.Currency;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
+import com.bolenum.util.GenericUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -55,12 +59,10 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	private Erc20TokenService erc20TokenService;
 
 	@Autowired
-	private OrdersService orderService;
+	private OrdersService ordersService;
 
-
-	/**
-	 * creating BIP32 hierarchical deterministic (HD) wallets
-	 */
+	@Autowired
+	private WithdrawalFeeService withdrawalFeeService;
 
 	@Autowired
 	private TransactionRepo transactionRepo;
@@ -71,13 +73,28 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
-	
 	@Autowired
 	private LocaleService localeService;
-	
+
+	@Autowired
+	private EtherumWalletService etherumWalletService;
+
+	@Value("${bitcoin.service.url}")
+	private String btcUrl;
+
+	/**
+	 * 
+	 * used to create hot wallet for Bitcoin
+	 * 
+	 * creating BIP32 hierarchical deterministic (HD) wallets
+	 * 
+	 * @param wallet
+	 *            Id
+	 * @return wallet Id
+	 */
 	@Override
 	public String createHotWallet(String uuid) {
-		String url = BTCUrlConstant.HOT_WALLET;
+		String url = btcUrl + UrlConstant.HOT_WALLET;
 		RestTemplate restTemplate = new RestTemplate();
 		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<String, String>();
 		logger.debug("create wallet uuid:  {}", uuid);
@@ -110,50 +127,20 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	/**
-	 * to get wallet address and QR code
+	 * to get Bitcoin wallet balance
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Object> getWalletAddressAndQrCode(String walletUuid) {
-		String url = BTCUrlConstant.WALLET_ADDR;
-		RestTemplate restTemplate = new RestTemplate();
-		logger.debug("get Wallet Address And QrCode uuid:  {}", walletUuid);
-		Map<String, Object> map = new HashMap<String, Object>();
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url).queryParam("walletUuid", walletUuid);
-		try {
-			Map<String, Object> res = restTemplate.getForObject(builder.toUriString(), Map.class);
-			logger.debug("get Wallet Address And QrCode res map: {}", res);
-			boolean isError = (boolean) res.get("error");
-			if (!isError) {
-				String bal = getWalletBalnce(walletUuid);
-				bal = bal.replace("BTC", "").trim();
-				Map<String, Object> data = (Map<String, Object>) res.get("data");
-				res.clear();
-				res.put("address", data.get("address"));
-				res.put("file_name", data.get("file_name"));
-				res.put("balance", bal);
-				map.put("data", res);
-			}
-		} catch (RestClientException e) {
-			logger.error("get Wallet Address exception RCE:  {}", e.getMessage());
-			e.printStackTrace();
-		}
-		return map;
-	}
-
-	/**
-	 * to get bitcoin wallet balance
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public String getWalletBalnce(String uuid) {
-		String url = BTCUrlConstant.WALLET_BAL;
+	public String getWalletBalance(String uuid) {
+		String url = btcUrl + UrlConstant.WALLET_BAL;
 		RestTemplate restTemplate = new RestTemplate();
 		logger.debug("get Wallet balance:  {}", uuid);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url).queryParam("walletUuid", uuid);
 		try {
 			Map<String, Object> res = restTemplate.getForObject(builder.toUriString(), Map.class);
-			return (String) res.get("data");
+			String balance = (String) res.get("data");
+			balance = balance.replace("BTC", "");
+			return balance;
 		} catch (RestClientException e) {
 			logger.error("get Wallet balance RCE:  {}", e.getMessage());
 			e.printStackTrace();
@@ -167,7 +154,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String getWalletAddress(String walletUuid) {
-		String url = BTCUrlConstant.WALLET_ADDR;
+		String url = btcUrl + UrlConstant.WALLET_ADDR;
 		RestTemplate restTemplate = new RestTemplate();
 		logger.debug("get Wallet Address uuid:  {}", walletUuid);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url).queryParam("walletUuid", walletUuid);
@@ -192,16 +179,18 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public boolean validateAddresss(String btcWalletUuid, String toAddress) {
 		RestTemplate restTemplate = new RestTemplate();
-		String url = BTCUrlConstant.WALLET_ADDR;
+		String url = btcUrl + UrlConstant.WALLET_ADDR;
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 		ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-		System.out.println("hiiii" + txRes);
+		logger.debug("Transaction response: {}", txRes);
 		return false;
 	}
 
 	/**
+	 * used to validate available balance in wallet in case of doing transaction
+	 * during trading and withdrawal
 	 * 
 	 * @param availableBalance
 	 * @param availableBalanceLimitToWithdraw
@@ -209,41 +198,57 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * @return
 	 */
 	@Override
-	public boolean validateAvailableWalletBalance(Double availableBalance, Double availableBalanceLimitToWithdraw,
-			Double withdrawAmount) {
-		if (availableBalance >= withdrawAmount && availableBalance >= availableBalanceLimitToWithdraw) {
-			return true;
+	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			WithdrawalFee withdrawalFee, Currency currency) {
+		Double availableBalance = 0.0, minWithdrawAmount = 0.0, bolenumFee = 0.0, networkFee = 0.0;
+		if (withdrawalFee != null) {
+			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
+			bolenumFee = withdrawalFee.getFee();
 		}
-		return false;
+		logger.debug("Minimum withdraw ammount:{} Withdraw fee: {} of currency: {}", minWithdrawAmount, bolenumFee,
+				currency.getCurrencyName());
+		if (withdrawAmount < minWithdrawAmount) {
+			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
+		}
+		if ("BTC".equals(tokenName)) {
+			String balance = getWalletBalance(user.getBtcWalletUuid());
+			availableBalance = Double.valueOf(balance);
+		} else {
+			availableBalance = etherumWalletService.getWalletBalance(user);
+			networkFee = GenericUtils.getEstimetedFeeEthereum();
+		}
+		logger.debug("Available balance: {} estimeted network fee: {}", availableBalance,
+				GenericUtils.getDecimalFormat().format(networkFee));
+		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, currency, currency);
+		logger.debug("Order Book balance:{} of user: {}", placeOrderVolume, user.getEmailId());
+		if (availableBalance >= (withdrawAmount + placeOrderVolume + bolenumFee + networkFee)) {
+			return true;
+		} else {
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
+		}
 	}
 
-	/**
-	 * 
-	 * @param availableBalance
-	 * @param withdrawAmount
-	 * @return
-	 */
 	@Override
-	public boolean validateWithdrawAmount(Double availableBalance, Double withdrawAmount) {
-		if (availableBalance >= withdrawAmount) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) throws InsufficientBalanceException {
+	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) {
 		Double availableBalance = 0.0;
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
+		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(erc20Token.getCurrency().getCurrencyId())
+				.getMinWithDrawAmount();
+
+		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
+			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
+		}
 		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
-		double placeOrderVolume = orderService.totalUserBalanceInBook(user, erc20Token.getCurrency(), erc20Token.getCurrency());
+		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, erc20Token.getCurrency(),
+				erc20Token.getCurrency());
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
-		if (availableBalance >= (withdrawAmount+placeOrderVolume)) {
+		if (availableBalance >= (withdrawAmount + placeOrderVolume)) {
 			return true;
-		}
-		else {
-			throw new InsufficientBalanceException(MessageFormat.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
+		} else {
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
 		}
 	}
 
@@ -271,5 +276,4 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
 	}
-
 }

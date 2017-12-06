@@ -72,5 +72,6 @@ public interface Erc20TokenService {
 
 	void saveIncomingErc20Transaction(String tokenName) throws IOException, CipherException;
 
+
 	Erc20Token getByCoin(String coin);
 }

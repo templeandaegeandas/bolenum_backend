@@ -22,4 +22,5 @@ public interface CurrencyRepo extends JpaRepository<Currency, Long> {
 	Currency findByCurrencyAbbreviationInIgnoreCase(String currencyAbbreviation);
 
 	List<Currency> findByCurrencyTypeNotIn(CurrencyType type);
+
 }
