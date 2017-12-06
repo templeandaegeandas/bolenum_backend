@@ -597,7 +597,6 @@ public class OrdersServiceImpl implements OrdersService {
 		c.setTime(endDate);
 		c.add(Calendar.DATE, -7);
 		Date startDate = c.getTime();
-		startDate = (Date) startDate;
 		return ordersRepository.countOrdersByCreatedOnBetween(startDate, endDate);
 	}
 
@@ -608,7 +607,6 @@ public class OrdersServiceImpl implements OrdersService {
 		c.setTime(endDate);
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
-		startDate = (Date) startDate;
 		return ordersRepository.countOrderByOrderTypeAndCreatedOnBetween(orderType, startDate, endDate);
 	}
 

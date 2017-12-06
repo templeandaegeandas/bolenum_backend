@@ -66,7 +66,4 @@ public interface UserService {
 			throws IOException, PersistenceException, MaxSizeExceedException;
 
 	public boolean isKycVerified(User user);
-
-	
-
 }

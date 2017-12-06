@@ -181,7 +181,8 @@ public class UserServiceImpl implements UserService {
 
 		// if (editUserForm.getLastName() != null) {
 		// user.setLastName(editUserForm.getLastName());
-		// } else if (editUserForm.getLastName() == null && user.getLastName() == null)
+		// } else if (editUserForm.getLastName() == null && user.getLastName()
+		// == null)
 		// {
 		// user.setLastName(editUserForm.getLastName());
 		// }
@@ -336,5 +337,4 @@ public class UserServiceImpl implements UserService {
 		}
 		return true;
 	}
-
 }

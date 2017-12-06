@@ -13,5 +13,6 @@ import com.bolenum.model.orders.book.Orders;
  */
 public interface WalletService {
 	public String getBalance(String ticker, String currencyType, User user);
+
 	public String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded);
 }

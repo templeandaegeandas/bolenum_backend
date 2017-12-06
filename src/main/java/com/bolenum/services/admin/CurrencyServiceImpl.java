@@ -26,6 +26,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 	
 	public static final Logger logger = LoggerFactory.getLogger(CurrencyServiceImpl.class);
 
+
 	@Autowired
 	private CurrencyRepo currencyRepo;
 
@@ -36,7 +37,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 	public Currency findByCurrencyName(String currencyName) {
 		return currencyRepo.findByCurrencyNameInIgnoreCase(currencyName);
 	}
-	
+
 	@Override
 	public Currency findByCurrencyAbbreviation(String currencyAbbreviation) {
 		return currencyRepo.findByCurrencyAbbreviationInIgnoreCase(currencyAbbreviation);
@@ -71,7 +72,6 @@ public class CurrencyServiceImpl implements CurrencyService {
 	public List<Currency> getCurrencyList() {
 		return currencyRepo.findByCurrencyTypeNotIn(CurrencyType.FIAT);
 	}
-	
 	@Override
 	public List<Currency> getCurrencyListForAdmin() {
 		return currencyRepo.findAll();

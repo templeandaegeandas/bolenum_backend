@@ -257,7 +257,8 @@ public class UserController {
 	}
 
 	/**
-	 * used to add mobile number at the time of providing profile information by user
+	 * used to add mobile number at the time of providing profile information by
+	 * user
 	 * 
 	 * @param mobileNumber
 	 * @param countryCode
@@ -319,7 +320,7 @@ public class UserController {
 	}
 
 	/**
-	 * to upload user profile image 
+	 * to upload user profile image
 	 * 
 	 * @param file
 	 * @return
@@ -367,8 +368,8 @@ public class UserController {
 	}
 
 	/**
-	 * used to get list of transaction done by a particular user,
-	 * user can only see his own transactions at the time of deposited to his wallet 
+	 * used to get list of transaction done by a particular user, user can only
+	 * see his own transactions at the time of deposited to his wallet
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
@@ -388,8 +389,8 @@ public class UserController {
 	}
 
 	/**
-	 * used to get list of transaction done by a particular user,
-	 * user can only see his own transactions at the time of deposited to his wallet 
+	 * used to get list of transaction done by a particular user, user can only
+	 * see his own transactions at the time of deposited to his wallet
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
@@ -412,7 +413,6 @@ public class UserController {
 	 * to get number of trading buy/sell performed by particular user
 	 * 
 	 * @return
-	 * 
 	 */
 
 	@RequestMapping(value = UrlConstant.MY_TRADING_COUNT, method = RequestMethod.GET)
