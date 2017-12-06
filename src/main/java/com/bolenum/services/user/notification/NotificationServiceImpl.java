@@ -45,7 +45,21 @@ public class NotificationServiceImpl implements NotificationService {
 	 */
 	@Override
 	public boolean sendNotification(User user, String message) {
-		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage("trade.summary"), message);
+		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage("trade.summary"),
+				message);
+		if (status.isDone()) {
+			logger.debug("notification send to : {}", user.getEmailId());
+		}
+		return false;
+	}
+
+	/**
+	 * to send dispute notification with respect to buyer/seller
+	 */
+	@Override
+	public boolean sendNotificationForDispute(User user, String message) {
+		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage("dispute.summary"),
+				message);
 		if (status.isDone()) {
 			logger.debug("notification send to : {}", user.getEmailId());
 		}
@@ -66,6 +80,9 @@ public class NotificationServiceImpl implements NotificationService {
 		return notificationRepositroy.findByBuyerAndIsDeleted(receiver, false, pageRequest);
 	}
 
+	/**
+	 * 
+	 */
 	@Async
 	@Override
 	public Notification saveNotification(User buyer, User seller, String msg) {

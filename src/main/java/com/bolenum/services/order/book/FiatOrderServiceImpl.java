@@ -286,7 +286,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			User seller = sellerOrder.getUser();
 			double qtyTraded = sellerOrder.getLockedVolume();
 			try {
-				Future<Boolean> result = transactionService.performTransaction(currencyAbr, qtyTraded, buyer, seller);
+				Future<Boolean> result = transactionService.performTransaction(currencyAbr, qtyTraded, buyer, seller,
+						false);
 				boolean res = result.get();
 				logger.debug("perform fiat transaction result: {} of sell order id: {} and buy order id:{}", res,
 						sellerOrder.getId(), buyersOrder.getId());
@@ -298,7 +299,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 					ordersRepository.save(sellerOrder);
 					ordersRepository.save(buyersOrder);
 					Trade trade = new Trade(buyersOrder.getPrice(), qtyTraded, buyer, seller, sellerOrder.getPair(),
-							sellerOrder.getOrderStandard());
+							sellerOrder.getOrderStandard(), 0.0, 0.0);
 					orderAsyncService.saveTrade(trade);
 				}
 			} catch (InterruptedException | ExecutionException e) {
@@ -317,11 +318,11 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		if (OrderType.BUY.equals(order.getOrderType())) {
 			orderType = OrderType.SELL;
 			pageable = new PageRequest(page, size, Direction.ASC, "price");
-			return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
-					order.getPrice(), orderType, OrderStatus.SUBMITTED, pairId, pageable);
+			return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
+					orderType, OrderStatus.SUBMITTED, pairId, pageable);
 		}
-		return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(
-				order.getPrice(), orderType, OrderStatus.SUBMITTED, pairId, pageable);
+		return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
+				orderType, OrderStatus.SUBMITTED, pairId, pageable);
 	}
 
 	@Override

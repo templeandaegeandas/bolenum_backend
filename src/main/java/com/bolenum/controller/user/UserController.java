@@ -246,6 +246,7 @@ public class UserController {
 	}
 
 	/**
+	 * used to find out current logged in user
 	 * 
 	 * @return
 	 */
@@ -255,6 +256,14 @@ public class UserController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), user);
 	}
 
+	/**
+	 * used to add mobile number at the time of providing profile information by user
+	 * 
+	 * @param mobileNumber
+	 * @param countryCode
+	 * @return
+	 * @throws PersistenceException
+	 */
 	@RequestMapping(value = UrlConstant.ADD_MOBILE_NUMBER, method = RequestMethod.PUT)
 	public ResponseEntity<Object> addMobileNumber(@RequestParam("mobileNumber") String mobileNumber,
 			@RequestParam("countryCode") String countryCode) throws PersistenceException {
@@ -270,6 +279,7 @@ public class UserController {
 	}
 
 	/**
+	 * used for verification of OTP
 	 * 
 	 * @param otp
 	 * @return
@@ -295,6 +305,8 @@ public class UserController {
 
 	/**
 	 * 
+	 * used to authenticate user via OTP
+	 * 
 	 * @return
 	 * @throws PersistenceException
 	 * @throws InvalidOtpException
@@ -307,7 +319,7 @@ public class UserController {
 	}
 
 	/**
-	 * to upload user profile image
+	 * to upload user profile image 
 	 * 
 	 * @param file
 	 * @return
@@ -354,6 +366,16 @@ public class UserController {
 				list);
 	}
 
+	/**
+	 * used to get list of transaction done by a particular user,
+	 * user can only see his own transactions at the time of deposited to his wallet 
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortOrder
+	 * @param sortBy
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -365,6 +387,16 @@ public class UserController {
 				localService.getMessage("transaction.list.withdraw.success"), listOfUserTransaction);
 	}
 
+	/**
+	 * used to get list of transaction done by a particular user,
+	 * user can only see his own transactions at the time of deposited to his wallet 
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortOrder
+	 * @param sortBy
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
