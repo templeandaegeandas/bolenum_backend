@@ -140,7 +140,8 @@ public class OrderController {
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		Page<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(pageNumber, pageSize, sortOrder, sortBy, user, OrderStatus.SUBMITTED);
+		Page<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(pageNumber, pageSize, sortOrder, sortBy,
+				user, OrderStatus.SUBMITTED);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
@@ -164,5 +165,4 @@ public class OrderController {
 		map.put("orderDetails", orders);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
 	}
-
 }

@@ -228,3 +228,4 @@ public final class Erc20TokenWrapper extends Contract {
         public String _transactionHash;
     }
 }
+

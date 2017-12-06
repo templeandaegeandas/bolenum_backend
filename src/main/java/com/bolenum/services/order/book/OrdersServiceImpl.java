@@ -32,6 +32,7 @@ import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.admin.fees.TradingFeeService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
+import com.bolenum.util.GenericUtils;
 
 /**
  * 
@@ -103,9 +104,11 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		double userPlacedOrderVolume = fiatOrderService.getPlacedOrderVolumeOfCurrency(user, OrderStatus.SUBMITTED,
 				OrderType.SELL, currency);
-		logger.debug("user placed order volume: {} and order volume: {}", userPlacedOrderVolume, minOrderVol);
+		logger.debug("user placed order volume: {} and order volume: {}",
+				GenericUtils.getDecimalFormat(userPlacedOrderVolume),
+				GenericUtils.getDecimalFormat(Double.valueOf(minOrderVol)));
 		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
-		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
+		logger.debug("minimum order volume required to buy/sell: {}", GenericUtils.getDecimalFormat(minBalance));
 		// getting the user current wallet balance
 		String balance = walletService.getBalance(tickter, currencyType, user);
 		balance = balance.replace("BTC", "");
@@ -190,8 +193,9 @@ public class OrdersServiceImpl implements OrdersService {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
 		CurrencyPair pair = orders.getPair();
-		logger.debug("Order type is: {}", orderType);
+		logger.debug("Process Market Order, Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
+		logger.debug("Process Market Order, remaining Volume: {}", GenericUtils.getDecimalFormat(remainingVolume));
 		if (OrderType.BUY.equals(orderType)) {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
@@ -203,7 +207,8 @@ public class OrdersServiceImpl implements OrdersService {
 				return processed;
 			}
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
-				logger.debug("inner buy while loop for buyers remainingVolume: {}", remainingVolume);
+				logger.debug("inner buy while loop for buyers remaining Volume: {}",
+						GenericUtils.getDecimalFormat(remainingVolume));
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 			}
 			if (remainingVolume >= 0) {
@@ -230,7 +235,8 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			logger.debug("buyOrderList.size(): {}", buyOrderList.size());
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
-				logger.debug("inner sell while loop for sellers remainingVolume: {}", remainingVolume);
+				logger.debug("inner sell while loop for sellers remaining Volume: {}",
+						GenericUtils.getDecimalFormat(remainingVolume));
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
 			}
 			if (remainingVolume >= 0) {
@@ -254,6 +260,7 @@ public class OrdersServiceImpl implements OrdersService {
 		try {
 			orderAsyncServices.saveOrder(ordersList);
 		} catch (Exception e) {
+			logger.error("saving Process Market Order list: ", e.getMessage());
 			ordersList.clear();
 		}
 		ordersList.clear();
@@ -385,7 +392,7 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("qty traded: {}", qtyTraded);
 				// setting new required SELL/BUY volume is remaining order
 				// volume
-				double remain = matchedOrder.getVolume() - remainingVolume;
+				double remain = GenericUtils.getDecimalFormat(matchedOrder.getVolume() - remainingVolume);
 				logger.debug("reamining volume: {}", remain);
 				matchedOrder.setVolume(remain);
 				logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
@@ -399,7 +406,7 @@ public class OrdersServiceImpl implements OrdersService {
 				qtyTraded = matchedOrder.getVolume();
 				logger.debug("qty traded else: {}", qtyTraded);
 				// new selling/buying volume is remainingVolume - qtyTraded
-				remainingVolume = remainingVolume - qtyTraded;
+				remainingVolume = GenericUtils.getDecimalFormat(remainingVolume - qtyTraded);
 				logger.debug("remaining volume else: {}", remainingVolume);
 				// removed processed order
 				removeOrderFromList(ordersList);
@@ -430,6 +437,9 @@ public class OrdersServiceImpl implements OrdersService {
 			if (buyer.getUserId() != seller.getUserId()) {
 				buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
 				sellerTradeFee = tradingFeeService.calculateFee(qtyTraded);
+				buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
+				sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
+				logger.info("buyer trade fee: {} seller trade fee: {}", buyerTradeFee, sellerTradeFee);
 				logger.info("buyer trade fee: {} seller trade fee: {}", decimalFormat.format(buyerTradeFee),
 						decimalFormat.format(sellerTradeFee));
 				// saving the processed BUY/SELL order in trade

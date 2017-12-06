@@ -49,7 +49,6 @@ public class Orders {
 
 	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
-
 	@OneToOne
 	private User user;
 

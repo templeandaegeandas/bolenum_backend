@@ -200,6 +200,4 @@ public class DisputeOrder {
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
 	}
-
-	
 }
