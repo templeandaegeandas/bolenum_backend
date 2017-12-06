@@ -157,6 +157,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			logger.debug("orders saving started");
 			if (OrderType.BUY.equals(orders.getOrderType())) {
 				orders.setMatchedOrder(matchedOrder);
+				matchedOrder.setMatchedOrder(orders);
 				buyer = orders.getUser();
 				seller = matchedOrder.getUser();
 				msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
@@ -171,6 +172,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			orders = orderAsyncService.saveOrder(orders);
 			if (OrderType.SELL.equals(orders.getOrderType())) {
 				matchedOrder.setMatchedOrder(orders);
+				orders.setMatchedOrder(matchedOrder);
 				buyer = matchedOrder.getUser();
 				seller = orders.getUser();
 
@@ -262,9 +264,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ " Please confirm amount by login into bolenumexchage.";
 				notificationService.sendNotification(seller, msg);
 				notificationService.saveNotification(seller, buyer, msg);
-				matched.setConfirm(true);
-				ordersRepository.save(matched);
-				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_BUYER_CONFIRM,
+				exitingOrder.setConfirm(true);
+				ordersRepository.save(exitingOrder);
+				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
 						MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
 				logger.debug("WebSocket message: {}", MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
 				return true;
@@ -281,7 +283,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	@Async
 	public Future<Boolean> processTransactionFiatOrders(Orders sellerOrder, String currencyAbr) {
 		Orders buyersOrder = ordersRepository.findByMatchedOrder(sellerOrder);
-		if (buyersOrder != null) {
+		if (buyersOrder != null && buyersOrder.isConfirm()) {
 			User buyer = buyersOrder.getUser();
 			User seller = sellerOrder.getUser();
 			double qtyTraded = sellerOrder.getLockedVolume();
@@ -297,6 +299,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 					sellerOrder.setConfirm(true);
 
 					ordersRepository.save(sellerOrder);
+					buyersOrder.setOrderStatus(OrderStatus.COMPLETED);
 					ordersRepository.save(buyersOrder);
 					Trade trade = new Trade(buyersOrder.getPrice(), qtyTraded, buyer, seller, sellerOrder.getPair(),
 							sellerOrder.getOrderStandard(), 0.0, 0.0);
@@ -318,10 +321,10 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		if (OrderType.BUY.equals(order.getOrderType())) {
 			orderType = OrderType.SELL;
 			pageable = new PageRequest(page, size, Direction.ASC, "price");
-			return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
+			return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
 					orderType, OrderStatus.SUBMITTED, pairId, pageable);
 		}
-		return ordersRepository.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
+		return ordersRepository.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndPairPairId(order.getPrice(),
 				orderType, OrderStatus.SUBMITTED, pairId, pageable);
 	}
 
