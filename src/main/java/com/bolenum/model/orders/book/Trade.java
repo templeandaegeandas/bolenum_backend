@@ -41,7 +41,7 @@ public class Trade {
 	private Double sellerTradeFee;
 	private Boolean isFeeDeductedBuyer;
 	private Boolean isFeeDeductedSeller;
-	
+
 	public Trade(Double price, Double volume, User buyer, User seller, CurrencyPair pair, OrderStandard orderStandard,
 			Double buyerTradeFee, Double sellerTradeFee) {
 		this.price = price;
@@ -130,7 +130,8 @@ public class Trade {
 	}
 
 	/**
-	 * @param buyerTradeFee the buyerTradeFee to set
+	 * @param buyerTradeFee
+	 *            the buyerTradeFee to set
 	 */
 	public void setBuyerTradeFee(Double buyerTradeFee) {
 		this.buyerTradeFee = buyerTradeFee;
@@ -144,7 +145,8 @@ public class Trade {
 	}
 
 	/**
-	 * @param sellerTradeFee the sellerTradeFee to set
+	 * @param sellerTradeFee
+	 *            the sellerTradeFee to set
 	 */
 	public void setSellerTradeFee(Double sellerTradeFee) {
 		this.sellerTradeFee = sellerTradeFee;
@@ -158,7 +160,8 @@ public class Trade {
 	}
 
 	/**
-	 * @param isFeeDeductedBuyer the isFeeDeductedBuyer to set
+	 * @param isFeeDeductedBuyer
+	 *            the isFeeDeductedBuyer to set
 	 */
 	public void setIsFeeDeductedBuyer(Boolean isFeeDeductedBuyer) {
 		this.isFeeDeductedBuyer = isFeeDeductedBuyer;
@@ -172,11 +175,11 @@ public class Trade {
 	}
 
 	/**
-	 * @param isFeeDeductedSeller the isFeeDeductedSeller to set
+	 * @param isFeeDeductedSeller
+	 *            the isFeeDeductedSeller to set
 	 */
 	public void setIsFeeDeductedSeller(Boolean isFeeDeductedSeller) {
 		this.isFeeDeductedSeller = isFeeDeductedSeller;
 	}
-	
-	
+
 }
