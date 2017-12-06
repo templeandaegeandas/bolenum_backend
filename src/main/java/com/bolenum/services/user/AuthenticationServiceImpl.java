@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.enums.TokenType;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 
@@ -53,8 +54,7 @@ public class AuthenticationServiceImpl implements AuthenticationTokenService {
 		c.setTime(endDate);
 		c.add(Calendar.DATE,-7);
 		Date startDate=c.getTime();
-		startDate=(Date)startDate;
-		return authenticationTokenRepo.countAuthenticationTokenByCreatedOnBetween(startDate, endDate);
+		return authenticationTokenRepo.countAuthenticationTokenByTokentypeCreatedOnBetween(TokenType.AUTHENTICATION, startDate, endDate);
 		
 	}
 }
