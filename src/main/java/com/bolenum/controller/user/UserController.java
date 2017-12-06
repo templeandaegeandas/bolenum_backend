@@ -103,7 +103,6 @@ public class UserController {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
 				String requestObj = mapper.writeValueAsString(signupForm);
-				logger.debug("Requested Object:" + requestObj);
 				User isUserExist = userService.findByEmail(signupForm.getEmailId());
 				if (isUserExist == null) {
 					User newUser = signupForm.copy(new User());
@@ -114,9 +113,6 @@ public class UserController {
 					return ResponseHandler.response(HttpStatus.CONFLICT, false,
 							localService.getMessage("email.already.exist"), isUserExist.getEmailId());
 				} else {
-					// User user = signupForm.copy(new User());
-					// requestObj = mapper.writeValueAsString(user);
-					// logger.debug("Requested Object for Re Register", user);
 					userService.reRegister(signupForm);
 					return ResponseHandler.response(HttpStatus.OK, false,
 							localService.getMessage("user.registarion.success"), signupForm.getEmailId());
@@ -257,12 +253,8 @@ public class UserController {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * used to add mobile number at the time of providing profile information by
-	 * user
-=======
+
 	 * used to add mobile number at the time of providing profile information by user
->>>>>>> feature_BOL166
 	 * 
 	 * @param mobileNumber
 	 * @param countryCode
@@ -324,7 +316,7 @@ public class UserController {
 	}
 
 	/**
-	 * to upload user profile image 
+	 * to upload user profile image
 	 * 
 	 * @param file
 	 * @return
@@ -372,13 +364,9 @@ public class UserController {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * used to get list of transaction done by a particular user, user can only
-	 * see his own transactions at the time of deposited to his wallet
-=======
+
 	 * used to get list of transaction done by a particular user,
 	 * user can only see his own transactions at the time of deposited to his wallet 
->>>>>>> feature_BOL166
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
@@ -386,7 +374,7 @@ public class UserController {
 	 * @param sortBy
 	 * @return
 	 */
-	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
+	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
@@ -398,13 +386,9 @@ public class UserController {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * used to get list of transaction done by a particular user, user can only
-	 * see his own transactions at the time of deposited to his wallet
-=======
+
 	 * used to get list of transaction done by a particular user,
 	 * user can only see his own transactions at the time of deposited to his wallet 
->>>>>>> feature_BOL166
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
@@ -412,7 +396,7 @@ public class UserController {
 	 * @param sortBy
 	 * @return
 	 */
-	@RequestMapping(value = UrlConstant.GET_TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
+	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
