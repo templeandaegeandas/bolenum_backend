@@ -81,9 +81,7 @@ public class DisputeController {
 				return ResponseHandler.response(HttpStatus.CONFLICT, true,
 						localeService.getMessage("dispute.already.raised"), null);
 			}
-
 			DisputeOrder response = disputeService.raiseDispute(orders, transactionId, commentByDisputeRaiser, file);
-
 			if (response != null) {
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
@@ -92,7 +90,6 @@ public class DisputeController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.time.not.eligible"), null);
 		}
-
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("dispute.raised.failed"),
 				null);
 

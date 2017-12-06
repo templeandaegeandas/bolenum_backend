@@ -8,8 +8,7 @@ import java.util.Date;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToOne;
-
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
@@ -24,12 +23,12 @@ import com.bolenum.model.orders.book.Orders;
  */
 public class OrdersDTO {
 	private Long id;
-	@NotEmpty(message = "Volume must be greater than 0.001")
+	@NotNull(message = "Volume must be greater than 0.001")
 	private Double volume; // Quantity of buy/sell order
-	@NotEmpty(message = "Volume must be greater than 0.001")
+	@NotNull(message = "Volume must be greater than 0.001")
 	private Double totalVolume; // total quantity to keep track of initial
 								// quantity
-	@NotEmpty(message = "price must be greater than 0")
+	@NotNull(message = "price must be greater than 0")
 	private Double price; // price of 1 UNIT
 
 	@Enumerated(EnumType.STRING)

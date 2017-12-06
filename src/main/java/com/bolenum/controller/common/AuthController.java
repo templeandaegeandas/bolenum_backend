@@ -172,14 +172,11 @@ public class AuthController {
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localeService.getMessage("token.invalid"));
 		}
-
 		User verifiedUser = authService.verifyTokenForResetPassword(token);
-
 		if (verifiedUser == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("token.invalid"),
 					null);
 		}
-
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.CONFLICT, true,
 					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());
