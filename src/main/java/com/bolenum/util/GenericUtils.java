@@ -24,6 +24,7 @@ public class GenericUtils {
 	private static Logger logger = LoggerFactory.getLogger(GenericUtils.class);
 
 	/**
+	 * to get the current logged in user from context
 	 * 
 	 * @return user
 	 */
@@ -46,7 +47,7 @@ public class GenericUtils {
 	 * @description to convert value from wei to either
 	 * @param amount
 	 *            in wei
-	 * @return either
+	 * @return amount in either
 	 */
 	public static Double convertWeiToEther(BigInteger amount) {
 		logger.debug("amount in Wei: {}", amount);
@@ -56,6 +57,13 @@ public class GenericUtils {
 		logger.debug("amount in eth: {}", getDecimalFormat().format(amountInEther));
 		return amountInEther.doubleValue();
 	}
+
+	/**
+	 * 
+	 * @description to calculate the Estimeted Fee of Ethereum
+	 * @return estimited fee
+	 *
+	 */
 
 	public static double getEstimetedFeeEthereum() {
 		DecimalFormat df = new DecimalFormat("0");
@@ -80,11 +88,18 @@ public class GenericUtils {
 		df.setMaximumFractionDigits(8);
 		return df;
 	}
-	
+
+	/**
+	 * 
+	 * @description to get the decimal digit up to 8.
+	 * @param amount
+	 * @return amount
+	 *
+	 */
 	public static double getDecimalFormat(double amount) {
 		DecimalFormat df = new DecimalFormat("0");
 		df.setMaximumFractionDigits(8);
-		String formate = df.format(amount); 
+		String formate = df.format(amount);
 		return Double.parseDouble(formate);
 	}
 }

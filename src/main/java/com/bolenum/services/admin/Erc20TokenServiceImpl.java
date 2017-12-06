@@ -219,6 +219,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 							saveTx(user, tx, tokenName, erc20Token);
 						}
 					}
+				}, err -> {
+					logger.error("Erc20Token incoming transaction saving subscribe error: {}", err.getMessage());
+					err.printStackTrace();
 				});
 	}
 

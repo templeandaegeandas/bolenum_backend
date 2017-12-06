@@ -1,4 +1,5 @@
 package com.bolenum.enums;
+
 /**
  * 
  * @Author Himanshu Kumar
@@ -7,7 +8,7 @@ package com.bolenum.enums;
 
 public enum TransactionStatus {
 
-WITHDRAW("withdraw"), DEPOSIT("deposit");
+	WITHDRAW("withdraw"), DEPOSIT("deposit"), FEE("fee");
 
 	private String txStatus;
 
@@ -18,5 +19,5 @@ WITHDRAW("withdraw"), DEPOSIT("deposit");
 	public String getTransactionStatus() {
 		return txStatus;
 	}
-	
+
 }
