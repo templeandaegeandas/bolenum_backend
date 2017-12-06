@@ -7,6 +7,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.bolenum.constant.BTCUrlConstant;
+import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
 import com.bolenum.repo.user.UserRepository;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -38,6 +39,9 @@ public class AdminServiceImpl implements AdminService {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Value("${bitcoin.service.url}")
+	private String btcUrl;
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
@@ -71,7 +75,7 @@ public class AdminServiceImpl implements AdminService {
 	 */
 	@Override
 	public String createAdminHotWallet(String uuid) {
-		String url = BTCUrlConstant.ADMIN_HOT_WALLET;
+		String url = btcUrl + UrlConstant.ADMIN_HOT_WALLET;
 		RestTemplate restTemplate = new RestTemplate();
 		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<String, String>();
 		logger.debug("create wallet uuid:  {}", uuid);
@@ -103,11 +107,11 @@ public class AdminServiceImpl implements AdminService {
 		return "";
 
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public String getAdminWalletBalnce(String uuid) {
-		String url = BTCUrlConstant.WALLET_BAL;
+		String url = btcUrl + UrlConstant.WALLET_BAL;
 		RestTemplate restTemplate = new RestTemplate();
 		logger.debug("get Wallet balance:  {}", uuid);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url).queryParam("walletUuid", uuid);

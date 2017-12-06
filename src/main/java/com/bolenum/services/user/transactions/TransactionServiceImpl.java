@@ -9,7 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -49,7 +48,6 @@ import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
-import com.bolenum.constant.BTCUrlConstant;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
@@ -77,6 +75,7 @@ import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.WalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.EthereumServiceUtil;
+import com.bolenum.util.GenericUtils;
 
 /**
  * @author chandan kumar singh
@@ -131,7 +130,11 @@ public class TransactionServiceImpl implements TransactionService {
 	@Autowired
 	private WalletService walletService;
 
-	private DecimalFormat decimalFormat = new DecimalFormat("0");
+	@Value("${bitcoin.service.url}")
+	private String btcUrl;
+
+	@Value("${admin.email}")
+	private String adminEmail;
 
 	/**
 	 * to perform in app transaction for ethereum
@@ -222,7 +225,6 @@ public class TransactionServiceImpl implements TransactionService {
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
 			TransactionStatus transactionStatus) {
 		logger.debug("performing btc tx : {} to address: {}, amount:{}", fromUser.getEmailId(), toAddress, amount);
-		decimalFormat.setMaximumFractionDigits(8);
 		Currency currency = currencyService.findByCurrencyAbbreviation("BTC");
 		WithdrawalFee fee = null;
 		double txFeePerKb = 0.001;
@@ -232,15 +234,15 @@ public class TransactionServiceImpl implements TransactionService {
 		if (fee != null) {
 			txFeePerKb = fee.getFee();
 		}
-		logger.debug("perform btc trnsaction with fee/KB: {}", decimalFormat.format(txFeePerKb));
+		logger.debug("perform btc trnsaction with fee/KB: {}", GenericUtils.getDecimalFormat().format(txFeePerKb));
 		RestTemplate restTemplate = new RestTemplate();
-		String url = BTCUrlConstant.CREATE_TX;
+		String url = btcUrl + UrlConstant.CREATE_TX;
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		JSONObject request = new JSONObject();
 		try {
 			request.put("walletId", fromUser.getBtcWalletUuid());
-			request.put("transactionTradeAmount", String.valueOf(decimalFormat.format(amount)));
+			request.put("transactionTradeAmount", String.valueOf(GenericUtils.getDecimalFormat().format(amount)));
 			request.put("receiverAddress", toAddress);
 			request.put("transactionFee", txFeePerKb);
 		} catch (JSONException e) {
@@ -548,10 +550,10 @@ public class TransactionServiceImpl implements TransactionService {
 			notificationService.sendNotification(buyer, msg);
 			notificationService.saveNotification(buyer, seller, msg);
 			// fee deduction for admin
-			User admin = userService.findByEmail("admin@bolenum.com");
+			User admin = userService.findByEmail(adminEmail);
 			Future<Boolean> feeStatus;
 			logger.debug("actual quantity admin will get from seller: {} {} of trade Id: {} ",
-					decimalFormat.format(sellerTradeFee), tickters[0], trade.getId());
+					GenericUtils.getDecimalFormat().format(sellerTradeFee), tickters[0], trade.getId());
 			feeStatus = performTransaction(tickters[0], sellerTradeFee, admin, seller, true);
 			boolean res = feeStatus.get();
 			if (res) {
@@ -559,7 +561,7 @@ public class TransactionServiceImpl implements TransactionService {
 				orderAsyncServices.saveTrade(trade);
 			}
 			logger.debug("actual quantity admin will get from buyer: {} {} of trade Id: {} ",
-					decimalFormat.format(buyerTradeFee), tickters[1], trade.getId());
+					GenericUtils.getDecimalFormat().format(buyerTradeFee), tickters[1], trade.getId());
 			feeStatus = performTransaction(tickters[1], buyerTradeFee, admin, buyer, true);
 			res = feeStatus.get();
 			if (res) {

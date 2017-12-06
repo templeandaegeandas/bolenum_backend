@@ -22,6 +22,7 @@ import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.DisputeOrder;
+import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.common.DisputeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.util.ResponseHandler;
@@ -65,23 +66,23 @@ public class DisputeController {
 			@RequestParam("commentByDisputeRaiser") String commentByDisputeRaiser)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 
-		Boolean isEligible = disputeService.checkEligibilityToDispute(orderId);
+		Orders orders = disputeService.checkEligibilityToDispute(orderId);
 
-		if (!isEligible) {
+		if (orders == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.not.eligible"), null);
 		}
 
-		Boolean isExpired = disputeService.checkExpiryToDispute(orderId);
+		Boolean isExpired = disputeService.checkExpiryToDispute(orders);
 
 		if (!isExpired) {
-			Boolean isExistDisputeOrder = disputeService.isAlreadyDisputed(orderId, transactionId);
+			Boolean isExistDisputeOrder = disputeService.isAlreadyDisputed(orders, transactionId);
 			if (!isExistDisputeOrder) {
 				return ResponseHandler.response(HttpStatus.CONFLICT, true,
 						localeService.getMessage("dispute.already.raised"), null);
 			}
 
-			DisputeOrder response = disputeService.raiseDispute(orderId, transactionId, commentByDisputeRaiser, file);
+			DisputeOrder response = disputeService.raiseDispute(orders, transactionId, commentByDisputeRaiser, file);
 
 			if (response != null) {
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
@@ -108,9 +109,9 @@ public class DisputeController {
 	@RequestMapping(value = UrlConstant.RAISED_DISPUTE_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getRaisedDisputeOrderList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
-			@RequestParam("sortOrder") String sortOrder, @RequestParam("disputeStatus") DisputeStatus disputeStatus) {
+			@RequestParam("sortOrder") String sortOrder) {
 		Page<DisputeOrder> listOfDisputeOrder = disputeService.getListOfDisputeOrder(pageNumber, pageSize, sortBy,
-				sortOrder, disputeStatus);
+				sortOrder);
 		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("dispute.order.submitted.list"),
 				listOfDisputeOrder);
 	}
@@ -124,7 +125,7 @@ public class DisputeController {
 	public ResponseEntity<Object> getRaisedDisputeOrder(@RequestParam("disputeId") Long disputeId) {
 		DisputeOrder disputeOrder = disputeService.getDisputeOrderByID(disputeId);
 		if (disputeOrder != null) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("dispute.order.found.success"), disputeOrder);
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,

@@ -1,5 +1,7 @@
 package com.bolenum.controller.common;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.AddUserBankDetailsForm;
 import com.bolenum.dto.common.EditUserBankDetailsForm;
@@ -27,7 +30,6 @@ import com.bolenum.util.ResponseHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.List;
 import io.swagger.annotations.Api;
 
 /**

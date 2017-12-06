@@ -11,6 +11,7 @@ import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.DisputeOrder;
+import com.bolenum.model.orders.book.Orders;
 
 /**
  * 
@@ -22,17 +23,16 @@ public interface DisputeService {
 	DisputeOrder uploadProofDocument(MultipartFile file, DisputeOrder disputeOrder, User user)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException;
 
-	Boolean checkExpiryToDispute(Long orderId);
+	Boolean checkExpiryToDispute(Orders orders);
 
-	DisputeOrder raiseDispute(Long orderId, Long transactionid, String comment, MultipartFile file)
+	DisputeOrder raiseDispute(Orders orders, Long transactionid, String comment, MultipartFile file)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException;
 
-	Boolean isAlreadyDisputed(Long orderId, Long transactionId);
+	Boolean isAlreadyDisputed(Orders orders, Long transactionId);
 
-	Boolean checkEligibilityToDispute(Long orderId);
+	Orders checkEligibilityToDispute(Long orderId);
 
-	Page<DisputeOrder> getListOfDisputeOrder(int pageNumber, int pageSize, String sortBy, String sortOrder,
-			DisputeStatus disputeStatus);
+	Page<DisputeOrder> getListOfDisputeOrder(int pageNumber, int pageSize, String sortBy, String sortOrder);
 
 	DisputeOrder getDisputeOrderByID(Long disputeId);
 

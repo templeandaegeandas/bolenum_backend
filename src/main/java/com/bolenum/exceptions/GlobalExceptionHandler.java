@@ -1,10 +1,13 @@
 package com.bolenum.exceptions;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -12,7 +15,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,9 +36,11 @@ import com.bolenum.util.ResponseHandler;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-	
+
 	@Autowired
 	private LocaleService localeService;
+
+	private Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 	public GlobalExceptionHandler() {
 		super();
@@ -44,19 +48,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	/**
 	 * to handle Illegal Argument Exception
+	 * 
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
 	 */
 
 	@ExceptionHandler({ IllegalArgumentException.class })
-	public ResponseEntity<Object> handleIllegalArgumentException(final IllegalArgumentException ex, final WebRequest request) {
+	public ResponseEntity<Object> handleIllegalArgumentException(final IllegalArgumentException ex,
+			final WebRequest request) {
 		ex.printStackTrace();
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
-	
+
 	/**
 	 * to handle IOException
+	 * 
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
@@ -66,7 +73,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		ex.printStackTrace();
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
-	
+
 	/**
 	 * 
 	 * @param ex
@@ -77,7 +84,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler({ ConstraintViolationException.class })
 	public ResponseEntity<Object> handleBadRequest(final ConstraintViolationException ex, final WebRequest request) {
 		ex.printStackTrace();
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("constraint.violent"), null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("constraint.violent"),
+				null);
 	}
 
 	/**
@@ -91,7 +99,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleBadRequest(final DataIntegrityViolationException ex, final WebRequest request) {
 		ex.printStackTrace();
 
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("constraint.violent"), null);
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("constraint.violent"),
+				null);
 	}
 
 	/**
@@ -132,7 +141,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
-	
+
 	/**
 	 * 
 	 * @param ex
@@ -146,12 +155,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
 
-	@Override
-	protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex,
-			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
-		ex.printStackTrace();
-
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
+	@ExceptionHandler({ InsufficientBalanceException.class })
+	protected ResponseEntity<Object> handleInsufficientBalanceException(final InsufficientBalanceException ex,
+			final WebRequest request) {
+		logger.error("InsufficientBalanceException: {}", ex.getMessage());
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), Optional.empty());
 	}
 
 	@Override
@@ -239,7 +247,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler({ NullPointerException.class, IllegalStateException.class})
+	@ExceptionHandler({ NullPointerException.class, IllegalStateException.class })
 	public ResponseEntity<Object> handleInternal(final RuntimeException ex, final WebRequest request) {
 		logger.error("500 Status Code");
 		ex.printStackTrace();
