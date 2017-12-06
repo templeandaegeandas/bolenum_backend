@@ -263,7 +263,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			form.setFirstName("bolenum");
 			form.setEmailId("admin@bolenum.com");
 			if (activeProfile.equals("prod")) {
-				form.setPassword(passwordEncoder.encode("m@n!@b0l3num!@#"));
+				form.setPassword(passwordEncoder.encode("M@n!@b0l3num!@#"));
 			} else if (activeProfile.equals("stag")) {
 				form.setPassword(passwordEncoder.encode("bolenum@oodles"));
 			} else {

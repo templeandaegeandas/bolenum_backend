@@ -536,14 +536,14 @@ public class TransactionServiceImpl implements TransactionService {
 
 		if (qtr != null && Double.valueOf(qtr) > 0) {
 			// process tx buyers and sellers
-			double buyerQty = (qtyTraded - sellerTradeFee);
+			double buyerQty = GenericUtils.getDecimalFormat(qtyTraded - sellerTradeFee);
 			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(), buyerQty, tickters[0]);
 			performTransaction(tickters[0], buyerQty, buyer, seller, false); // seller
 																				// eth
 			notificationService.sendNotification(seller, msg1);
 			notificationService.saveNotification(seller, buyer, msg1);
 			// process tx sellers and buyers
-			double sellerQty = Double.valueOf(qtr) - buyerTradeFee;
+			double sellerQty = GenericUtils.getDecimalFormat(Double.valueOf(qtr) - buyerTradeFee);
 			logger.debug("actual quantity seller will get: {} {}", sellerQty, tickters[1]);
 			performTransaction(tickters[1], sellerQty, seller, buyer, false); // buyuer
 																				// btc
@@ -553,12 +553,15 @@ public class TransactionServiceImpl implements TransactionService {
 			User admin = userService.findByEmail(adminEmail);
 			Future<Boolean> feeStatus;
 			logger.debug("actual quantity admin will get from seller: {} {} of trade Id: {} ",
-					GenericUtils.getDecimalFormat().format(sellerTradeFee), tickters[0], trade.getId());
+					GenericUtils.getDecimalFormat(sellerTradeFee), tickters[0], trade.getId());
 			feeStatus = performTransaction(tickters[0], sellerTradeFee, admin, seller, true);
 			boolean res = feeStatus.get();
 			if (res) {
 				trade.setIsFeeDeductedSeller(true);
-				orderAsyncServices.saveTrade(trade);
+				logger.debug("Set seller trade fee is deducted: {}", trade.getSellerTradeFee());
+				logger.debug("Saving trade fee for seller started");
+				trade = orderAsyncServices.saveTrade(trade);
+				logger.debug("Saving trade fee for seller completed: {}", trade.getSellerTradeFee());
 			}
 			logger.debug("actual quantity admin will get from buyer: {} {} of trade Id: {} ",
 					GenericUtils.getDecimalFormat().format(buyerTradeFee), tickters[1], trade.getId());
@@ -566,7 +569,10 @@ public class TransactionServiceImpl implements TransactionService {
 			res = feeStatus.get();
 			if (res) {
 				trade.setIsFeeDeductedBuyer(true);
-				orderAsyncServices.saveTrade(trade);
+				logger.debug("Set buyer trade fee is deducted: {}", trade.getBuyerTradeFee());
+				logger.debug("Saving trade fee for buyer started");
+				trade = orderAsyncServices.saveTrade(trade);
+				logger.debug("Saving trade fee for buyer completed: {}", trade.getBuyerTradeFee());
 			}
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");

@@ -204,7 +204,7 @@ public class BTCWalletController {
 					transactionService.performEthTransaction(user, withdrawBalanceForm.getToAddress(),
 							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 					if (bolenumFee > 0) {
-						transactionService.performBtcTransaction(user, admin.getEthWalletaddress(), bolenumFee,
+						transactionService.performEthTransaction(user, admin.getEthWalletaddress(), bolenumFee,
 								TransactionStatus.WITHDRAW);
 					}
 				}
@@ -223,7 +223,7 @@ public class BTCWalletController {
 				transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
 				if (bolenumFee > 0) {
-					transactionService.performBtcTransaction(user, admin.getEthWalletaddress(), bolenumFee,
+					transactionService.performErc20Transaction(user, coinCode, admin.getEthWalletaddress(), bolenumFee,
 							TransactionStatus.WITHDRAW);
 				}
 			}
