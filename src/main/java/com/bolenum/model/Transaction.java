@@ -64,6 +64,10 @@ public class Transaction {
 
 	@ManyToOne
 	private User toUser;
+	/**
+	 * platform fee for withdrawal
+	 */
+	private Double fee;
 
 	public Transaction() {
 
@@ -303,4 +307,13 @@ public class Transaction {
 	public void setTransactionStatus(TransactionStatus transactionStatus) {
 		this.transactionStatus = transactionStatus;
 	}
+
+	public Double getFee() {
+		return fee;
+	}
+
+	public void setFee(Double fee) {
+		this.fee = fee;
+	}
+
 }
