@@ -40,6 +40,8 @@ public class Orders {
 	private OrderType orderType; // buy or sell
 
 	private Date createdOn = new Date();
+	
+	private Date matchedOn;
 
 	private Date deletedOn;
 	private boolean isDeleted;
@@ -116,6 +118,14 @@ public class Orders {
 
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
+	}
+
+	public Date getMatchedOn() {
+		return matchedOn;
+	}
+
+	public void setMatchedOn(Date matchedOn) {
+		this.matchedOn = matchedOn;
 	}
 
 	public Date getDeletedOn() {

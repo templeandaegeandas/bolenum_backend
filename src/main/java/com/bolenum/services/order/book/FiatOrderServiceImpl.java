@@ -3,6 +3,7 @@
  */
 package com.bolenum.services.order.book;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,12 +149,13 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			matchedOrder.setVolume(remain);
 			logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
 			matchedOrder.setLockedVolume(qtyTraded);
+			matchedOrder.setMatchedOn(new Date());
 			logger.debug("locked volume after set: {}", matchedOrder.getLockedVolume());
 			remainingVolume = 0.0;
 			orders.setVolume(remainingVolume);
 			orders.setLockedVolume(qtyTraded);
 			orders.setOrderStatus(OrderStatus.LOCKED);
-
+			orders.setMatchedOn(new Date());
 			logger.debug("orders saving started");
 			if (OrderType.BUY.equals(orders.getOrderType())) {
 				orders.setMatchedOrder(matchedOrder);
@@ -229,6 +231,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			matched.setLockedVolume(0);
 			matched.setMatchedOrder(null);
 			matched.setOrderStatus(OrderStatus.SUBMITTED);
+			matched.setMatchedOn(null);
 			logger.debug("matched order saving start");
 			orderAsyncService.saveOrder(matched);
 		}
