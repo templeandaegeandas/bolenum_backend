@@ -5,6 +5,8 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.validation.Valid;
 
@@ -160,12 +162,14 @@ public class BTCWalletController {
 	 * @param withdrawBalanceForm
 	 * @param coinCode
 	 * @return
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @throws InsufficientBalanceException
 	 */
 	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmount(@RequestParam(name = "currencyType") String currencyType,
 			@Valid @RequestBody WithdrawBalanceForm withdrawBalanceForm, @RequestParam(name = "code") String coinCode,
-			BindingResult bindingResult) {
+			BindingResult bindingResult) throws InterruptedException, ExecutionException {
 		if (bindingResult.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localService.getMessage("withdraw.invalid.amount"), Optional.empty());
@@ -191,21 +195,22 @@ public class BTCWalletController {
 				logger.debug("Validate balance: {}", validWithdrawAmount);
 				if (validWithdrawAmount) {
 					transactionService.performBtcTransaction(user, withdrawBalanceForm.getToAddress(),
-							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
+							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW, bolenumFee);
 					if (bolenumFee > 0) {
 						transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(), bolenumFee,
-								TransactionStatus.WITHDRAW);
+								TransactionStatus.FEE, null);
 					}
 				}
 				break;
 			case "ETH":
 				logger.debug("Validate balance: {}", validWithdrawAmount);
 				if (validWithdrawAmount) {
-					transactionService.performEthTransaction(user, withdrawBalanceForm.getToAddress(),
-							withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
-					if (bolenumFee > 0) {
+					Future<Boolean> res = transactionService.performEthTransaction(user,
+							withdrawBalanceForm.getToAddress(), withdrawBalanceForm.getWithdrawAmount(),
+							TransactionStatus.WITHDRAW, bolenumFee);
+					if (res.get() && bolenumFee > 0) {
 						transactionService.performEthTransaction(user, admin.getEthWalletaddress(), bolenumFee,
-								TransactionStatus.WITHDRAW);
+								TransactionStatus.FEE, null);
 					}
 				}
 				break;
@@ -220,11 +225,12 @@ public class BTCWalletController {
 					withdrawBalanceForm.getWithdrawAmount());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
-				transactionService.performErc20Transaction(user, coinCode, withdrawBalanceForm.getToAddress(),
-						withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW);
-				if (bolenumFee > 0) {
+				Future<Boolean> res = transactionService.performErc20Transaction(user, coinCode,
+						withdrawBalanceForm.getToAddress(), withdrawBalanceForm.getWithdrawAmount(),
+						TransactionStatus.WITHDRAW, bolenumFee);
+				if (res.get() && bolenumFee > 0) {
 					transactionService.performErc20Transaction(user, coinCode, admin.getEthWalletaddress(), bolenumFee,
-							TransactionStatus.WITHDRAW);
+							TransactionStatus.FEE, null);
 				}
 			}
 			break;
