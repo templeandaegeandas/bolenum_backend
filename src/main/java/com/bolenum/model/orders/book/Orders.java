@@ -51,13 +51,13 @@ public class Orders {
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
 	@OneToOne
 	private User user;
+
 	private double lockedVolume;
 
 	private boolean isConfirm;
 
 	/**
-	 * to keep track of which order is matched with incoming order for fiat
-	 * order
+	 * to keep track of which order is matched with incoming order for fiat order
 	 */
 	@OneToOne
 	private Orders matchedOrder;
