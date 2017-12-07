@@ -51,6 +51,7 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.Transfer;
+import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 import com.bolenum.constant.UrlConstant;
@@ -220,17 +221,14 @@ public class TransactionServiceImpl implements TransactionService {
 			EthGetTransactionCount ethGetTransactionCount = web3j
 					.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.PENDING).send();
 			BigInteger nonce = ethGetTransactionCount.getTransactionCount();
-			// BigInteger nonce1 =
-			// BigInteger.valueOf(System.currentTimeMillis());
 			logger.debug("ETH transaction count:{}", nonce);
-			// long randomNum = ThreadLocalRandom.current().nextInt(0,
-			// Integer.MAX_VALUE);
-			// nonce = nonce.add(BigInteger.valueOf(1));
 			BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
 			logger.debug("ETH transaction gas Price: {}", gasPrice);
 			// create our transaction
+			BigDecimal weiValue = Convert.toWei(String.valueOf(amount), Convert.Unit.ETHER);
+			logger.debug("weiValue transaction: {}", weiValue);
 			RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPrice, Transfer.GAS_LIMIT,
-					toAddress, new BigDecimal(amount).toBigInteger());
+					toAddress, weiValue.toBigIntegerExact());
 			logger.debug("ETH raw transaction created");
 			// sign & send our transaction
 			byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);

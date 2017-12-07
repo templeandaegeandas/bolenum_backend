@@ -224,6 +224,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		} else {
 			availableBalance = etherumWalletService.getWalletBalance(user);
 			networkFee = GenericUtils.getEstimetedFeeEthereum();
+			/**
+			 * network fee required for sending to the receiver address and
+			 * admin address, so networkFee = networkFee * 2;
+			 * 
+			 */
+			networkFee = networkFee * 2;
 		}
 		logger.debug("Available balance: {} estimeted network fee: {}", availableBalance,
 				GenericUtils.getDecimalFormat().format(networkFee));
@@ -238,8 +244,24 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	@Override
-	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) {
+	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			WithdrawalFee withdrawalFee) {
+		Double bolenumFee = 0.0, networkFee = 0.0, availableBalanceETH = 0.0;
 		Double availableBalance = 0.0;
+		if (withdrawalFee != null) {
+			bolenumFee = withdrawalFee.getFee();
+		}
+		networkFee = GenericUtils.getEstimetedFeeEthereum();
+		/**
+		 * network fee required for sending to the receiver address and admin
+		 * address, so networkFee = networkFee * 2;
+		 * 
+		 */
+		networkFee = networkFee * 2;
+		availableBalanceETH = etherumWalletService.getWalletBalance(user);
+		if (networkFee > availableBalanceETH) {
+			throw new InsufficientBalanceException(localeService.getMessage("contact.support"));
+		}
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(erc20Token.getCurrency().getCurrencyId())
 				.getMinWithDrawAmount();
@@ -252,7 +274,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				erc20Token.getCurrency());
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
-		if (availableBalance >= (withdrawAmount + placeOrderVolume)) {
+		if (availableBalance >= (withdrawAmount + placeOrderVolume + bolenumFee)) {
 			return true;
 		} else {
 			throw new InsufficientBalanceException(MessageFormat
