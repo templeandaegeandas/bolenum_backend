@@ -281,7 +281,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 					e.printStackTrace();
 				}
 				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
-						jsonObject);
+						jsonObject.toString());
 				logger.debug("WebSocket message: {}", MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
 				return true;
 			} else {
