@@ -127,8 +127,7 @@ public class BTCWalletController {
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":
-			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
-					null);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
 		default:
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
 					null);
@@ -213,7 +212,7 @@ public class BTCWalletController {
 
 		case "ERC20TOKEN":
 			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode,
-					withdrawBalanceForm.getWithdrawAmount());
+					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee);
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
@@ -233,14 +232,15 @@ public class BTCWalletController {
 			break;
 		default:
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
-					null);
+					Optional.empty());
 		}
 		if (!validWithdrawAmount) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
-					localService.getMessage("withdraw.invalid.amount"), null);
+					localService.getMessage("withdraw.invalid.amount"), Optional.empty());
 
 		}
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"), null);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("withdraw.coin.success"),
+				Optional.empty());
 	}
 
 	/**
@@ -255,7 +255,7 @@ public class BTCWalletController {
 		Transaction transactionResponse = btcWalletService.setDepositeList(transaction);
 		if (transactionResponse == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("Deposit not saved!"),
-					null);
+					Optional.empty());
 		} else {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localService.getMessage("Deposit saved successfully!"), transactionResponse);
