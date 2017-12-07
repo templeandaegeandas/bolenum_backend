@@ -76,7 +76,6 @@ import com.bolenum.services.order.book.OrderAsyncService;
 import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.notification.NotificationService;
-import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.WalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.EthereumServiceUtil;
@@ -104,9 +103,6 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private NotificationService notificationService;
-
-	@Autowired
-	private BTCWalletService bTCWalletService;
 
 	@Autowired
 	private ErrorService errorService;
@@ -157,8 +153,7 @@ public class TransactionServiceImpl implements TransactionService {
 				amount);
 		String passwordKey = fromUser.getEthWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
-		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-		Credentials credentials = null;
+
 		String fileName = ethWalletLocation + fromUser.getEthWalletJsonFileName();
 		logger.debug("user eth wallet file name: {}", fileName);
 		File walletFile = new File(fileName);
@@ -168,30 +163,9 @@ public class TransactionServiceImpl implements TransactionService {
 			EthSendTransaction ethSendTransaction = null;
 			try {
 				logger.debug("ETH transaction credentials load started");
-				credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+				Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
 				logger.debug("ETH transaction credentials load completed");
-				logger.debug("ETH transaction count started");
-				// get the next available nonce
-				EthGetTransactionCount ethGetTransactionCount = web3j
-						.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.PENDING).send();
-
-				BigInteger nonce = ethGetTransactionCount.getTransactionCount();
-				logger.debug("ETH transaction count:{}", nonce);
-				// long randomNum = ThreadLocalRandom.current().nextInt(0,
-				// Integer.MAX_VALUE);
-				// nonce = nonce.add(BigInteger.valueOf(1));
-				BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
-				logger.debug("ETH transaction gas Price: {}", gasPrice);
-				// create our transaction
-				RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPrice,
-						Transfer.GAS_LIMIT, toAddress, new BigDecimal(amount).toBigInteger());
-				logger.debug("ETH raw transaction created");
-				// sign & send our transaction
-				byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
-				logger.debug("ETH raw transaction message signed");
-				String hexValue = Numeric.toHexString(signedMessage);
-				logger.debug("ETH transaction hex Value calculated and send started");
-				ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
+				ethSendTransaction = transferEth(credentials, toAddress, amount);
 				logger.debug("ETH transaction send completed: {}", ethSendTransaction.getTransactionHash());
 			} catch (Exception e) {
 				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount,
@@ -236,6 +210,39 @@ public class TransactionServiceImpl implements TransactionService {
 			e1.printStackTrace();
 		}
 		return new AsyncResult<Boolean>(false);
+	}
+
+	private EthSendTransaction transferEth(Credentials credentials, String toAddress, Double amount) {
+		logger.debug("ETH transaction count started");
+		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
+		// get the next available nonce
+		try {
+			EthGetTransactionCount ethGetTransactionCount = web3j
+					.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.PENDING).send();
+			BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+			// BigInteger nonce1 =
+			// BigInteger.valueOf(System.currentTimeMillis());
+			logger.debug("ETH transaction count:{}", nonce);
+			// long randomNum = ThreadLocalRandom.current().nextInt(0,
+			// Integer.MAX_VALUE);
+			// nonce = nonce.add(BigInteger.valueOf(1));
+			BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+			logger.debug("ETH transaction gas Price: {}", gasPrice);
+			// create our transaction
+			RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPrice, Transfer.GAS_LIMIT,
+					toAddress, new BigDecimal(amount).toBigInteger());
+			logger.debug("ETH raw transaction created");
+			// sign & send our transaction
+			byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+			logger.debug("ETH raw transaction message signed");
+			String hexValue = Numeric.toHexString(signedMessage);
+			logger.debug("ETH transaction hex Value calculated and send started");
+			return web3j.ethSendRawTransaction(hexValue).send();
+		} catch (IOException e) {
+			logger.error("ethereum transaction failed: {}", e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**
@@ -435,7 +442,7 @@ public class TransactionServiceImpl implements TransactionService {
 			switch (currencyAbr) {
 			case "BTC":
 				logger.debug("BTC transaction started");
-				txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
+				txStatus = performBtcTransaction(seller, walletService.getBalance(currencyAbr, currencyType, buyer),
 						qtyTraded, null, null);
 				try {
 					boolean res = txStatus.get();
