@@ -15,6 +15,7 @@ import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 
@@ -62,6 +63,7 @@ public class Orders {
 	 * to keep track of which order is matched with incoming order for fiat order
 	 */
 	@OneToOne
+	@JsonIgnore
 	private Orders matchedOrder;
 
 	public Long getId() {
