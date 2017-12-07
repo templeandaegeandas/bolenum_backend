@@ -297,8 +297,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 						TransactionStatus.WITHDRAW, bolenumFee);
 				try {
 					if (res.get() && bolenumFee > 0) {
-						transactionService.performBtcTransaction(user, toAddress, bolenumFee, TransactionStatus.FEE,
-								null);
+						transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(), bolenumFee,
+								TransactionStatus.FEE, null);
 					}
 				} catch (InterruptedException | ExecutionException e1) {
 					e1.printStackTrace();
@@ -309,8 +309,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 						bolenumFee);
 				try {
 					if (res.get() && bolenumFee > 0) {
-						transactionService.performEthTransaction(user, toAddress, bolenumFee, TransactionStatus.FEE,
-								null);
+						transactionService.performEthTransaction(user, admin.getEthWalletaddress(), bolenumFee,
+								TransactionStatus.FEE, null);
 					}
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
@@ -319,11 +319,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 			break;
 		case "ERC20TOKEN":
-			Future<Boolean> res = transactionService.performErc20Transaction(user, coinCode, toAddress, amount,
+			Future<Boolean> res1 = transactionService.performErc20Transaction(user, coinCode, toAddress, amount,
 					TransactionStatus.WITHDRAW, bolenumFee);
 			try {
-				if (res.get() && bolenumFee > 0) {
-					transactionService.performErc20Transaction(user, coinCode, toAddress, bolenumFee,
+				if (res1.get() && bolenumFee > 0) {
+					transactionService.performErc20Transaction(user, coinCode, admin.getEthWalletaddress(), bolenumFee,
 							TransactionStatus.FEE, null);
 				}
 			} catch (InterruptedException | ExecutionException e) {
