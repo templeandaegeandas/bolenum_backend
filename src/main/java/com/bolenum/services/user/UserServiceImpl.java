@@ -226,9 +226,11 @@ public class UserServiceImpl implements UserService {
 		if (existinguser == null) {
 			smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
 			// TODO need to remove mail OTP as this is for mail varification
+			logger.debug("OTP on mail send start");
 			emailservice.mailSend(user.getEmailId(), "OTP", message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			if (otpRepository.save(otp) != null) {
+				logger.debug("OTP saved");
 				user.setCountryCode(countryCode);
 				user.setMobileNumber(mobileNumber);
 				user.setIsMobileVerified(false);
@@ -240,11 +242,15 @@ public class UserServiceImpl implements UserService {
 			if (existinguser.getUserId().equals(user.getUserId()) && existinguser.getIsMobileVerified()) {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.verified.by.you"));
 			} else if (existinguser.getUserId().equals(user.getUserId()) && !existinguser.getIsMobileVerified()) {
+				logger.debug("user exist but mobile not verified");
 				smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
-				// TODO need to remove mail OTP as this is for mail varification
+				// TODO need to remove mail OTP as this is for m-ail
+				// varification
+				logger.debug("OTP on mail send start");
 				emailservice.mailSend(user.getEmailId(), "OTP", message);
 				OTP otp = new OTP(mobileNumber, code, user);
 				otpRepository.save(otp);
+				logger.debug("OTP saved");
 				return existinguser;
 			} else {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.added"));
