@@ -130,6 +130,11 @@ public class AdminController {
 				localeService.getMessage("admin.transaction.fees.found.success"), fee);
 	}
 
+	/**
+	 * 
+	 * @param withdrawalFee
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.POST)
 	public ResponseEntity<Object> saveWithdrawlFees(@RequestBody WithdrawalFee withdrawalFee) {
 		WithdrawalFee savedWithdrawalFee = withdrawalFeeService.saveWithdrawalFee(withdrawalFee);
@@ -141,6 +146,11 @@ public class AdminController {
 				Optional.empty());
 	}
 
+	/**
+	 * 
+	 * @param currencyId
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWithdrawlFees(@RequestParam("currencyId") long currencyId) {
 		WithdrawalFee fee = withdrawalFeeService.getWithdrawalFee(currencyId);

@@ -39,14 +39,12 @@ public class GenericUtils {
 		String emailPattern = "^(.+)@(.+)$";
 		Pattern pattern = Pattern.compile(emailPattern);
 		Matcher matcher = pattern.matcher(email);
-
 		return matcher.matches();
 	}
 
 	/**
-	 * @description to convert value from wei to either
-	 * @param amount
-	 *            in wei
+	 * @description 
+	 * @param 
 	 * @return amount in either
 	 */
 	public static Double convertWeiToEther(BigInteger amount) {
