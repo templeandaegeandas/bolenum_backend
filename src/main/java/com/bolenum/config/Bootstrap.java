@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -107,6 +108,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private EtherumWalletService etherumWalletService;
 
 	@Autowired
+	@Lazy
 	private BTCWalletService btcWalletService;
 
 	@Autowired

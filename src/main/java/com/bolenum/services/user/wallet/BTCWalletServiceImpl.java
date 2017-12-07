@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -40,6 +44,7 @@ import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
+import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.util.GenericUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -78,6 +83,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;
+
+	@Autowired
+	private TransactionService transactionService;
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
@@ -216,6 +224,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		} else {
 			availableBalance = etherumWalletService.getWalletBalance(user);
 			networkFee = GenericUtils.getEstimetedFeeEthereum();
+			/**
+			 * network fee required for sending to the receiver address and
+			 * admin address, so networkFee = networkFee * 2;
+			 * 
+			 */
+			networkFee = networkFee * 2;
 		}
 		logger.debug("Available balance: {} estimeted network fee: {}", availableBalance,
 				GenericUtils.getDecimalFormat().format(networkFee));
@@ -230,8 +244,24 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	@Override
-	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount) {
+	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			WithdrawalFee withdrawalFee) {
+		Double bolenumFee = 0.0, networkFee = 0.0, availableBalanceETH = 0.0;
 		Double availableBalance = 0.0;
+		if (withdrawalFee != null) {
+			bolenumFee = withdrawalFee.getFee();
+		}
+		networkFee = GenericUtils.getEstimetedFeeEthereum();
+		/**
+		 * network fee required for sending to the receiver address and admin
+		 * address, so networkFee = networkFee * 2;
+		 * 
+		 */
+		networkFee = networkFee * 2;
+		availableBalanceETH = etherumWalletService.getWalletBalance(user);
+		if (networkFee > availableBalanceETH) {
+			throw new InsufficientBalanceException(localeService.getMessage("contact.support"));
+		}
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(erc20Token.getCurrency().getCurrencyId())
 				.getMinWithDrawAmount();
@@ -244,7 +274,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				erc20Token.getCurrency());
 		logger.debug("Available balance: {}", availableBalance);
 		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
-		if (availableBalance >= (withdrawAmount + placeOrderVolume)) {
+		if (availableBalance >= (withdrawAmount + placeOrderVolume + bolenumFee)) {
 			return true;
 		} else {
 			throw new InsufficientBalanceException(MessageFormat
@@ -275,5 +305,56 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
+	}
+
+	@Override
+	@Async
+	public Future<Boolean> withdrawAmount(String currencyType, String coinCode, User user, String toAddress,
+			Double amount, Double bolenumFee, User admin) {
+		switch (currencyType) {
+		case "CRYPTO":
+			switch (coinCode) {
+			case "BTC":
+				Future<Boolean> res = transactionService.performBtcTransaction(user, toAddress, amount,
+						TransactionStatus.WITHDRAW, bolenumFee);
+				try {
+					if (res.get() && bolenumFee > 0) {
+						transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(), bolenumFee,
+								TransactionStatus.FEE, null);
+					}
+				} catch (InterruptedException | ExecutionException e1) {
+					e1.printStackTrace();
+				}
+				break;
+			case "ETH":
+				res = transactionService.performEthTransaction(user, toAddress, amount, TransactionStatus.WITHDRAW,
+						bolenumFee);
+				try {
+					if (res.get() && bolenumFee > 0) {
+						transactionService.performEthTransaction(user, admin.getEthWalletaddress(), bolenumFee,
+								TransactionStatus.FEE, null);
+					}
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+			break;
+		case "ERC20TOKEN":
+			Future<Boolean> res1 = transactionService.performErc20Transaction(user, coinCode, toAddress, amount,
+					TransactionStatus.WITHDRAW, bolenumFee);
+			try {
+				if (res1.get() && bolenumFee > 0) {
+					transactionService.performErc20Transaction(user, coinCode, admin.getEthWalletaddress(), bolenumFee,
+							TransactionStatus.FEE, null);
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+			break;
+		default:
+			new AsyncResult<Boolean>(false);
+		}
+		return new AsyncResult<Boolean>(true);
 	}
 }

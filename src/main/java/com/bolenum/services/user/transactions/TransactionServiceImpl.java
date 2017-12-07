@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ExecutionException;
@@ -40,13 +41,18 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderType;
@@ -71,7 +77,6 @@ import com.bolenum.services.order.book.OrderAsyncService;
 import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.notification.NotificationService;
-import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.WalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.EthereumServiceUtil;
@@ -99,9 +104,6 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private NotificationService notificationService;
-
-	@Autowired
-	private BTCWalletService bTCWalletService;
 
 	@Autowired
 	private ErrorService errorService;
@@ -147,28 +149,25 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
-			TransactionStatus transactionStatus) {
+			TransactionStatus transactionStatus, Double fee) {
 		logger.debug("performing eth transaction: {} to address: {}, amount: {}", fromUser.getEmailId(), toAddress,
 				amount);
 		String passwordKey = fromUser.getEthWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
-		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-		Credentials credentials = null;
+
 		String fileName = ethWalletLocation + fromUser.getEthWalletJsonFileName();
 		logger.debug("user eth wallet file name: {}", fileName);
 		File walletFile = new File(fileName);
 		try {
 			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
 			// logger.debug("decr password: {}", decrPwd);
-			TransactionReceipt transactionReceipt = null;
+			EthSendTransaction ethSendTransaction = null;
 			try {
 				logger.debug("ETH transaction credentials load started");
-				credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+				Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
 				logger.debug("ETH transaction credentials load completed");
-				logger.debug("ETH transaction send fund started");
-				RemoteCall<TransactionReceipt> tr = Transfer.sendFunds(web3j, credentials, toAddress,
-						BigDecimal.valueOf(amount), Convert.Unit.ETHER);
-				transactionReceipt = tr.send();
+				ethSendTransaction = transferEth(credentials, toAddress, amount);
+				logger.debug("ETH transaction send completed: {}", ethSendTransaction.getTransactionHash());
 			} catch (Exception e) {
 				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount,
 						false);
@@ -177,13 +176,13 @@ public class TransactionServiceImpl implements TransactionService {
 				return new AsyncResult<Boolean>(false);
 			}
 			logger.debug("ETH transaction send fund completed");
-			String txHash = transactionReceipt.getTransactionHash();
+			String txHash = ethSendTransaction.getTransactionHash();
 			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
 				transaction = new Transaction();
-				transaction.setTxHash(transactionReceipt.getTransactionHash());
+				transaction.setTxHash(ethSendTransaction.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
@@ -191,11 +190,13 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setFromUser(fromUser);
 				transaction.setCurrencyName("ETH");
+				if (fee != null) {
+					transaction.setFee(fee);
+				}
 				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
 				if (receiverUser != null) {
 					transaction.setToUser(receiverUser);
 				}
-
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
@@ -212,6 +213,36 @@ public class TransactionServiceImpl implements TransactionService {
 		return new AsyncResult<Boolean>(false);
 	}
 
+	private EthSendTransaction transferEth(Credentials credentials, String toAddress, Double amount) {
+		logger.debug("ETH transaction count started");
+		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
+		// get the next available nonce
+		try {
+			EthGetTransactionCount ethGetTransactionCount = web3j
+					.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.PENDING).send();
+			BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+			logger.debug("ETH transaction count:{}", nonce);
+			BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+			logger.debug("ETH transaction gas Price: {}", gasPrice);
+			// create our transaction
+			BigDecimal weiValue = Convert.toWei(String.valueOf(amount), Convert.Unit.ETHER);
+			logger.debug("weiValue transaction: {}", weiValue);
+			RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPrice, Transfer.GAS_LIMIT,
+					toAddress, weiValue.toBigIntegerExact());
+			logger.debug("ETH raw transaction created");
+			// sign & send our transaction
+			byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+			logger.debug("ETH raw transaction message signed");
+			String hexValue = Numeric.toHexString(signedMessage);
+			logger.debug("ETH transaction hex Value calculated and send started");
+			return web3j.ethSendRawTransaction(hexValue).send();
+		} catch (IOException e) {
+			logger.error("ethereum transaction failed: {}", e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	/**
 	 * to perform in app transaction for bitcoin
 	 * 
@@ -223,7 +254,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
-			TransactionStatus transactionStatus) {
+			TransactionStatus transactionStatus, Double feeE) {
 		logger.debug("performing btc tx : {} to address: {}, amount:{}", fromUser.getEmailId(), toAddress, amount);
 		Currency currency = currencyService.findByCurrencyAbbreviation("BTC");
 		WithdrawalFee fee = null;
@@ -272,6 +303,9 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction.setFromUser(fromUser);
 					transaction.setTransactionStatus(transactionStatus);
 					transaction.setCurrencyName("BTC");
+					if (feeE != null) {
+						transaction.setFee(feeE);
+					}
 					User receiverUser = userRepository.findByBtcWalletAddress(toAddress);
 					if (receiverUser != null) {
 						transaction.setToUser(receiverUser);
@@ -309,7 +343,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus) {
+			TransactionStatus transactionStatus, Double fee) {
 		try {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, erc20Token,
@@ -331,6 +365,9 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setFromUser(fromUser);
 				transaction.setCurrencyName(tokenName);
+				if (fee != null) {
+					transaction.setFee(fee);
+				}
 				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
 				if (receiverUser != null) {
 					transaction.setToUser(receiverUser);
@@ -403,8 +440,8 @@ public class TransactionServiceImpl implements TransactionService {
 			switch (currencyAbr) {
 			case "BTC":
 				logger.debug("BTC transaction started");
-				txStatus = performBtcTransaction(seller, bTCWalletService.getWalletAddress(buyer.getBtcWalletUuid()),
-						qtyTraded, null);
+				txStatus = performBtcTransaction(seller, walletService.getBalance(currencyAbr, currencyType, buyer),
+						qtyTraded, null, null);
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
@@ -424,7 +461,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 			case "ETH":
 				logger.debug("ETH transaction started");
-				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null);
+				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null, null);
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is ETH transaction successed: {}", res);
@@ -447,7 +484,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 		case "ERC20TOKEN":
 			logger.debug("ERC20TOKEN transaction started");
-			txStatus = performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null);
+			txStatus = performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null, null);
 			try {
 				boolean res = txStatus.get();
 				logger.debug("is ERC20TOKEN transaction successed: {}", res);

@@ -122,6 +122,8 @@ public class FiatOrderController {
 		orders.setPair(currencyPairService.findCurrencypairByPairId(pairId));
 		orders.setUser(user);
 		orders = fiatOrderService.createOrders(orders);
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
+				com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"),
 				orders.getId());
 	}
@@ -256,6 +258,10 @@ public class FiatOrderController {
 		}
 		boolean result = fiatOrderService.processCancelOrder(exitingOrder);
 		if (result) {
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
+					com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + exitingOrder.getMatchedOrder().getUser().getUserId(),
+					MessageType.ORDER_CANCELLED);
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"),
 					Optional.empty());
 		}
@@ -315,8 +321,11 @@ public class FiatOrderController {
 		Orders orders = ordersService.getOrderDetails(orderId);
 		if (orders != null) {
 			if (OrderType.BUY.equals(orderType)) {
-				BankAccountDetails accountDetails = bankAccountDetailsService
-						.primaryBankAccountDetails(orders.getMatchedOrder().getUser());
+				BankAccountDetails accountDetails = null;
+				if(orders.getMatchedOrder() != null) {
+					accountDetails = bankAccountDetailsService
+							.primaryBankAccountDetails(orders.getMatchedOrder().getUser());
+				}
 				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(orders.getUser(),
 						orders.getPair());
 				map.put("accountDetails", response(accountDetails));
@@ -328,6 +337,8 @@ public class FiatOrderController {
 				map.put("walletAddress", userAddress.get("address"));
 				map.put("currencyAbr", userAddress.get("currencyAbbr"));
 				map.put("orderStatus", orders.getOrderStatus());
+				map.put("matchedOn", orders.getMatchedOn());
+				map.put("isConfirmed", orders.isConfirm());
 			} else {
 				BankAccountDetails accountDetails = bankAccountDetailsService
 						.primaryBankAccountDetails(orders.getUser());
@@ -337,6 +348,11 @@ public class FiatOrderController {
 				map.put("totalPrice", orders.getLockedVolume() * orders.getPrice());
 				map.put("orderVolume", orders.getLockedVolume());
 				map.put("orderStatus", orders.getOrderStatus());
+				map.put("matchedOn", orders.getMatchedOn());
+				map.put("isConfirmed", orders.isConfirm());
+				if(orders.getMatchedOrder() != null) {
+					map.put("isMatchedConfirm", orders.getMatchedOrder().isConfirm());
+				}
 			}
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"),
 					map);

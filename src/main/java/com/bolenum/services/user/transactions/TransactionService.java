@@ -21,10 +21,10 @@ import com.bolenum.model.orders.book.Trade;
 public interface TransactionService {
 
 	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
-			TransactionStatus transactionStatus);
+			TransactionStatus transactionStatus, Double fee);
 
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
-			TransactionStatus transactionStatus);
+			TransactionStatus transactionStatus, Double fee);
 
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
 			boolean isFee) throws InterruptedException, ExecutionException;
@@ -33,7 +33,7 @@ public interface TransactionService {
 			int pageSize, String sortOrder, String sortBy);
 
 	Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus);
+			TransactionStatus transactionStatus, Double fee);
 
 	public Future<Boolean> processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer,
 			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade)

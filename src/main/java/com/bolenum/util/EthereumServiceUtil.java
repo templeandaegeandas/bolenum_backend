@@ -3,6 +3,10 @@
  */
 package com.bolenum.util;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
@@ -10,32 +14,28 @@ import org.web3j.protocol.http.HttpService;
  * @author chandan kumar singh
  * @date 26-Sep-2017
  */
-public class EthereumServiceUtil implements Cloneable{
-	
+@Component
+public class EthereumServiceUtil {
+
+	@Value("${ethereum.service.url}")
+	private String url;
+
 	private static Web3j instance = null;
+
+	@PostConstruct
+	void init() {
+		HttpService httpService = new HttpService(url);
+		instance = Web3j.build(httpService);
+	}
 
 	private EthereumServiceUtil() {
 
 	}
+
 	/**
-	 * singleton method for getting instance of ethereum web3j 
-	 * @description getWeb3jInstance
-	 * @param 
-	 * @return Web3j
-	 * @exception 
-	 *
+	 * method for getting instance of ethereum web3j
 	 */
 	public static Web3j getWeb3jInstance() {
-		if (instance == null) {
-			HttpService httpService = new HttpService("http://165.227.86.165:8000");
-			instance = Web3j.build(httpService);
-			return instance;
-		}
 		return instance;
-	}
-	
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-	    throw new CloneNotSupportedException("Clone not supported by EthereumServiceUtil"); 
 	}
 }
