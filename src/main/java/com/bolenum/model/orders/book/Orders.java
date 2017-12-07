@@ -15,6 +15,7 @@ import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 
@@ -40,6 +41,8 @@ public class Orders {
 	private OrderType orderType; // buy or sell
 
 	private Date createdOn = new Date();
+	
+	private Date matchedOn;
 
 	private Date deletedOn;
 	private boolean isDeleted;
@@ -60,6 +63,7 @@ public class Orders {
 	 * to keep track of which order is matched with incoming order for fiat order
 	 */
 	@OneToOne
+	@JsonIgnore
 	private Orders matchedOrder;
 
 	public Long getId() {
@@ -116,6 +120,14 @@ public class Orders {
 
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
+	}
+
+	public Date getMatchedOn() {
+		return matchedOn;
+	}
+
+	public void setMatchedOn(Date matchedOn) {
+		this.matchedOn = matchedOn;
 	}
 
 	public Date getDeletedOn() {
