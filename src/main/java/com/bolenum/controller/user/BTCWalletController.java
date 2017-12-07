@@ -127,7 +127,7 @@ public class BTCWalletController {
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
 					null);
 		default:
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("invalid.coin.code"),
