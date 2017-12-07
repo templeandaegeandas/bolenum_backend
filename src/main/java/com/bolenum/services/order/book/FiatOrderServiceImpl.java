@@ -12,6 +12,8 @@ import java.util.concurrent.Future;
 
 import javax.transaction.Transactional;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,8 @@ import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
+
+import springfox.documentation.spring.web.json.Json;
 
 /**
  * @author chandan kumar singh
@@ -269,8 +273,15 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				notificationService.saveNotification(seller, buyer, msg);
 				exitingOrder.setConfirm(true);
 				ordersRepository.save(exitingOrder);
+				JSONObject jsonObject = new JSONObject();
+				try {
+					jsonObject.put("ORDER_CONFIRMATION", MessageType.ORDER_CONFIRMATION);
+					jsonObject.put("matchedOrderId", matched.getId());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
-						MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
+						jsonObject);
 				logger.debug("WebSocket message: {}", MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
 				return true;
 			} else {
