@@ -42,8 +42,6 @@ import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
 
-import springfox.documentation.spring.web.json.Json;
-
 /**
  * @author chandan kumar singh
  * @date 16-Nov-2017
