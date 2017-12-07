@@ -181,7 +181,8 @@ public class UserServiceImpl implements UserService {
 
 		// if (editUserForm.getLastName() != null) {
 		// user.setLastName(editUserForm.getLastName());
-		// } else if (editUserForm.getLastName() == null && user.getLastName() == null)
+		// } else if (editUserForm.getLastName() == null && user.getLastName()
+		// == null)
 		// {
 		// user.setLastName(editUserForm.getLastName());
 		// }
@@ -224,6 +225,8 @@ public class UserServiceImpl implements UserService {
 		logger.debug("Otp sent success: {}", code);
 		if (existinguser == null) {
 			smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
+			// TODO need to remove mail OTP as this is for mail varification
+			emailservice.mailSend(user.getEmailId(), "OTP", message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			if (otpRepository.save(otp) != null) {
 				user.setCountryCode(countryCode);
@@ -238,6 +241,8 @@ public class UserServiceImpl implements UserService {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.verified.by.you"));
 			} else if (existinguser.getUserId().equals(user.getUserId()) && !existinguser.getIsMobileVerified()) {
 				smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
+				// TODO need to remove mail OTP as this is for mail varification
+				emailservice.mailSend(user.getEmailId(), "OTP", message);
 				OTP otp = new OTP(mobileNumber, code, user);
 				otpRepository.save(otp);
 				return existinguser;
