@@ -273,7 +273,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				ordersRepository.save(exitingOrder);
 				JSONObject jsonObject = new JSONObject();
 				try {
-					jsonObject.put("ORDER_CONFIRMATION", MessageType.ORDER_CONFIRMATION);
+					jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
 					jsonObject.put("matchedOrderId", matched.getId());
 				} catch (JSONException e) {
 					e.printStackTrace();
