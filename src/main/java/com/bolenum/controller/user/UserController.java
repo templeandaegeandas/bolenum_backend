@@ -34,12 +34,14 @@ import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.Countries;
 import com.bolenum.model.States;
+import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
+import com.bolenum.services.user.SubscribedUserService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
@@ -87,6 +89,9 @@ public class UserController {
 
 	@Autowired
 	private OrdersService orderService;
+
+	@Autowired
+	private SubscribedUserService subscribedUserService;
 
 	/**
 	 * 
@@ -253,8 +258,9 @@ public class UserController {
 	}
 
 	/**
-
-	 * used to add mobile number at the time of providing profile information by user
+	 * 
+	 * used to add mobile number at the time of providing profile information by
+	 * user
 	 * 
 	 * @param mobileNumber
 	 * @param countryCode
@@ -364,9 +370,9 @@ public class UserController {
 	}
 
 	/**
-
-	 * used to get list of transaction done by a particular user,
-	 * user can only see his own transactions at the time of deposited to his wallet 
+	 * 
+	 * used to get list of transaction done by a particular user, user can only see
+	 * his own transactions at the time of deposited to his wallet
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
@@ -386,9 +392,8 @@ public class UserController {
 	}
 
 	/**
-
-	 * used to get list of transaction done by a particular user,
-	 * user can only see his own transactions at the time of deposited to his wallet 
+	 * used to get list of transaction done by a particular user, user can only see
+	 * his own transactions at the time of deposited to his wallet
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
@@ -425,6 +430,33 @@ public class UserController {
 		tradingNumber.put("totalNumberOfTrading", totalNumberOfTrading);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("my.trading.count.success"),
 				tradingNumber);
+	}
+
+	/**
+	 * 
+	 * @param email
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.SUBSCRIBE_USER, method = RequestMethod.POST)
+	public ResponseEntity<Object> sendNewsLetter(@RequestParam("email") String email) {
+
+		if (!GenericUtils.isValidMail(email)) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localService.getMessage("user.email.not.valid"), null);
+		}
+		SubscribedUser subscribedUser = subscribedUserService.validateSubscribedUser(email);
+		if (subscribedUser == null) {
+			SubscribedUser response = subscribedUserService.saveSubscribedUser(email);
+			if (response != null) {
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("user.subscribe.success"),
+						response);
+			} else {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localService.getMessage("user.subscribe.failure"), null);
+			}
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+				localService.getMessage("user.subscribe.already.exist"), null);
 	}
 
 }

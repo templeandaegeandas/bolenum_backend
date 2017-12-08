@@ -100,8 +100,7 @@ public class DisputeServiceImpl implements DisputeService {
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		Orders matchedOrder = order.getMatchedOrder();
 		User disputeRaisedAgainst = matchedOrder.getUser();
-		if (order != null && OrderStatus.LOCKED.equals(order.getOrderStatus())
-				&& OrderType.BUY.equals(order.getOrderType())) {
+		if (OrderStatus.LOCKED.equals(order.getOrderStatus()) && OrderType.BUY.equals(order.getOrderType())) {
 
 			User disputeRaiser = order.getUser();
 			DisputeOrder disputeOrder = new DisputeOrder();
@@ -165,25 +164,27 @@ public class DisputeServiceImpl implements DisputeService {
 	}
 
 	/**
-	 * 
+	 *  perform action on raised dispute by admin with respect to Dispute Status
 	 */
 	@Override
 	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentForDisputeRaiser,
 			String commentForDisputeRaisedAgainst, DisputeStatus disputeStatus) {
-
 		if (DisputeStatus.RAISED.equals(disputeOrder.getDisputeStatus())
 				&& disputeStatus.equals(DisputeStatus.INPROCESS)) {
 			disputeOrder.setDisputeStatus(disputeStatus);
 			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
 			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
+			return disputeOrderRepo.save(disputeOrder);
 
 		} else if (DisputeStatus.INPROCESS.equals(disputeOrder.getDisputeStatus())
 				&& disputeStatus.equals(DisputeStatus.COMPLETED)) {
 			disputeOrder.setDisputeStatus(disputeStatus);
 			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
 			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
+			return disputeOrderRepo.save(disputeOrder);
 		}
-		return disputeOrderRepo.save(disputeOrder);
+		return null;
+
 	}
 
 	/**

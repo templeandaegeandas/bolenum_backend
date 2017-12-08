@@ -69,9 +69,11 @@ public class KYCServiceImpl implements KYCService {
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		long sizeLimit = 1024 * 1024 * 10L;
 		User user = userRepository.findOne(userId);
-		if (user.getMobileNumber() == null || !user.getIsMobileVerified()) {
-			throw new MobileNotVerifiedException(localeService.getMessage("mobile.number.not.verified"));
-		}
+		/*
+		 * if (user.getMobileNumber() == null || !user.getIsMobileVerified()) {
+		 * throw new MobileNotVerifiedException(localeService.getMessage(
+		 * "mobile.number.not.verified")); }
+		 */
 		UserKyc savedKyc = null;
 		if (file != null) {
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
