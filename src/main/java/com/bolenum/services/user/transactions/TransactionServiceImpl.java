@@ -440,8 +440,7 @@ public class TransactionServiceImpl implements TransactionService {
 			switch (currencyAbr) {
 			case "BTC":
 				logger.debug("BTC transaction started");
-				txStatus = performBtcTransaction(seller, walletService.getBalance(currencyAbr, currencyType, buyer),
-						qtyTraded, null, null);
+				txStatus = performBtcTransaction(seller, buyer.getBtcWalletAddress(), qtyTraded, null, null);
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
