@@ -208,10 +208,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			WithdrawalFee withdrawalFee, Currency currency) {
-		Double availableBalance = 0.0, minWithdrawAmount = 0.0, bolenumFee = 0.0, networkFee = 0.0;
+		Double availableBalance = 0.0, minWithdrawAmount = 0.0, bolenumFee = 0.0, networkFee = 0.0, lockVolume = 0.0;
 		if (withdrawalFee != null) {
 			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
 			bolenumFee = withdrawalFee.getFee();
+			lockVolume = withdrawalFee.getLockVolume();
 		}
 		logger.debug("Minimum withdraw ammount:{} Withdraw fee: {} of currency: {}", minWithdrawAmount, bolenumFee,
 				currency.getCurrencyName());
@@ -233,23 +234,29 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		logger.debug("Available balance: {} estimeted network fee: {}", availableBalance,
 				GenericUtils.getDecimalFormat().format(networkFee));
+		availableBalance = GenericUtils.getDecimalFormat(availableBalance - lockVolume);
+		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
+
 		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, currency, currency);
 		logger.debug("Order Book balance:{} of user: {}", placeOrderVolume, user.getEmailId());
-		if (availableBalance >= (withdrawAmount + placeOrderVolume + bolenumFee + networkFee)) {
+		double volume = GenericUtils.getDecimalFormat(withdrawAmount + placeOrderVolume + bolenumFee + networkFee);
+		logger.debug("addition of withdraw amount, place order, fee and network fee volume: {}", volume);
+		if (availableBalance >= volume) {
 			return true;
 		} else {
-			throw new InsufficientBalanceException(MessageFormat
-					.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
+			throw new InsufficientBalanceException(MessageFormat.format(
+					localeService.getMessage("insufficient.balance"), withdrawAmount, lockVolume, placeOrderVolume));
 		}
 	}
 
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			WithdrawalFee withdrawalFee) {
-		Double bolenumFee = 0.0, networkFee = 0.0, availableBalanceETH = 0.0;
+		Double bolenumFee = 0.0, networkFee = 0.0, availableBalanceETH = 0.0, lockVolume = 0.0;
 		Double availableBalance = 0.0;
 		if (withdrawalFee != null) {
 			bolenumFee = withdrawalFee.getFee();
+			lockVolume = withdrawalFee.getLockVolume();
 		}
 		networkFee = GenericUtils.getEstimetedFeeEthereum();
 		/**
@@ -270,15 +277,24 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
 		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
+		logger.debug("Available balance: {}", availableBalance);
+
+		availableBalance = availableBalance - lockVolume;
+		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
+
 		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, erc20Token.getCurrency(),
 				erc20Token.getCurrency());
-		logger.debug("Available balance: {}", availableBalance);
-		logger.debug("OrderBook balance of user: {}", placeOrderVolume);
-		if (availableBalance >= (withdrawAmount + placeOrderVolume + bolenumFee)) {
+
+		logger.debug("Order Book balance: {} of user: {}", placeOrderVolume, user.getEmailId());
+
+		double volume = withdrawAmount + placeOrderVolume + bolenumFee;
+		logger.debug("addition of withdraw amount, place order and fee volume: {}", volume);
+
+		if (availableBalance >= volume) {
 			return true;
 		} else {
-			throw new InsufficientBalanceException(MessageFormat
-					.format(localeService.getMessage("insufficient.balance"), availableBalance, placeOrderVolume));
+			throw new InsufficientBalanceException(MessageFormat.format(
+					localeService.getMessage("insufficient.balance"), withdrawAmount, lockVolume, placeOrderVolume));
 		}
 	}
 
