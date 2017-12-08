@@ -57,7 +57,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	long lastVerifiedTime = 0; // time of last success
 	final GoogleAuthenticator gAuth = new GoogleAuthenticator();
 	AtomicInteger windowSize = new AtomicInteger(3);
-	
+
 	@Value("${bolenum.google.qr.code.location}")
 	private String qrCodeLocation;
 
@@ -69,7 +69,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	private SMSService smsServiceUtil;
 	@Autowired
 	private LocaleService localeService;
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(TwoFactorAuthServiceImpl.class);
 
 	@Override
@@ -114,9 +114,8 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		int code = (100000 + r.nextInt(900000));
 		if (user.getIsMobileVerified()) {
 			String mobileNumber = user.getMobileNumber();
-			String message = localeService.getMessage("otp.for.twofa.verification") + "  " + code;
+			smsServiceUtil.sendOtp(code, user.getCountryCode(), mobileNumber);
 			logger.debug("2 FA otp sent success: {}", code);
-			smsServiceUtil.sendMessage(mobileNumber, user.getCountryCode(), message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			return otpRepository.save(otp);
 		} else {
@@ -227,24 +226,24 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		MatrixToImageWriter.writeToFile(matrix, filePath.substring(filePath.lastIndexOf('.') + 1), file);
 		Encoder encoder = Base64.getEncoder();
 		String base64Image = encoder.encodeToString(Files.readAllBytes(file.toPath()));
-		logger.debug("QR code file name: {}",String.valueOf(file));
-		//using PosixFilePermission to set file permissions 777
-        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-        //add owners permission
-        perms.add(PosixFilePermission.OWNER_READ);
-        perms.add(PosixFilePermission.OWNER_WRITE);
-        //perms.add(PosixFilePermission.OWNER_EXECUTE);
-        //add group permissions
-        perms.add(PosixFilePermission.GROUP_READ);
-        perms.add(PosixFilePermission.GROUP_WRITE);
-        //perms.add(PosixFilePermission.GROUP_EXECUTE);
-        //add others permissions
-        perms.add(PosixFilePermission.OTHERS_READ);
-        //perms.add(PosixFilePermission.OTHERS_WRITE);
-        //perms.add(PosixFilePermission.OTHERS_EXECUTE);
-        
-        Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
-        logger.info("2FA QR code generated");
+		logger.debug("QR code file name: {}", String.valueOf(file));
+		// using PosixFilePermission to set file permissions 777
+		Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+		// add owners permission
+		perms.add(PosixFilePermission.OWNER_READ);
+		perms.add(PosixFilePermission.OWNER_WRITE);
+		// perms.add(PosixFilePermission.OWNER_EXECUTE);
+		// add group permissions
+		perms.add(PosixFilePermission.GROUP_READ);
+		perms.add(PosixFilePermission.GROUP_WRITE);
+		// perms.add(PosixFilePermission.GROUP_EXECUTE);
+		// add others permissions
+		perms.add(PosixFilePermission.OTHERS_READ);
+		// perms.add(PosixFilePermission.OTHERS_WRITE);
+		// perms.add(PosixFilePermission.OTHERS_EXECUTE);
+
+		Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
+		logger.info("2FA QR code generated");
 		return "data:image/png;base64," + base64Image;
 	}
 
