@@ -45,13 +45,10 @@ public class SMSServiceImpl implements SMSService{
 	}
 	
 	@Override
-	public void sendOtp(int otp, String countryCode, String mobileNumber) throws Exception {
+	public void sendOtp(int otp, String countryCode, String mobileNumber) {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = twoFactorUrl + "+" +countryCode+mobileNumber + "/" + otp + "/bolenum otp";
 		@SuppressWarnings("unchecked")
 		Map<Object, Object> response = restTemplate.getForObject(url, HashMap.class);
-		if (response.get("Status").equals("Error")) {
-			throw new Exception(response.get("Details").toString());
-		}
 	}
 }

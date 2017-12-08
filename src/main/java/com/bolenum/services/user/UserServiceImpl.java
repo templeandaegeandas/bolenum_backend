@@ -223,11 +223,7 @@ public class UserServiceImpl implements UserService {
 		int code = (100000 + r.nextInt(900000));
 		logger.debug("Otp sent success: {}", code);
 		if (existinguser == null) {
-			try {
-				smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
 			// TODO need to remove mail OTP as this is for mail varification
 			logger.debug("OTP on mail send start");
 			emailservice.mailSend(user.getEmailId(), "OTP", String.valueOf(code));
@@ -246,11 +242,7 @@ public class UserServiceImpl implements UserService {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.verified.by.you"));
 			} else if (existinguser.getUserId().equals(user.getUserId()) && !existinguser.getIsMobileVerified()) {
 				logger.debug("user exist but mobile not verified");
-				try {
-					smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
 				// TODO need to remove mail OTP as this is for m-ail
 				// varification
 				logger.debug("OTP on mail send start");
@@ -297,11 +289,7 @@ public class UserServiceImpl implements UserService {
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
 		logger.debug("Otp sent success: {}", code);
-		try {
-			smsServiceUtil.sendOtp(code, user.getCountryCode(), mobileNumber);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		smsServiceUtil.sendOtp(code, user.getCountryCode(), mobileNumber);
 		OTP otp = new OTP(mobileNumber, code, user);
 		otpRepository.save(otp);
 	}
