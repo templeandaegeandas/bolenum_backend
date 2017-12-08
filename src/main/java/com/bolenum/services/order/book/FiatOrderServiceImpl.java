@@ -270,7 +270,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				notificationService.sendNotification(seller, msg);
 				notificationService.saveNotification(seller, buyer, msg);
 				exitingOrder.setConfirm(true);
+				matched.setMatchedOn(new Date());
 				ordersRepository.save(exitingOrder);
+				ordersRepository.save(matched);
 				JSONObject jsonObject = new JSONObject();
 				try {
 					jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);

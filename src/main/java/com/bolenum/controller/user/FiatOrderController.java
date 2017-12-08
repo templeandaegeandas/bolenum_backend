@@ -256,12 +256,12 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + exitingOrder.getMatchedOrder().getUser().getUserId(),
+				MessageType.ORDER_CANCELLED);
 		boolean result = fiatOrderService.processCancelOrder(exitingOrder);
 		if (result) {
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
 					com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + exitingOrder.getMatchedOrder().getUser().getUserId(),
-					MessageType.ORDER_CANCELLED);
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"),
 					Optional.empty());
 		}
