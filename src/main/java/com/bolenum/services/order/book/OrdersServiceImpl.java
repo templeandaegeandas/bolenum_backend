@@ -63,9 +63,6 @@ public class OrdersServiceImpl implements OrdersService {
 	private TransactionService transactionService;
 
 	@Autowired
-	private FiatOrderService fiatOrderService;
-
-	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
 	public static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
@@ -102,8 +99,8 @@ public class OrdersServiceImpl implements OrdersService {
 			tickter = currency.getCurrencyAbbreviation();
 			currencyType = currency.getCurrencyType().toString();
 		}
-		double userPlacedOrderVolume = fiatOrderService.getPlacedOrderVolumeOfCurrency(user, OrderStatus.SUBMITTED,
-				OrderType.SELL, currency);
+		double userPlacedOrderVolume = getPlacedOrderVolumeOfCurrency(user, OrderStatus.SUBMITTED, OrderType.SELL,
+				currency);
 		logger.debug("user placed order volume: {} and order volume: {}",
 				GenericUtils.getDecimalFormat(userPlacedOrderVolume),
 				GenericUtils.getDecimalFormat(Double.valueOf(minOrderVol)));
@@ -119,6 +116,22 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 		}
 		return balance;
+	}
+
+	/**
+	 * @description getPlacedOrderVolumeOfCurrency @param @return
+	 *              double @exception
+	 * 
+	 */
+	private double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType,
+			Currency currency) {
+		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(user, orderStatus,
+				orderType, currency);
+		double total = 0.0;
+		for (Orders order : orders) {
+			total = total + order.getVolume();
+		}
+		return total;
 	}
 
 	/**
@@ -165,8 +178,8 @@ public class OrdersServiceImpl implements OrdersService {
 	 * @description to check user requested order and existing order
 	 * @param requested
 	 *            order, list of existing orders
-	 * @return #true if user requested order is matched with own existing user else
-	 *         #false
+	 * @return #true if user requested order is matched with own existing user
+	 *         else #false
 	 */
 	@Override
 	public boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
@@ -200,7 +213,8 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			/**
-			 * checking user self order, return false if self order else proceed.
+			 * checking user self order, return false if self order else
+			 * proceed.
 			 */
 
 			if (isUsersSelfOrder(orders, sellOrderList)) {
@@ -227,8 +241,9 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceDesc(OrderType.BUY, OrderStatus.SUBMITTED, pair);
 			/**
-			 * checking user self order, return false if self order else proceed. checking
-			 * user self order, return false if self order else proceed.
+			 * checking user self order, return false if self order else
+			 * proceed. checking user self order, return false if self order
+			 * else proceed.
 			 */
 			if (isUsersSelfOrder(orders, buyOrderList)) {
 				return processed;
@@ -254,8 +269,8 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		logger.debug("MarketOrder: Order list saving started");
 		/**
-		 * if any exception occurs then clear list, otherwise double order will be
-		 * placed
+		 * if any exception occurs then clear list, otherwise double order will
+		 * be placed
 		 */
 		try {
 			orderAsyncServices.saveOrder(ordersList);
@@ -291,15 +306,16 @@ public class OrdersServiceImpl implements OrdersService {
 					.findByOrderTypeAndOrderStatusAndPairAndPriceLessThanEqualOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
-			 * checking user self order, return false if self order else proceed.
+			 * checking user self order, return false if self order else
+			 * proceed.
 			 */
 
 			if (isUsersSelfOrder(orders, sellOrderList)) {
 				return processed;
 			}
 			/**
-			 * fetch one best seller's price from list of sellers, order by price in ASC
-			 * then process the order
+			 * fetch one best seller's price from list of sellers, order by
+			 * price in ASC then process the order
 			 */
 			while (sellOrderList.size() > 0 && (remainingVolume > 0) && (price >= getBestBuy(sellOrderList))) {
 				logger.debug("inner buy while loop for buyers and remaining volume: {}", remainingVolume);
@@ -319,21 +335,23 @@ public class OrdersServiceImpl implements OrdersService {
 			processed = true;
 		} else {
 			/**
-			 * fetching the list of BUYERS whose buy price is greater than sell price
+			 * fetching the list of BUYERS whose buy price is greater than sell
+			 * price
 			 */
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndPairAndPriceGreaterThanEqualOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, pair, price);
 			/**
-			 * checking user self order, return false if self order else proceed.
+			 * checking user self order, return false if self order else
+			 * proceed.
 			 */
 			if (isUsersSelfOrder(orders, buyOrderList)) {
 				return processed;
 			}
 
 			/**
-			 * fetch one best buyer's price from list of buyers, order by price in desc then
-			 * process the order
+			 * fetch one best buyer's price from list of buyers, order by price
+			 * in desc then process the order
 			 */
 			while (buyOrderList.size() > 0 && (remainingVolume > 0) && (price <= buyOrderList.get(0).getPrice())) {
 				logger.debug("inner sell while loop for seller and remaining volume: {}", remainingVolume);
@@ -474,8 +492,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the lowest selling price, thats why it is best buy for
-	 * buyers
+	 * this will calculate the lowest selling price, thats why it is best buy
+	 * for buyers
 	 */
 	@Override
 	public Double getBestBuy(List<Orders> sellOrderList) {
@@ -489,8 +507,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the highest selling price, thats why it is worst buy for
-	 * buyers
+	 * this will calculate the highest selling price, thats why it is worst buy
+	 * for buyers
 	 */
 	@Override
 	public Double getWorstBuy(List<Orders> sellOrderList) {
@@ -504,8 +522,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the highest buying price, thats why it is best sell for
-	 * seller
+	 * this will calculate the highest buying price, thats why it is best sell
+	 * for seller
 	 */
 	@Override
 	public Double getBestSell(List<Orders> buyOrderList) {
@@ -520,8 +538,8 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	/**
-	 * this will calculate the lowest buying price, thats why it is worst sell for
-	 * seller
+	 * this will calculate the lowest buying price, thats why it is worst sell
+	 * for seller
 	 */
 	@Override
 	public Double getWorstSell(List<Orders> buyOrderList) {
