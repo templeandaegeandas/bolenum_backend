@@ -1,14 +1,11 @@
 package com.bolenum.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.twilio.Twilio;
 import com.twilio.exception.ApiException;
@@ -25,8 +22,6 @@ public class SMSServiceImpl implements SMSService{
 	String twilioAuthToken;
 	@Value("${bolenum.twilio.phone.number}")
 	String twilioMobileNumber;
-	@Value("${bolenum.2factor.otp.api.dev}")
-	String twoFactorUrl;
 	
 	public static final Logger logger = LoggerFactory.getLogger(SMSServiceImpl.class);
 
@@ -42,13 +37,5 @@ public class SMSServiceImpl implements SMSService{
 		} catch (ApiException e) {
 			logger.error(e.getMessage());
 		}
-	}
-	
-	@Override
-	public void sendOtp(int otp, String countryCode, String mobileNumber) {
-		RestTemplate restTemplate = new RestTemplate();
-		String url = twoFactorUrl + "+" +countryCode+mobileNumber + "/" + otp + "/bolenum otp";
-		@SuppressWarnings("unchecked")
-		Map<Object, Object> response = restTemplate.getForObject(url, HashMap.class);
 	}
 }
