@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +63,7 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping(value = UrlConstant.BASE_USER_URI_V1)
 @Api(value = "User Controller")
+@Scope("request")
 public class UserController {
 
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
