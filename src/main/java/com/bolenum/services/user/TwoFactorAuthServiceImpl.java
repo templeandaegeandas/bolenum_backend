@@ -114,9 +114,12 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		int code = (100000 + r.nextInt(900000));
 		if (user.getIsMobileVerified()) {
 			String mobileNumber = user.getMobileNumber();
-			String message = localeService.getMessage("otp.for.twofa.verification") + "  " + code;
+			try {
+				smsServiceUtil.sendOtp(code, user.getCountryCode(), mobileNumber);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			logger.debug("2 FA otp sent success: {}", code);
-			smsServiceUtil.sendMessage(mobileNumber, user.getCountryCode(), message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			return otpRepository.save(otp);
 		} else {
