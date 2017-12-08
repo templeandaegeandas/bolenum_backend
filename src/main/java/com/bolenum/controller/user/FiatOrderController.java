@@ -267,8 +267,10 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}
-		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + exitingOrder.getMatchedOrder().getUser().getUserId(),
-				MessageType.ORDER_CANCELLED);
+		if (exitingOrder.getMatchedOrder() != null && exitingOrder.getMatchedOrder().getUser() != null) {
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/"
+					+ exitingOrder.getMatchedOrder().getUser().getUserId(), MessageType.ORDER_CANCELLED);
+		}
 		boolean result = fiatOrderService.processCancelOrder(exitingOrder);
 		if (result) {
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
@@ -333,7 +335,7 @@ public class FiatOrderController {
 		if (orders != null) {
 			if (OrderType.BUY.equals(orderType)) {
 				BankAccountDetails accountDetails = null;
-				if(orders.getMatchedOrder() != null) {
+				if (orders.getMatchedOrder() != null) {
 					accountDetails = bankAccountDetailsService
 							.primaryBankAccountDetails(orders.getMatchedOrder().getUser());
 				}
@@ -361,7 +363,7 @@ public class FiatOrderController {
 				map.put("orderStatus", orders.getOrderStatus());
 				map.put("matchedOn", orders.getMatchedOn());
 				map.put("isConfirmed", orders.isConfirm());
-				if(orders.getMatchedOrder() != null) {
+				if (orders.getMatchedOrder() != null) {
 					map.put("isMatchedConfirm", orders.getMatchedOrder().isConfirm());
 				}
 			}

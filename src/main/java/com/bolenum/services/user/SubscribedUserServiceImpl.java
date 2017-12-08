@@ -1,6 +1,10 @@
 package com.bolenum.services.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.model.SubscribedUser;
@@ -21,10 +25,14 @@ public class SubscribedUserServiceImpl implements SubscribedUserService {
 	@Override
 	public SubscribedUser saveSubscribedUser(String email) {
 		SubscribedUser subscribedUser=new SubscribedUser();
-		System.out.println("hhihihih");
 		subscribedUser.setEmail(email);
 		subscribedUser.setIsSubscribed(true);
-		System.out.println("hhihihih");
 		return subscribedUserRepo.save(subscribedUser);
+	}
+
+	@Override
+	public Page<SubscribedUser> getSubscribedUserList(int pageNumber, int pageSize, String sortBy, String sortOrder) {
+		Pageable page = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
+		return subscribedUserRepo.findAll(page);
 	}
 }

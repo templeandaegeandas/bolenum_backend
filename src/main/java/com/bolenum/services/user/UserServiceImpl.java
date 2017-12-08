@@ -221,13 +221,12 @@ public class UserServiceImpl implements UserService {
 		User existinguser = userRepository.findByMobileNumber(mobileNumber);
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
-		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
 		logger.debug("Otp sent success: {}", code);
 		if (existinguser == null) {
-			smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
+			smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
 			// TODO need to remove mail OTP as this is for mail varification
 			logger.debug("OTP on mail send start");
-			emailservice.mailSend(user.getEmailId(), "OTP", message);
+			emailservice.mailSend(user.getEmailId(), "OTP", String.valueOf(code));
 			OTP otp = new OTP(mobileNumber, code, user);
 			if (otpRepository.save(otp) != null) {
 				logger.debug("OTP saved");
@@ -243,11 +242,11 @@ public class UserServiceImpl implements UserService {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.verified.by.you"));
 			} else if (existinguser.getUserId().equals(user.getUserId()) && !existinguser.getIsMobileVerified()) {
 				logger.debug("user exist but mobile not verified");
-				smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
+				smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
 				// TODO need to remove mail OTP as this is for m-ail
 				// varification
 				logger.debug("OTP on mail send start");
-				emailservice.mailSend(user.getEmailId(), "OTP", message);
+				emailservice.mailSend(user.getEmailId(), "OTP", String.valueOf(code));
 				OTP otp = new OTP(mobileNumber, code, user);
 				otpRepository.save(otp);
 				logger.debug("OTP saved");
@@ -289,9 +288,8 @@ public class UserServiceImpl implements UserService {
 		String mobileNumber = user.getMobileNumber();
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
-		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
 		logger.debug("Otp sent success: {}", code);
-		smsServiceUtil.sendMessage(mobileNumber, user.getCountryCode(), message);
+		smsServiceUtil.sendOtp(code, user.getCountryCode(), mobileNumber);
 		OTP otp = new OTP(mobileNumber, code, user);
 		otpRepository.save(otp);
 	}
