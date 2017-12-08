@@ -44,17 +44,17 @@ public class AuthenticationServiceImpl implements AuthenticationTokenService {
 	}
 
 	/**
-	 *  to count number of user who logged in within 7 days
+	 * to count number of user who logged in within 7 days
 	 */
 	@Override
 	public Long countActiveUsers() {
-		
-		Date endDate=new Date();
-		Calendar c=Calendar.getInstance();
+		Date endDate = new Date();
+		Calendar c = Calendar.getInstance();
 		c.setTime(endDate);
-		c.add(Calendar.DATE,-7);
-		Date startDate=c.getTime();
-		return authenticationTokenRepo.countAuthenticationTokenByTokentypeCreatedOnBetween(TokenType.AUTHENTICATION, startDate, endDate);
-		
+		c.add(Calendar.DATE, -7);
+		Date startDate = c.getTime();
+		return authenticationTokenRepo.countAuthenticationTokenByTokentypeCreatedOnBetween(TokenType.AUTHENTICATION,
+				startDate, endDate);
+
 	}
 }

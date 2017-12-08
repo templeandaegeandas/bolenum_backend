@@ -439,7 +439,7 @@ public class UserController {
 	 */
 	@RequestMapping(value = UrlConstant.SUBSCRIBE_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> sendNewsLetter(@RequestParam("email") String email) {
-		
+
 		if (!GenericUtils.isValidMail(email)) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localService.getMessage("user.email.not.valid"), null);
