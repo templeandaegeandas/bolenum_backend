@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderType;
-import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.User;
 import com.bolenum.model.fees.TradingFee;
 import com.bolenum.model.fees.WithdrawalFee;
@@ -30,7 +29,6 @@ import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
-import com.bolenum.services.user.SubscribedUserService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
 
@@ -64,9 +62,6 @@ public class AdminController {
 
 	@Autowired
 	private WithdrawalFeeService withdrawalFeeService;
-
-	@Autowired
-	private SubscribedUserService subscribedUserService;
 
 	public static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
@@ -106,8 +101,8 @@ public class AdminController {
 	}
 
 	/**
-	 * to add trading fees for transaction done by user and deducted fees will be
-	 * store in Admin wallet
+	 * to add trading fees for transaction done by user and deducted fees will
+	 * be store in Admin wallet
 	 * 
 	 * @param tradingFee
 	 * @return
@@ -163,8 +158,8 @@ public class AdminController {
 	}
 
 	/**
-	 * to count number of new buyers/sellers and active users and active orders that
-	 * will be shown on Admin dashboard
+	 * to count number of new buyers/sellers and active users and active orders
+	 * that will be shown on Admin dashboard
 	 * 
 	 * @return
 	 */
@@ -200,26 +195,6 @@ public class AdminController {
 		Page<Orders> listOfLatestOrders = ordersService.getListOfLatestOrders(pageNumber, pageSize, sortBy, sortOrder);
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.latest.orders.list.success"), listOfLatestOrders);
-	}
-
-	/**
-	 * 
-	 * @param pageNumber
-	 * @param pageSize
-	 * @param sortBy
-	 * @param sortOrder
-	 * @return
-	 */
-	@RequestMapping(value = UrlConstant.SUBSCRIBE_USER, method = RequestMethod.GET)
-	public ResponseEntity<Object> getListOfSubscribedUser(@RequestParam("pageNumber") int pageNumber,
-			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
-			@RequestParam("sortOrder") String sortOrder) {
-
-		Page<SubscribedUser> listOfSubscribedUser = subscribedUserService.getSubscribedUserList(pageNumber, pageSize,
-				sortBy, sortOrder);
-		System.out.println(listOfSubscribedUser.getTotalElements());
-		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.subscribed.user.list"),
-				listOfSubscribedUser);
 	}
 
 }
