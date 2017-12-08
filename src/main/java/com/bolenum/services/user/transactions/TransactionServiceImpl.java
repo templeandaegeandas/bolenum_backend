@@ -550,14 +550,17 @@ public class TransactionServiceImpl implements TransactionService {
 		// checking the order type BUY
 		if (OrderType.BUY.equals(orders.getOrderType())) {
 			logger.debug("BUY Order");
+
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
-			logger.debug("msg: {}", msg);
-			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
 					+ " order has been initiated, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
-					+ tickters[0] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[1];
-			logger.debug("msg1: {}", msg1);
+					+ tickters[0] + " remaining voloume: " + remainingVolume + " " + tickters[1];
+			logger.debug("Byuer's transaction initiated msg: {}", msg);
+
+			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
+					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
+
+			logger.debug("Seller's transaction initiated msg: {}", msg1);
 		} else {
 			logger.debug("SELL Order");
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
