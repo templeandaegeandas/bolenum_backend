@@ -63,6 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.SEND_2FA_OTP);
 		web.ignoring().antMatchers(UrlConstant.WEBSOCKET_PATH + "/**");
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.DEPOSIT_TRANSACTION_STATUS);
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.SUBSCRIBE_USER);
 		
 		
 		// Check if Active profiles contains "dev" or "stag"
