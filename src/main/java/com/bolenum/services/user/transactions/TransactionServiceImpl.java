@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -199,7 +200,8 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
-					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
+					simpMessagingTemplate.convertAndSend(
+							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
@@ -313,7 +315,8 @@ public class TransactionServiceImpl implements TransactionService {
 					}
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
-						simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
+						simpMessagingTemplate.convertAndSend(
+								UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 								com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 						return new AsyncResult<Boolean>(true);
@@ -376,7 +379,8 @@ public class TransactionServiceImpl implements TransactionService {
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
-					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
+					simpMessagingTemplate.convertAndSend(
+							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					;
@@ -403,7 +407,8 @@ public class TransactionServiceImpl implements TransactionService {
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction else part saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
-					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
+					simpMessagingTemplate.convertAndSend(
+							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					;
@@ -552,24 +557,30 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("BUY Order");
 
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(qtyTraded) + " "
+					+ tickters[0] + ", on " + GenericUtils.getDecimalFormat(Double.valueOf(qtr)) + " " + tickters[1]
+					+ " remaining voloume: " + GenericUtils.getDecimalFormat(remainingVolume) + " " + tickters[0];
 			logger.debug("Byuer's transaction initiated msg: {}", msg);
 
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(qtyTraded) + " "
+					+ tickters[0] + ", on " + GenericUtils.getDecimalFormat(Double.valueOf(qtr)) + " " + tickters[1]
+					+ " remaining voloume: " + GenericUtils.getDecimalFormat(matchedOrder.getVolume()) + " "
+					+ tickters[0];
 
 			logger.debug("Seller's transaction initiated msg: {}", msg1);
 		} else {
 			logger.debug("SELL Order");
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(qtyTraded) + " "
+					+ tickters[0] + ", on " + GenericUtils.getDecimalFormat(Double.valueOf(qtr)) + " " + tickters[1]
+					+ " remaining voloume: " + GenericUtils.getDecimalFormat(remainingVolume) + " " + tickters[0];
 			logger.debug("Seller's msg1: {}", msg1);
 			msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
-					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(qtyTraded) + " "
+					+ tickters[0] + ", on " + GenericUtils.getDecimalFormat(Double.valueOf(qtr)) + " " + tickters[1]
+					+ " remaining voloume: " + GenericUtils.getDecimalFormat(matchedOrder.getVolume()) + " "
+					+ tickters[0];
 			logger.debug("Byuer's msg: {}", msg);
 		}
 
