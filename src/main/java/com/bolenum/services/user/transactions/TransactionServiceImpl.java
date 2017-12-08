@@ -434,9 +434,11 @@ public class TransactionServiceImpl implements TransactionService {
 		String msg = "", msg1 = "";
 		logger.debug("perform transaction for admin fee: {}", isFee);
 		if (!isFee) {
-			msg = "Hi " + seller.getFirstName() + ", Your transaction of selling " + qtyTraded + " " + currencyAbr
+			msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
+					+ GenericUtils.getDecimalFormat(qtyTraded) + " " + currencyAbr
 					+ " have been processed successfully!";
-			msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying " + qtyTraded + " " + currencyAbr
+			msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "
+					+ GenericUtils.getDecimalFormat(qtyTraded) + " " + currencyAbr
 					+ " have been processed successfully!";
 		}
 		Future<Boolean> txStatus;
