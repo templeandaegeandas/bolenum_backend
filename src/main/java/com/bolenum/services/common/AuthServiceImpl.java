@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
 			// Generate Token and Save it for the logged in user
 			AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
 			authToken.setTokentype(TokenType.AUTHENTICATION);
-			
+
 			AuthenticationToken savedAuthToken = authenticationTokenRepo.save(authToken);
 			UserActivity userActivity = new UserActivity(ipAddress, browserName, clientOSName, savedAuthToken);
 			userActivityRepository.save(userActivity);
@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
 			throw new InvalidPasswordException(localeService.getMessage("invalid.credential"));
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param token
@@ -179,5 +179,5 @@ public class AuthServiceImpl implements AuthService {
 		user.setPassword(passwordEncoder.encode(resetPasswordForm.getNewPassword()));
 		userRepository.save(user);
 	}
-	
+
 }
