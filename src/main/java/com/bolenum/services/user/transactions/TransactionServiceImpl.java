@@ -552,8 +552,8 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("BUY Order");
 
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
-					+ tickters[0] + " remaining voloume: " + remainingVolume + " " + tickters[1];
+					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
 			logger.debug("Byuer's transaction initiated msg: {}", msg);
 
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
@@ -566,11 +566,11 @@ public class TransactionServiceImpl implements TransactionService {
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
 					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
 					+ tickters[1] + " remaining voloume: " + remainingVolume + " " + tickters[0];
-			logger.debug("msg1: {}", msg1);
+			logger.debug("Seller's msg1: {}", msg1);
 			msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been initiated, quantity: " + qtr + " " + tickters[1] + ", on " + qtyTraded + " "
-					+ tickters[0] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[1];
-			logger.debug("msg: {}", msg);
+					+ " order has been initiated, quantity: " + qtyTraded + " " + tickters[0] + ", on " + qtr + " "
+					+ tickters[1] + " remaining voloume: " + matchedOrder.getVolume() + " " + tickters[0];
+			logger.debug("Byuer's msg: {}", msg);
 		}
 
 		if (qtr != null && Double.valueOf(qtr) > 0) {
