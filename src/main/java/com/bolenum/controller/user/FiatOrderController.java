@@ -13,6 +13,8 @@ import java.util.concurrent.Future;
 
 import javax.validation.Valid;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -204,9 +206,16 @@ public class FiatOrderController {
 				notificationService.sendNotification(matchedOrder.getUser(), msg);
 				notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg);
 				map.put("orderId", order.getId());
+				JSONObject jsonObject = new JSONObject();
+				try {
+					jsonObject.put("MATCHED_NOTIFICATION", MessageType.MATCHED_NOTIFICATION);
+					jsonObject.put("matchedOrderId", matchedOrder.getId());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 				simpMessagingTemplate.convertAndSend(
-						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER_SELLER_CONFIRM,
-						MessageType.ORDER_CONFIRMATION + "#" + matchedOrder.getId());
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matchedOrder.getUser().getUserId(),
+						jsonObject.toString());
 			}
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"),
 					map);
