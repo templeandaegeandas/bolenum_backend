@@ -225,8 +225,8 @@ public class UserServiceImpl implements UserService {
 		if (existinguser == null) {
 			smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
 			// TODO need to remove mail OTP as this is for mail varification
-			logger.debug("OTP on mail send start");
-			emailservice.mailSend(user.getEmailId(), "OTP", String.valueOf(code));
+			// logger.debug("OTP on mail send start");
+			// emailservice.mailSend(user.getEmailId(), "OTP", message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			if (otpRepository.save(otp) != null) {
 				logger.debug("OTP saved");
@@ -245,8 +245,8 @@ public class UserServiceImpl implements UserService {
 				smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
 				// TODO need to remove mail OTP as this is for m-ail
 				// varification
-				logger.debug("OTP on mail send start");
-				emailservice.mailSend(user.getEmailId(), "OTP", String.valueOf(code));
+				// logger.debug("OTP on mail send start");
+				// emailservice.mailSend(user.getEmailId(), "OTP", message);
 				OTP otp = new OTP(mobileNumber, code, user);
 				otpRepository.save(otp);
 				logger.debug("OTP saved");
