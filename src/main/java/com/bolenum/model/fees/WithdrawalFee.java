@@ -25,6 +25,11 @@ public class WithdrawalFee {
 	private Double minWithDrawAmount;
 	@OneToOne
 	private Currency currency;
+	/**
+	 * this volume will be locked for Bolenum platform, need to maintain locked
+	 * volume for withdrawal
+	 */
+	private Double lockVolume;
 
 	/**
 	 * @return the id
@@ -85,5 +90,20 @@ public class WithdrawalFee {
 	public void setCurrency(Currency currency) {
 		this.currency = currency;
 	}
+
+	/**
+	 * @return the lockVolume
+	 */
+	public Double getLockVolume() {
+		return lockVolume;
+	}
+
+	/**
+	 * @param lockVolume the lockVolume to set
+	 */
+	public void setLockVolume(Double lockVolume) {
+		this.lockVolume = lockVolume;
+	}
+	
 
 }

@@ -282,7 +282,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				logger.debug("new incoming else transaction saved of user: {}", toUser.getEmailId());
 			}
 		}
-		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
 				com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 		logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 	}
