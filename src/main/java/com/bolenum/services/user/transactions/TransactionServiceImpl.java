@@ -199,7 +199,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
-					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
@@ -313,7 +313,7 @@ public class TransactionServiceImpl implements TransactionService {
 					}
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
-						simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
+						simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 								com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 						return new AsyncResult<Boolean>(true);
@@ -376,7 +376,7 @@ public class TransactionServiceImpl implements TransactionService {
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
-					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					;
@@ -403,7 +403,7 @@ public class TransactionServiceImpl implements TransactionService {
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction else part saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
-					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_WITHDRAW,
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					;

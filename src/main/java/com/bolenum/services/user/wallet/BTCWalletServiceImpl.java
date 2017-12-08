@@ -311,13 +311,13 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
 			transaction.setCurrencyName("BTC");
 			transaction.setToUser(toUser);
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(transaction);
 		} else {
 			savedTransaction.setTransactionType(TransactionType.INCOMING);
 			savedTransaction.setToUser(toUser);
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
