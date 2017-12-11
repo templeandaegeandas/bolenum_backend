@@ -297,8 +297,10 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	@Async
 	public Future<Boolean> processTransactionFiatOrders(Orders sellerOrder, String currencyAbr) {
 		logger.debug("processTransactionFiatOrders order id: {}", sellerOrder.getId());
+		logger.debug("processTransactionFiatOrders matched order: {}", sellerOrder.getMatchedOrder());
+		logger.debug("processTransactionFiatOrders matched order id: {}", sellerOrder.getMatchedOrder().getId());
 		Orders buyersOrder = ordersRepository.findByMatchedOrder(sellerOrder);
-		logger.debug("buyers order id: {}", buyersOrder.getId());
+		logger.debug("buyers order: {}", buyersOrder);
 		if (buyersOrder != null && buyersOrder.isConfirm()) {
 			User buyer = buyersOrder.getUser();
 			User seller = sellerOrder.getUser();
