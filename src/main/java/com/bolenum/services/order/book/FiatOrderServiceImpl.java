@@ -329,6 +329,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				e.printStackTrace();
 				return new AsyncResult<Boolean>(false);
 			}
+			catch (Exception e) {
+				return new AsyncResult<Boolean>(true);
+			}
 			return new AsyncResult<Boolean>(true);
 		}
 		return new AsyncResult<Boolean>(false);

@@ -311,6 +311,16 @@ public class FiatOrderController {
 		try {
 			logger.debug("result of order: {}", result);
 			if (result.get()) {
+				JSONObject jsonObject = new JSONObject();
+				try {
+					jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
+					jsonObject.put("matchedOrderId", exitingOrder.getMatchedOrder().getId());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + exitingOrder.getMatchedOrder().getUser().getUserId(),
+						jsonObject.toString());
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localeService.getMessage("order.transaction.success"), Optional.empty());
 			}
