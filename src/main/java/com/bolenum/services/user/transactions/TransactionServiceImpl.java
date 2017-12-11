@@ -582,7 +582,8 @@ public class TransactionServiceImpl implements TransactionService {
 	public Future<Boolean> processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer,
 			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade)
 			throws InterruptedException, ExecutionException {
-		logger.debug("buyer trade fee: {} seller trade fee: {}", buyerTradeFee, sellerTradeFee);
+		logger.debug("buyer trade fee: {} seller trade fee: {}", GenericUtils.getDecimalFormat(buyerTradeFee),
+				GenericUtils.getDecimalFormat(sellerTradeFee));
 		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
@@ -594,36 +595,39 @@ public class TransactionServiceImpl implements TransactionService {
 		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		// fetching the limit price of order
 		String qtr = walletService.getPairedBalance(matchedOrder, currencyPair, qtyTraded);
-		logger.debug("paired currency volume: {} {}", qtr, tickters[1]);
+
+		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormat(qtr), tickters[1]);
 		// checking the order type BUY
 		if (OrderType.BUY.equals(orders.getOrderType())) {
 			logger.debug("BUY Order");
 
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(qtyTraded) + " "
-					+ tickters[0] + ", on " + GenericUtils.getDecimalFormat(Double.valueOf(qtr)) + " " + tickters[1]
-					+ " remaining voloume: " + GenericUtils.getDecimalFormat(remainingVolume) + " " + tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(String.valueOf(qtyTraded))
+					+ " " + tickters[0] + ", on " + GenericUtils.getDecimalFormat(qtr) + " " + tickters[1]
+					+ " remaining voloume: " + GenericUtils.getDecimalFormat(String.valueOf(remainingVolume)) + " "
+					+ tickters[0];
 			logger.debug("Byuer's transaction initiated msg: {}", msg);
 
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(qtyTraded) + " "
-					+ tickters[0] + ", on " + GenericUtils.getDecimalFormat(Double.valueOf(qtr)) + " " + tickters[1]
-					+ " remaining voloume: " + GenericUtils.getDecimalFormat(matchedOrder.getVolume()) + " "
-					+ tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(String.valueOf(qtyTraded))
+					+ " " + tickters[0] + ", on " + GenericUtils.getDecimalFormat(qtr) + " " + tickters[1]
+					+ " remaining voloume: " + GenericUtils.getDecimalFormat(String.valueOf(matchedOrder.getVolume()))
+					+ " " + tickters[0];
 
 			logger.debug("Seller's transaction initiated msg: {}", msg1);
 		} else {
 			logger.debug("SELL Order");
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(qtyTraded) + " "
-					+ tickters[0] + ", on " + GenericUtils.getDecimalFormat(Double.valueOf(qtr)) + " " + tickters[1]
-					+ " remaining voloume: " + GenericUtils.getDecimalFormat(remainingVolume) + " " + tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(String.valueOf(qtyTraded))
+					+ " " + tickters[0] + ", on " + GenericUtils.getDecimalFormat(qtr) + " " + tickters[1]
+					+ " remaining voloume: " + GenericUtils.getDecimalFormat(String.valueOf(remainingVolume)) + " "
+					+ tickters[0];
 			logger.debug("Seller's msg1: {}", msg1);
 			msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(qtyTraded) + " "
-					+ tickters[0] + ", on " + GenericUtils.getDecimalFormat(Double.valueOf(qtr)) + " " + tickters[1]
-					+ " remaining voloume: " + GenericUtils.getDecimalFormat(matchedOrder.getVolume()) + " "
-					+ tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(String.valueOf(qtyTraded))
+					+ " " + tickters[0] + ", on " + GenericUtils.getDecimalFormat(qtr) + " " + tickters[1]
+					+ " remaining voloume: " + GenericUtils.getDecimalFormat(String.valueOf(matchedOrder.getVolume()))
+					+ " " + tickters[0];
 			logger.debug("Byuer's msg: {}", msg);
 		}
 
@@ -631,41 +635,52 @@ public class TransactionServiceImpl implements TransactionService {
 			// process tx buyers and sellers
 			// double buyerQty = GenericUtils.getDecimalFormat(qtyTraded -
 			// sellerTradeFee);
-			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(), qtyTraded, tickters[0]);
+			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(),
+					GenericUtils.getDecimalFormat(String.valueOf(qtyTraded)), tickters[0]);
 			performTransaction(tickters[0], qtyTraded, buyer, seller, false); // seller
 																				// eth
 			notificationService.sendNotification(seller, msg1);
 			notificationService.saveNotification(seller, buyer, msg1);
 			// process tx sellers and buyers
+			double sellerQty = GenericUtils.getDecimalFormat(Double.valueOf(qtr) - sellerTradeFee);
 			// double sellerQty =
-			// GenericUtils.getDecimalFormat(Double.valueOf(qtr) -
-			// buyerTradeFee);
-			double sellerQty = GenericUtils.getDecimalFormat(Double.valueOf(qtr));
-			logger.debug("actual quantity seller will get: {} {}", sellerQty, tickters[1]);
+			// GenericUtils.getDecimalFormat(Double.valueOf(qtr));
+			logger.debug("actual quantity seller will get: {} {}",
+					GenericUtils.getDecimalFormat(String.valueOf(sellerQty)), tickters[1]);
 			performTransaction(tickters[1], sellerQty, seller, buyer, false); // buyuer
 																				// btc
 			notificationService.sendNotification(buyer, msg);
 			notificationService.saveNotification(buyer, seller, msg);
 			// fee deduction for admin
 			User admin = userService.findByEmail(adminEmail);
-			Future<Boolean> feeStatus;
-			logger.debug("actual quantity admin will get from seller: {} {} of trade Id: {} ",
-					GenericUtils.getDecimalFormat(sellerTradeFee), tickters[0], trade.getId());
-			feeStatus = performTransaction(tickters[0], sellerTradeFee, admin, seller, true);
+			// Future<Boolean> feeStatus;
+			// logger.debug("actual quantity admin will get from seller: {} {}
+			// of trade Id: {} ",
+			// GenericUtils.getDecimalFormat(sellerTradeFee), tickters[0],
+			// trade.getId());
+			// feeStatus = performTransaction(tickters[0], sellerTradeFee,
+			// admin, seller, true);
+			// boolean res = feeStatus.get();
+			// if (res) {
+			// trade.setIsFeeDeductedSeller(true);
+			// logger.debug("Set seller trade fee is deducted: {}",
+			// trade.getSellerTradeFee());
+			// logger.debug("Saving trade fee for seller started");
+			// trade = orderAsyncServices.saveTrade(trade);
+			// logger.debug("Saving trade fee for seller completed: {}",
+			// trade.getSellerTradeFee());
+			// }
+			double tfee = GenericUtils.getDecimalFormat(buyerTradeFee + sellerTradeFee);
+			logger.debug(
+					"actual quantity admin will get from buyer: {} and seller: {} total fee: {} {} of trade Id: {} ",
+					GenericUtils.getDecimalFormat(String.valueOf(buyerTradeFee)),
+					GenericUtils.getDecimalFormat(String.valueOf(sellerTradeFee)),
+					GenericUtils.getDecimalFormat(String.valueOf(tfee)), tickters[1], trade.getId());
+			Future<Boolean> feeStatus = performTransaction(tickters[1], tfee, admin, buyer, true);
 			boolean res = feeStatus.get();
 			if (res) {
-				trade.setIsFeeDeductedSeller(true);
-				logger.debug("Set seller trade fee is deducted: {}", trade.getSellerTradeFee());
-				logger.debug("Saving trade fee for seller started");
-				trade = orderAsyncServices.saveTrade(trade);
-				logger.debug("Saving trade fee for seller completed: {}", trade.getSellerTradeFee());
-			}
-			logger.debug("actual quantity admin will get from buyer: {} {} of trade Id: {} ",
-					GenericUtils.getDecimalFormat().format(buyerTradeFee), tickters[1], trade.getId());
-			feeStatus = performTransaction(tickters[1], buyerTradeFee, admin, buyer, true);
-			res = feeStatus.get();
-			if (res) {
 				trade.setIsFeeDeductedBuyer(true);
+				trade.setIsFeeDeductedSeller(true);
 				logger.debug("Set buyer trade fee is deducted: {}", trade.getBuyerTradeFee());
 				logger.debug("Saving trade fee for buyer started");
 				trade = orderAsyncServices.saveTrade(trade);
