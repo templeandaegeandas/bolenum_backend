@@ -451,6 +451,10 @@ public class TransactionServiceImpl implements TransactionService {
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
+					/**
+					 * if transaction for users, then return result with mail
+					 * notification to users
+					 */
 					if (res && !isFee) {
 						notificationService.sendNotification(seller, msg);
 						notificationService.saveNotification(buyer, seller, msg);
@@ -458,6 +462,13 @@ public class TransactionServiceImpl implements TransactionService {
 						notificationService.saveNotification(buyer, seller, msg1);
 						logger.debug("Message : {}", msg);
 						logger.debug("Message : {}", msg1);
+						return new AsyncResult<Boolean>(res);
+					}
+					/**
+					 * if transaction for admin, then return result without mail
+					 * notification
+					 */
+					if (res && isFee) {
 						return new AsyncResult<Boolean>(res);
 					}
 				} catch (InterruptedException | ExecutionException e) {
@@ -471,6 +482,10 @@ public class TransactionServiceImpl implements TransactionService {
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is ETH transaction successed: {}", res);
+					/**
+					 * if transaction for users, then return result with mail
+					 * notification to users
+					 */
 					if (res && !isFee) {
 						notificationService.sendNotification(seller, msg);
 						notificationService.saveNotification(buyer, seller, msg);
@@ -478,6 +493,13 @@ public class TransactionServiceImpl implements TransactionService {
 						notificationService.saveNotification(buyer, seller, msg1);
 						logger.debug("Message : {}", msg);
 						logger.debug("Message : {}", msg1);
+						return new AsyncResult<Boolean>(res);
+					}
+					/**
+					 * if transaction for admin, then return result without mail
+					 * notification
+					 */
+					if (res && isFee) {
 						return new AsyncResult<Boolean>(res);
 					}
 				} catch (InterruptedException | ExecutionException e) {
@@ -494,6 +516,10 @@ public class TransactionServiceImpl implements TransactionService {
 			try {
 				boolean res = txStatus.get();
 				logger.debug("is ERC20TOKEN transaction successed: {}", res);
+				/**
+				 * if transaction for users, then return result with mail
+				 * notification to users
+				 */
 				if (res && !isFee) {
 					notificationService.sendNotification(seller, msg);
 					notificationService.saveNotification(buyer, seller, msg);
@@ -501,6 +527,13 @@ public class TransactionServiceImpl implements TransactionService {
 					notificationService.saveNotification(buyer, seller, msg1);
 					logger.debug("Message : {}", msg);
 					logger.debug("Message : {}", msg1);
+					return new AsyncResult<Boolean>(res);
+				}
+				/**
+				 * if transaction for admin, then return result without mail
+				 * notification
+				 */
+				if (res && isFee) {
 					return new AsyncResult<Boolean>(res);
 				}
 			} catch (InterruptedException | ExecutionException e) {

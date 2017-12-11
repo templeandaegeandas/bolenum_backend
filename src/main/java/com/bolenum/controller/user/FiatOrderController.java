@@ -119,7 +119,7 @@ public class FiatOrderController {
 		if (OrderType.SELL.equals(orders.getOrderType())) {
 			String balance = fiatOrderService.checkFiatOrderEligibility(user, orders, pairId);
 			if (!balance.equals("proceed")) {
-				return ResponseHandler.response(HttpStatus.OK, false,
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 						localeService.getMessage("order.insufficient.balance"), Optional.empty());
 			}
 		}
@@ -293,10 +293,12 @@ public class FiatOrderController {
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_TX, method = RequestMethod.PUT)
 	public ResponseEntity<Object> processTransactionFiatOrders(@RequestParam("orderId") long orderId) {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
+		
 		if (exitingOrder == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}
+		logger.debug("existing order id: {}",exitingOrder.getId());
 		String currencyAbr;
 		if (!(CurrencyType.FIAT.equals(exitingOrder.getPair().getToCurrency().get(0).getCurrencyType()))) {
 			currencyAbr = exitingOrder.getPair().getToCurrency().get(0).getCurrencyAbbreviation();
