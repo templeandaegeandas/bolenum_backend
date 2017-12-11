@@ -23,7 +23,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -87,6 +86,15 @@ import com.bolenum.util.GenericUtils;
  * @author chandan kumar singh
  * @date 29-Sep-2017
  * @modified Vishal Kumar
+ * 
+ * @change1: Buyer and Seller will pay the fee 0.15% on trading volume from the
+ *           its own account, receiver will get full amount,For example Seller
+ *           Have placed the Order, 1 ETH on 1 BTC price then Seller have to pay
+ *           1 ETH and 0.15% fee that is 0.15 ETH as fee. So total ETH = 1 +
+ *           0.15 = 1.15 ETH. Buyer will get 1 ETH
+ * 
+ *           BUYER has placed an order, 1 ETH on 1 BTC price then Buyer have to
+ *           pay 1 BTC + 0.15 BTC(fee) = 1.15 BTC, Seller will get 1 BTC
  */
 @Service
 @Transactional
@@ -621,14 +629,18 @@ public class TransactionServiceImpl implements TransactionService {
 
 		if (qtr != null && Double.valueOf(qtr) > 0) {
 			// process tx buyers and sellers
-			double buyerQty = GenericUtils.getDecimalFormat(qtyTraded - sellerTradeFee);
-			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(), buyerQty, tickters[0]);
-			performTransaction(tickters[0], buyerQty, buyer, seller, false); // seller
+			// double buyerQty = GenericUtils.getDecimalFormat(qtyTraded -
+			// sellerTradeFee);
+			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(), qtyTraded, tickters[0]);
+			performTransaction(tickters[0], qtyTraded, buyer, seller, false); // seller
 																				// eth
 			notificationService.sendNotification(seller, msg1);
 			notificationService.saveNotification(seller, buyer, msg1);
 			// process tx sellers and buyers
-			double sellerQty = GenericUtils.getDecimalFormat(Double.valueOf(qtr) - buyerTradeFee);
+			// double sellerQty =
+			// GenericUtils.getDecimalFormat(Double.valueOf(qtr) -
+			// buyerTradeFee);
+			double sellerQty = GenericUtils.getDecimalFormat(Double.valueOf(qtr));
 			logger.debug("actual quantity seller will get: {} {}", sellerQty, tickters[1]);
 			performTransaction(tickters[1], sellerQty, seller, buyer, false); // buyuer
 																				// btc
