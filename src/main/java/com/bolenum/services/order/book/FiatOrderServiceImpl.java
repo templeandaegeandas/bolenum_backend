@@ -294,9 +294,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	}
 
 	@Override
-	@Transactional
 	@Async
 	public Future<Boolean> processTransactionFiatOrders(Orders sellerOrder, String currencyAbr) {
+		logger.debug("processTransactionFiatOrders order id: {}", sellerOrder.getId());
 		Orders buyersOrder = ordersRepository.findByMatchedOrder(sellerOrder);
 		logger.debug("buyers order id: {}", buyersOrder.getId());
 		if (buyersOrder != null && buyersOrder.isConfirm()) {
@@ -324,6 +324,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error("perform fiat transaction failed: {}", e.getMessage());
 				e.printStackTrace();
+				return new AsyncResult<Boolean>(false);
 			}
 			return new AsyncResult<Boolean>(true);
 		}

@@ -293,23 +293,24 @@ public class FiatOrderController {
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_TX, method = RequestMethod.PUT)
 	public ResponseEntity<Object> processTransactionFiatOrders(@RequestParam("orderId") long orderId) {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
-		
+
 		if (exitingOrder == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}
-		logger.debug("existing order id: {}",exitingOrder.getId());
+		logger.debug("existing order id: {}", exitingOrder.getId());
 		String currencyAbr;
 		if (!(CurrencyType.FIAT.equals(exitingOrder.getPair().getToCurrency().get(0).getCurrencyType()))) {
 			currencyAbr = exitingOrder.getPair().getToCurrency().get(0).getCurrencyAbbreviation();
 		} else {
 			currencyAbr = exitingOrder.getPair().getPairedCurrency().get(0).getCurrencyAbbreviation();
 		}
+		logger.debug("existing order currency Abr: {}", currencyAbr);
 		Future<Boolean> result = fiatOrderService.processTransactionFiatOrders(exitingOrder, currencyAbr);
-		boolean res;
+		logger.debug("existing order currency Abr: {}", currencyAbr);
 		try {
-			res = result.get();
-			if (res) {
+			logger.debug("result of order: {}", result);
+			if (result.get()) {
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localeService.getMessage("order.transaction.success"), Optional.empty());
 			}
@@ -317,7 +318,7 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}
-
+		logger.debug("response: {}", result);
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 				Optional.empty());
 	}
