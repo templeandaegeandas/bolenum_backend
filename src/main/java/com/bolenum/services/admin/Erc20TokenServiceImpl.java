@@ -49,6 +49,7 @@ import com.bolenum.repo.admin.Erc20TokenRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.Erc20TokenWrapper;
 import com.bolenum.util.Erc20TokenWrapper.TransferEventResponse;
@@ -80,6 +81,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private LocaleService localeService;
+	
+	@Autowired
+	private EtherumWalletService etherumWalletService;
 
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
@@ -149,6 +153,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	private Credentials getCredentials(User user) throws InvalidKeyException, NoSuchAlgorithmException,
 			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
 		File file = new File(ethWalletLocation);
+		if(user.getEthWalletJsonFileName() == null) {
+			etherumWalletService.createWallet(user);
+		}
 		File jsonFile = new File(file + "/" + user.getEthWalletJsonFileName());
 		logger.debug("JSON file of the user is: {}", user.getEthWalletJsonFileName());
 		String passwordKey = user.getEthWalletPwdKey();
