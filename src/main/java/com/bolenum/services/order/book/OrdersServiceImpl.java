@@ -457,7 +457,6 @@ public class OrdersServiceImpl implements OrdersService {
 				sellerTradeFee = tradingFeeService.calculateFee(qtyTraded);
 				buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
 				sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
-				logger.info("buyer trade fee: {} seller trade fee: {}", buyerTradeFee, sellerTradeFee);
 				logger.info("buyer trade fee: {} seller trade fee: {}", decimalFormat.format(buyerTradeFee),
 						decimalFormat.format(sellerTradeFee));
 				// saving the processed BUY/SELL order in trade
