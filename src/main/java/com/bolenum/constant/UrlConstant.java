@@ -98,6 +98,7 @@ public class UrlConstant {
 
 	/******************** ORDER API ******/
 	public static final String CREATE_ORDER = "create/order";
+	public static final String CANCEL_ORDER = "cancel/order";
 	public static final String CREATE_ORDER_FIAT = "create/order/fiat";
 	public static final String BUY_ORDER_LIST = "get/buy/orders";
 	public static final String SELL_ORDER_LIST = "get/sell/orders";

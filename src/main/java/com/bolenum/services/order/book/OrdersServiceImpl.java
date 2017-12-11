@@ -665,4 +665,15 @@ public class OrdersServiceImpl implements OrdersService {
 		Date startDate = c.getTime();
 		return ordersRepository.findByCreatedOnBetween(startDate, endDate, page);
 	}
+	
+	@Override
+	public boolean cancelOrder(long orderId) {
+		Orders order = ordersRepository.findOne(orderId);
+		if(order != null) {
+			order.setOrderStatus(OrderStatus.CANCELLED);
+			ordersRepository.save(order);
+			return true;
+		}
+		return false;
+	}
 }

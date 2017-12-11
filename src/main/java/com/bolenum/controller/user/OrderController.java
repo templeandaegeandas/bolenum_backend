@@ -3,6 +3,7 @@ package com.bolenum.controller.user;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -63,13 +64,8 @@ public class OrderController {
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
-		if (orders.getVolume() <= 0.0001) {
+		if (orders.getVolume() * orders.getPrice() < 0.0001) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.volume.zero"),
-					null);
-		}
-		// can not place order on 0 prize
-		if (orders.getPrice() <= 0) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"),
 					null);
 		}
 		User user = GenericUtils.getLoggedInUser();
@@ -169,5 +165,14 @@ public class OrderController {
 		map.put("bankDetails", bankAccountDetails);
 		map.put("orderDetails", orders);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
+	}
+	
+	@RequestMapping(value = UrlConstant.CANCEL_ORDER, method = RequestMethod.DELETE)
+	public ResponseEntity<Object> cancelOrders(@RequestParam("orderId") long orderId) {
+		boolean status = ordersService.cancelOrder(orderId);
+		if (status) {
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"), Optional.empty());
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"), Optional.empty());
 	}
 }
