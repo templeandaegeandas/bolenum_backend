@@ -100,4 +100,11 @@ public class GenericUtils {
 		String formate = df.format(amount);
 		return Double.parseDouble(formate);
 	}
+	
+	public static String getDecimalFormat(String amount) {
+		DecimalFormat df = new DecimalFormat("0");
+		df.setMaximumFractionDigits(8);
+		String formate = df.format(amount);
+		return formate;
+	}
 }
