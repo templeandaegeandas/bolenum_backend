@@ -596,38 +596,39 @@ public class TransactionServiceImpl implements TransactionService {
 		// fetching the limit price of order
 		String qtr = walletService.getPairedBalance(matchedOrder, currencyPair, qtyTraded);
 
-		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormat(qtr), tickters[1]);
+		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormatString(Double.valueOf(qtr)),
+				tickters[1]);
 		// checking the order type BUY
 		if (OrderType.BUY.equals(orders.getOrderType())) {
 			logger.debug("BUY Order");
 
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(String.valueOf(qtyTraded))
-					+ " " + tickters[0] + ", on " + GenericUtils.getDecimalFormat(qtr) + " " + tickters[1]
-					+ " remaining voloume: " + GenericUtils.getDecimalFormat(String.valueOf(remainingVolume)) + " "
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
+					+ tickters[0] + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
+					+ tickters[1] + " remaining voloume: " + GenericUtils.getDecimalFormatString(remainingVolume) + " "
 					+ tickters[0];
 			logger.debug("Byuer's transaction initiated msg: {}", msg);
 
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(String.valueOf(qtyTraded))
-					+ " " + tickters[0] + ", on " + GenericUtils.getDecimalFormat(qtr) + " " + tickters[1]
-					+ " remaining voloume: " + GenericUtils.getDecimalFormat(String.valueOf(matchedOrder.getVolume()))
-					+ " " + tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
+					+ tickters[0] + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
+					+ tickters[1] + " remaining voloume: "
+					+ GenericUtils.getDecimalFormatString(matchedOrder.getVolume()) + " " + tickters[0];
 
 			logger.debug("Seller's transaction initiated msg: {}", msg1);
 		} else {
 			logger.debug("SELL Order");
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(String.valueOf(qtyTraded))
-					+ " " + tickters[0] + ", on " + GenericUtils.getDecimalFormat(qtr) + " " + tickters[1]
-					+ " remaining voloume: " + GenericUtils.getDecimalFormat(String.valueOf(remainingVolume)) + " "
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
+					+ tickters[0] + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
+					+ tickters[1] + " remaining voloume: " + GenericUtils.getDecimalFormatString(remainingVolume) + " "
 					+ tickters[0];
 			logger.debug("Seller's msg1: {}", msg1);
 			msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormat(String.valueOf(qtyTraded))
-					+ " " + tickters[0] + ", on " + GenericUtils.getDecimalFormat(qtr) + " " + tickters[1]
-					+ " remaining voloume: " + GenericUtils.getDecimalFormat(String.valueOf(matchedOrder.getVolume()))
-					+ " " + tickters[0];
+					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
+					+ tickters[0] + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
+					+ tickters[1] + " remaining voloume: "
+					+ GenericUtils.getDecimalFormatString(matchedOrder.getVolume()) + " " + tickters[0];
 			logger.debug("Byuer's msg: {}", msg);
 		}
 
@@ -636,7 +637,7 @@ public class TransactionServiceImpl implements TransactionService {
 			// double buyerQty = GenericUtils.getDecimalFormat(qtyTraded -
 			// sellerTradeFee);
 			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(),
-					GenericUtils.getDecimalFormat(String.valueOf(qtyTraded)), tickters[0]);
+					GenericUtils.getDecimalFormatString(qtyTraded), tickters[0]);
 			performTransaction(tickters[0], qtyTraded, buyer, seller, false); // seller
 																				// eth
 			notificationService.sendNotification(seller, msg1);
@@ -645,8 +646,8 @@ public class TransactionServiceImpl implements TransactionService {
 			double sellerQty = GenericUtils.getDecimalFormat(Double.valueOf(qtr) - sellerTradeFee);
 			// double sellerQty =
 			// GenericUtils.getDecimalFormat(Double.valueOf(qtr));
-			logger.debug("actual quantity seller will get: {} {}",
-					GenericUtils.getDecimalFormat(String.valueOf(sellerQty)), tickters[1]);
+			logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
+					tickters[1]);
 			performTransaction(tickters[1], sellerQty, seller, buyer, false); // buyuer
 																				// btc
 			notificationService.sendNotification(buyer, msg);
@@ -673,9 +674,9 @@ public class TransactionServiceImpl implements TransactionService {
 			double tfee = GenericUtils.getDecimalFormat(buyerTradeFee + sellerTradeFee);
 			logger.debug(
 					"actual quantity admin will get from buyer: {} and seller: {} total fee: {} {} of trade Id: {} ",
-					GenericUtils.getDecimalFormat(String.valueOf(buyerTradeFee)),
-					GenericUtils.getDecimalFormat(String.valueOf(sellerTradeFee)),
-					GenericUtils.getDecimalFormat(String.valueOf(tfee)), tickters[1], trade.getId());
+					GenericUtils.getDecimalFormatString(buyerTradeFee),
+					GenericUtils.getDecimalFormatString(sellerTradeFee), GenericUtils.getDecimalFormatString(tfee),
+					tickters[1], trade.getId());
 			Future<Boolean> feeStatus = performTransaction(tickters[1], tfee, admin, buyer, true);
 			boolean res = feeStatus.get();
 			if (res) {
