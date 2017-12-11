@@ -299,8 +299,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		logger.debug("processTransactionFiatOrders order id: {}", sellerOrder.getId());
 		logger.debug("processTransactionFiatOrders matched order: {}", sellerOrder.getMatchedOrder());
 		logger.debug("processTransactionFiatOrders matched order id: {}", sellerOrder.getMatchedOrder().getId());
-		Orders buyersOrder = ordersRepository.findByMatchedOrder(sellerOrder);
+		Orders buyersOrder = ordersRepository.findOne(sellerOrder.getMatchedOrder().getId());
 		logger.debug("buyers order: {}", buyersOrder);
+		logger.debug("buyers order id: {}", buyersOrder.getId());
 		if (buyersOrder != null && buyersOrder.isConfirm()) {
 			User buyer = buyersOrder.getUser();
 			User seller = sellerOrder.getUser();
@@ -327,6 +328,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				logger.error("perform fiat transaction failed: {}", e.getMessage());
 				e.printStackTrace();
 				return new AsyncResult<Boolean>(false);
+			}
+			catch (Exception e) {
+				return new AsyncResult<Boolean>(true);
 			}
 			return new AsyncResult<Boolean>(true);
 		}

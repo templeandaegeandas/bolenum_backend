@@ -250,7 +250,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				tx.setFromUser(senderUser);
 			}
 			Transaction saved = transactionRepo.saveAndFlush(tx);
-			logger.debug("transaction saved completed: {}", senderUser.getEmailId());
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", senderUser.getEmailId());
 			}

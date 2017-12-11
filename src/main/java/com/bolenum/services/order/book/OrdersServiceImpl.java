@@ -454,10 +454,9 @@ public class OrdersServiceImpl implements OrdersService {
 			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
 			if (buyer.getUserId() != seller.getUserId()) {
 				buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
-				sellerTradeFee = tradingFeeService.calculateFee(qtyTraded);
+				sellerTradeFee = buyerTradeFee;// tradingFeeService.calculateFee(qtyTraded);
 				buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
 				sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
-				logger.info("buyer trade fee: {} seller trade fee: {}", buyerTradeFee, sellerTradeFee);
 				logger.info("buyer trade fee: {} seller trade fee: {}", decimalFormat.format(buyerTradeFee),
 						decimalFormat.format(sellerTradeFee));
 				// saving the processed BUY/SELL order in trade
@@ -665,11 +664,11 @@ public class OrdersServiceImpl implements OrdersService {
 		Date startDate = c.getTime();
 		return ordersRepository.findByCreatedOnBetween(startDate, endDate, page);
 	}
-	
+
 	@Override
 	public boolean cancelOrder(long orderId) {
 		Orders order = ordersRepository.findOne(orderId);
-		if(order != null) {
+		if (order != null) {
 			order.setOrderStatus(OrderStatus.CANCELLED);
 			ordersRepository.save(order);
 			return true;
