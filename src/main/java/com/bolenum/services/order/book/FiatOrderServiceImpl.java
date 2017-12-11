@@ -280,7 +280,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
 						jsonObject.toString());
 				logger.debug("WebSocket message: {}", MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
 				return true;
@@ -293,10 +294,11 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	}
 
 	@Override
-	@Transactional
 	@Async
 	public Future<Boolean> processTransactionFiatOrders(Orders sellerOrder, String currencyAbr) {
+		logger.debug("processTransactionFiatOrders order id: {}", sellerOrder.getId());
 		Orders buyersOrder = ordersRepository.findByMatchedOrder(sellerOrder);
+		logger.debug("buyers order id: {}", buyersOrder.getId());
 		if (buyersOrder != null && buyersOrder.isConfirm()) {
 			User buyer = buyersOrder.getUser();
 			User seller = sellerOrder.getUser();
@@ -322,6 +324,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error("perform fiat transaction failed: {}", e.getMessage());
 				e.printStackTrace();
+				return new AsyncResult<Boolean>(false);
 			}
 			return new AsyncResult<Boolean>(true);
 		}

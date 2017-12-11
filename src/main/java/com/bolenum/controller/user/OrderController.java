@@ -64,13 +64,8 @@ public class OrderController {
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
-		if (orders.getVolume() <= 0.0001) {
+		if (orders.getVolume() * orders.getPrice() < 0.0001) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.volume.zero"),
-					null);
-		}
-		// can not place order on 0 prize
-		if (orders.getPrice() <= 0) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"),
 					null);
 		}
 		User user = GenericUtils.getLoggedInUser();
