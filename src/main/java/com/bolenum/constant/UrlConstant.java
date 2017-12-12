@@ -136,6 +136,7 @@ public class UrlConstant {
 	/******************************* Dispute API *****************************/
 	public static final String UPLOAD_PROOF_DOCUMENT_FOR_DISPUTE = "document/proof/dispute";
 	public static final String RAISE_DISPUTE = "raise/dispute";
+	public static final String RAISE_DISPUTE_BY_SELLER = "raise/seller/dispute";
 	public static final String RAISED_DISPUTE_ORDER = "raised/dispute";
 	public static final String RAISED_DISPUTE_LIST = "raised/dispute/list";
 	public static final String ACTION_ON_RAISED_DISPUTE_ORDER = "action/raised/dispute";

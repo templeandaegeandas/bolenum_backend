@@ -214,12 +214,13 @@ public class OrdersServiceImpl implements OrdersService {
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			/**
 			 * checking user self order, return false if self order else
-			 * proceed.
+			 * proceed. Feature has been paused on Dec 12 2017
 			 */
 
-			if (isUsersSelfOrder(orders, sellOrderList)) {
-				return processed;
-			}
+			/*
+			 * if (isUsersSelfOrder(orders, sellOrderList)) { return processed;
+			 * }
+			 */
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remaining Volume: {}",
 						GenericUtils.getDecimalFormat(remainingVolume));
@@ -243,11 +244,11 @@ public class OrdersServiceImpl implements OrdersService {
 			/**
 			 * checking user self order, return false if self order else
 			 * proceed. checking user self order, return false if self order
-			 * else proceed.
+			 * else proceed. Feature has been paused on Dec 12 2017
 			 */
-			if (isUsersSelfOrder(orders, buyOrderList)) {
-				return processed;
-			}
+			/*
+			 * if (isUsersSelfOrder(orders, buyOrderList)) { return processed; }
+			 */
 			logger.debug("buyOrderList.size(): {}", buyOrderList.size());
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remaining Volume: {}",
@@ -307,12 +308,13 @@ public class OrdersServiceImpl implements OrdersService {
 							OrderStatus.SUBMITTED, pair, price);
 			/**
 			 * checking user self order, return false if self order else
-			 * proceed.
+			 * proceed. Feature has been paused on Dec 12 2017
 			 */
 
-			if (isUsersSelfOrder(orders, sellOrderList)) {
-				return processed;
-			}
+			/*
+			 * if (isUsersSelfOrder(orders, sellOrderList)) { return processed;
+			 * }
+			 */
 			/**
 			 * fetch one best seller's price from list of sellers, order by
 			 * price in ASC then process the order
@@ -343,11 +345,11 @@ public class OrdersServiceImpl implements OrdersService {
 							OrderStatus.SUBMITTED, pair, price);
 			/**
 			 * checking user self order, return false if self order else
-			 * proceed.
+			 * proceed. Feature has been paused on Dec 12 2017
 			 */
-			if (isUsersSelfOrder(orders, buyOrderList)) {
-				return processed;
-			}
+			/*
+			 * if (isUsersSelfOrder(orders, buyOrderList)) { return processed; }
+			 */
 
 			/**
 			 * fetch one best buyer's price from list of buyers, order by price
@@ -452,22 +454,22 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			// buyer and seller must be different user
 			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
-			if (buyer.getUserId() != seller.getUserId()) {
-				buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
-				sellerTradeFee = buyerTradeFee;// tradingFeeService.calculateFee(qtyTraded);
-				buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
-				sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
-				logger.info("buyer trade fee: {} seller trade fee: {}", decimalFormat.format(buyerTradeFee),
-						decimalFormat.format(sellerTradeFee));
-				// saving the processed BUY/SELL order in trade
-				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT,
-						buyerTradeFee, sellerTradeFee);
-				trade = orderAsyncServices.saveTrade(trade);
-				// tradeList.add(trade);
-				logger.debug("trade saved: {}", trade.getId());
-				transactionService.processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume,
-						buyerTradeFee, sellerTradeFee, trade);
-			}
+			// if (buyer.getUserId() != seller.getUserId()) {
+			buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
+			sellerTradeFee = buyerTradeFee;// tradingFeeService.calculateFee(qtyTraded);
+			buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
+			sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
+			logger.info("buyer trade fee: {} seller trade fee: {}", decimalFormat.format(buyerTradeFee),
+					decimalFormat.format(sellerTradeFee));
+			// saving the processed BUY/SELL order in trade
+			Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT,
+					buyerTradeFee, sellerTradeFee);
+			trade = orderAsyncServices.saveTrade(trade);
+			// tradeList.add(trade);
+			logger.debug("trade saved: {}", trade.getId());
+			transactionService.processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume,
+					buyerTradeFee, sellerTradeFee, trade);
+			// }
 		}
 		return remainingVolume;
 	}
