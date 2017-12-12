@@ -347,9 +347,9 @@ public class OrdersServiceImpl implements OrdersService {
 			 * checking user self order, return false if self order else
 			 * proceed. Feature has been paused on Dec 12 2017
 			 */
-			/*if (isUsersSelfOrder(orders, buyOrderList)) {
-				return processed;
-			}*/
+			/*
+			 * if (isUsersSelfOrder(orders, buyOrderList)) { return processed; }
+			 */
 
 			/**
 			 * fetch one best buyer's price from list of buyers, order by price
@@ -454,22 +454,22 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			// buyer and seller must be different user
 			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
-			if (buyer.getUserId() != seller.getUserId()) {
-				buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
-				sellerTradeFee = buyerTradeFee;// tradingFeeService.calculateFee(qtyTraded);
-				buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
-				sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
-				logger.info("buyer trade fee: {} seller trade fee: {}", decimalFormat.format(buyerTradeFee),
-						decimalFormat.format(sellerTradeFee));
-				// saving the processed BUY/SELL order in trade
-				Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT,
-						buyerTradeFee, sellerTradeFee);
-				trade = orderAsyncServices.saveTrade(trade);
-				// tradeList.add(trade);
-				logger.debug("trade saved: {}", trade.getId());
-				transactionService.processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume,
-						buyerTradeFee, sellerTradeFee, trade);
-			}
+			// if (buyer.getUserId() != seller.getUserId()) {
+			buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
+			sellerTradeFee = buyerTradeFee;// tradingFeeService.calculateFee(qtyTraded);
+			buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
+			sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
+			logger.info("buyer trade fee: {} seller trade fee: {}", decimalFormat.format(buyerTradeFee),
+					decimalFormat.format(sellerTradeFee));
+			// saving the processed BUY/SELL order in trade
+			Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT,
+					buyerTradeFee, sellerTradeFee);
+			trade = orderAsyncServices.saveTrade(trade);
+			// tradeList.add(trade);
+			logger.debug("trade saved: {}", trade.getId());
+			transactionService.processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume,
+					buyerTradeFee, sellerTradeFee, trade);
+			// }
 		}
 		return remainingVolume;
 	}
