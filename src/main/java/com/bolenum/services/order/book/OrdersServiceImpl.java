@@ -244,11 +244,11 @@ public class OrdersServiceImpl implements OrdersService {
 			/**
 			 * checking user self order, return false if self order else
 			 * proceed. checking user self order, return false if self order
-			 * else proceed.
+			 * else proceed. Feature has been paused on Dec 12 2017
 			 */
-			if (isUsersSelfOrder(orders, buyOrderList)) {
-				return processed;
-			}
+			/*
+			 * if (isUsersSelfOrder(orders, buyOrderList)) { return processed; }
+			 */
 			logger.debug("buyOrderList.size(): {}", buyOrderList.size());
 			while (buyOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remaining Volume: {}",
@@ -345,11 +345,11 @@ public class OrdersServiceImpl implements OrdersService {
 							OrderStatus.SUBMITTED, pair, price);
 			/**
 			 * checking user self order, return false if self order else
-			 * proceed.
+			 * proceed. Feature has been paused on Dec 12 2017
 			 */
-			if (isUsersSelfOrder(orders, buyOrderList)) {
+			/*if (isUsersSelfOrder(orders, buyOrderList)) {
 				return processed;
-			}
+			}*/
 
 			/**
 			 * fetch one best buyer's price from list of buyers, order by price
