@@ -214,12 +214,13 @@ public class OrdersServiceImpl implements OrdersService {
 					.findByOrderTypeAndOrderStatusAndPairOrderByPriceAsc(OrderType.SELL, OrderStatus.SUBMITTED, pair);
 			/**
 			 * checking user self order, return false if self order else
-			 * proceed.
+			 * proceed. Feature has been paused on Dec 12 2017
 			 */
 
-			if (isUsersSelfOrder(orders, sellOrderList)) {
-				return processed;
-			}
+			/*
+			 * if (isUsersSelfOrder(orders, sellOrderList)) { return processed;
+			 * }
+			 */
 			while (sellOrderList.size() > 0 && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remaining Volume: {}",
 						GenericUtils.getDecimalFormat(remainingVolume));
@@ -307,12 +308,13 @@ public class OrdersServiceImpl implements OrdersService {
 							OrderStatus.SUBMITTED, pair, price);
 			/**
 			 * checking user self order, return false if self order else
-			 * proceed.
+			 * proceed. Feature has been paused on Dec 12 2017
 			 */
 
-			if (isUsersSelfOrder(orders, sellOrderList)) {
-				return processed;
-			}
+			/*
+			 * if (isUsersSelfOrder(orders, sellOrderList)) { return processed;
+			 * }
+			 */
 			/**
 			 * fetch one best seller's price from list of sellers, order by
 			 * price in ASC then process the order
