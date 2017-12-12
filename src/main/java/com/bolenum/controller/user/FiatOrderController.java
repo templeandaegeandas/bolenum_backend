@@ -352,7 +352,7 @@ public class FiatOrderController {
 					accountDetails = bankAccountDetailsService
 							.primaryBankAccountDetails(orders.getMatchedOrder().getUser());
 				}
-				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(orders.getUser(),
+				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(orders.getMatchedOrder().getUser(),
 						orders.getPair());
 				map.put("accountDetails", response(accountDetails));
 				map.put("orderId", orders.getId());
@@ -366,6 +366,8 @@ public class FiatOrderController {
 				map.put("matchedOn", orders.getMatchedOn());
 				map.put("isConfirmed", orders.isConfirm());
 			} else {
+				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(orders.getUser(),
+						orders.getMatchedOrder().getPair());
 				BankAccountDetails accountDetails = bankAccountDetailsService
 						.primaryBankAccountDetails(orders.getUser());
 				map.put("accountDetails", response(accountDetails));
@@ -373,6 +375,8 @@ public class FiatOrderController {
 				map.put("createdDate", orders.getCreatedOn());
 				map.put("totalPrice", orders.getLockedVolume() * orders.getPrice());
 				map.put("orderVolume", orders.getLockedVolume());
+				map.put("walletAddress", userAddress.get("address"));
+				map.put("currencyAbr", userAddress.get("currencyAbbr"));
 				map.put("orderStatus", orders.getOrderStatus());
 				map.put("matchedOn", orders.getMatchedOn());
 				map.put("isConfirmed", orders.isConfirm());
