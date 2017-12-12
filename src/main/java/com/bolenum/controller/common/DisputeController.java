@@ -26,6 +26,7 @@ import com.bolenum.model.orders.book.DisputeOrder;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.common.DisputeService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.order.book.OrderAsyncService;
 import com.bolenum.util.ResponseHandler;
 
 import io.swagger.annotations.Api;
@@ -49,6 +50,9 @@ public class DisputeController {
 
 	@Autowired
 	private DisputeService disputeService;
+	
+	@Autowired
+	private OrderAsyncService orderAsyncService;
 
 	/**
 	 * 
@@ -85,6 +89,38 @@ public class DisputeController {
 			}
 			DisputeOrder response = disputeService.raiseDispute(orders, transactionId, commentByDisputeRaiser, file);
 			if (response != null) {
+				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
+						response);
+			}
+		} else {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("dispute.time.not.eligible"), null);
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("dispute.raised.failed"),
+				null);
+
+	}
+	
+	@RequestMapping(value = UrlConstant.RAISE_DISPUTE_BY_SELLER, method = RequestMethod.PUT)
+	public ResponseEntity<Object> requestDisputeBySeller(@RequestParam("orderId") Long orderId) {
+
+		Orders orders = disputeService.checkEligibilityToDispute(orderId);
+
+		if (orders == null) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("dispute.not.eligible"), null);
+		}
+		if(orders.isDispute()) {
+			return ResponseHandler.response(HttpStatus.CONFLICT, true,
+					localeService.getMessage("dispute.already.raised"), null);
+		}
+		Boolean isExpired = disputeService.checkExpiryToDispute(orders);
+
+		if (!isExpired) {
+			orders.setDispute(true);
+			DisputeOrder response = disputeService.raiseDisputeBySeller(orders);
+			if(response!=null) {
+				orderAsyncService.saveOrder(orders);
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
 			}

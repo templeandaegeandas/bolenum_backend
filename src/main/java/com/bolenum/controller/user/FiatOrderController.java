@@ -293,9 +293,12 @@ public class FiatOrderController {
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_TX, method = RequestMethod.PUT)
 	public ResponseEntity<Object> processTransactionFiatOrders(@RequestParam("orderId") long orderId) {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
-
 		if (exitingOrder == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
+					Optional.empty());
+		}
+		if(!exitingOrder.getMatchedOrder().isConfirm()) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.not.confirm"),
 					Optional.empty());
 		}
 		logger.debug("existing order id: {}", exitingOrder.getId());
@@ -366,7 +369,7 @@ public class FiatOrderController {
 				map.put("matchedOn", orders.getMatchedOn());
 				map.put("isConfirmed", orders.isConfirm());
 			} else {
-				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(orders.getUser(),
+				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(orders.getMatchedOrder().getUser(),
 						orders.getMatchedOrder().getPair());
 				BankAccountDetails accountDetails = bankAccountDetailsService
 						.primaryBankAccountDetails(orders.getUser());
@@ -374,12 +377,14 @@ public class FiatOrderController {
 				map.put("orderId", orders.getId());
 				map.put("createdDate", orders.getCreatedOn());
 				map.put("totalPrice", orders.getLockedVolume() * orders.getPrice());
+				map.put("sellerName", orders.getUser().getFirstName());
 				map.put("orderVolume", orders.getLockedVolume());
 				map.put("walletAddress", userAddress.get("address"));
 				map.put("currencyAbr", userAddress.get("currencyAbbr"));
 				map.put("orderStatus", orders.getOrderStatus());
 				map.put("matchedOn", orders.getMatchedOn());
 				map.put("isConfirmed", orders.isConfirm());
+				map.put("isDispute", orders.isDispute());
 				if (orders.getMatchedOrder() != null) {
 					map.put("isMatchedConfirm", orders.getMatchedOrder().isConfirm());
 				}

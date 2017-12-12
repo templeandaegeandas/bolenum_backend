@@ -58,7 +58,9 @@ public class Orders {
 	private double lockedVolume;
 
 	private boolean isConfirm;
-
+	
+	private boolean isDispute;
+	
 	/**
 	 * to keep track of which order is matched with incoming order for fiat order
 	 */
@@ -207,5 +209,13 @@ public class Orders {
 	 */
 	public void setConfirm(boolean isConfirm) {
 		this.isConfirm = isConfirm;
+	}
+
+	public boolean isDispute() {
+		return isDispute;
+	}
+
+	public void setDispute(boolean isDispute) {
+		this.isDispute = isDispute;
 	}
 }
