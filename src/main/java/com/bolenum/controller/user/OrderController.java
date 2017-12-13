@@ -33,8 +33,6 @@ import com.bolenum.services.order.book.TradeService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.Api;
 
@@ -114,28 +112,28 @@ public class OrderController {
 	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("pairId") Long pairId) {
 		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			String stringList = mapper.writeValueAsString(list);
-			logger.debug("Buy list as String: {}", stringList);
-		} catch (JsonProcessingException e) {
-			logger.debug("error in buy get list: {}", e.getMessage());
-			e.printStackTrace();
-		}
+//		ObjectMapper mapper = new ObjectMapper();
+//		try {
+//			String stringList = mapper.writeValueAsString(list);
+//			logger.debug("Buy list as String: {}", stringList);
+//		} catch (JsonProcessingException e) {
+//			logger.debug("error in buy get list: {}", e.getMessage());
+//			e.printStackTrace();
+//		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
 	@RequestMapping(value = UrlConstant.SELL_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("pairId") Long pairId) {
 		Page<Orders> list = ordersService.getSellOrdersListByPair(pairId);
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			String stringList = mapper.writeValueAsString(list);
-			logger.debug("Sell list as String: {}", stringList);
-		} catch (JsonProcessingException e) {
-			logger.debug("error in sell get list: {}", e.getMessage());
-			e.printStackTrace();
-		}
+//		ObjectMapper mapper = new ObjectMapper();
+//		try {
+//			String stringList = mapper.writeValueAsString(list);
+//			logger.debug("Sell list as String: {}", stringList);
+//		} catch (JsonProcessingException e) {
+//			logger.debug("error in sell get list: {}", e.getMessage());
+//			e.printStackTrace();
+//		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
@@ -147,14 +145,14 @@ public class OrderController {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Trade> list = tradeService.getTradedOrdersLoggedIn(user, pageNumber, pageSize, sortOrder, sortBy,
 				orderType, date);
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			String stringList = mapper.writeValueAsString(list);
-			logger.debug("logged in user trade list as String: {}", stringList);
-		} catch (JsonProcessingException e) {
-			logger.debug("error in logged in user trade get list: {}", e.getMessage());
-			e.printStackTrace();
-		}
+//		ObjectMapper mapper = new ObjectMapper();
+//		try {
+//			String stringList = mapper.writeValueAsString(list);
+//			logger.debug("logged in user trade list as String: {}", stringList);
+//		} catch (JsonProcessingException e) {
+//			logger.debug("error in logged in user trade get list: {}", e.getMessage());
+//			e.printStackTrace();
+//		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
 
@@ -163,14 +161,14 @@ public class OrderController {
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		Page<Trade> list = tradeService.getTradedOrders(pageNumber, pageSize, sortOrder, sortBy);
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			String stringList = mapper.writeValueAsString(list);
-			logger.debug("all trade list as String: {}", stringList);
-		} catch (JsonProcessingException e) {
-			logger.debug("error in all trade get list: {}", e.getMessage());
-			e.printStackTrace();
-		}
+//		ObjectMapper mapper = new ObjectMapper();
+//		try {
+//			String stringList = mapper.writeValueAsString(list);
+//			logger.debug("all trade list as String: {}", stringList);
+//		} catch (JsonProcessingException e) {
+//			logger.debug("error in all trade get list: {}", e.getMessage());
+//			e.printStackTrace();
+//		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
 
@@ -181,14 +179,14 @@ public class OrderController {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(pageNumber, pageSize, sortOrder, sortBy,
 				user, OrderStatus.SUBMITTED);
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			String stringList = mapper.writeValueAsString(list);
-			logger.debug("my order as String: {}", stringList);
-		} catch (JsonProcessingException e) {
-			logger.debug("error in my order get list: {}", e.getMessage());
-			e.printStackTrace();
-		}
+//		ObjectMapper mapper = new ObjectMapper();
+//		try {
+//			String stringList = mapper.writeValueAsString(list);
+//			logger.debug("my order as String: {}", stringList);
+//		} catch (JsonProcessingException e) {
+//			logger.debug("error in my order get list: {}", e.getMessage());
+//			e.printStackTrace();
+//		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 

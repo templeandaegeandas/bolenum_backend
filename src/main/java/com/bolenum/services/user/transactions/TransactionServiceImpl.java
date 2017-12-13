@@ -16,7 +16,6 @@ import java.util.concurrent.Future;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.transaction.Transactional;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -593,7 +592,6 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Async
-	@Transactional
 	public Future<Boolean> processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer,
 			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade) {
 		logger.debug("thread: {} going to sleep for 10 Secs ", Thread.currentThread().getName());
