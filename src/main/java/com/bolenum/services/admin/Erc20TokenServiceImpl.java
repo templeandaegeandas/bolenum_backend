@@ -249,7 +249,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			logger.debug("receiver user : {}", toUser);
 			logger.debug("receiver user id: {}", toUser.getUserId());
 			tx.setToUser(toUser);
-			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			if(erc20Token != null) {
+				tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			}
 			tx.setCurrencyName(tokenName);
 			if (senderUser != null) {
 				tx.setTransactionStatus(TransactionStatus.WITHDRAW);
@@ -259,14 +261,16 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			}
 			Transaction saved = transactionRepo.saveAndFlush(tx);
 			if (saved != null) {
-				logger.debug("new incoming transaction saved of user: {}", senderUser.getEmailId());
+				logger.debug("new incoming transaction saved of user: {}", saved.getFromAddress());
 			}
 		} else {
 			logger.debug("saving else transaction for user: {}", toUser.getEmailId());
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			if(erc20Token != null) {
+				tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+			}
 			logger.debug("Balance else part returned by the listner: {}",
 					transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			tx.setTransactionType(TransactionType.OUTGOING);

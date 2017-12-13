@@ -388,7 +388,10 @@ public class TransactionServiceImpl implements TransactionService {
 
 				}
 				transaction.setTradeId(tradeId);
-				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				Transaction saved = null;
+				if(transactionRepo.findByTxHash(txHash)==null) {
+					saved = transactionRepo.saveAndFlush(transaction);
+				}
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(
