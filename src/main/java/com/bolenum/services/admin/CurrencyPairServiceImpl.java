@@ -22,7 +22,6 @@ import com.bolenum.repo.common.CurrencyRepo;
  * @Date 09-Oct-2017
  */
 @Service
-@Transactional
 public class CurrencyPairServiceImpl implements CurrencyPairService {
 
 	@Autowired
