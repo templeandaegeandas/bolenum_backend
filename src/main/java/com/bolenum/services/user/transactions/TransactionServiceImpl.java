@@ -187,7 +187,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("ETH transaction send fund completed");
 			String txHash = ethSendTransaction.getTransactionHash();
 			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
-			Transaction transaction = transactionRepo.findByTxHash(txHash);
+			Transaction transaction = transactionRepo.findByTransactionHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
 				transaction = new Transaction();
@@ -302,7 +302,7 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("transaction hash: {}", txHash);
 				String txFee = String.valueOf(data.get("transactionFee"));
 				logger.debug("transaction fee: {}", GenericUtils.getDecimalFormatString(Double.valueOf(txFee)));
-				Transaction transaction = transactionRepo.findByTxHash(txHash);
+				Transaction transaction = transactionRepo.findByTransactionHash(txHash);
 				if (transaction == null) {
 					transaction = new Transaction();
 					transaction.setTxFee((txFee != null) ? Double.parseDouble(txFee) : 0);
@@ -367,7 +367,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
 					amount);
 			Thread.sleep(500);
-			Transaction transaction = transactionRepo.findByTxHash(txHash);
+			Transaction transaction = transactionRepo.findByTransactionHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
 				logger.debug("saving transaction for user: {}", fromUser.getEmailId());
@@ -390,7 +390,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 				transaction.setTradeId(tradeId);
 				Transaction saved = null;
-				if(transactionRepo.findByTxHash(txHash) == null) {
+				if(transactionRepo.findByTransactionHash(txHash) == null) {
 					saved = transactionRepo.saveAndFlush(transaction);
 				}
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());

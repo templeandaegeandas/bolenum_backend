@@ -242,7 +242,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			logger.debug("thread error: {}", e.getMessage());
 			e.printStackTrace();
 		}
-		Transaction tx = transactionRepo.findByTxHash(transaction._transactionHash);
+		Transaction tx = transactionRepo.findByTransactionHash(transaction._transactionHash);
 		if (tx == null) {
 			tx = new Transaction();
 			logger.debug("saving transaction for user: {}", toUser.getEmailId());
@@ -266,7 +266,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				tx.setFromUser(senderUser);
 			}
 			Transaction saved = null;
-			if(transactionRepo.findByTxHash(transaction._transactionHash) == null) {
+			if(transactionRepo.findByTransactionHash(transaction._transactionHash) == null) {
 				saved = transactionRepo.saveAndFlush(tx);
 			}
 			if (saved != null) {
