@@ -164,6 +164,7 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException {
 		orders = ordersRepository.save(orders);
+		logger.debug("saved requested order id: {}", orders.getId());
 		Boolean status;
 		if (OrderStandard.MARKET.equals(orders.getOrderStandard())) {
 			logger.debug("Processing market order");
@@ -508,12 +509,14 @@ public class OrdersServiceImpl implements OrdersService {
 			logger.info("buyer trade fee: {} seller trade fee: {}", GenericUtils.getDecimalFormatString(buyerTradeFee),
 					GenericUtils.getDecimalFormatString(sellerTradeFee));
 			// saving the processed BUY/SELL order in trade
+			logger.debug("matched order id: {}", matchedOrder.getId());
+			logger.debug("orders id: {}", orders.getId());
 			Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT,
 					buyerTradeFee, sellerTradeFee, matchedOrder, orders);
 			trade = orderAsyncServices.saveTrade(trade);
 
 			// tradeList.add(trade);
-			logger.debug("trade saved: {}", trade.getId());
+			logger.debug("trade saved id: {} with matche orders id: {} ,requested order id: {}", trade.getId(), matchedOrder.getId(), orders.getId());
 			transactionService.processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume,
 					buyerTradeFee, sellerTradeFee, trade);
 			// }
