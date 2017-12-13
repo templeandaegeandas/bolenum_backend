@@ -219,7 +219,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				orderType, currency);
 		double total = 0.0;
 		for (Orders order : orders) {
-			total = total + order.getVolume();
+			total = total + order.getVolume() + order.getLockedVolume();
 		}
 		return total;
 	}
@@ -307,7 +307,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			double qtyTraded = sellerOrder.getLockedVolume();
 			try {
 				Future<Boolean> result = transactionService.performTransaction(currencyAbr, qtyTraded, buyer, seller,
-						false);
+						false, null);
 				boolean res = result.get();
 				logger.debug("perform fiat transaction result: {} of sell order id: {} and buy order id:{}", res,
 						sellerOrder.getId(), buyersOrder.getId());
@@ -320,7 +320,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 					buyersOrder.setOrderStatus(OrderStatus.COMPLETED);
 					ordersRepository.save(buyersOrder);
 					Trade trade = new Trade(buyersOrder.getPrice(), qtyTraded, buyer, seller, sellerOrder.getPair(),
-							sellerOrder.getOrderStandard(), 0.0, 0.0);
+							sellerOrder.getOrderStandard(), 0.0, 0.0,null,null);
 					orderAsyncService.saveTrade(trade);
 				}
 			} catch (InterruptedException | ExecutionException e) {

@@ -16,8 +16,6 @@ import java.util.concurrent.Future;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.transaction.Transactional;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -97,7 +95,6 @@ import com.bolenum.util.GenericUtils;
  *           pay 1 BTC + 0.15 BTC(fee) = 1.15 BTC, Seller will get 1 BTC
  */
 @Service
-@Transactional
 public class TransactionServiceImpl implements TransactionService {
 
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(TransactionServiceImpl.class);
@@ -158,7 +155,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee) {
+			TransactionStatus transactionStatus, Double fee, Long tradeId) {
 		logger.debug("performing eth transaction: {} to address: {}, amount: {}", fromUser.getEmailId(), toAddress,
 				amount);
 		String passwordKey = fromUser.getEthWalletPwdKey();
@@ -178,8 +175,8 @@ public class TransactionServiceImpl implements TransactionService {
 				ethSendTransaction = transferEth(credentials, toAddress, amount);
 				logger.debug("ETH transaction send completed: {}", ethSendTransaction.getTransactionHash());
 			} catch (Exception e) {
-				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount,
-						false);
+				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount, false,
+						tradeId);
 				errorService.saveError(error);
 				logger.debug("error saved: {}", error);
 				return new AsyncResult<Boolean>(false);
@@ -206,6 +203,7 @@ public class TransactionServiceImpl implements TransactionService {
 				if (receiverUser != null) {
 					transaction.setToUser(receiverUser);
 				}
+				transaction.setTradeId(tradeId);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(
@@ -264,7 +262,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double feeE) {
+			TransactionStatus transactionStatus, Double feeE, Long tradeId) {
 		logger.debug("performing btc tx : {} to address: {}, amount:{}", fromUser.getEmailId(), toAddress, amount);
 		Currency currency = currencyService.findByCurrencyAbbreviation("BTC");
 		WithdrawalFee fee = null;
@@ -300,7 +298,7 @@ public class TransactionServiceImpl implements TransactionService {
 				String txHash = (String) data.get("transactionHash");
 				logger.debug("transaction hash: {}", txHash);
 				String txFee = String.valueOf(data.get("transactionFee"));
-				logger.debug("transaction fee: {}", txFee);
+				logger.debug("transaction fee: {}", GenericUtils.getDecimalFormatString(Double.valueOf(txFee)));
 				Transaction transaction = transactionRepo.findByTxHash(txHash);
 				if (transaction == null) {
 					transaction = new Transaction();
@@ -321,6 +319,7 @@ public class TransactionServiceImpl implements TransactionService {
 						transaction.setToUser(receiverUser);
 						logger.debug("receiver user email id: {}", receiverUser.getEmailId());
 					}
+					transaction.setTradeId(tradeId);
 					Transaction saved = transactionRepo.saveAndFlush(transaction);
 					if (saved != null) {
 						simpMessagingTemplate.convertAndSend(
@@ -336,13 +335,14 @@ public class TransactionServiceImpl implements TransactionService {
 		} catch (JSONException e) {
 			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress,
 					e.getMessage() + ", ERROR: transaction completed but transaction object not saved in db", "BTC",
-					amount, false);
+					amount, false, tradeId);
 			errorService.saveError(error);
 			logger.debug("error saved: {}", error);
 			logger.error("btc transaction exception:  {}", e.getMessage());
 			e.printStackTrace();
 		} catch (RestClientException e) {
-			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress, e.getMessage(), "BTC", amount, false);
+			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress, e.getMessage(), "BTC", amount, false,
+					tradeId);
 			errorService.saveError(error);
 			logger.debug("error saved: {}", error);
 			logger.error("btc transaction exception:  {}", e.getMessage());
@@ -354,7 +354,7 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee) {
+			TransactionStatus transactionStatus, Double fee, Long tradeId) {
 		try {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, erc20Token,
@@ -384,6 +384,7 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction.setToUser(receiverUser);
 
 				}
+				transaction.setTradeId(tradeId);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
@@ -412,6 +413,7 @@ public class TransactionServiceImpl implements TransactionService {
 					transaction.setToUser(receiverUser);
 
 				}
+				transaction.setTradeId(tradeId);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction else part saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
@@ -436,17 +438,17 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
-			boolean isFee) {
+			boolean isFee, Long tradeId) {
 
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
 		String msg = "", msg1 = "";
 		logger.debug("perform transaction for admin fee: {}", isFee);
 		if (!isFee) {
 			msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
-					+ GenericUtils.getDecimalFormat(qtyTraded) + " " + currencyAbr
+					+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + currencyAbr
 					+ " have been processed successfully!";
 			msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "
-					+ GenericUtils.getDecimalFormat(qtyTraded) + " " + currencyAbr
+					+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + currencyAbr
 					+ " have been processed successfully!";
 		}
 		Future<Boolean> txStatus;
@@ -455,7 +457,7 @@ public class TransactionServiceImpl implements TransactionService {
 			switch (currencyAbr) {
 			case "BTC":
 				logger.debug("BTC transaction started");
-				txStatus = performBtcTransaction(seller, buyer.getBtcWalletAddress(), qtyTraded, null, null);
+				txStatus = performBtcTransaction(seller, buyer.getBtcWalletAddress(), qtyTraded, null, null, tradeId);
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
@@ -486,7 +488,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 			case "ETH":
 				logger.debug("ETH transaction started");
-				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null, null);
+				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null, null, tradeId);
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is ETH transaction successed: {}", res);
@@ -520,7 +522,8 @@ public class TransactionServiceImpl implements TransactionService {
 
 		case "ERC20TOKEN":
 			logger.debug("ERC20TOKEN transaction started");
-			txStatus = performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null, null);
+			txStatus = performErc20Transaction(seller, currencyAbr, buyer.getEthWalletaddress(), qtyTraded, null, null,
+					tradeId);
 			try {
 				boolean res = txStatus.get();
 				logger.debug("is ERC20TOKEN transaction successed: {}", res);
@@ -580,22 +583,34 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Async
 	public Future<Boolean> processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer,
-			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade)
-			throws InterruptedException, ExecutionException {
-		logger.debug("buyer trade fee: {} seller trade fee: {}", GenericUtils.getDecimalFormat(buyerTradeFee),
-				GenericUtils.getDecimalFormat(sellerTradeFee));
+			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade) {
+		logger.debug("thread: {} going to sleep for 10 Secs ", Thread.currentThread().getName());
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			logger.error("exception: {}", e.getMessage());
+			e.printStackTrace();
+		}
+		logger.debug("thread: {} waked up after for 10 Secs ", Thread.currentThread().getName());
+		logger.debug("buyer trade fee: {} seller trade fee: {}", GenericUtils.getDecimalFormatString(buyerTradeFee),
+				GenericUtils.getDecimalFormatString(sellerTradeFee));
 		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
 		// finding currency pair
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(matchedOrder.getPair().getPairId());
+		logger.debug("currency pair: {}", currencyPair.getPairName());
 		String[] tickters = new String[2];
+		logger.debug("currency tickters: {}", tickters.length);
+		logger.debug("currency tickters: {}", currencyPair.getToCurrency().size());
+		logger.debug("currency tickters: {}", currencyPair.getPairedCurrency().size());
 		// finding the currency abbreviations
 		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
 		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		logger.debug("currency pair to:{} and pair: {}", tickters[0], tickters[1]);
 		// fetching the limit price of order
 		String qtr = walletService.getPairedBalance(matchedOrder, currencyPair, qtyTraded);
-
+		logger.debug("currency pair qtr: {}", qtr);
 		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormatString(Double.valueOf(qtr)),
 				tickters[1]);
 		// checking the order type BUY
@@ -638,54 +653,133 @@ public class TransactionServiceImpl implements TransactionService {
 			// sellerTradeFee);
 			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(),
 					GenericUtils.getDecimalFormatString(qtyTraded), tickters[0]);
-			performTransaction(tickters[0], qtyTraded, buyer, seller, false); // seller
-																				// eth
-			notificationService.sendNotification(seller, msg1);
-			notificationService.saveNotification(seller, buyer, msg1);
-			// process tx sellers and buyers
+			/**
+			 * Seller performing transaction; to send ETH to buyer in case of
+			 * ETH/BTC pair
+			 */
+			Future<Boolean> txStatus = performTransaction(tickters[0], qtyTraded, buyer, seller, false, trade.getId());
+			try {
+				if (txStatus.get()) {
+					logger.debug("Seller: {} has performed tx to buyer:{} of amount: {} {}", seller.getEmailId(),
+							buyer.getEmailId(), GenericUtils.getDecimalFormatString(qtyTraded), tickters[0]);
+					trade.setIsTxSeller(true);
+					trade = orderAsyncServices.saveTrade(trade);
+					logger.debug("seller tx perfrom status saved: {}", trade.getIsTxSeller());
+					/**
+					 * unlocking locked volume
+					 */
+					logger.debug("seller locked volume, unlocking started");
+					if (OrderType.BUY.equals(orders.getOrderType())) {
+						double lockedVolRemaining = matchedOrder.getLockedVolume() - qtyTraded;
+						logger.debug("seller unlock volume: {}, remaining locked volume: {} ",
+								GenericUtils.getDecimalFormatString(qtyTraded),
+								GenericUtils.getDecimalFormatString(lockedVolRemaining));
+						matchedOrder.setLockedVolume(lockedVolRemaining);
+						orderAsyncServices.saveOrder(matchedOrder);
+						logger.debug("seller locked volume, unlocking completed");
+					} else {
+						double lockedVolRemaining = orders.getLockedVolume() - qtyTraded;
+						logger.debug("seller unlock volume: {}, remaining locked volume: {} ",
+								GenericUtils.getDecimalFormatString(qtyTraded),
+								GenericUtils.getDecimalFormatString(lockedVolRemaining));
+						orders.setLockedVolume(lockedVolRemaining);
+						orderAsyncServices.saveOrder(orders);
+						logger.debug("seller locked volume, unlocking completed");
+					}
+					notificationService.sendNotification(seller, msg1);
+					notificationService.saveNotification(seller, buyer, msg1);
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			double sellerQty = GenericUtils.getDecimalFormat(Double.valueOf(qtr) - sellerTradeFee);
 			// double sellerQty =
 			// GenericUtils.getDecimalFormat(Double.valueOf(qtr));
 			logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
 					tickters[1]);
-			performTransaction(tickters[1], sellerQty, seller, buyer, false); // buyuer
-																				// btc
-			notificationService.sendNotification(buyer, msg);
-			notificationService.saveNotification(buyer, seller, msg);
+			/**
+			 * Buyer performing transaction; to send BTC to Seller in case of
+			 * ETH/BTC pair
+			 */
+			txStatus = performTransaction(tickters[1], sellerQty, seller, buyer, false, trade.getId());
+
+			try {
+				if (txStatus.get()) {
+					logger.debug("Buyer: {} has performed tx to Seller:{} of amount: {} {}", buyer.getEmailId(),
+							seller.getEmailId(), GenericUtils.getDecimalFormatString(sellerQty), tickters[1]);
+					trade.setIsTxBuyer(true);
+					trade = orderAsyncServices.saveTrade(trade);
+					logger.debug("Buyer tx perfrom status saved: {}", trade.getIsTxBuyer());
+					/**
+					 * unlocking locked volume
+					 */
+					logger.debug("buyer locked volume, unlocking started");
+					if (OrderType.BUY.equals(orders.getOrderType())) {
+						double lockedVolRemaining = orders.getLockedVolume() - qtyTraded;
+						logger.debug("buyer unlock volume: {}, remaining locked volume: {} ",
+								GenericUtils.getDecimalFormatString(qtyTraded),
+								GenericUtils.getDecimalFormatString(lockedVolRemaining));
+						orders.setLockedVolume(lockedVolRemaining);
+						orderAsyncServices.saveOrder(orders);
+						logger.debug("buyer locked volume, unlocking completed");
+					} else {
+						double lockedVolRemaining = matchedOrder.getLockedVolume() - qtyTraded;
+						logger.debug("buyer unlock volume: {}, remaining locked volume: {} ",
+								GenericUtils.getDecimalFormatString(qtyTraded),
+								GenericUtils.getDecimalFormatString(lockedVolRemaining));
+						matchedOrder.setLockedVolume(lockedVolRemaining);
+						orderAsyncServices.saveOrder(matchedOrder);
+						logger.debug("buyer locked volume, unlocking completed");
+					}
+					notificationService.sendNotification(buyer, msg);
+					notificationService.saveNotification(buyer, seller, msg);
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			// fee deduction for admin
 			User admin = userService.findByEmail(adminEmail);
-			// Future<Boolean> feeStatus;
-			// logger.debug("actual quantity admin will get from seller: {} {}
-			// of trade Id: {} ",
-			// GenericUtils.getDecimalFormat(sellerTradeFee), tickters[0],
-			// trade.getId());
-			// feeStatus = performTransaction(tickters[0], sellerTradeFee,
-			// admin, seller, true);
-			// boolean res = feeStatus.get();
-			// if (res) {
-			// trade.setIsFeeDeductedSeller(true);
-			// logger.debug("Set seller trade fee is deducted: {}",
-			// trade.getSellerTradeFee());
-			// logger.debug("Saving trade fee for seller started");
-			// trade = orderAsyncServices.saveTrade(trade);
-			// logger.debug("Saving trade fee for seller completed: {}",
-			// trade.getSellerTradeFee());
-			// }
+			/*
+			 * Future<Boolean> feeStatus; logger.debug("actual quantity admin
+			 * will get from seller: {} {} of trade Id: {} ",
+			 * GenericUtils.getDecimalFormat(sellerTradeFee), tickters[0],
+			 * trade.getId()); feeStatus = performTransaction(tickters[0],
+			 * sellerTradeFee, admin, seller, true); boolean res =
+			 * feeStatus.get(); if (res) { trade.setIsFeeDeductedSeller(true);
+			 * logger.debug("Set seller trade fee is deducted: {}",
+			 * trade.getSellerTradeFee());
+			 * logger.debug("Saving trade fee for seller started"); trade =
+			 * orderAsyncServices.saveTrade(trade);
+			 * logger.debug("Saving trade fee for seller completed: {}",
+			 * trade.getSellerTradeFee()); }
+			 */
 			double tfee = GenericUtils.getDecimalFormat(buyerTradeFee + sellerTradeFee);
 			logger.debug(
 					"actual quantity admin will get from buyer: {} and seller: {} total fee: {} {} of trade Id: {} ",
 					GenericUtils.getDecimalFormatString(buyerTradeFee),
 					GenericUtils.getDecimalFormatString(sellerTradeFee), GenericUtils.getDecimalFormatString(tfee),
 					tickters[1], trade.getId());
-			Future<Boolean> feeStatus = performTransaction(tickters[1], tfee, admin, buyer, true);
-			boolean res = feeStatus.get();
+			Future<Boolean> feeStatus = performTransaction(tickters[1], tfee, admin, buyer, true, trade.getId());
+			boolean res = false;
+			try {
+				res = feeStatus.get();
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (res) {
 				trade.setIsFeeDeductedBuyer(true);
 				trade.setIsFeeDeductedSeller(true);
-				logger.debug("Set buyer trade fee is deducted: {}", trade.getBuyerTradeFee());
+				if (trade.getIsTxBuyer() && trade.getIsTxSeller()) {
+					trade.setStatus(true);
+				}
+				logger.debug("Set buyer trade fee is deducted: {}", trade.getIsFeeDeductedBuyer());
 				logger.debug("Saving trade fee for buyer started");
 				trade = orderAsyncServices.saveTrade(trade);
-				logger.debug("Saving trade fee for buyer completed: {}", trade.getBuyerTradeFee());
+				logger.debug("Saving trade fee for buyer completed: {}", trade.getIsFeeDeductedBuyer());
 			}
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");

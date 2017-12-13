@@ -76,6 +76,10 @@ public class Transaction {
 	private String txStatus;
 
 	private Integer noOfConfirmations;
+	/**
+	 * for trade Id, to get the details of trade
+	 */
+	private Long tradeId;
 
 	public Transaction() {
 
@@ -332,7 +336,8 @@ public class Transaction {
 	}
 
 	/**
-	 * @param txStatus the txStatus to set
+	 * @param txStatus
+	 *            the txStatus to set
 	 */
 	public void setTxStatus(String txStatus) {
 		this.txStatus = txStatus;
@@ -346,9 +351,25 @@ public class Transaction {
 	}
 
 	/**
-	 * @param noOfConfirmations the noOfConfirmations to set
+	 * @param noOfConfirmations
+	 *            the noOfConfirmations to set
 	 */
 	public void setNoOfConfirmations(Integer noOfConfirmations) {
 		this.noOfConfirmations = noOfConfirmations;
 	}
+
+	/**
+	 * @return the tradeId
+	 */
+	public Long getTradeId() {
+		return tradeId;
+	}
+
+	/**
+	 * @param tradeId the tradeId to set
+	 */
+	public void setTradeId(Long tradeId) {
+		this.tradeId = tradeId;
+	}
+	
 }

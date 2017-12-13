@@ -75,7 +75,7 @@ public class OrderController {
 					null);
 		}
 		String balance = ordersService.checkOrderEligibility(user, orders, pairId);
-		logger.debug("balance: {}", balance);
+		logger.debug("balance: {} of user: {}", balance,user.getEmailId());
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);
 		}
