@@ -236,6 +236,12 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	}
 
 	private void saveTx(User toUser, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token) {
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			logger.debug("thread error: {}", e.getMessage());
+			e.printStackTrace();
+		}
 		Transaction tx = transactionRepo.findByTxHash(transaction._transactionHash);
 		if (tx == null) {
 			tx = new Transaction();

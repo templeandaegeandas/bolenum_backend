@@ -366,6 +366,7 @@ public class TransactionServiceImpl implements TransactionService {
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
 					amount);
+			Thread.sleep(500);
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
@@ -389,7 +390,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 				transaction.setTradeId(tradeId);
 				Transaction saved = null;
-				if(transactionRepo.findByTxHash(txHash)==null) {
+				if(transactionRepo.findByTxHash(txHash) == null) {
 					saved = transactionRepo.saveAndFlush(transaction);
 				}
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
