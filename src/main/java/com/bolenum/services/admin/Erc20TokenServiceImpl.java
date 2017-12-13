@@ -54,6 +54,7 @@ import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.Erc20TokenWrapper;
 import com.bolenum.util.Erc20TokenWrapper.TransferEventResponse;
 import com.bolenum.util.EthereumServiceUtil;
+import com.bolenum.util.GenericUtils;
 
 /**
  * 
@@ -177,7 +178,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials, Contract.GAS_PRICE,
 					Contract.GAS_LIMIT);
 			amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
-			logger.debug("Balance of the user is: {}", amount);
+			logger.debug("Balance of the user is: {}", GenericUtils.getDecimalFormatString(amount));
 			return amount / createDecimals(token.decimals().getValue().intValue());
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException | IOException | CipherException e) {
@@ -221,7 +222,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		token.transferEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
 				.subscribe(tx -> {
 					if (tx._to.getValue() != null) {
-						logger.debug("tx.getTo() {}", tx._to);
+						//logger.debug("tx.getTo() {}", tx._to);
 						User user = userRepository.findByEthWalletaddress(tx._to.getValue());
 						if (user != null) {
 							logger.debug("new Incoming {} transaction for user : {}", tokenName, user.getEmailId());

@@ -74,6 +74,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(User user, OrderStatus orderStatus,
 			OrderType orderType, Currency currency);
 
+	List<Orders> findByUserAndOrderStatusAndPairToCurrency(User user, OrderStatus orderStatus, Currency currency);
+
 	@Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and o.user = :user and (o.pair.toCurrency = :toCurrencyList or o.pair.pairedCurrency = :pairedCurrencyList)")
 	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrency") Currency toCurrency,
 			@Param("pairedCurrency") Currency pairedCurrency);

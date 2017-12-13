@@ -2,6 +2,8 @@ package com.bolenum.services.admin;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,7 @@ import com.bolenum.repo.common.CurrencyRepo;
  * @Date 09-Oct-2017
  */
 @Service
+@Transactional
 public class CurrencyPairServiceImpl implements CurrencyPairService {
 
 	@Autowired
