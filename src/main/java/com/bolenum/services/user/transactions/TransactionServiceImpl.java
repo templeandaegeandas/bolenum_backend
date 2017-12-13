@@ -16,6 +16,8 @@ import java.util.concurrent.Future;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.transaction.Transactional;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -95,6 +97,7 @@ import com.bolenum.util.GenericUtils;
  *           pay 1 BTC + 0.15 BTC(fee) = 1.15 BTC, Seller will get 1 BTC
  */
 @Service
+@Transactional
 public class TransactionServiceImpl implements TransactionService {
 
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(TransactionServiceImpl.class);
@@ -597,20 +600,16 @@ public class TransactionServiceImpl implements TransactionService {
 		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
+		logger.debug("pair id:{}", matchedOrder.getPair().getPairId());
 		// finding currency pair
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(matchedOrder.getPair().getPairId());
 		logger.debug("currency pair: {}", currencyPair.getPairName());
 		String[] tickters = new String[2];
-		logger.debug("currency tickters: {}", tickters.length);
-		logger.debug("currency tickters: {}", currencyPair.getToCurrency().size());
-		logger.debug("currency tickters: {}", currencyPair.getPairedCurrency().size());
 		// finding the currency abbreviations
 		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
 		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
-		logger.debug("currency pair to:{} and pair: {}", tickters[0], tickters[1]);
 		// fetching the limit price of order
 		String qtr = walletService.getPairedBalance(matchedOrder, currencyPair, qtyTraded);
-		logger.debug("currency pair qtr: {}", qtr);
 		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormatString(Double.valueOf(qtr)),
 				tickters[1]);
 		// checking the order type BUY
@@ -676,7 +675,7 @@ public class TransactionServiceImpl implements TransactionService {
 								GenericUtils.getDecimalFormatString(lockedVolRemaining));
 						matchedOrder.setLockedVolume(lockedVolRemaining);
 						orderAsyncServices.saveOrder(matchedOrder);
-						logger.debug("seller locked volume, unlocking completed");
+						logger.debug("seller locked volume, unlocking completed amount: {}", qtyTraded);
 					} else {
 						double lockedVolRemaining = orders.getLockedVolume() - qtyTraded;
 						logger.debug("seller unlock volume: {}, remaining locked volume: {} ",
@@ -684,7 +683,7 @@ public class TransactionServiceImpl implements TransactionService {
 								GenericUtils.getDecimalFormatString(lockedVolRemaining));
 						orders.setLockedVolume(lockedVolRemaining);
 						orderAsyncServices.saveOrder(orders);
-						logger.debug("seller locked volume, unlocking completed");
+						logger.debug("seller locked volume, unlocking completed amount: {}", qtyTraded);
 					}
 					notificationService.sendNotification(seller, msg1);
 					notificationService.saveNotification(seller, buyer, msg1);
@@ -716,21 +715,24 @@ public class TransactionServiceImpl implements TransactionService {
 					 */
 					logger.debug("buyer locked volume, unlocking started");
 					if (OrderType.BUY.equals(orders.getOrderType())) {
-						double lockedVolRemaining = orders.getLockedVolume() - qtyTraded;
+						double lockedVolRemaining = orders.getLockedVolume() - (matchedOrder.getPrice() * qtyTraded);
 						logger.debug("buyer unlock volume: {}, remaining locked volume: {} ",
-								GenericUtils.getDecimalFormatString(qtyTraded),
+								GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded),
 								GenericUtils.getDecimalFormatString(lockedVolRemaining));
 						orders.setLockedVolume(lockedVolRemaining);
 						orderAsyncServices.saveOrder(orders);
-						logger.debug("buyer locked volume, unlocking completed");
+						logger.debug("buyer locked volume, unlocking completed: {}",
+								matchedOrder.getPrice() * qtyTraded);
 					} else {
-						double lockedVolRemaining = matchedOrder.getLockedVolume() - qtyTraded;
+						double lockedVolRemaining = matchedOrder.getLockedVolume()
+								- (matchedOrder.getPrice() * qtyTraded);
 						logger.debug("buyer unlock volume: {}, remaining locked volume: {} ",
-								GenericUtils.getDecimalFormatString(qtyTraded),
+								GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded),
 								GenericUtils.getDecimalFormatString(lockedVolRemaining));
 						matchedOrder.setLockedVolume(lockedVolRemaining);
 						orderAsyncServices.saveOrder(matchedOrder);
-						logger.debug("buyer locked volume, unlocking completed");
+						logger.debug("buyer locked volume, unlocking completed amount: {}",
+								matchedOrder.getPrice() * qtyTraded);
 					}
 					notificationService.sendNotification(buyer, msg);
 					notificationService.saveNotification(buyer, seller, msg);
