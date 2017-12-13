@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -61,6 +62,9 @@ public class OrderController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
 
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
@@ -171,6 +175,8 @@ public class OrderController {
 	public ResponseEntity<Object> cancelOrders(@RequestParam("orderId") long orderId) {
 		boolean status = ordersService.cancelOrder(orderId);
 		if (status) {
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
+					com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"), Optional.empty());
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"), Optional.empty());
