@@ -267,7 +267,12 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			}
 			Transaction saved = null;
 			if(transactionRepo.findByTransactionHash(transaction._transactionHash) == null) {
-				saved = transactionRepo.saveAndFlush(tx);
+				try {
+					saved = transactionRepo.save(tx);
+				}
+				catch (Exception e) {
+					logger.debug("exception in saving: {}", e.getMessage());
+				}
 			}
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", saved.getFromAddress());

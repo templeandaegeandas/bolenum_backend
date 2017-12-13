@@ -101,7 +101,7 @@ import com.bolenum.util.GenericUtils;
 public class TransactionServiceImpl implements TransactionService {
 
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(TransactionServiceImpl.class);
-
+	
 	@Value("${bolenum.ethwallet.location}")
 	private String ethWalletLocation;
 
@@ -391,7 +391,12 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setTradeId(tradeId);
 				Transaction saved = null;
 				if(transactionRepo.findByTransactionHash(txHash) == null) {
-					saved = transactionRepo.saveAndFlush(transaction);
+					try {
+						saved = transactionRepo.save(transaction);
+					}
+					catch (Exception e) {
+						logger.debug("exception in saving: {}", e.getMessage());
+					}
 				}
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
