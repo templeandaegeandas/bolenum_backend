@@ -97,7 +97,6 @@ import com.bolenum.util.GenericUtils;
  *           pay 1 BTC + 0.15 BTC(fee) = 1.15 BTC, Seller will get 1 BTC
  */
 @Service
-@Transactional
 public class TransactionServiceImpl implements TransactionService {
 
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(TransactionServiceImpl.class);
@@ -594,6 +593,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Async
+	@Transactional
 	public Future<Boolean> processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer,
 			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade) {
 		logger.debug("thread: {} going to sleep for 10 Secs ", Thread.currentThread().getName());
