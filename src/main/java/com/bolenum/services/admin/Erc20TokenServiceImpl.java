@@ -24,6 +24,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.CipherException;
@@ -82,7 +84,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private LocaleService localeService;
-	
+
 	@Autowired
 	private EtherumWalletService etherumWalletService;
 
@@ -154,7 +156,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	private Credentials getCredentials(User user) throws InvalidKeyException, NoSuchAlgorithmException,
 			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException, CipherException {
 		File file = new File(ethWalletLocation);
-		if(user.getEthWalletJsonFileName() == null) {
+		if (user.getEthWalletJsonFileName() == null) {
 			etherumWalletService.createWallet(user);
 		}
 		File jsonFile = new File(file + "/" + user.getEthWalletJsonFileName());
@@ -222,7 +224,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		token.transferEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
 				.subscribe(tx -> {
 					if (tx._to.getValue() != null) {
-						//logger.debug("tx.getTo() {}", tx._to);
+						// logger.debug("tx.getTo() {}", tx._to);
 						User user = userRepository.findByEthWalletaddress(tx._to.getValue());
 						if (user != null) {
 							logger.debug("new Incoming {} transaction for user : {}", tokenName, user.getEmailId());
@@ -235,17 +237,21 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				});
 	}
 
+	@Transactional(isolation = Isolation.READ_UNCOMMITTED)
 	private void saveTx(User toUser, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token) {
-		try {
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-			logger.debug("thread error: {}", e.getMessage());
-			e.printStackTrace();
-		}
+		// try {
+		// logger.debug("sleeping thread: {}",
+		// Thread.currentThread().getName());
+		// Thread.sleep(2000);
+		// } catch (InterruptedException e) {
+		// logger.debug("thread error: {}", e.getMessage());
+		// e.printStackTrace();
+		// }
+		logger.debug("wakeup thread: {}", Thread.currentThread().getName());
 		Transaction tx = transactionRepo.findByTransactionHash(transaction._transactionHash);
 		if (tx == null) {
 			tx = new Transaction();
-			logger.debug("saving transaction for user: {}", toUser.getEmailId());
+			logger.debug("saving transaction listener for user: {}", toUser.getEmailId());
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
@@ -255,7 +261,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			logger.debug("receiver user : {}", toUser);
 			logger.debug("receiver user id: {}", toUser.getUserId());
 			tx.setToUser(toUser);
-			if(erc20Token != null) {
+			if (erc20Token != null) {
 				tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			}
 			tx.setCurrencyName(tokenName);
@@ -265,24 +271,17 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				logger.debug("from user id: {}", senderUser.getUserId());
 				tx.setFromUser(senderUser);
 			}
-			Transaction saved = null;
-			if(transactionRepo.findByTransactionHash(transaction._transactionHash) == null) {
-				try {
-					saved = transactionRepo.save(tx);
-				}
-				catch (Exception e) {
-					logger.debug("exception in saving: {}", e.getMessage());
-				}
-			}
+			Transaction saved = transactionRepo.save(tx);
 			if (saved != null) {
-				logger.debug("new incoming transaction saved of user: {}", saved.getFromAddress());
+				logger.debug("new incoming transaction saved of user: {} and hash: {}", saved.getFromAddress(),
+						saved.getTxHash());
 			}
 		} else {
-			logger.debug("saving else transaction for user: {}", toUser.getEmailId());
+			logger.debug("saving else transaction listenr for user: {}", toUser.getEmailId());
 			tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
-			if(erc20Token != null) {
+			if (erc20Token != null) {
 				tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			}
 			logger.debug("Balance else part returned by the listner: {}",
@@ -294,7 +293,11 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setCurrencyName(tokenName);
 			logger.debug("from else user id: {}", toUser.getUserId());
 			tx.setToUser(toUser);
-			Transaction saved = transactionRepo.saveAndFlush(tx);
+			/*
+			 * try { Thread.sleep(1000); } catch (InterruptedException e) { //
+			 * TODO Auto-generated catch block e.printStackTrace(); }
+			 */
+			Transaction saved = transactionRepo.save(tx);
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", toUser.getEmailId());
 
@@ -307,7 +310,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				logger.debug("new incoming else transaction saved of user: {}", toUser.getEmailId());
 			}
 		}
-		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
+		simpMessagingTemplate.convertAndSend(
+				UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
 				com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 		logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 	}
