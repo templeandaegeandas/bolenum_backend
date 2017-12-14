@@ -144,7 +144,7 @@ public class CurrencyController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
 				currencyList);
 	}
-	
+
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_ADMIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyListForAdmin() {
 		List<Currency> currencyList = currencyService.getCurrencyListForAdmin();
@@ -167,7 +167,7 @@ public class CurrencyController {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String stringList = mapper.writeValueAsString(currencyList);
-			logger.debug("all currency list as String: {}", stringList);
+			// logger.debug("all currency list as String: {}", stringList);
 		} catch (JsonProcessingException e) {
 			logger.debug("error in currency list: {}", e.getMessage());
 			e.printStackTrace();
@@ -175,7 +175,6 @@ public class CurrencyController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
 				currencyList);
 	}
-
 
 	/**
 	 * 

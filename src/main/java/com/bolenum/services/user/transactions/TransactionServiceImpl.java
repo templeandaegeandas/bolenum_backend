@@ -36,6 +36,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.web3j.crypto.CipherException;
@@ -66,9 +67,9 @@ import com.bolenum.model.User;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
+import com.bolenum.repo.common.CurrencyPairRepo;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
-import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
@@ -99,7 +100,7 @@ import com.bolenum.util.GenericUtils;
 public class TransactionServiceImpl implements TransactionService {
 
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(TransactionServiceImpl.class);
-	
+
 	@Value("${bolenum.ethwallet.location}")
 	private String ethWalletLocation;
 
@@ -128,9 +129,6 @@ public class TransactionServiceImpl implements TransactionService {
 	private WithdrawalFeeService withdrawalFeeService;
 
 	@Autowired
-	private CurrencyPairService currencyPairService;
-
-	@Autowired
 	private UserService userService;
 
 	@Autowired
@@ -145,6 +143,9 @@ public class TransactionServiceImpl implements TransactionService {
 	@Value("${admin.email}")
 	private String adminEmail;
 
+	@Autowired
+	private CurrencyPairRepo currencyPairRepo;
+
 	/**
 	 * to perform in app transaction for ethereum
 	 * 
@@ -158,7 +159,7 @@ public class TransactionServiceImpl implements TransactionService {
 	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
 		logger.debug("performing eth transaction: {} to address: {}, amount: {}", fromUser.getEmailId(), toAddress,
-				amount);
+				GenericUtils.getDecimalFormatString(amount));
 		String passwordKey = fromUser.getEthWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
 
@@ -264,7 +265,8 @@ public class TransactionServiceImpl implements TransactionService {
 	@Async
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double feeE, Long tradeId) {
-		logger.debug("performing btc tx : {} to address: {}, amount:{}", fromUser.getEmailId(), toAddress, amount);
+		logger.debug("performing btc tx : {} to address: {}, amount:{}", fromUser.getEmailId(), toAddress,
+				GenericUtils.getDecimalFormatString(amount));
 		Currency currency = currencyService.findByCurrencyAbbreviation("BTC");
 		WithdrawalFee fee = null;
 		double txFeePerKb = 0.001;
@@ -388,11 +390,10 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 				transaction.setTradeId(tradeId);
 				Transaction saved = null;
-				if(transactionRepo.findByTransactionHash(txHash) == null) {
+				if (transactionRepo.findByTransactionHash(txHash) == null) {
 					try {
 						saved = transactionRepo.save(transaction);
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						logger.debug("exception in saving: {}", e.getMessage());
 					}
 				}
@@ -592,6 +593,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Async
+	@Transactional
 	public Future<Boolean> processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer,
 			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade) {
 		logger.debug("thread: {} going to sleep for 10 Secs ", Thread.currentThread().getName());
@@ -609,7 +611,7 @@ public class TransactionServiceImpl implements TransactionService {
 				matchedOrder.getId());
 		logger.debug("pair id:{}", matchedOrder.getPair().getPairId());
 		// finding currency pair
-		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(matchedOrder.getPair().getPairId());
+		CurrencyPair currencyPair = currencyPairRepo.findByPairId(matchedOrder.getPair().getPairId());// currencyPairService.findCurrencypairByPairId(matchedOrder.getPair().getPairId());
 		logger.debug("currency pair: {}", currencyPair.getPairName());
 		String[] tickters = new String[2];
 		// finding the currency abbreviations
@@ -690,7 +692,8 @@ public class TransactionServiceImpl implements TransactionService {
 								GenericUtils.getDecimalFormatString(lockedVolRemaining));
 						orders.setLockedVolume(lockedVolRemaining);
 						orderAsyncServices.saveOrder(orders);
-						logger.debug("seller locked volume, unlocking completed amount: {}", qtyTraded);
+						logger.debug("seller locked volume, unlocking completed amount: {}",
+								GenericUtils.getDecimalFormatString(qtyTraded));
 					}
 					notificationService.sendNotification(seller, msg1);
 					notificationService.saveNotification(seller, buyer, msg1);
@@ -728,8 +731,8 @@ public class TransactionServiceImpl implements TransactionService {
 								GenericUtils.getDecimalFormatString(lockedVolRemaining));
 						orders.setLockedVolume(lockedVolRemaining);
 						orderAsyncServices.saveOrder(orders);
-						logger.debug("buyer locked volume, unlocking completed: {}",
-								matchedOrder.getPrice() * qtyTraded);
+						logger.debug("buyer locked volume, unlocking completed for amount: {}",
+								GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded));
 					} else {
 						double lockedVolRemaining = matchedOrder.getLockedVolume()
 								- (matchedOrder.getPrice() * qtyTraded);
@@ -739,7 +742,7 @@ public class TransactionServiceImpl implements TransactionService {
 						matchedOrder.setLockedVolume(lockedVolRemaining);
 						orderAsyncServices.saveOrder(matchedOrder);
 						logger.debug("buyer locked volume, unlocking completed amount: {}",
-								matchedOrder.getPrice() * qtyTraded);
+								GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded));
 					}
 					notificationService.sendNotification(buyer, msg);
 					notificationService.saveNotification(buyer, seller, msg);
