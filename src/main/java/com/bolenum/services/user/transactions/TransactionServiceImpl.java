@@ -36,7 +36,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.web3j.crypto.CipherException;
@@ -59,7 +58,6 @@ import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Currency;
-import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
@@ -67,7 +65,6 @@ import com.bolenum.model.User;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
-import com.bolenum.repo.common.CurrencyPairRepo;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.CurrencyService;
@@ -142,9 +139,6 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Value("${admin.email}")
 	private String adminEmail;
-
-	@Autowired
-	private CurrencyPairRepo currencyPairRepo;
 
 	/**
 	 * to perform in app transaction for ethereum
@@ -366,11 +360,10 @@ public class TransactionServiceImpl implements TransactionService {
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
 					amount);
-			Thread.sleep(500);
 			Transaction transaction = transactionRepo.findByTransactionHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
-				logger.debug("saving transaction for user: {}", fromUser.getEmailId());
+				logger.debug("saving transaction for user: {}, hash: {}", fromUser.getEmailId(), txHash);
 				transaction = new Transaction();
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
@@ -389,12 +382,12 @@ public class TransactionServiceImpl implements TransactionService {
 
 				}
 				transaction.setTradeId(tradeId);
-				Transaction saved = null;
-				if (transactionRepo.findByTransactionHash(txHash) == null) {
+				Transaction saved = transactionRepo.findByTransactionHash(txHash);
+				if (saved == null) {
 					try {
 						saved = transactionRepo.save(transaction);
 					} catch (Exception e) {
-						logger.debug("exception in saving: {}", e.getMessage());
+						logger.debug("exception in saving tx: {}", e.getMessage());
 					}
 				}
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
@@ -403,7 +396,6 @@ public class TransactionServiceImpl implements TransactionService {
 							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
-					;
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
@@ -425,14 +417,13 @@ public class TransactionServiceImpl implements TransactionService {
 
 				}
 				transaction.setTradeId(tradeId);
-				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				Transaction saved = transactionRepo.save(transaction);
 				logger.debug("transaction else part saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(
 							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
-					;
 					logger.debug("transaction else part saved successfully of user: {}", fromUser.getEmailId());
 					return new AsyncResult<Boolean>(true);
 				}
@@ -593,7 +584,6 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Async
-	@Transactional
 	public Future<Boolean> processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer,
 			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade) {
 		logger.debug("thread: {} going to sleep for 10 Secs ", Thread.currentThread().getName());
@@ -609,16 +599,13 @@ public class TransactionServiceImpl implements TransactionService {
 		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
-		logger.debug("pair id:{}", matchedOrder.getPair().getPairId());
 		// finding currency pair
-		CurrencyPair currencyPair = currencyPairRepo.findByPairId(matchedOrder.getPair().getPairId());// currencyPairService.findCurrencypairByPairId(matchedOrder.getPair().getPairId());
-		logger.debug("currency pair: {}", currencyPair.getPairName());
 		String[] tickters = new String[2];
 		// finding the currency abbreviations
-		tickters[0] = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
-		tickters[1] = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		tickters[0] = matchedOrder.getPair().getToCurrency().get(0).getCurrencyAbbreviation();
+		tickters[1] = matchedOrder.getPair().getPairedCurrency().get(0).getCurrencyAbbreviation();
 		// fetching the limit price of order
-		String qtr = walletService.getPairedBalance(matchedOrder, currencyPair, qtyTraded);
+		String qtr = walletService.getPairedBalance(matchedOrder, matchedOrder.getPair(), qtyTraded);
 		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormatString(Double.valueOf(qtr)),
 				tickters[1]);
 		// checking the order type BUY
@@ -798,5 +785,4 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		return new AsyncResult<Boolean>(true);
 	}
-
 }
