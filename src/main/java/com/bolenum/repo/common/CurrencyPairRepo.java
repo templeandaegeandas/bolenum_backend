@@ -19,7 +19,7 @@ public interface CurrencyPairRepo extends JpaRepository<CurrencyPair, Long> {
 	CurrencyPair findByPairId(Long pairId);
 
 	Page<CurrencyPair> findByIsEnabled(Boolean isEnabled, Pageable page);
-	
+
 	List<CurrencyPair> findByToCurrencyCurrencyIdAndIsEnabled(Long currencyId, Boolean isEnabled);
 
 }

@@ -6,10 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.model.orders.book.Orders;
-import com.bolenum.model.orders.book.PartialTrade;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
-import com.bolenum.repo.order.book.PartialTradeRepository;
 import com.bolenum.repo.order.book.TradeRepository;
 
 @Service
@@ -21,24 +19,14 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 	@Autowired
 	private TradeRepository tradeRepository;
 
-	@Autowired
-	private PartialTradeRepository partialTradeRepository;
-
-	// @Async
 	@Override
 	public List<Orders> saveOrder(List<Orders> ordersList) {
 		return ordersRepository.save(ordersList);
 	}
 
-	// @Async
 	@Override
 	public List<Trade> saveTrade(List<Trade> tradeList) {
 		return tradeRepository.save(tradeList);
-	}
-
-	@Override
-	public List<PartialTrade> savePartialTrade(List<PartialTrade> tradeList) {
-		return partialTradeRepository.save(tradeList);
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package com.bolenum.services.order.book;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,7 +24,6 @@ import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
-import com.bolenum.model.orders.book.PartialTrade;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.CurrencyPairService;
@@ -71,19 +69,17 @@ public class OrdersServiceImpl implements OrdersService {
 
 	List<Orders> matchedOrdersList = new ArrayList<>();
 
-	List<PartialTrade> partialTradeList = new ArrayList<>();
-
-	private DecimalFormat decimalFormat = new DecimalFormat("0");
-
 	/**
 	 * this will check user wallet balance to get place an order
 	 */
 	@Override
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
-		decimalFormat.setMaximumFractionDigits(8);
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
 		String tickter = null, minOrderVol = null, currencyType = null;
+		/**
+		 * to get the placed volume of selling currency
+		 */
 		Currency currency;
 		/**
 		 * if order type is SELL then only checking, user have selling volume
@@ -93,19 +89,25 @@ public class OrdersServiceImpl implements OrdersService {
 			tickter = currency.getCurrencyAbbreviation();
 			currencyType = currency.getCurrencyType().toString();
 			minOrderVol = String.valueOf(orders.getVolume());
+			logger.debug("user: {} should have: {} {}", user.getEmailId(), minOrderVol, tickter);
 		} else {
 			minOrderVol = walletService.getPairedBalance(orders, currencyPair, orders.getVolume());
 			currency = currencyPair.getPairedCurrency().get(0);
 			tickter = currency.getCurrencyAbbreviation();
 			currencyType = currency.getCurrencyType().toString();
+			logger.debug("user: {} should have: {} {}", user.getEmailId(), minOrderVol, tickter);
 		}
 		double userPlacedOrderVolume = getPlacedOrderVolumeOfCurrency(user, OrderStatus.SUBMITTED, OrderType.SELL,
 				currency);
-		logger.debug("user placed order volume: {} and order volume: {}",
-				GenericUtils.getDecimalFormat(userPlacedOrderVolume),
-				GenericUtils.getDecimalFormat(Double.valueOf(minOrderVol)));
-		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume;
-		logger.debug("minimum order volume required to buy/sell: {}", GenericUtils.getDecimalFormat(minBalance));
+		double userPlacedLockedOrderVolume = getLockedOrderVolumeOfCurrency(user, OrderStatus.COMPLETED, currency);
+		
+		logger.debug("user:{} placed order volume: {}, locked volume: {}, and order volume: {}", user.getEmailId(),
+				GenericUtils.getDecimalFormatString(userPlacedOrderVolume),
+				GenericUtils.getDecimalFormatString(userPlacedLockedOrderVolume),
+				GenericUtils.getDecimalFormatString(Double.valueOf(minOrderVol)));
+		double minBalance = Double.valueOf(minOrderVol) + userPlacedOrderVolume + userPlacedLockedOrderVolume;
+		logger.debug("user: {}, minimum order volume required to buy/sell: {}", user.getEmailId(),
+				GenericUtils.getDecimalFormatString(minBalance));
 		// getting the user current wallet balance
 		String balance = walletService.getBalance(tickter, currencyType, user);
 		balance = balance.replace("BTC", "");
@@ -129,7 +131,16 @@ public class OrdersServiceImpl implements OrdersService {
 				orderType, currency);
 		double total = 0.0;
 		for (Orders order : orders) {
-			total = total + order.getVolume();
+			total = total + order.getVolume() + order.getLockedVolume();
+		}
+		return total;
+	}
+
+	private double getLockedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, Currency currency) {
+		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndPairToCurrency(user, orderStatus, currency);
+		double total = 0.0;
+		for (Orders order : orders) {
+			total = total + order.getVolume() + order.getLockedVolume();
 		}
 		return total;
 	}
@@ -145,13 +156,15 @@ public class OrdersServiceImpl implements OrdersService {
 		List<Orders> orders = findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
 		double total = 0.0;
 		for (Orders order : orders) {
-			total = total + order.getVolume();
+			total = total + order.getVolume() + order.getLockedVolume();
 		}
 		return total;
 	}
 
 	@Override
 	public Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException {
+		orders = ordersRepository.save(orders);
+		logger.debug("saved requested order id: {}", orders.getId());
 		Boolean status;
 		if (OrderStandard.MARKET.equals(orders.getOrderStandard())) {
 			logger.debug("Processing market order");
@@ -397,6 +410,8 @@ public class OrdersServiceImpl implements OrdersService {
 		OrderType orderType = orders.getOrderType();
 		User buyer, seller;
 		double buyerTradeFee, sellerTradeFee;
+		String toCA = pair.getToCurrency().get(0).getCurrencyAbbreviation();
+		String pairCA = pair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		logger.debug("process order list remainingVolume: {}", remainingVolume);
 		// process till order size and remaining volume is > 0
 		while ((ordersList.size() > 0) && (remainingVolume > 0)) {
@@ -445,12 +460,44 @@ public class OrdersServiceImpl implements OrdersService {
 				buyer = orders.getUser();
 				// seller is matched order's user
 				seller = matchedOrder.getUser();
+				/**
+				 * Setting the locked volume of orders, if trade tx fails then
+				 * can be retried
+				 */
+				logger.debug("seller existing locked volume: {} {}, locked volume: {} {}",
+						matchedOrder.getLockedVolume(), toCA, qtyTraded, toCA);
+				double lockVol = matchedOrder.getLockedVolume() + qtyTraded;
+				logger.debug("seller total locked volume: {} {}", lockVol, toCA);
+				matchedOrder.setLockedVolume(lockVol);
+				logger.debug("buyer existing locked volume: {} {}, locked volume: {} {}", orders.getLockedVolume(),
+						pairCA, matchedOrder.getPrice() * qtyTraded, pairCA);
+				lockVol = orders.getLockedVolume() + (matchedOrder.getPrice() * qtyTraded);
+				logger.debug("buyer total locked volume: {} {}", lockVol, pairCA);
+				orders.setLockedVolume(lockVol);
 			} else {
 				// order type is SELL
 				// buyer is matched order's user
 				buyer = matchedOrder.getUser();
 				// seller is coming order's user
 				seller = orders.getUser();
+				/**
+				 * Setting the locked volume of orders, if trade tx fails then
+				 * can be retried
+				 */
+				logger.debug("buyer existing locked volume: {} {}, locked volume: {} {}",
+						matchedOrder.getLockedVolume(), pairCA, matchedOrder.getPrice() * qtyTraded, pairCA);
+				double lockVol = matchedOrder.getLockedVolume() + (matchedOrder.getPrice() * qtyTraded);
+				logger.debug("buyer total locked volume: {} {}", lockVol, pairCA);
+				matchedOrder.setLockedVolume(lockVol);
+				logger.debug("buyer total locked volume after set: {} {}", matchedOrder.getLockedVolume(), pairCA);
+
+				logger.debug("seller existing locked volume: {} {}, locked volume: {} {}", orders.getLockedVolume(),
+						toCA, qtyTraded, toCA);
+				lockVol = orders.getLockedVolume() + qtyTraded;
+				logger.debug("seller total locked volume: {} {}", lockVol, toCA);
+				orders.setLockedVolume(lockVol);
+				logger.debug("seller total locked volume after set: {} {}", orders.getLockedVolume(), toCA);
+
 			}
 			// buyer and seller must be different user
 			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
@@ -459,14 +506,17 @@ public class OrdersServiceImpl implements OrdersService {
 			sellerTradeFee = buyerTradeFee;// tradingFeeService.calculateFee(qtyTraded);
 			buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
 			sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
-			logger.info("buyer trade fee: {} seller trade fee: {}", decimalFormat.format(buyerTradeFee),
-					decimalFormat.format(sellerTradeFee));
+			logger.info("buyer trade fee: {} seller trade fee: {}", GenericUtils.getDecimalFormatString(buyerTradeFee),
+					GenericUtils.getDecimalFormatString(sellerTradeFee));
 			// saving the processed BUY/SELL order in trade
+			logger.debug("matched order id: {}", matchedOrder.getId());
+			logger.debug("orders id: {}", orders.getId());
 			Trade trade = new Trade(matchedOrder.getPrice(), qtyTraded, buyer, seller, pair, OrderStandard.LIMIT,
-					buyerTradeFee, sellerTradeFee);
+					buyerTradeFee, sellerTradeFee, matchedOrder, orders);
 			trade = orderAsyncServices.saveTrade(trade);
+
 			// tradeList.add(trade);
-			logger.debug("trade saved: {}", trade.getId());
+			logger.debug("trade saved id: {} with matche orders id: {} ,requested order id: {}", trade.getId(), matchedOrder.getId(), orders.getId());
 			transactionService.processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume,
 					buyerTradeFee, sellerTradeFee, trade);
 			// }

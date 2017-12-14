@@ -303,7 +303,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@Override
 	public Transaction setDepositeList(Transaction transaction) {
-		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
+		Transaction savedTransaction = transactionRepo.findByTransactionHash(transaction.getTxHash());
 		logger.debug("savedTransaction {}", savedTransaction);
 		User toUser = userRepository.findByBtcWalletAddress(transaction.getToAddress());
 		if (savedTransaction == null) {
@@ -311,13 +311,15 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
 			transaction.setCurrencyName("BTC");
 			transaction.setToUser(toUser);
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
+			simpMessagingTemplate.convertAndSend(
+					UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(transaction);
 		} else {
 			savedTransaction.setTransactionType(TransactionType.INCOMING);
 			savedTransaction.setToUser(toUser);
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
+			simpMessagingTemplate.convertAndSend(
+					UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
@@ -332,11 +334,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			switch (coinCode) {
 			case "BTC":
 				Future<Boolean> res = transactionService.performBtcTransaction(user, toAddress, amount,
-						TransactionStatus.WITHDRAW, bolenumFee);
+						TransactionStatus.WITHDRAW, bolenumFee, null);
 				try {
 					if (res.get() && bolenumFee > 0) {
 						transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(), bolenumFee,
-								TransactionStatus.FEE, null);
+								TransactionStatus.FEE, null, null);
 					}
 				} catch (InterruptedException | ExecutionException e1) {
 					e1.printStackTrace();
@@ -344,11 +346,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				break;
 			case "ETH":
 				res = transactionService.performEthTransaction(user, toAddress, amount, TransactionStatus.WITHDRAW,
-						bolenumFee);
+						bolenumFee, null);
 				try {
 					if (res.get() && bolenumFee > 0) {
 						transactionService.performEthTransaction(user, admin.getEthWalletaddress(), bolenumFee,
-								TransactionStatus.FEE, null);
+								TransactionStatus.FEE, null, null);
 					}
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
@@ -358,11 +360,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			break;
 		case "ERC20TOKEN":
 			Future<Boolean> res1 = transactionService.performErc20Transaction(user, coinCode, toAddress, amount,
-					TransactionStatus.WITHDRAW, bolenumFee);
+					TransactionStatus.WITHDRAW, bolenumFee, null);
 			try {
 				if (res1.get() && bolenumFee > 0) {
 					transactionService.performErc20Transaction(user, coinCode, admin.getEthWalletaddress(), bolenumFee,
-							TransactionStatus.FEE, null);
+							TransactionStatus.FEE, null, null);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();

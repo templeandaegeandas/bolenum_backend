@@ -149,11 +149,11 @@ public class DisputeServiceImpl implements DisputeService {
 	 */
 	@Override
 	public Orders checkEligibilityToDispute(Long orderId) {
-		Orders order = ordersRepository.findOne(orderId);
-		if (OrderType.BUY.equals(order.getOrderType())) {
-			return order;
-		}
-		return null;
+		return ordersRepository.findOne(orderId);
+//		if (OrderType.BUY.equals(order.getOrderType())) {
+//			return order;
+//		}
+//		return null;
 	}
 
 	/**
