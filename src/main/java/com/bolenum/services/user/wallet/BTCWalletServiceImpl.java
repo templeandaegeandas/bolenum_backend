@@ -104,10 +104,10 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	public String createHotWallet(String uuid) {
 		String url = btcUrl + UrlConstant.HOT_WALLET;
 		RestTemplate restTemplate = new RestTemplate();
-		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<>();
 		logger.debug("create wallet uuid:  {}", uuid);
 		parametersMap.add("uuid", uuid);
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String json = restTemplate.postForObject(url, parametersMap, String.class);
@@ -120,16 +120,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 		} catch (RestClientException e) {
 			logger.error("create wallet exception RCE:  {}", e.getMessage());
-			e.printStackTrace();
 		} catch (JsonParseException e) {
 			logger.error("create wallet exception JPE:  {}", e.getMessage());
-			e.printStackTrace();
 		} catch (JsonMappingException e) {
 			logger.error("create wallet exception JME:  {}", e.getMessage());
-			e.printStackTrace();
 		} catch (IOException e) {
 			logger.error("create wallet exception IOE:  {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return "";
 	}
@@ -151,7 +147,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return balance;
 		} catch (RestClientException e) {
 			logger.error("get Wallet balance RCE:  {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return "";
 	}
@@ -176,7 +171,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 		} catch (RestClientException e) {
 			logger.error("get Wallet Address And QrCode exception RCE:  {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return "";
 	}
@@ -190,7 +184,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		String url = btcUrl + UrlConstant.WALLET_ADDR;
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		HttpEntity<String> entity = new HttpEntity<>(null, headers);
 		ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 		logger.debug("Transaction response: {}", txRes);
 		return false;
@@ -303,7 +297,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@Override
 	public Transaction setDepositeList(Transaction transaction) {
-		Transaction savedTransaction = transactionRepo.findByTransactionHash(transaction.getTxHash());
+		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
 		logger.debug("savedTransaction {}", savedTransaction);
 		User toUser = userRepository.findByBtcWalletAddress(transaction.getToAddress());
 		if (savedTransaction == null) {

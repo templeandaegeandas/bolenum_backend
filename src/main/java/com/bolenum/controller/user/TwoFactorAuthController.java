@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,6 +58,7 @@ public class TwoFactorAuthController {
 	 * @throws WriterException
 	 * @throws IOException
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GEN_GOOGLE_AUTH_QR, method = RequestMethod.POST)
 	ResponseEntity<Object> generateGoogleAuthQr() throws URISyntaxException, WriterException, IOException {
 		User user = GenericUtils.getLoggedInUser();
@@ -75,6 +77,7 @@ public class TwoFactorAuthController {
 	 * @param secret
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.VERIFY_GOOGLE_AUTH_KEY, method = RequestMethod.PUT)
 	ResponseEntity<Object> authenticateGoogleAuthKey(@RequestParam("secret") String secret) {
 		User user = GenericUtils.getLoggedInUser();
@@ -99,6 +102,7 @@ public class TwoFactorAuthController {
 	 * 
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TWO_FACTOR_AUTH_VIA_MOBILE, method = RequestMethod.PUT)
 	ResponseEntity<Object> setTwoFactorAuthViaMobile() {
 		User user = GenericUtils.getLoggedInUser();
@@ -172,6 +176,7 @@ public class TwoFactorAuthController {
 	 * 
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.REMOVE_TWO_FACTOR_AUTH, method = RequestMethod.DELETE)
 	ResponseEntity<Object> removeTwoFactorAuth() {
 		User user = GenericUtils.getLoggedInUser();

@@ -56,7 +56,7 @@ public class WalletServiceImpl implements WalletService {
 		case "FIAT":
 			break;
 		}
-		logger.debug("get wallet balance: {}", balance);
+		logger.debug("get wallet balance: {} of User: {}", balance, user.getEmailId());
 		return balance;
 	}
 
@@ -80,14 +80,13 @@ public class WalletServiceImpl implements WalletService {
 			 * fetching the market BTC price of buying currency
 			 */
 
-			// MarketPrice marketPrice =
-			// marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
 			/**
 			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
 			 * BTC, this will update according to order selling book
 			 */
 			double buyingCurrencyValue = currencyPair.getPairedCurrency().get(0).getPriceBTC();
-			logger.debug("order value : {}, buyingCurrencyValue: {}", GenericUtils.getDecimalFormatString(qtyTraded), GenericUtils.getDecimalFormatString(buyingCurrencyValue));
+			logger.debug("order value : {}, buyingCurrencyValue: {}", GenericUtils.getDecimalFormatString(qtyTraded),
+					GenericUtils.getDecimalFormatString(buyingCurrencyValue));
 			if (buyingCurrencyValue > 0) {
 				/**
 				 * user must have this balance to give market order, Example

@@ -65,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
 	 */
 	@Override
 	public AuthenticationToken login(String password, User user, String ipAddress, String browserName,
-			String clientOSName) throws InvalidPasswordException {
+			String clientOSName) {
 		if (passwordEncoder.matches(password, user.getPassword())) {
 			// Generate Token and Save it for the logged in user
 			AuthenticationToken authToken = new AuthenticationToken(TokenGenerator.generateToken(), user);
@@ -150,8 +150,7 @@ public class AuthServiceImpl implements AuthService {
 		String url = serverUrl + urlForResetPassword + token;
 		emailService.mailSend(user.getEmailId(), localeService.getMessage("message.subject.forget.password"), url);
 		authenticationToken.setTokentype(TokenType.FORGOT_PASSWORD);
-		AuthenticationToken savedToken = authenticationTokenRepo.saveAndFlush(authenticationToken);
-		return savedToken;
+		return authenticationTokenRepo.saveAndFlush(authenticationToken);
 
 	}
 

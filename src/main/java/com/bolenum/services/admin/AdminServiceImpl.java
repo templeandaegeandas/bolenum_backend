@@ -58,8 +58,7 @@ public class AdminServiceImpl implements AdminService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		Page<User> userList = userRepository.getUserListWithSearch(searchData, user.getUserId(), pageRequest);
-		return userList;
+		return userRepository.getUserListWithSearch(searchData, user.getUserId(), pageRequest);
 	}
 
 	/**
@@ -77,10 +76,10 @@ public class AdminServiceImpl implements AdminService {
 	public String createAdminHotWallet(String uuid) {
 		String url = btcUrl + UrlConstant.ADMIN_HOT_WALLET;
 		RestTemplate restTemplate = new RestTemplate();
-		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<>();
 		logger.debug("create wallet uuid:  {}", uuid);
 		parametersMap.add("uuid", uuid);
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String json = restTemplate.postForObject(url, parametersMap, String.class);
@@ -93,16 +92,12 @@ public class AdminServiceImpl implements AdminService {
 			}
 		} catch (RestClientException e) {
 			logger.error("create wallet exception RCE:  {}", e.getMessage());
-			e.printStackTrace();
 		} catch (JsonParseException e) {
 			logger.error("create wallet exception JPE:  {}", e.getMessage());
-			e.printStackTrace();
 		} catch (JsonMappingException e) {
 			logger.error("create wallet exception JME:  {}", e.getMessage());
-			e.printStackTrace();
 		} catch (IOException e) {
 			logger.error("create wallet exception IOE:  {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return "";
 
@@ -120,7 +115,6 @@ public class AdminServiceImpl implements AdminService {
 			return (String) res.get("data");
 		} catch (RestClientException e) {
 			logger.error("get Wallet balance RCE:  {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return "";
 	}

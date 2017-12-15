@@ -1,7 +1,6 @@
 package com.bolenum.util;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,6 @@ public class SMSServiceImpl implements SMSService{
 	public void sendOtp(int otp, String countryCode, String mobileNumber) {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = twoFactorUrl + "+" +countryCode+mobileNumber + "/" + otp + "/bolenum otp";
-		@SuppressWarnings("unchecked")
-		Map<Object, Object> response = restTemplate.getForObject(url, HashMap.class);
+		restTemplate.getForObject(url, HashMap.class);
 	}
 }

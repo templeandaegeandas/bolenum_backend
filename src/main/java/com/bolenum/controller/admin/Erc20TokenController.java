@@ -3,10 +3,10 @@ package com.bolenum.controller.admin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,7 +27,6 @@ import com.bolenum.util.ResponseHandler;
  */
 @RestController
 @RequestMapping(value = UrlConstant.BASE_ADMIN_URI_V1)
-@Scope("request")
 public class Erc20TokenController {
 
 	public static final Logger logger = LoggerFactory.getLogger(Erc20TokenController.class);
@@ -38,6 +37,7 @@ public class Erc20TokenController {
 	@Autowired
 	private LocaleService localeService;
 
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.ADD_NEW_TOKEN, method = RequestMethod.POST)
 	public ResponseEntity<Object> addNewToken(@RequestBody Erc20Token erc20Token) {
 		Erc20Token savedToken = erc20TokenService.saveToken(erc20Token);
@@ -50,6 +50,7 @@ public class Erc20TokenController {
 		}
 	}
 
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.GET_TOKEN_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getAllTokens(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
@@ -58,6 +59,7 @@ public class Erc20TokenController {
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("erc20.token.list"), erc20TokenList);
 	}
 
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.GET_TOKEN_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTokenByTokenId(@RequestParam("id") Long id) {
 		Erc20Token erc20Token = erc20TokenService.getById(id);

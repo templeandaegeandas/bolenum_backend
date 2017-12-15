@@ -58,6 +58,8 @@ public class Currency {
 
 	private Double priceBTC;
 	
+	private Double priceNGN;
+	
 	public Currency() {
 
 	}
@@ -159,6 +161,14 @@ public class Currency {
 	 */
 	public void setPriceBTC(Double price_BTC) {
 		this.priceBTC = price_BTC;
+	}
+
+	public Double getPriceNGN() {
+		return priceNGN;
+	}
+
+	public void setPriceNGN(Double priceNGN) {
+		this.priceNGN = priceNGN;
 	}
 
 }

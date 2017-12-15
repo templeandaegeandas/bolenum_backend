@@ -7,10 +7,10 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +40,6 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping(value = UrlConstant.BASE_ADMIN_URI_V1)
 @Api(value = "Currency Pair Controller")
-@Scope("request")
 public class CurrencyPairController {
 
 	@Autowired
@@ -57,6 +56,7 @@ public class CurrencyPairController {
 	 * @param result
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.POST)
 	public ResponseEntity<Object> createCurrencyPair(@Valid @RequestBody CurrencyPairForm currencyPairForm,
 			BindingResult result) {
@@ -89,7 +89,6 @@ public class CurrencyPairController {
 		if (existingCurrencyPair == null && existingCurrencyPairByReverse == null) {
 			CurrencyPair currencyPair = currencyPairForm.copy(new CurrencyPair());
 			Boolean isValid = currencyPairService.validCurrencyPair(currencyPair);
-			// currencyPairForm.copy(new CurrencyPair());
 			if (isValid) {
 				CurrencyPair savedCurrencyPair = currencyPairService.saveCurrencyPair(currencyPair);
 				if (savedCurrencyPair != null) {
@@ -117,6 +116,7 @@ public class CurrencyPairController {
 	 * @param sortOrder
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyPairList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
@@ -137,6 +137,7 @@ public class CurrencyPairController {
 	 * @param pairId
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyPair(@RequestParam("pairId") long pairId) {
 		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairId);
@@ -153,6 +154,7 @@ public class CurrencyPairController {
 	 * @param pairId
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.PUT)
 	public ResponseEntity<Object> changeStateOfCurrencyPair(@RequestParam("pairId") long pairId) {
 		CurrencyPair isCurrencyPairExist = currencyPairService.findCurrencypairByPairId(pairId);
@@ -177,8 +179,8 @@ public class CurrencyPairController {
 	public ResponseEntity<Object> getListOfPairedCurrency(@RequestParam("currencyId") long currencyId) {
 		List<CurrencyPair> listOfPairedCurrency = currencyPairService.findCurrencyPairByCurrencyId(currencyId);
 		if (listOfPairedCurrency != null) {
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("paired.currency.found.success"),
-					listOfPairedCurrency);
+			return ResponseHandler.response(HttpStatus.OK, false,
+					localeService.getMessage("paired.currency.found.success"), listOfPairedCurrency);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 					localeService.getMessage("currency.not.found"), null);

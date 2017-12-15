@@ -24,8 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.CipherException;
@@ -134,8 +132,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		Page<Erc20Token> tokenList = erc20TokenRepository.findByIsDeleted(false, pageRequest);
-		return tokenList;
+		return erc20TokenRepository.findByIsDeleted(false, pageRequest);
 	}
 
 	@Override
@@ -179,6 +176,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
 			token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials, Contract.GAS_PRICE,
 					Contract.GAS_LIMIT);
+			logger.debug("contract loaded");
 			amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
 			logger.debug("Balance of the user is: {}", GenericUtils.getDecimalFormatString(amount));
 			return amount / createDecimals(token.decimals().getValue().intValue());
@@ -200,7 +198,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
 		logger.debug("Transfering amount in Double: {}", token.decimals().getValue().intValue());
-		BigInteger fundInBig = new BigDecimal(fund * createDecimals(token.decimals().getValue().intValue()))
+		BigInteger fundInBig = BigDecimal.valueOf(fund * createDecimals(token.decimals().getValue().intValue()))
 				.toBigInteger();
 		logger.debug("Transfering amount in BigInteger: {}", fundInBig);
 		Uint256 transferFunds = new Uint256(fundInBig);
@@ -224,7 +222,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		token.transferEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
 				.subscribe(tx -> {
 					if (tx._to.getValue() != null) {
-						// logger.debug("tx.getTo() {}", tx._to);
 						User user = userRepository.findByEthWalletaddress(tx._to.getValue());
 						if (user != null) {
 							logger.debug("new Incoming {} transaction for user : {}", tokenName, user.getEmailId());
@@ -233,22 +230,11 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 					}
 				}, err -> {
 					logger.error("Erc20Token incoming transaction saving subscribe error: {}", err.getMessage());
-					err.printStackTrace();
 				});
 	}
 
-	@Transactional(isolation = Isolation.READ_UNCOMMITTED)
 	private void saveTx(User toUser, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token) {
-		// try {
-		// logger.debug("sleeping thread: {}",
-		// Thread.currentThread().getName());
-		// Thread.sleep(2000);
-		// } catch (InterruptedException e) {
-		// logger.debug("thread error: {}", e.getMessage());
-		// e.printStackTrace();
-		// }
-		logger.debug("wakeup thread: {}", Thread.currentThread().getName());
-		Transaction tx = transactionRepo.findByTransactionHash(transaction._transactionHash);
+		Transaction tx = transactionRepo.findByTxHash(transaction._transactionHash);
 		if (tx == null) {
 			tx = new Transaction();
 			logger.debug("saving transaction listener for user: {}", toUser.getEmailId());
@@ -278,7 +264,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			}
 		} else {
 			logger.debug("saving else transaction listenr for user: {}", toUser.getEmailId());
-			tx.setTxHash(transaction._transactionHash);
+			// tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
 			if (erc20Token != null) {
@@ -297,7 +283,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			 * try { Thread.sleep(1000); } catch (InterruptedException e) { //
 			 * TODO Auto-generated catch block e.printStackTrace(); }
 			 */
-			Transaction saved = transactionRepo.save(tx);
+			Transaction saved = transactionRepo.saveAndFlush(tx);
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", toUser.getEmailId());
 

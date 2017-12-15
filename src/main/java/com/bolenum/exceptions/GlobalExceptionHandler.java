@@ -34,7 +34,7 @@ import com.bolenum.util.ResponseHandler;
  *
  */
 
-//@RestControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@Autowired
@@ -110,7 +110,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @param request
 	 * @return ResponseEntity
 	 */
-	//@ExceptionHandler({ InvalidPasswordException.class })
+	@ExceptionHandler({ InvalidPasswordException.class })
 	public ResponseEntity<Object> handleBadRequest(final InvalidPasswordException ex, final WebRequest request) {
 		ex.printStackTrace();
 
@@ -136,7 +136,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @param request
 	 * @return ResponseEntity
 	 */
-	//@ExceptionHandler({ MaxSizeExceedException.class })
+	@ExceptionHandler({ MaxSizeExceedException.class })
 	public ResponseEntity<Object> handleBadRequest(final MaxSizeExceedException ex, final WebRequest request) {
 		ex.printStackTrace();
 
@@ -149,14 +149,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @param request
 	 * @return ResponseEntity
 	 */
-	//@ExceptionHandler({ MobileNotVerifiedException.class })
+	@ExceptionHandler({ MobileNotVerifiedException.class })
 	public ResponseEntity<Object> handleBadRequest(final MobileNotVerifiedException ex, final WebRequest request) {
 		ex.printStackTrace();
 
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
 
-	//@ExceptionHandler({ InsufficientBalanceException.class })
+	@ExceptionHandler({ InsufficientBalanceException.class })
 	protected ResponseEntity<Object> handleInsufficientBalanceException(final InsufficientBalanceException ex,
 			final WebRequest request) {
 		logger.error("InsufficientBalanceException: {}", ex.getMessage());
@@ -248,8 +248,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	//@ExceptionHandler({ NullPointerException.class, IllegalStateException.class })
-	public ResponseEntity<Object> handleInternal(final RuntimeException ex, final WebRequest request) {
+	@ExceptionHandler({ Exception.class })
+	public ResponseEntity<Object> handleInternal(final Exception ex, final WebRequest request) {
 		logger.error("500 Status Code");
 		ex.printStackTrace();
 		return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true, ex.getMessage(), null);

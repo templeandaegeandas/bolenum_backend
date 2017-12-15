@@ -58,6 +58,7 @@ import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.model.Currency;
+import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
@@ -180,7 +181,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("ETH transaction send fund completed");
 			String txHash = ethSendTransaction.getTransactionHash();
 			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
-			Transaction transaction = transactionRepo.findByTransactionHash(txHash);
+			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
 				transaction = new Transaction();
@@ -296,7 +297,7 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("transaction hash: {}", txHash);
 				String txFee = String.valueOf(data.get("transactionFee"));
 				logger.debug("transaction fee: {}", GenericUtils.getDecimalFormatString(Double.valueOf(txFee)));
-				Transaction transaction = transactionRepo.findByTransactionHash(txHash);
+				Transaction transaction = transactionRepo.findByTxHash(txHash);
 				if (transaction == null) {
 					transaction = new Transaction();
 					transaction.setTxFee((txFee != null) ? Double.parseDouble(txFee) : 0);
@@ -360,7 +361,7 @@ public class TransactionServiceImpl implements TransactionService {
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
 					amount);
-			Transaction transaction = transactionRepo.findByTransactionHash(txHash);
+			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
 				logger.debug("saving transaction for user: {}, hash: {}", fromUser.getEmailId(), txHash);
@@ -382,14 +383,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 				}
 				transaction.setTradeId(tradeId);
-				Transaction saved = transactionRepo.findByTransactionHash(txHash);
-				if (saved == null) {
-					try {
-						saved = transactionRepo.save(transaction);
-					} catch (Exception e) {
-						logger.debug("exception in saving tx: {}", e.getMessage());
-					}
-				}
+				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(
@@ -401,7 +395,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 			} else {
 				logger.debug("transaction else part already saved: {}", transaction.getTxHash());
-				transaction.setTxHash(transactionReceipt.getTransactionHash());
+				// transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
@@ -417,7 +411,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 				}
 				transaction.setTradeId(tradeId);
-				Transaction saved = transactionRepo.save(transaction);
+				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				logger.debug("transaction else part saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(
@@ -594,51 +588,48 @@ public class TransactionServiceImpl implements TransactionService {
 			e.printStackTrace();
 		}
 		logger.debug("thread: {} waked up after for 10 Secs ", Thread.currentThread().getName());
-		logger.debug("buyer trade fee: {} seller trade fee: {}", GenericUtils.getDecimalFormatString(buyerTradeFee),
-				GenericUtils.getDecimalFormatString(sellerTradeFee));
 		String msg = "", msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
 		// finding currency pair
-		String[] tickters = new String[2];
-		// finding the currency abbreviations
-		tickters[0] = matchedOrder.getPair().getToCurrency().get(0).getCurrencyAbbreviation();
-		tickters[1] = matchedOrder.getPair().getPairedCurrency().get(0).getCurrencyAbbreviation();
+		CurrencyPair currencyPair = matchedOrder.getPair();
+		String toCurrAbrrivaiton = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+		String pairCurrAbrrivaiton = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		// fetching the limit price of order
-		String qtr = walletService.getPairedBalance(matchedOrder, matchedOrder.getPair(), qtyTraded);
+		String qtr = walletService.getPairedBalance(matchedOrder, currencyPair, qtyTraded);
 		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormatString(Double.valueOf(qtr)),
-				tickters[1]);
+				pairCurrAbrrivaiton);
 		// checking the order type BUY
 		if (OrderType.BUY.equals(orders.getOrderType())) {
 			logger.debug("BUY Order");
 
 			msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
 					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
-					+ tickters[0] + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
-					+ tickters[1] + " remaining voloume: " + GenericUtils.getDecimalFormatString(remainingVolume) + " "
-					+ tickters[0];
+					+ toCurrAbrrivaiton + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
+					+ pairCurrAbrrivaiton + " remaining voloume: "
+					+ GenericUtils.getDecimalFormatString(remainingVolume) + " " + toCurrAbrrivaiton;
 			logger.debug("Byuer's transaction initiated msg: {}", msg);
 
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
 					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
-					+ tickters[0] + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
-					+ tickters[1] + " remaining voloume: "
-					+ GenericUtils.getDecimalFormatString(matchedOrder.getVolume()) + " " + tickters[0];
+					+ toCurrAbrrivaiton + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
+					+ pairCurrAbrrivaiton + " remaining voloume: "
+					+ GenericUtils.getDecimalFormatString(matchedOrder.getVolume()) + " " + toCurrAbrrivaiton;
 
 			logger.debug("Seller's transaction initiated msg: {}", msg1);
 		} else {
 			logger.debug("SELL Order");
 			msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
 					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
-					+ tickters[0] + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
-					+ tickters[1] + " remaining voloume: " + GenericUtils.getDecimalFormatString(remainingVolume) + " "
-					+ tickters[0];
+					+ toCurrAbrrivaiton + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
+					+ pairCurrAbrrivaiton + " remaining voloume: "
+					+ GenericUtils.getDecimalFormatString(remainingVolume) + " " + toCurrAbrrivaiton;
 			logger.debug("Seller's msg1: {}", msg1);
 			msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
 					+ " order has been initiated, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
-					+ tickters[0] + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
-					+ tickters[1] + " remaining voloume: "
-					+ GenericUtils.getDecimalFormatString(matchedOrder.getVolume()) + " " + tickters[0];
+					+ toCurrAbrrivaiton + ", on " + GenericUtils.getDecimalFormatString(Double.valueOf(qtr)) + " "
+					+ pairCurrAbrrivaiton + " remaining voloume: "
+					+ GenericUtils.getDecimalFormatString(matchedOrder.getVolume()) + " " + toCurrAbrrivaiton;
 			logger.debug("Byuer's msg: {}", msg);
 		}
 
@@ -647,16 +638,17 @@ public class TransactionServiceImpl implements TransactionService {
 			// double buyerQty = GenericUtils.getDecimalFormat(qtyTraded -
 			// sellerTradeFee);
 			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(),
-					GenericUtils.getDecimalFormatString(qtyTraded), tickters[0]);
+					GenericUtils.getDecimalFormatString(qtyTraded), toCurrAbrrivaiton);
 			/**
 			 * Seller performing transaction; to send ETH to buyer in case of
 			 * ETH/BTC pair
 			 */
-			Future<Boolean> txStatus = performTransaction(tickters[0], qtyTraded, buyer, seller, false, trade.getId());
+			Future<Boolean> txStatus = performTransaction(toCurrAbrrivaiton, qtyTraded, buyer, seller, false,
+					trade.getId());
 			try {
 				if (txStatus.get()) {
 					logger.debug("Seller: {} has performed tx to buyer:{} of amount: {} {}", seller.getEmailId(),
-							buyer.getEmailId(), GenericUtils.getDecimalFormatString(qtyTraded), tickters[0]);
+							buyer.getEmailId(), GenericUtils.getDecimalFormatString(qtyTraded), toCurrAbrrivaiton);
 					trade.setIsTxSeller(true);
 					trade = orderAsyncServices.saveTrade(trade);
 					logger.debug("seller tx perfrom status saved: {}", trade.getIsTxSeller());
@@ -686,24 +678,24 @@ public class TransactionServiceImpl implements TransactionService {
 					notificationService.saveNotification(seller, buyer, msg1);
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				// TODO Auto-generated catch block
+				logger.error("Exception: {}", e.getMessage());
 				e.printStackTrace();
 			}
 			double sellerQty = GenericUtils.getDecimalFormat(Double.valueOf(qtr) - sellerTradeFee);
 			// double sellerQty =
 			// GenericUtils.getDecimalFormat(Double.valueOf(qtr));
 			logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
-					tickters[1]);
+					pairCurrAbrrivaiton);
 			/**
 			 * Buyer performing transaction; to send BTC to Seller in case of
 			 * ETH/BTC pair
 			 */
-			txStatus = performTransaction(tickters[1], sellerQty, seller, buyer, false, trade.getId());
+			txStatus = performTransaction(pairCurrAbrrivaiton, sellerQty, seller, buyer, false, trade.getId());
 
 			try {
 				if (txStatus.get()) {
 					logger.debug("Buyer: {} has performed tx to Seller:{} of amount: {} {}", buyer.getEmailId(),
-							seller.getEmailId(), GenericUtils.getDecimalFormatString(sellerQty), tickters[1]);
+							seller.getEmailId(), GenericUtils.getDecimalFormatString(sellerQty), pairCurrAbrrivaiton);
 					trade.setIsTxBuyer(true);
 					trade = orderAsyncServices.saveTrade(trade);
 					logger.debug("Buyer tx perfrom status saved: {}", trade.getIsTxBuyer());
@@ -735,7 +727,7 @@ public class TransactionServiceImpl implements TransactionService {
 					notificationService.saveNotification(buyer, seller, msg);
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				// TODO Auto-generated catch block
+				logger.error("Exception: {}", e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -744,8 +736,8 @@ public class TransactionServiceImpl implements TransactionService {
 			/*
 			 * Future<Boolean> feeStatus; logger.debug("actual quantity admin
 			 * will get from seller: {} {} of trade Id: {} ",
-			 * GenericUtils.getDecimalFormat(sellerTradeFee), tickters[0],
-			 * trade.getId()); feeStatus = performTransaction(tickters[0],
+			 * GenericUtils.getDecimalFormat(sellerTradeFee), toCurrAbrrivaiton,
+			 * trade.getId()); feeStatus = performTransaction(toCurrAbrrivaiton,
 			 * sellerTradeFee, admin, seller, true); boolean res =
 			 * feeStatus.get(); if (res) { trade.setIsFeeDeductedSeller(true);
 			 * logger.debug("Set seller trade fee is deducted: {}",
@@ -760,13 +752,14 @@ public class TransactionServiceImpl implements TransactionService {
 					"actual quantity admin will get from buyer: {} and seller: {} total fee: {} {} of trade Id: {} ",
 					GenericUtils.getDecimalFormatString(buyerTradeFee),
 					GenericUtils.getDecimalFormatString(sellerTradeFee), GenericUtils.getDecimalFormatString(tfee),
-					tickters[1], trade.getId());
-			Future<Boolean> feeStatus = performTransaction(tickters[1], tfee, admin, buyer, true, trade.getId());
+					pairCurrAbrrivaiton, trade.getId());
+			Future<Boolean> feeStatus = performTransaction(pairCurrAbrrivaiton, tfee, admin, buyer, true,
+					trade.getId());
 			boolean res = false;
 			try {
 				res = feeStatus.get();
 			} catch (InterruptedException | ExecutionException e) {
-				// TODO Auto-generated catch block
+				logger.error("Exception: {}", e.getMessage());
 				e.printStackTrace();
 			}
 			if (res) {
