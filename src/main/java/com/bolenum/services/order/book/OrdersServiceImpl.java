@@ -196,7 +196,7 @@ public class OrdersServiceImpl implements OrdersService {
 	 */
 	@Override
 	public boolean isUsersSelfOrder(Orders reqOrder, List<Orders> orderList) {
-		if (orderList.isEmpty()) {
+		if (!orderList.isEmpty()) {
 			Orders matchedOrder = matchedOrder(orderList);
 			long matchedUserId = matchedOrder.getUser().getUserId();
 			long reqOrderUserId = reqOrder.getUser().getUserId();
@@ -332,7 +332,7 @@ public class OrdersServiceImpl implements OrdersService {
 			 * fetch one best seller's price from list of sellers, order by
 			 * price in ASC then process the order
 			 */
-			while (sellOrderList.isEmpty() && (remainingVolume > 0) && (price >= getBestBuy(sellOrderList))) {
+			while (!sellOrderList.isEmpty() && (remainingVolume > 0) && (price >= getBestBuy(sellOrderList))) {
 				logger.debug("inner buy while loop for buyers and remaining volume: {}", remainingVolume);
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, pair);
 			}
@@ -368,7 +368,7 @@ public class OrdersServiceImpl implements OrdersService {
 			 * fetch one best buyer's price from list of buyers, order by price
 			 * in desc then process the order
 			 */
-			while (buyOrderList.isEmpty() && (remainingVolume > 0) && (price <= buyOrderList.get(0).getPrice())) {
+			while (!buyOrderList.isEmpty() && (remainingVolume > 0) && (price <= buyOrderList.get(0).getPrice())) {
 				logger.debug("inner sell while loop for seller and remaining volume: {}", remainingVolume);
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, pair);
 			}
@@ -414,7 +414,7 @@ public class OrdersServiceImpl implements OrdersService {
 		String pairCA = pair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		logger.debug("process order list remainingVolume: {}", remainingVolume);
 		// process till order size and remaining volume is > 0
-		while ((ordersList.isEmpty()) && (remainingVolume > 0)) {
+		while ((!ordersList.isEmpty()) && (remainingVolume > 0)) {
 			logger.debug("inner proccessing while");
 			Double qtyTraded; // total number quantity which is processed
 			// fetch matched order object
