@@ -347,6 +347,7 @@ public class UserController {
 	 * 
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GET_COUNTRIES_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCountriesList() {
 		List<Countries> list = countryAndStateService.getCountriesList();
@@ -360,6 +361,7 @@ public class UserController {
 	 * @param countryId
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GET_STATE_BY_COUNTRY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getStatesByCountryId(@RequestParam("countryId") Long countryId) {
 		List<States> list = countryAndStateService.getStatesByCountry(countryId);

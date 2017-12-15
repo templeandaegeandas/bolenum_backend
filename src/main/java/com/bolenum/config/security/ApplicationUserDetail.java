@@ -52,7 +52,7 @@ public class ApplicationUserDetail implements UserDetails,Serializable {
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return true;
+		return !user.getIsLocked();
 	}
 
 	@Override
