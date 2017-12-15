@@ -34,7 +34,6 @@ import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.SubscribedUserService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.Api;
 
@@ -136,14 +135,6 @@ public class AdminController {
 	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTradingFees() {
 		TradingFee fee = tradingFeeService.getTradingFee();
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			String s = mapper.writeValueAsString(fee);
-			logger.debug("trading fees: {}", s);
-		} catch(Exception e) {
-			logger.debug("catch block: {}", e.getMessage());
-			e.printStackTrace();;
-		}
 		return ResponseHandler.response(HttpStatus.OK, true,
 				localeService.getMessage("admin.transaction.fees.found.success"), fee);
 	}
@@ -191,7 +182,7 @@ public class AdminController {
 		Long newSellers = ordersService.getTotalCountOfNewerBuyerAndSeller(OrderType.SELL);
 		Long activeUsers = authenticationTokenService.countActiveUsers();
 		Long activeOrders = ordersService.countActiveOpenOrder();
-		Map<String, Long> countOfusers = new HashMap<String, Long>();
+		Map<String, Long> countOfusers = new HashMap<>();
 		countOfusers.put("newBuyers", newBuyers);
 		countOfusers.put("newSellers", newSellers);
 		countOfusers.put("activeUsers", activeUsers);

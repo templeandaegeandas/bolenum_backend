@@ -167,18 +167,9 @@ public class CurrencyController {
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_MARKET, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyListForMarket() {
 		List<Currency> currencyList = currencyService.getCurrencyListForMarket();
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			String stringList = mapper.writeValueAsString(currencyList);
-			logger.debug("all currency list as String: {}", stringList);
-		} catch (JsonProcessingException e) {
-			logger.debug("error in currency list: {}", e.getMessage());
-			e.printStackTrace();
-		}
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
 				currencyList);
 	}
-
 
 	/**
 	 * 

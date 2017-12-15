@@ -4,6 +4,7 @@
 package com.bolenum.repo.user.transactions;
 
 import java.io.Serializable;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,17 +22,16 @@ import com.bolenum.model.User;
 public interface TransactionRepo extends JpaRepository<Transaction, Serializable> {
 
 	/**
-	 * @description findByTxHash 
+	 * @description findByTxHash
 	 * 
 	 */
-	@Query("select t from Transaction t where t.txHash=:txHash")
-	Transaction findByTransactionHash(@Param("txHash")String txHash);
-	
-	Page<Transaction> findByFromUserAndTransactionStatus(User fromUser,TransactionStatus transactionStatus, Pageable pageable);
+	Transaction findByTxHash(String txHash);
+
+	Page<Transaction> findByFromUserAndTransactionStatus(User fromUser, TransactionStatus transactionStatus,
+			Pageable pageable);
 
 	@Query("select t from Transaction t where t.toUser=:toUser and (t.transactionStatus='WITHDRAW' or t.transactionStatus='DEPOSIT')")
-	Page<Transaction> findByToUserAndTransactionStatusOrTransactionStatus(@Param("toUser")User toUser, Pageable pageable);
-
+	Page<Transaction> findByToUserAndTransactionStatusOrTransactionStatus(@Param("toUser") User toUser,
+			Pageable pageable);
 
 }
-
