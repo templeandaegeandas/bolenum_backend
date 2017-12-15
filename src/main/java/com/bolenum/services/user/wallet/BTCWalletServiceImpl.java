@@ -303,7 +303,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@Override
 	public Transaction setDepositeList(Transaction transaction) {
-		Transaction savedTransaction = transactionRepo.findByTransactionHash(transaction.getTxHash());
+		Transaction savedTransaction = transactionRepo.findByTxHash(transaction.getTxHash());
 		logger.debug("savedTransaction {}", savedTransaction);
 		User toUser = userRepository.findByBtcWalletAddress(transaction.getToAddress());
 		if (savedTransaction == null) {

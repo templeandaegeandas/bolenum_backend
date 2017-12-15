@@ -25,9 +25,7 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 	 * @description findByTxHash
 	 * 
 	 */
-	// TODO check code
-	@Query(value = "select SQL_NO_CACHE * from transaction t where t.tx_hash=:txHash", nativeQuery = true)
-	Transaction findByTransactionHash(@Param("txHash") String txHash);
+	Transaction findByTxHash(String txHash);
 
 	Page<Transaction> findByFromUserAndTransactionStatus(User fromUser, TransactionStatus transactionStatus,
 			Pageable pageable);
