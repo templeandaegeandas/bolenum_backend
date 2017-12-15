@@ -89,7 +89,6 @@ public class CurrencyPairController {
 		if (existingCurrencyPair == null && existingCurrencyPairByReverse == null) {
 			CurrencyPair currencyPair = currencyPairForm.copy(new CurrencyPair());
 			Boolean isValid = currencyPairService.validCurrencyPair(currencyPair);
-			// currencyPairForm.copy(new CurrencyPair());
 			if (isValid) {
 				CurrencyPair savedCurrencyPair = currencyPairService.saveCurrencyPair(currencyPair);
 				if (savedCurrencyPair != null) {
@@ -180,8 +179,8 @@ public class CurrencyPairController {
 	public ResponseEntity<Object> getListOfPairedCurrency(@RequestParam("currencyId") long currencyId) {
 		List<CurrencyPair> listOfPairedCurrency = currencyPairService.findCurrencyPairByCurrencyId(currencyId);
 		if (listOfPairedCurrency != null) {
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("paired.currency.found.success"),
-					listOfPairedCurrency);
+			return ResponseHandler.response(HttpStatus.OK, false,
+					localeService.getMessage("paired.currency.found.success"), listOfPairedCurrency);
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 					localeService.getMessage("currency.not.found"), null);

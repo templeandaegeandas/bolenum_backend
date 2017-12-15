@@ -139,7 +139,7 @@ public class CurrencyController {
 	 * @param searchData
 	 * @return
 	 */
-	@Secured("ROLE_USER")
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_TRADING, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyList() {
 		List<Currency> currencyList = currencyService.getCurrencyList();
@@ -187,7 +187,14 @@ public class CurrencyController {
 			return ResponseHandler.response(HttpStatus.CONFLICT, false, localService.getMessage("currency.not.found"),
 					null);
 		}
-
 	}
-
+	
+	@Secured("ROLE_ADMIN")
+	@RequestMapping(value = UrlConstant.CURRENCY_NGN_PRICE_SAVE, method = RequestMethod.PUT)
+	public ResponseEntity<Object> saveBLNNGNPrice(@RequestParam("priceNGN") double priceNGN ) {
+		Currency currency = currencyService.findByCurrencyAbbreviation("BLN");
+		currency.setPriceNGN(priceNGN);
+		Currency savedCurrency = currencyService.saveCurrency(currency);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.price.saved"), savedCurrency);
+	}
 }

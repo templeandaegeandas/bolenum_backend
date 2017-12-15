@@ -66,6 +66,7 @@ public class UrlConstant {
 	public static final String PAIRED_CURRENCY = "paired/currency/list";
 	public static final String COUNT_BUYER_SELLER_DASHBOARD = "buyer/seller";
 	public static final String DISPLAY_LATEST_ORDER = "latest/order/list";
+	public static final String CURRENCY_NGN_PRICE_SAVE = "set/bln_ngn";
 
 
 	/********************** KYC API ***********************/

@@ -63,12 +63,16 @@ public class KYCController {
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.UPLOAD_DOCUMENT, method = RequestMethod.POST)
 	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file,
-			@RequestParam String documentType)
-			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
+			@RequestParam String documentType) {
 		User user = GenericUtils.getLoggedInUser();
 		DocumentType isValidDocumentType = kycService.validateDocumentType(documentType);
 		if (isValidDocumentType != null) {
-			UserKyc response = kycService.uploadKycDocument(file, user.getUserId(), isValidDocumentType);
+			UserKyc response;
+			try {
+				response = kycService.uploadKycDocument(file, user.getUserId(), isValidDocumentType);
+			} catch (IOException | PersistenceException | MaxSizeExceedException | MobileNotVerifiedException e) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+			}
 			if (response != null) {
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localeService.getMessage("user.document.uploaded.success"), response);
