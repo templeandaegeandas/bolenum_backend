@@ -5,10 +5,10 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,7 +40,6 @@ import io.swagger.annotations.Api;
 @RestController
 @Api(value = "Dispute Controller")
 @RequestMapping(value = UrlConstant.BASE_URI_V1)
-@Scope("request")
 public class DisputeController {
 
 	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -50,7 +49,7 @@ public class DisputeController {
 
 	@Autowired
 	private DisputeService disputeService;
-	
+
 	@Autowired
 	private OrderAsyncService orderAsyncService;
 
@@ -66,6 +65,7 @@ public class DisputeController {
 	 * @throws MaxSizeExceedException
 	 * @throws MobileNotVerifiedException
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.RAISE_DISPUTE, method = RequestMethod.POST)
 	public ResponseEntity<Object> requestDisputeOrder(@RequestParam("orderId") Long orderId,
 			@RequestParam(required = false) Long transactionId, @RequestParam("file") MultipartFile file,
@@ -100,7 +100,8 @@ public class DisputeController {
 				null);
 
 	}
-	
+
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.RAISE_DISPUTE_BY_SELLER, method = RequestMethod.PUT)
 	public ResponseEntity<Object> requestDisputeBySeller(@RequestParam("orderId") Long orderId) {
 
@@ -110,7 +111,7 @@ public class DisputeController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.not.eligible"), null);
 		}
-		if(orders.isDispute()) {
+		if (orders.isDispute()) {
 			return ResponseHandler.response(HttpStatus.CONFLICT, true,
 					localeService.getMessage("dispute.already.raised"), null);
 		}
@@ -119,7 +120,7 @@ public class DisputeController {
 		if (!isExpired) {
 			orders.setDispute(true);
 			DisputeOrder response = disputeService.raiseDisputeBySeller(orders);
-			if(response!=null) {
+			if (response != null) {
 				orderAsyncService.saveOrder(orders);
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
@@ -141,6 +142,7 @@ public class DisputeController {
 	 * @param sortOrder
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.RAISED_DISPUTE_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getRaisedDisputeOrderList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
@@ -156,6 +158,7 @@ public class DisputeController {
 	 * @param disputeId
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.RAISED_DISPUTE_ORDER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getRaisedDisputeOrder(@RequestParam("disputeId") Long disputeId) {
 		DisputeOrder disputeOrder = disputeService.getDisputeOrderByID(disputeId);
@@ -175,6 +178,7 @@ public class DisputeController {
 	 * @param disputeStatus
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.ACTION_ON_RAISED_DISPUTE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> actionOnRaisedDispute(@RequestParam("disputeId") Long disputeId,
 			@RequestParam("commentForDisputeRaiser") String commentForDisputeRaiser,

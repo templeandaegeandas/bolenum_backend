@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,7 +49,6 @@ import io.swagger.annotations.Api;
 
 @RestController
 @Api(value = "Authentication Controller")
-@Scope("request")
 public class AuthController {
 	@Autowired
 	private AuthService authService;
@@ -120,7 +120,7 @@ public class AuthController {
 	 * @param token
 	 * @return
 	 */
-	// @PreAuthorize("hasRole('USER')")
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	@RequestMapping(value = UrlConstant.USER_LOOUT, method = RequestMethod.DELETE)
 	ResponseEntity<Object> logout(@RequestHeader("Authorization") String token) {
 		boolean response = authService.logOut(token);

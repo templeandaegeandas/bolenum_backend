@@ -29,6 +29,7 @@ import com.bolenum.constant.UrlConstant;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
 	@Autowired
 	private Environment environment;
 
@@ -37,7 +38,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 				.authorizeRequests().antMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
-				.antMatchers(HttpMethod.POST, "/api/v1/user/register").permitAll().anyRequest().authenticated();
+				.antMatchers(HttpMethod.POST, "/api/v1/user/register").permitAll()
+				.antMatchers(HttpMethod.GET, "/api/v1/admin/currency/list/market").permitAll()
+				.antMatchers(HttpMethod.GET, "api/v1/admin/get/trade/fees").permitAll()
+				.antMatchers(HttpMethod.GET, "/api/v1/user/get/trade/list").permitAll()
+				.anyRequest().authenticated();
 
 		// Implementing Token based authentication in this filter
 		final TokenAuthenticationFilter tokenFilter = new TokenAuthenticationFilter();
@@ -53,19 +58,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring().antMatchers("/refresh");
 		web.ignoring().antMatchers("/api/v1/forgetpassword");
 		web.ignoring().antMatchers("/api/v1/forgetpassword/verify");
-		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1+UrlConstant.BUY_ORDER_LIST);
-		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1+UrlConstant.SELL_ORDER_LIST);
-		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1+UrlConstant.TRADE_LIST_ALL);
-		web.ignoring().antMatchers(UrlConstant.BASE_ADMIN_URI_V1+UrlConstant.CURRENCY_LIST_FOR_MARKET);
-		web.ignoring().antMatchers(UrlConstant.BASE_ADMIN_URI_V1+UrlConstant.PAIRED_CURRENCY);
-		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1+UrlConstant.MARKET_PRICE);
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.BUY_ORDER_LIST);
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.SELL_ORDER_LIST);
+//		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.TRADE_LIST_ALL);
+//		web.ignoring().antMatchers(UrlConstant.BASE_ADMIN_URI_V1 + UrlConstant.CURRENCY_LIST_FOR_MARKET);
+		web.ignoring().antMatchers(UrlConstant.BASE_ADMIN_URI_V1 + UrlConstant.PAIRED_CURRENCY);
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.MARKET_PRICE);
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.VERIFY_2FA_OTP);
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.SEND_2FA_OTP);
 		web.ignoring().antMatchers(UrlConstant.WEBSOCKET_PATH + "/**");
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.DEPOSIT_TRANSACTION_STATUS);
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.SUBSCRIBE_USER);
-		
-		
+//		web.ignoring().antMatchers(UrlConstant.BASE_ADMIN_URI_V1 + UrlConstant.TRADING_FEES);
+
 		// Check if Active profiles contains "dev" or "stag"
 		if (Arrays.stream(environment.getActiveProfiles())
 				.anyMatch(env -> (env.equalsIgnoreCase("dev") || env.equalsIgnoreCase("stag")))) {
@@ -75,7 +80,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			web.ignoring().antMatchers("/configuration/**");
 			web.ignoring().antMatchers("/swagger-resources/**");
 			web.ignoring().antMatchers("/v2/**");
-			
 
 		}
 	}

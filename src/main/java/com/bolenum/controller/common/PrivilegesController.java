@@ -7,7 +7,6 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -31,7 +30,6 @@ import io.swagger.annotations.Api;
  */
 @RestController
 @RequestMapping(value = UrlConstant.BASE_PRIVILEGE_URI_V1)
-@Scope("request")
 @Api(value = "Privileges Controller")
 
 public class PrivilegesController {

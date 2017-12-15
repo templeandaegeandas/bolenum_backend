@@ -18,11 +18,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,7 +60,6 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping(value = UrlConstant.BASE_USER_URI_V1)
 @Api(value = "Fiat Order Controller")
-@Scope("request")
 public class FiatOrderController {
 
 	@Autowired
@@ -90,14 +89,15 @@ public class FiatOrderController {
 	private Logger logger = LoggerFactory.getLogger(FiatOrderController.class);
 
 	/**
-	 * to create a Fiat order, if order based on volume and price does not match
-	 * any existing order then only it will be saved. Otherwise existing order
-	 * list will be returned
+	 * to create a Fiat order, if order based on volume and price does not match any
+	 * existing order then only it will be saved. Otherwise existing order list will
+	 * be returned
 	 * 
 	 * @param Order,
 	 * @param pairid
 	 * @return list of order/ created order id
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.POST)
 	public ResponseEntity<Object> createFiateOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
 		User user = GenericUtils.getLoggedInUser();
@@ -134,6 +134,7 @@ public class FiatOrderController {
 
 	// @changed by vishal kumar: unrelated response removed
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> initializeOrder(@RequestParam("pairId") long pairId,
 			@RequestParam("orderId") long matchedOrderId, @Valid @RequestBody OrdersDTO ordersDTO,
@@ -244,6 +245,7 @@ public class FiatOrderController {
 	 *            of buyer
 	 *
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_PAID, method = RequestMethod.PUT)
 	public ResponseEntity<Object> confirmFiatPaidOrder(@RequestParam("orderId") long orderId) {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
@@ -260,6 +262,7 @@ public class FiatOrderController {
 				Optional.empty());
 	}
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_CANCEL, method = RequestMethod.PUT)
 	public ResponseEntity<Object> cancelOrder(@RequestParam("orderId") long orderId) {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
@@ -290,6 +293,7 @@ public class FiatOrderController {
 	 *            of seller
 	 *
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_TX, method = RequestMethod.PUT)
 	public ResponseEntity<Object> processTransactionFiatOrders(@RequestParam("orderId") long orderId) {
 		Orders exitingOrder = ordersService.getOrderDetails(orderId);
@@ -297,7 +301,7 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}
-		if(!exitingOrder.getMatchedOrder().isConfirm()) {
+		if (!exitingOrder.getMatchedOrder().isConfirm()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.not.confirm"),
 					Optional.empty());
 		}
@@ -321,9 +325,8 @@ public class FiatOrderController {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				simpMessagingTemplate.convertAndSend(
-						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + exitingOrder.getMatchedOrder().getUser().getUserId(),
-						jsonObject.toString());
+				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/"
+						+ exitingOrder.getMatchedOrder().getUser().getUserId(), jsonObject.toString());
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localeService.getMessage("order.transaction.success"), Optional.empty());
 			}
@@ -343,6 +346,7 @@ public class FiatOrderController {
 	 * @param orderType
 	 * @return single order
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrders(@RequestParam("orderId") long orderId,
 			@RequestParam("orderType") OrderType orderType) {
@@ -355,8 +359,8 @@ public class FiatOrderController {
 					accountDetails = bankAccountDetailsService
 							.primaryBankAccountDetails(orders.getMatchedOrder().getUser());
 				}
-				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(orders.getMatchedOrder().getUser(),
-						orders.getPair());
+				Map<String, String> userAddress = fiatOrderService
+						.byersWalletAddressAndCurrencyAbbr(orders.getMatchedOrder().getUser(), orders.getPair());
 				map.put("accountDetails", response(accountDetails));
 				map.put("orderId", orders.getId());
 				map.put("createdDate", orders.getCreatedOn());
@@ -369,8 +373,8 @@ public class FiatOrderController {
 				map.put("matchedOn", orders.getMatchedOn());
 				map.put("isConfirmed", orders.isConfirm());
 			} else {
-				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(orders.getMatchedOrder().getUser(),
-						orders.getMatchedOrder().getPair());
+				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(
+						orders.getMatchedOrder().getUser(), orders.getMatchedOrder().getPair());
 				BankAccountDetails accountDetails = bankAccountDetailsService
 						.primaryBankAccountDetails(orders.getUser());
 				map.put("accountDetails", response(accountDetails));
@@ -397,13 +401,14 @@ public class FiatOrderController {
 	}
 
 	/**
-	 * get list of orders against type of Orders(SELL/BUY), If requested order
-	 * is BUY then it will return SELL order list, and for SELL order return BUY
-	 * order list
+	 * get list of orders against type of Orders(SELL/BUY), If requested order is
+	 * BUY then it will return SELL order list, and for SELL order return BUY order
+	 * list
 	 * 
 	 * @param order
 	 * @return list or orders
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrdersList(@RequestParam("volume") double volume,
 			@RequestParam("price") double price, @RequestParam("orderType") OrderType orderType,

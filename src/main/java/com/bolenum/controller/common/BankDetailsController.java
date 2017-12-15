@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +41,6 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping(value = UrlConstant.BASE_USER_URI_V1)
 @Api(value = "Bank Details Controller")
-@Scope("request")
 public class BankDetailsController {
 
 	@Autowired
@@ -61,6 +61,7 @@ public class BankDetailsController {
 	 * @param result
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ADD_USER_BANK_DETAILS, method = RequestMethod.POST)
 	public ResponseEntity<Object> addUserBankDetails(@Valid @RequestBody AddUserBankDetailsForm addUserBankDetailsForm,
 			BindingResult result) {
@@ -109,6 +110,7 @@ public class BankDetailsController {
 	 * 
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.EDIT_USER_BANK_DETAILS, method = RequestMethod.PUT)
 	public ResponseEntity<Object> editUserBankDetails(
 			@Valid @RequestBody EditUserBankDetailsForm editUserBankDetailsForm, BindingResult result) {
@@ -142,7 +144,7 @@ public class BankDetailsController {
 	 * 
 	 * @return
 	 */
-
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS, method = RequestMethod.GET)
 	public ResponseEntity<Object> viewUserBankDetails() {
 		User user = GenericUtils.getLoggedInUser();
@@ -167,6 +169,7 @@ public class BankDetailsController {
 	 * @return
 	 * 
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS_BY_ADMIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> viewUserBankDetailsByAdmin(@RequestParam Long userId) {
 		User user = GenericUtils.getLoggedInUser();

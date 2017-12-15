@@ -7,9 +7,9 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +40,6 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping(value = UrlConstant.BASE_ADMIN_URI_V1)
 @Api(value = "Admin Controller")
-@Scope("request")
 public class CurrencyController {
 
 	public static final Logger logger = LoggerFactory.getLogger(CurrencyController.class);
@@ -57,6 +56,7 @@ public class CurrencyController {
 	 * @param result
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.POST)
 	public ResponseEntity<Object> addCurrency(@Valid @RequestBody CurrencyForm currencyForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -101,6 +101,7 @@ public class CurrencyController {
 	 * @param result
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.PUT)
 	public ResponseEntity<Object> editCurrency(@Valid @RequestBody CurrencyForm currencyForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -138,6 +139,7 @@ public class CurrencyController {
 	 * @param searchData
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_TRADING, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyList() {
 		List<Currency> currencyList = currencyService.getCurrencyList();
@@ -145,6 +147,7 @@ public class CurrencyController {
 				currencyList);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_ADMIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyListForAdmin() {
 		List<Currency> currencyList = currencyService.getCurrencyListForAdmin();
@@ -182,6 +185,7 @@ public class CurrencyController {
 	 * @param currencyId
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyById(@RequestParam Long currencyId) {
 		Currency currency = currencyService.findCurrencyById(currencyId);

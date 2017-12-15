@@ -4,12 +4,10 @@
 package com.bolenum.config.security;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.bolenum.model.User;
@@ -30,10 +28,11 @@ public class ApplicationUserDetail implements UserDetails,Serializable {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<GrantedAuthority> authList=new ArrayList<>();
-		GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getPrivileges().toString());
-		authList.add(authority);
-		return authList;
+//		List<GrantedAuthority> authList=new ArrayList<>();
+//		GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getPrivileges().toString());
+//		authList.add(authority);
+//		return authList;
+		return AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRole().getName());
 	}
 
 	@Override
@@ -48,22 +47,22 @@ public class ApplicationUserDetail implements UserDetails,Serializable {
 
 	@Override
 	public boolean isAccountNonExpired() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isCredentialsNonExpired() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		return false;
+		return user.getIsEnabled();
 	}
 
 }

@@ -9,11 +9,11 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -45,7 +45,6 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping(value = UrlConstant.BASE_USER_URI_V1)
 @Api(value = "Order Controller")
-@Scope("prototype")
 public class OrderController {
 	private Logger logger = LoggerFactory.getLogger(OrderController.class);
 	@Autowired
@@ -62,10 +61,11 @@ public class OrderController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
 		if (orders.getVolume() * orders.getPrice() < 0.0001) {
@@ -79,7 +79,7 @@ public class OrderController {
 					null);
 		}
 		String balance = ordersService.checkOrderEligibility(user, orders, pairId);
-		logger.debug("balance: {} of user: {}", balance,user.getEmailId());
+		logger.debug("balance: {} of user: {}", balance, user.getEmailId());
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);
 		}
@@ -112,31 +112,32 @@ public class OrderController {
 	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("pairId") Long pairId) {
 		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);
-//		ObjectMapper mapper = new ObjectMapper();
-//		try {
-//			String stringList = mapper.writeValueAsString(list);
-//			logger.debug("Buy list as String: {}", stringList);
-//		} catch (JsonProcessingException e) {
-//			logger.debug("error in buy get list: {}", e.getMessage());
-//			e.printStackTrace();
-//		}
+		// ObjectMapper mapper = new ObjectMapper();
+		// try {
+		// String stringList = mapper.writeValueAsString(list);
+		// logger.debug("Buy list as String: {}", stringList);
+		// } catch (JsonProcessingException e) {
+		// logger.debug("error in buy get list: {}", e.getMessage());
+		// e.printStackTrace();
+		// }
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
 	@RequestMapping(value = UrlConstant.SELL_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("pairId") Long pairId) {
 		Page<Orders> list = ordersService.getSellOrdersListByPair(pairId);
-//		ObjectMapper mapper = new ObjectMapper();
-//		try {
-//			String stringList = mapper.writeValueAsString(list);
-//			logger.debug("Sell list as String: {}", stringList);
-//		} catch (JsonProcessingException e) {
-//			logger.debug("error in sell get list: {}", e.getMessage());
-//			e.printStackTrace();
-//		}
+		// ObjectMapper mapper = new ObjectMapper();
+		// try {
+		// String stringList = mapper.writeValueAsString(list);
+		// logger.debug("Sell list as String: {}", stringList);
+		// } catch (JsonProcessingException e) {
+		// logger.debug("error in sell get list: {}", e.getMessage());
+		// e.printStackTrace();
+		// }
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRADE_LIST_LOGGEDIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTradedOrdersLoggedInUser(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -145,14 +146,14 @@ public class OrderController {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Trade> list = tradeService.getTradedOrdersLoggedIn(user, pageNumber, pageSize, sortOrder, sortBy,
 				orderType, date);
-//		ObjectMapper mapper = new ObjectMapper();
-//		try {
-//			String stringList = mapper.writeValueAsString(list);
-//			logger.debug("logged in user trade list as String: {}", stringList);
-//		} catch (JsonProcessingException e) {
-//			logger.debug("error in logged in user trade get list: {}", e.getMessage());
-//			e.printStackTrace();
-//		}
+		// ObjectMapper mapper = new ObjectMapper();
+		// try {
+		// String stringList = mapper.writeValueAsString(list);
+		// logger.debug("logged in user trade list as String: {}", stringList);
+		// } catch (JsonProcessingException e) {
+		// logger.debug("error in logged in user trade get list: {}", e.getMessage());
+		// e.printStackTrace();
+		// }
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
 
@@ -161,17 +162,18 @@ public class OrderController {
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		Page<Trade> list = tradeService.getTradedOrders(pageNumber, pageSize, sortOrder, sortBy);
-//		ObjectMapper mapper = new ObjectMapper();
-//		try {
-//			String stringList = mapper.writeValueAsString(list);
-//			logger.debug("all trade list as String: {}", stringList);
-//		} catch (JsonProcessingException e) {
-//			logger.debug("error in all trade get list: {}", e.getMessage());
-//			e.printStackTrace();
-//		}
+		// ObjectMapper mapper = new ObjectMapper();
+		// try {
+		// String stringList = mapper.writeValueAsString(list);
+		// logger.debug("all trade list as String: {}", stringList);
+		// } catch (JsonProcessingException e) {
+		// logger.debug("error in all trade get list: {}", e.getMessage());
+		// e.printStackTrace();
+		// }
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.MY_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getMyOrdereFromBook(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -179,17 +181,18 @@ public class OrderController {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(pageNumber, pageSize, sortOrder, sortBy,
 				user, OrderStatus.SUBMITTED);
-//		ObjectMapper mapper = new ObjectMapper();
-//		try {
-//			String stringList = mapper.writeValueAsString(list);
-//			logger.debug("my order as String: {}", stringList);
-//		} catch (JsonProcessingException e) {
-//			logger.debug("error in my order get list: {}", e.getMessage());
-//			e.printStackTrace();
-//		}
+		// ObjectMapper mapper = new ObjectMapper();
+		// try {
+		// String stringList = mapper.writeValueAsString(list);
+		// logger.debug("my order as String: {}", stringList);
+		// } catch (JsonProcessingException e) {
+		// logger.debug("error in my order get list: {}", e.getMessage());
+		// e.printStackTrace();
+		// }
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrderDetails(@RequestParam("orderId") long orderId) {
 		User user = GenericUtils.getLoggedInUser();
@@ -210,15 +213,18 @@ public class OrderController {
 		map.put("orderDetails", orders);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
 	}
-	
+
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CANCEL_ORDER, method = RequestMethod.DELETE)
 	public ResponseEntity<Object> cancelOrders(@RequestParam("orderId") long orderId) {
 		boolean status = ordersService.cancelOrder(orderId);
 		if (status) {
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
 					com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"), Optional.empty());
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"),
+					Optional.empty());
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"), Optional.empty());
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"),
+				Optional.empty());
 	}
 }
