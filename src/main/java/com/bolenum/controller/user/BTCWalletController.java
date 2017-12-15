@@ -162,7 +162,7 @@ public class BTCWalletController {
 	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmount(@RequestParam(name = "currencyType") String currencyType,
 			@Valid @RequestBody WithdrawBalanceForm withdrawBalanceForm, @RequestParam(name = "code") String coinCode,
-			BindingResult bindingResult) throws InterruptedException, ExecutionException {
+			BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localService.getMessage("withdraw.invalid.amount"), Optional.empty());

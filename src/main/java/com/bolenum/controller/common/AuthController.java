@@ -8,7 +8,6 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -120,7 +119,7 @@ public class AuthController {
 	 * @param token
 	 * @return
 	 */
-	@Secured({"ROLE_USER","ROLE_ADMIN"})
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.USER_LOOUT, method = RequestMethod.DELETE)
 	ResponseEntity<Object> logout(@RequestHeader("Authorization") String token) {
 		boolean response = authService.logOut(token);
@@ -143,16 +142,14 @@ public class AuthController {
 		email = email.trim();
 		email = email.replace(' ', '+');
 		boolean isValid = GenericUtils.isValidMail(email);
-		logger.debug("isValid = " + isValid);
+		logger.debug("isValid: {}", isValid);
 		if (isValid) {
 			User user = userService.findByEmail(email);
-			if (user != null && user.getIsEnabled() == true) {
+			if (user != null && user.getIsEnabled()) {
 				AuthenticationToken authenticationToken = authService.sendTokenToResetPassword(user);
 				logger.debug(authenticationToken.getToken());
-				if (authenticationToken != null) {
-					return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("mail.sent.success"),
-							email);
-				}
+				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("mail.sent.success"),
+						email);
 			}
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.email"), null);
@@ -182,7 +179,7 @@ public class AuthController {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.CONFLICT, true,
 					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());
-		} else if (!result.hasErrors() && verifiedUser != null) {
+		} else if (!result.hasErrors()) {
 			authService.resetPassword(verifiedUser, resetPasswordForm);
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("user.password.change.success"), verifiedUser.getEmailId());

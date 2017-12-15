@@ -195,7 +195,6 @@ public class FiatOrderController {
 			User bankDetailsUser = null;
 			Map<String, Object> map = new HashMap<>();
 			if (OrderType.BUY.equals(orders.getOrderType())) {
-				bankDetailsUser = matchedOrder.getUser();
 				map.put("orderId", order.getId());
 			} else {
 				bankDetailsUser = orders.getUser();
@@ -319,18 +318,14 @@ public class FiatOrderController {
 			logger.debug("result of order: {}", result);
 			if (result.get()) {
 				JSONObject jsonObject = new JSONObject();
-				try {
 					jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
 					jsonObject.put("matchedOrderId", exitingOrder.getMatchedOrder().getId());
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
 				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/"
 						+ exitingOrder.getMatchedOrder().getUser().getUserId(), jsonObject.toString());
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localeService.getMessage("order.transaction.success"), Optional.empty());
 			}
-		} catch (InterruptedException | ExecutionException e) {
+		} catch (InterruptedException | ExecutionException | JSONException e) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.order"),
 					Optional.empty());
 		}

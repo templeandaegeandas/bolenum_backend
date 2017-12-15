@@ -162,7 +162,7 @@ public class KYCController {
 	 * @return
 	 * 
 	 */
-	@Secured("ROLE_ADMIN")
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST_OF_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getListOfKycOfParticularUser() {
 		User user = GenericUtils.getLoggedInUser();

@@ -132,8 +132,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			sort = Direction.ASC;
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		Page<Erc20Token> tokenList = erc20TokenRepository.findByIsDeleted(false, pageRequest);
-		return tokenList;
+		return erc20TokenRepository.findByIsDeleted(false, pageRequest);
 	}
 
 	@Override
@@ -199,7 +198,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
 		logger.debug("Transfering amount in Double: {}", token.decimals().getValue().intValue());
-		BigInteger fundInBig = new BigDecimal(fund * createDecimals(token.decimals().getValue().intValue()))
+		BigInteger fundInBig = BigDecimal.valueOf(fund * createDecimals(token.decimals().getValue().intValue()))
 				.toBigInteger();
 		logger.debug("Transfering amount in BigInteger: {}", fundInBig);
 		Uint256 transferFunds = new Uint256(fundInBig);
@@ -223,7 +222,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		token.transferEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
 				.subscribe(tx -> {
 					if (tx._to.getValue() != null) {
-						// logger.debug("tx.getTo() {}", tx._to);
 						User user = userRepository.findByEthWalletaddress(tx._to.getValue());
 						if (user != null) {
 							logger.debug("new Incoming {} transaction for user : {}", tokenName, user.getEmailId());
@@ -232,7 +230,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 					}
 				}, err -> {
 					logger.error("Erc20Token incoming transaction saving subscribe error: {}", err.getMessage());
-					err.printStackTrace();
 				});
 	}
 

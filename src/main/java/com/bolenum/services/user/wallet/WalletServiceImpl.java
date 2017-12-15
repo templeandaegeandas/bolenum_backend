@@ -80,8 +80,6 @@ public class WalletServiceImpl implements WalletService {
 			 * fetching the market BTC price of buying currency
 			 */
 
-			// MarketPrice marketPrice =
-			// marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
 			/**
 			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
 			 * BTC, this will update according to order selling book

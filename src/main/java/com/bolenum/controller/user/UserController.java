@@ -130,7 +130,7 @@ public class UserController {
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
-	public ResponseEntity<Object> userMailVerfy(@RequestParam("token") String token) {
+	public ResponseEntity<Object> userMailVerify(@RequestParam("token") String token) {
 		logger.debug("user mail verify token: {}", token);
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localService.getMessage("token.invalid"));
@@ -312,7 +312,7 @@ public class UserController {
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.RESEND_OTP, method = RequestMethod.POST)
-	public ResponseEntity<Object> resendOtp() throws PersistenceException, InvalidOtpException {
+	public ResponseEntity<Object> resendOtp() {
 		User user = GenericUtils.getLoggedInUser();
 		userService.resendOTP(user);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.resend"), null);
@@ -427,7 +427,7 @@ public class UserController {
 		Long totalNumberOfBuy = orderService.countOrdersByOrderTypeAndUser(user, OrderType.BUY);
 		Long totalNumberOfSell = orderService.countOrdersByOrderTypeAndUser(user, OrderType.SELL);
 		Long totalNumberOfTrading = totalNumberOfBuy + totalNumberOfSell;
-		Map<String, Long> tradingNumber = new HashMap<String, Long>();
+		Map<String, Long> tradingNumber = new HashMap<>();
 		tradingNumber.put("totalNumberOfBuy", totalNumberOfBuy);
 		tradingNumber.put("totalNumberOfSell", totalNumberOfSell);
 		tradingNumber.put("totalNumberOfTrading", totalNumberOfTrading);

@@ -95,7 +95,9 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 				&& toCurrency.getCurrencyId() != pairedCurrency.getCurrencyId()) {
 			return true;
 		}
-		return false;
+		else {
+			return false;
+		}
 	}
 
 	/** 

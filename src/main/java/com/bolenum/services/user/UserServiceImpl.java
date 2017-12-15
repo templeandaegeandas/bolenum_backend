@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
 	 * to change password
 	 */
 	@Override
-	public Boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException {
+	public Boolean changePassword(User user, PasswordForm passwordForm) {
 		if (passwordEncoder.matches(passwordForm.getOldPassword(), user.getPassword())) {
 			user.setPassword(passwordEncoder.encode(passwordForm.getNewPassword()));
 			userRepository.save(user);
@@ -178,14 +178,6 @@ public class UserServiceImpl implements UserService {
 		}
 
 		user.setLastName(editUserForm.getLastName());
-
-		// if (editUserForm.getLastName() != null) {
-		// user.setLastName(editUserForm.getLastName());
-		// } else if (editUserForm.getLastName() == null && user.getLastName()
-		// == null)
-		// {
-		// user.setLastName(editUserForm.getLastName());
-		// }
 
 		if (editUserForm.getAddress() != null) {
 			user.setAddress(editUserForm.getAddress());
@@ -224,9 +216,6 @@ public class UserServiceImpl implements UserService {
 		logger.debug("Otp sent success: {}", code);
 		if (existinguser == null) {
 			smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
-			// TODO need to remove mail OTP as this is for mail varification
-			// logger.debug("OTP on mail send start");
-			// emailservice.mailSend(user.getEmailId(), "OTP", message);
 			OTP otp = new OTP(mobileNumber, code, user);
 			if (otpRepository.save(otp) != null) {
 				logger.debug("OTP saved");
@@ -243,10 +232,6 @@ public class UserServiceImpl implements UserService {
 			} else if (existinguser.getUserId().equals(user.getUserId()) && !existinguser.getIsMobileVerified()) {
 				logger.debug("user exist but mobile not verified");
 				smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
-				// TODO need to remove mail OTP as this is for m-ail
-				// varification
-				// logger.debug("OTP on mail send start");
-				// emailservice.mailSend(user.getEmailId(), "OTP", message);
 				OTP otp = new OTP(mobileNumber, code, user);
 				otpRepository.save(otp);
 				logger.debug("OTP saved");
@@ -261,7 +246,7 @@ public class UserServiceImpl implements UserService {
 	public Boolean verifyOTP(Integer otp, User user) throws InvalidOtpException {
 		OTP existingOtp = otpRepository.findByOtp(otp);
 		if (existingOtp != null) {
-			if (existingOtp.getIsDeleted() == false && existingOtp.getMobileNumber().equals(user.getMobileNumber())) {
+			if (!existingOtp.getIsDeleted() && existingOtp.getMobileNumber().equals(user.getMobileNumber())) {
 				long timeDiffInSec = (new Date().getTime() - existingOtp.getCreatedDate().getTime()) / 1000;
 				if (timeDiffInSec <= 300) {
 					user.setIsMobileVerified(true);
