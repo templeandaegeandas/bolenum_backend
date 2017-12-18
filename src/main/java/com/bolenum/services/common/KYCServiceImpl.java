@@ -82,15 +82,14 @@ public class KYCServiceImpl implements KYCService {
 
 			List<UserKyc> listOfUserKyc = kycService.getListOfKycByUser(user);
 
-			if (listOfUserKyc == null || listOfUserKyc.size() == 0) {
+			if (listOfUserKyc == null || listOfUserKyc.isEmpty()) {
 				UserKyc kyc = new UserKyc();
 				kyc.setDocument(updatedFileName);
 				kyc.setDocumentType(documentType);
 				listOfUserKyc.add(kyc);
 				kyc.setUser(user);
 				savedKyc = kycRepo.save(kyc);
-			} else if (listOfUserKyc.size() > 0 && listOfUserKyc.size() <= 2) {
-				// UserKyc userKyc = user.getUserKyc();
+			} else if (!listOfUserKyc.isEmpty() && listOfUserKyc.size() <= 2) {
 				boolean added = false;
 				Iterator<UserKyc> iterator = listOfUserKyc.iterator();
 				while (iterator.hasNext()) {
@@ -161,30 +160,16 @@ public class KYCServiceImpl implements KYCService {
 		User user = userKyc.getUser();
 		if (DocumentType.NATIONAL_ID.equals(userKyc.getDocumentType())) {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
-			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
 					localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
 		} else {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
-			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
 					localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
 		}
 		return kycRepo.save(userKyc);
 	}
 
-	// @Override
-	// public Page<User> getSubmitedKycList(int pageNumber, int pageSize, String
-	// sortBy, String sortOrder,
-	// String searchData) {
-	// Direction sort;
-	// if (sortOrder.equals("desc")) {
-	// sort = Direction.DESC;
-	// } else {
-	// sort = Direction.ASC;
-	// }
-	// Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-	// return userRepository.getNewlySubmittedKycListWIthSearch(searchData,
-	// DocumentStatus.SUBMITTED, pageRequest);
-	// }
 
 	@Override
 	public UserKyc getUserKycById(Long kycId) {
