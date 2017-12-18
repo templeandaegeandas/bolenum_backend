@@ -61,11 +61,12 @@ public class UrlConstant {
 	public static final String CURRENCY_LIST_FOR_MARKET = "currency/list/market";
 	public static final String CURRENCY_PAIR = "currency/pair";
 	public static final String CURRENCY_PAIR_LIST = "currency-pair/list";
-	public static final String TRADING_FEES = "trade/fees";
+	public static final String TRADING_FEES = "get/trade/fees";
 	public static final String WITHDRAWAL_FEES = "withdraw/fees";
 	public static final String PAIRED_CURRENCY = "paired/currency/list";
 	public static final String COUNT_BUYER_SELLER_DASHBOARD = "buyer/seller";
 	public static final String DISPLAY_LATEST_ORDER = "latest/order/list";
+	public static final String CURRENCY_NGN_PRICE_SAVE = "set/bln_ngn";
 
 
 	/********************** KYC API ***********************/
@@ -98,6 +99,7 @@ public class UrlConstant {
 
 	/******************** ORDER API ******/
 	public static final String CREATE_ORDER = "create/order";
+	public static final String CANCEL_ORDER = "cancel/order";
 	public static final String CREATE_ORDER_FIAT = "create/order/fiat";
 	public static final String BUY_ORDER_LIST = "get/buy/orders";
 	public static final String SELL_ORDER_LIST = "get/sell/orders";
@@ -135,6 +137,7 @@ public class UrlConstant {
 	/******************************* Dispute API *****************************/
 	public static final String UPLOAD_PROOF_DOCUMENT_FOR_DISPUTE = "document/proof/dispute";
 	public static final String RAISE_DISPUTE = "raise/dispute";
+	public static final String RAISE_DISPUTE_BY_SELLER = "raise/seller/dispute";
 	public static final String RAISED_DISPUTE_ORDER = "raised/dispute";
 	public static final String RAISED_DISPUTE_LIST = "raised/dispute/list";
 	public static final String ACTION_ON_RAISED_DISPUTE_ORDER = "action/raised/dispute";

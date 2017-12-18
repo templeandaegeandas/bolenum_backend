@@ -114,6 +114,23 @@ public class DisputeServiceImpl implements DisputeService {
 		}
 		return null;
 	}
+	
+	@Override
+	public DisputeOrder raiseDisputeBySeller(Orders order) {
+		Orders matchedOrder = order.getMatchedOrder();
+		User disputeRaisedAgainst = matchedOrder.getUser();
+		if (OrderStatus.LOCKED.equals(order.getOrderStatus()) && OrderType.BUY.equals(order.getOrderType())) {
+
+			User disputeRaiser = order.getUser();
+			DisputeOrder disputeOrder = new DisputeOrder();
+			disputeOrder.setOrders(order);
+			disputeOrder.setDisputeRaiser(disputeRaiser);
+			disputeOrder.setDisputeStatus(DisputeStatus.RAISED);
+			disputeOrder.setDisputeRaisedAgainst(disputeRaisedAgainst);
+			disputeOrderRepo.save(disputeOrder);
+		}
+		return null;
+	}
 
 	/**
 	 * 
@@ -132,11 +149,11 @@ public class DisputeServiceImpl implements DisputeService {
 	 */
 	@Override
 	public Orders checkEligibilityToDispute(Long orderId) {
-		Orders order = ordersRepository.findOne(orderId);
-		if (OrderType.BUY.equals(order.getOrderType())) {
-			return order;
-		}
-		return null;
+		return ordersRepository.findOne(orderId);
+//		if (OrderType.BUY.equals(order.getOrderType())) {
+//			return order;
+//		}
+//		return null;
 	}
 
 	/**

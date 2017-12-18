@@ -73,4 +73,6 @@ public interface OrdersService {
 
 	Page<Orders> findOrdersListByUserAndOrderStatus(int pageNumber, int pageSize, String sortOrder, String sortBy,
 			User user, OrderStatus orderStatus);
+
+	boolean cancelOrder(long orderId);
 }

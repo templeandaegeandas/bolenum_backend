@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -85,6 +86,7 @@ public class AdminController {
 	 * @param searchData
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.LIST_USERS, method = RequestMethod.GET)
 	public ResponseEntity<Object> getUsersList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
@@ -99,6 +101,7 @@ public class AdminController {
 	 * @param userId
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.GET_USER_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getUsersById(@PathVariable("userId") Long userId) {
 		User user = adminService.getUserById(userId);
@@ -112,6 +115,7 @@ public class AdminController {
 	 * @param tradingFee
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.POST)
 	public ResponseEntity<Object> addTradingFees(@RequestBody TradingFee tradingFee) {
 		TradingFee savedTradingFee = tradingFeeService.saveTradingFee(tradingFee);
@@ -140,6 +144,7 @@ public class AdminController {
 	 * @param withdrawalFee
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.POST)
 	public ResponseEntity<Object> saveWithdrawlFees(@RequestBody WithdrawalFee withdrawalFee) {
 		WithdrawalFee savedWithdrawalFee = withdrawalFeeService.saveWithdrawalFee(withdrawalFee);
@@ -156,6 +161,7 @@ public class AdminController {
 	 * @param currencyId
 	 * @return
 	 */
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWithdrawlFees(@RequestParam("currencyId") long currencyId) {
 		WithdrawalFee fee = withdrawalFeeService.getWithdrawalFee(currencyId);
@@ -168,6 +174,7 @@ public class AdminController {
 	 * 
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.COUNT_BUYER_SELLER_DASHBOARD, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTotalOfBuyerAndSeller() {
 
@@ -175,7 +182,7 @@ public class AdminController {
 		Long newSellers = ordersService.getTotalCountOfNewerBuyerAndSeller(OrderType.SELL);
 		Long activeUsers = authenticationTokenService.countActiveUsers();
 		Long activeOrders = ordersService.countActiveOpenOrder();
-		Map<String, Long> countOfusers = new HashMap<String, Long>();
+		Map<String, Long> countOfusers = new HashMap<>();
 		countOfusers.put("newBuyers", newBuyers);
 		countOfusers.put("newSellers", newSellers);
 		countOfusers.put("activeUsers", activeUsers);
@@ -192,6 +199,7 @@ public class AdminController {
 	 * @param sortOrder
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.DISPLAY_LATEST_ORDER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getLatestOrderList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
@@ -210,6 +218,7 @@ public class AdminController {
 	 * @param sortOrder
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.SUBSCRIBE_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getListOfSubscribedUser(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,8 +50,6 @@ import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.annotations.Api;
 
@@ -105,26 +104,19 @@ public class UserController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(result),
 					ErrorCollectionUtil.getErrorMap(result));
 		} else {
-			try {
-				ObjectMapper mapper = new ObjectMapper();
-				String requestObj = mapper.writeValueAsString(signupForm);
-				User isUserExist = userService.findByEmail(signupForm.getEmailId());
-				if (isUserExist == null) {
-					User newUser = signupForm.copy(new User());
-					userService.registerUser(newUser);
-					return ResponseHandler.response(HttpStatus.OK, false,
-							localService.getMessage("user.registarion.success"), newUser.getEmailId());
-				} else if (isUserExist != null && isUserExist.getIsEnabled()) {
-					return ResponseHandler.response(HttpStatus.CONFLICT, false,
-							localService.getMessage("email.already.exist"), isUserExist.getEmailId());
-				} else {
-					userService.reRegister(signupForm);
-					return ResponseHandler.response(HttpStatus.OK, false,
-							localService.getMessage("user.registarion.success"), signupForm.getEmailId());
-				}
-			} catch (JsonProcessingException e) {
-				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-						localService.getMessage("message.error"), null);
+			User isUserExist = userService.findByEmail(signupForm.getEmailId());
+			if (isUserExist == null) {
+				User newUser = signupForm.copy(new User());
+				userService.registerUser(newUser);
+				return ResponseHandler.response(HttpStatus.OK, false,
+						localService.getMessage("user.registarion.success"), newUser.getEmailId());
+			} else if (isUserExist.getIsEnabled()) {
+				return ResponseHandler.response(HttpStatus.CONFLICT, false,
+						localService.getMessage("email.already.exist"), isUserExist.getEmailId());
+			} else {
+				userService.reRegister(signupForm);
+				return ResponseHandler.response(HttpStatus.OK, false,
+						localService.getMessage("user.registarion.success"), signupForm.getEmailId());
 			}
 		}
 	}
@@ -138,7 +130,7 @@ public class UserController {
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
-	public ResponseEntity<Object> userMailVerfy(@RequestParam("token") String token) {
+	public ResponseEntity<Object> userMailVerify(@RequestParam("token") String token) {
 		logger.debug("user mail verify token: {}", token);
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localService.getMessage("token.invalid"));
@@ -195,7 +187,7 @@ public class UserController {
 	 * @return
 	 */
 
-	// @PreAuthorize("hasRole('USER')")
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CHANGE_PASS, method = RequestMethod.PUT)
 	public ResponseEntity<Object> changePassword(@Valid @RequestBody PasswordForm passwordForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -227,6 +219,7 @@ public class UserController {
 	 * @param result
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.UPDATE_USER_PROFILE, method = RequestMethod.PUT)
 	public ResponseEntity<Object> updateUserProfile(@Valid @RequestBody EditUserForm editUserForm,
 			BindingResult result) {
@@ -251,6 +244,7 @@ public class UserController {
 	 * 
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GET_LOGGEDIN_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getLoggedinUser() {
 		User user = GenericUtils.getLoggedInUser();
@@ -267,6 +261,7 @@ public class UserController {
 	 * @return
 	 * @throws PersistenceException
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ADD_MOBILE_NUMBER, method = RequestMethod.PUT)
 	public ResponseEntity<Object> addMobileNumber(@RequestParam("mobileNumber") String mobileNumber,
 			@RequestParam("countryCode") String countryCode) throws PersistenceException {
@@ -289,6 +284,7 @@ public class UserController {
 	 * @throws PersistenceException
 	 * @throws InvalidOtpException
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.VERIFY_OTP, method = RequestMethod.PUT)
 	public ResponseEntity<Object> verify(@RequestParam("otp") Integer otp) {
 		User user = GenericUtils.getLoggedInUser();
@@ -314,8 +310,9 @@ public class UserController {
 	 * @throws PersistenceException
 	 * @throws InvalidOtpException
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.RESEND_OTP, method = RequestMethod.POST)
-	public ResponseEntity<Object> resendOtp() throws PersistenceException, InvalidOtpException {
+	public ResponseEntity<Object> resendOtp() {
 		User user = GenericUtils.getLoggedInUser();
 		userService.resendOTP(user);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.resend"), null);
@@ -330,6 +327,7 @@ public class UserController {
 	 * @throws PersistenceException
 	 * @throws MaxSizeExceedException
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.UPLOAD_PROFILE_IMAGE, method = RequestMethod.POST)
 	public ResponseEntity<Object> uploadKycDocument(@RequestParam String profilePic)
 			throws IOException, PersistenceException, MaxSizeExceedException {
@@ -349,6 +347,7 @@ public class UserController {
 	 * 
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GET_COUNTRIES_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCountriesList() {
 		List<Countries> list = countryAndStateService.getCountriesList();
@@ -362,6 +361,7 @@ public class UserController {
 	 * @param countryId
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GET_STATE_BY_COUNTRY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getStatesByCountryId(@RequestParam("countryId") Long countryId) {
 		List<States> list = countryAndStateService.getStatesByCountry(countryId);
@@ -380,6 +380,7 @@ public class UserController {
 	 * @param sortBy
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -401,6 +402,7 @@ public class UserController {
 	 * @param sortBy
 	 * @return
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -418,13 +420,14 @@ public class UserController {
 	 * @return
 	 */
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.MY_TRADING_COUNT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getUserTradingCount() {
 		User user = GenericUtils.getLoggedInUser();
 		Long totalNumberOfBuy = orderService.countOrdersByOrderTypeAndUser(user, OrderType.BUY);
 		Long totalNumberOfSell = orderService.countOrdersByOrderTypeAndUser(user, OrderType.SELL);
 		Long totalNumberOfTrading = totalNumberOfBuy + totalNumberOfSell;
-		Map<String, Long> tradingNumber = new HashMap<String, Long>();
+		Map<String, Long> tradingNumber = new HashMap<>();
 		tradingNumber.put("totalNumberOfBuy", totalNumberOfBuy);
 		tradingNumber.put("totalNumberOfSell", totalNumberOfSell);
 		tradingNumber.put("totalNumberOfTrading", totalNumberOfTrading);

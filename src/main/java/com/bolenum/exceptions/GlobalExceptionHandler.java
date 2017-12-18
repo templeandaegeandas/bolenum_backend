@@ -54,7 +54,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler({ IllegalArgumentException.class })
+	//@ExceptionHandler({ IllegalArgumentException.class })
 	public ResponseEntity<Object> handleIllegalArgumentException(final IllegalArgumentException ex,
 			final WebRequest request) {
 		ex.printStackTrace();
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @param request
 	 * @return ResponseEntity
 	 */
-	@ExceptionHandler({ IOException.class })
+	//@ExceptionHandler({ IOException.class })
 	public ResponseEntity<Object> handleIOException(final IOException ex, final WebRequest request) {
 		ex.printStackTrace();
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
@@ -82,7 +82,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler({ ConstraintViolationException.class })
+	//@ExceptionHandler({ ConstraintViolationException.class })
 	public ResponseEntity<Object> handleBadRequest(final ConstraintViolationException ex, final WebRequest request) {
 		ex.printStackTrace();
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("constraint.violent"),
@@ -96,7 +96,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler({ DataIntegrityViolationException.class })
+	//@ExceptionHandler({ DataIntegrityViolationException.class })
 	public ResponseEntity<Object> handleBadRequest(final DataIntegrityViolationException ex, final WebRequest request) {
 		ex.printStackTrace();
 
@@ -123,7 +123,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @param request
 	 * @return ResponseEntity
 	 */
-	@ExceptionHandler({ PersistenceException.class })
+	//@ExceptionHandler({ PersistenceException.class })
 	public ResponseEntity<Object> handleBadRequest(final PersistenceException ex, final WebRequest request) {
 		ex.printStackTrace();
 
@@ -199,7 +199,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler({ AccessDeniedException.class })
+	//@ExceptionHandler({ AccessDeniedException.class })
 	public ResponseEntity<Object> handleAccessDeniedException(final Exception ex, final WebRequest request) {
 		ex.printStackTrace();
 
@@ -215,7 +215,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler(value = { EntityNotFoundException.class })
+	//@ExceptionHandler(value = { EntityNotFoundException.class })
 	protected ResponseEntity<Object> handleNotFound(final RuntimeException ex, final WebRequest request) {
 		ex.printStackTrace();
 
@@ -231,7 +231,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler({ InvalidDataAccessApiUsageException.class, DataAccessException.class })
+	//@ExceptionHandler({ InvalidDataAccessApiUsageException.class, DataAccessException.class })
 	protected ResponseEntity<Object> handleConflict(final RuntimeException ex, final WebRequest request) {
 		ex.printStackTrace();
 		return ResponseHandler.response(HttpStatus.CONFLICT, true, ex.getMessage(), null);
@@ -248,8 +248,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 * @return ResponseEntity
 	 */
 
-	@ExceptionHandler({ NullPointerException.class, IllegalStateException.class })
-	public ResponseEntity<Object> handleInternal(final RuntimeException ex, final WebRequest request) {
+	@ExceptionHandler({ Exception.class })
+	public ResponseEntity<Object> handleInternal(final Exception ex, final WebRequest request) {
 		logger.error("500 Status Code");
 		ex.printStackTrace();
 		return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true, ex.getMessage(), null);

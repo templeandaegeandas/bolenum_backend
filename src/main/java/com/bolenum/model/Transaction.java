@@ -65,9 +65,21 @@ public class Transaction {
 	@ManyToOne
 	private User toUser;
 	/**
-	 * platform fee for withdrawal
+	 * platform fee for withdrawal and deposit
 	 */
 	private Double fee;
+
+	/**
+	 * transaction current status with respect to number of confirmation in
+	 * blockchain
+	 */
+	private String txStatus;
+
+	private Integer noOfConfirmations;
+	/**
+	 * for trade Id, to get the details of trade
+	 */
+	private Long tradeId;
 
 	public Transaction() {
 
@@ -316,4 +328,48 @@ public class Transaction {
 		this.fee = fee;
 	}
 
+	/**
+	 * @return the txStatus
+	 */
+	public String getTxStatus() {
+		return txStatus;
+	}
+
+	/**
+	 * @param txStatus
+	 *            the txStatus to set
+	 */
+	public void setTxStatus(String txStatus) {
+		this.txStatus = txStatus;
+	}
+
+	/**
+	 * @return the noOfConfirmations
+	 */
+	public Integer getNoOfConfirmations() {
+		return noOfConfirmations;
+	}
+
+	/**
+	 * @param noOfConfirmations
+	 *            the noOfConfirmations to set
+	 */
+	public void setNoOfConfirmations(Integer noOfConfirmations) {
+		this.noOfConfirmations = noOfConfirmations;
+	}
+
+	/**
+	 * @return the tradeId
+	 */
+	public Long getTradeId() {
+		return tradeId;
+	}
+
+	/**
+	 * @param tradeId the tradeId to set
+	 */
+	public void setTradeId(Long tradeId) {
+		this.tradeId = tradeId;
+	}
+	
 }

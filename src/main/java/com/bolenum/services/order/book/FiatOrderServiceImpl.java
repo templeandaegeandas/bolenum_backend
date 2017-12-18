@@ -219,7 +219,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				orderType, currency);
 		double total = 0.0;
 		for (Orders order : orders) {
-			total = total + order.getVolume();
+			total = total + order.getVolume() + order.getLockedVolume();
 		}
 		return total;
 	}
@@ -280,7 +280,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
-				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
 						jsonObject.toString());
 				logger.debug("WebSocket message: {}", MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
 				return true;
@@ -293,17 +294,21 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	}
 
 	@Override
-	@Transactional
 	@Async
 	public Future<Boolean> processTransactionFiatOrders(Orders sellerOrder, String currencyAbr) {
-		Orders buyersOrder = ordersRepository.findByMatchedOrder(sellerOrder);
+		logger.debug("processTransactionFiatOrders order id: {}", sellerOrder.getId());
+		logger.debug("processTransactionFiatOrders matched order: {}", sellerOrder.getMatchedOrder());
+		logger.debug("processTransactionFiatOrders matched order id: {}", sellerOrder.getMatchedOrder().getId());
+		Orders buyersOrder = ordersRepository.findOne(sellerOrder.getMatchedOrder().getId());
+		logger.debug("buyers order: {}", buyersOrder);
+		logger.debug("buyers order id: {}", buyersOrder.getId());
 		if (buyersOrder != null && buyersOrder.isConfirm()) {
 			User buyer = buyersOrder.getUser();
 			User seller = sellerOrder.getUser();
 			double qtyTraded = sellerOrder.getLockedVolume();
 			try {
 				Future<Boolean> result = transactionService.performTransaction(currencyAbr, qtyTraded, buyer, seller,
-						false);
+						false, null);
 				boolean res = result.get();
 				logger.debug("perform fiat transaction result: {} of sell order id: {} and buy order id:{}", res,
 						sellerOrder.getId(), buyersOrder.getId());
@@ -316,12 +321,16 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 					buyersOrder.setOrderStatus(OrderStatus.COMPLETED);
 					ordersRepository.save(buyersOrder);
 					Trade trade = new Trade(buyersOrder.getPrice(), qtyTraded, buyer, seller, sellerOrder.getPair(),
-							sellerOrder.getOrderStandard(), 0.0, 0.0);
+							sellerOrder.getOrderStandard(), 0.0, 0.0,null,null);
 					orderAsyncService.saveTrade(trade);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error("perform fiat transaction failed: {}", e.getMessage());
 				e.printStackTrace();
+				return new AsyncResult<Boolean>(false);
+			}
+			catch (Exception e) {
+				return new AsyncResult<Boolean>(true);
 			}
 			return new AsyncResult<Boolean>(true);
 		}

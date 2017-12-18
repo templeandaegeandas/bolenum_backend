@@ -104,10 +104,10 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	public String createHotWallet(String uuid) {
 		String url = btcUrl + UrlConstant.HOT_WALLET;
 		RestTemplate restTemplate = new RestTemplate();
-		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> parametersMap = new LinkedMultiValueMap<>();
 		logger.debug("create wallet uuid:  {}", uuid);
 		parametersMap.add("uuid", uuid);
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			String json = restTemplate.postForObject(url, parametersMap, String.class);
@@ -120,16 +120,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 		} catch (RestClientException e) {
 			logger.error("create wallet exception RCE:  {}", e.getMessage());
-			e.printStackTrace();
 		} catch (JsonParseException e) {
 			logger.error("create wallet exception JPE:  {}", e.getMessage());
-			e.printStackTrace();
 		} catch (JsonMappingException e) {
 			logger.error("create wallet exception JME:  {}", e.getMessage());
-			e.printStackTrace();
 		} catch (IOException e) {
 			logger.error("create wallet exception IOE:  {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return "";
 	}
@@ -151,7 +147,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return balance;
 		} catch (RestClientException e) {
 			logger.error("get Wallet balance RCE:  {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return "";
 	}
@@ -176,7 +171,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 		} catch (RestClientException e) {
 			logger.error("get Wallet Address And QrCode exception RCE:  {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return "";
 	}
@@ -190,7 +184,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		String url = btcUrl + UrlConstant.WALLET_ADDR;
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		HttpEntity<String> entity = new HttpEntity<>(null, headers);
 		ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 		logger.debug("Transaction response: {}", txRes);
 		return false;
@@ -311,13 +305,15 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
 			transaction.setCurrencyName("BTC");
 			transaction.setToUser(toUser);
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+			simpMessagingTemplate.convertAndSend(
+					UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(transaction);
 		} else {
 			savedTransaction.setTransactionType(TransactionType.INCOMING);
 			savedTransaction.setToUser(toUser);
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_DEPOSIT,
+			simpMessagingTemplate.convertAndSend(
+					UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + toUser.getUserId(),
 					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
 			return transactionRepo.saveAndFlush(savedTransaction);
 		}
@@ -332,11 +328,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			switch (coinCode) {
 			case "BTC":
 				Future<Boolean> res = transactionService.performBtcTransaction(user, toAddress, amount,
-						TransactionStatus.WITHDRAW, bolenumFee);
+						TransactionStatus.WITHDRAW, bolenumFee, null);
 				try {
 					if (res.get() && bolenumFee > 0) {
 						transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(), bolenumFee,
-								TransactionStatus.FEE, null);
+								TransactionStatus.FEE, null, null);
 					}
 				} catch (InterruptedException | ExecutionException e1) {
 					e1.printStackTrace();
@@ -344,11 +340,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				break;
 			case "ETH":
 				res = transactionService.performEthTransaction(user, toAddress, amount, TransactionStatus.WITHDRAW,
-						bolenumFee);
+						bolenumFee, null);
 				try {
 					if (res.get() && bolenumFee > 0) {
 						transactionService.performEthTransaction(user, admin.getEthWalletaddress(), bolenumFee,
-								TransactionStatus.FEE, null);
+								TransactionStatus.FEE, null, null);
 					}
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
@@ -358,11 +354,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			break;
 		case "ERC20TOKEN":
 			Future<Boolean> res1 = transactionService.performErc20Transaction(user, coinCode, toAddress, amount,
-					TransactionStatus.WITHDRAW, bolenumFee);
+					TransactionStatus.WITHDRAW, bolenumFee, null);
 			try {
 				if (res1.get() && bolenumFee > 0) {
 					transactionService.performErc20Transaction(user, coinCode, admin.getEthWalletaddress(), bolenumFee,
-							TransactionStatus.FEE, null);
+							TransactionStatus.FEE, null, null);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();

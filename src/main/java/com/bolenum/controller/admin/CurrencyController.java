@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +56,7 @@ public class CurrencyController {
 	 * @param result
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.POST)
 	public ResponseEntity<Object> addCurrency(@Valid @RequestBody CurrencyForm currencyForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -99,6 +101,7 @@ public class CurrencyController {
 	 * @param result
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.PUT)
 	public ResponseEntity<Object> editCurrency(@Valid @RequestBody CurrencyForm currencyForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -136,6 +139,7 @@ public class CurrencyController {
 	 * @param searchData
 	 * @return
 	 */
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_TRADING, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyList() {
 		List<Currency> currencyList = currencyService.getCurrencyList();
@@ -143,6 +147,7 @@ public class CurrencyController {
 				currencyList);
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_ADMIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyListForAdmin() {
 		List<Currency> currencyList = currencyService.getCurrencyListForAdmin();
@@ -166,12 +171,12 @@ public class CurrencyController {
 				currencyList);
 	}
 
-
 	/**
 	 * 
 	 * @param currencyId
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyById(@RequestParam Long currencyId) {
 		Currency currency = currencyService.findCurrencyById(currencyId);
@@ -182,7 +187,14 @@ public class CurrencyController {
 			return ResponseHandler.response(HttpStatus.CONFLICT, false, localService.getMessage("currency.not.found"),
 					null);
 		}
-
 	}
-
+	
+	@Secured("ROLE_ADMIN")
+	@RequestMapping(value = UrlConstant.CURRENCY_NGN_PRICE_SAVE, method = RequestMethod.PUT)
+	public ResponseEntity<Object> saveBLNNGNPrice(@RequestParam("priceNGN") double priceNGN ) {
+		Currency currency = currencyService.findByCurrencyAbbreviation("BLN");
+		currency.setPriceNGN(priceNGN);
+		Currency savedCurrency = currencyService.saveCurrency(currency);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.price.saved"), savedCurrency);
+	}
 }

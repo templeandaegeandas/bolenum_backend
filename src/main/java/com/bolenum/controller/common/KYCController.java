@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,15 +60,19 @@ public class KYCController {
 	 * @throws PersistenceException
 	 * @throws MaxSizeExceedException
 	 */
-
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.UPLOAD_DOCUMENT, method = RequestMethod.POST)
 	public ResponseEntity<Object> uploadKycDocument(@RequestParam("file") MultipartFile file,
-			@RequestParam String documentType)
-			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
+			@RequestParam String documentType) {
 		User user = GenericUtils.getLoggedInUser();
 		DocumentType isValidDocumentType = kycService.validateDocumentType(documentType);
 		if (isValidDocumentType != null) {
-			UserKyc response = kycService.uploadKycDocument(file, user.getUserId(), isValidDocumentType);
+			UserKyc response;
+			try {
+				response = kycService.uploadKycDocument(file, user.getUserId(), isValidDocumentType);
+			} catch (IOException | PersistenceException | MaxSizeExceedException | MobileNotVerifiedException e) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
+			}
 			if (response != null) {
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localeService.getMessage("user.document.uploaded.success"), response);
@@ -85,6 +90,7 @@ public class KYCController {
 	 * @param userId
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.APPROVE_DOCUMENT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> approveKycDocument(@RequestParam("kycId") Long id) {
 		UserKyc userKyc = kycService.approveKycDocument(id);
@@ -102,6 +108,7 @@ public class KYCController {
 	 * @param data
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.DISAPPROVE_DOCUMENT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> disApproveKycDocument(@RequestBody Map<String, String> data) {
 		UserKyc userKyc = kycService.disApprovedKycDocument(Long.parseLong(data.get("id")),
@@ -117,37 +124,11 @@ public class KYCController {
 
 	/**
 	 * 
-	 * @param pageNumber
-	 * @param pageSize
-	 * @param sortBy
-	 * @param sortOrder
-	 * @param searchData
-	 * @return
-	 */
-
-	// @RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method =
-	// RequestMethod.GET)
-	// public ResponseEntity<Object>
-	// getSubmittedKycList(@RequestParam("pageNumber")
-	// int pageNumber,
-	//
-	// @RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String
-	// sortBy,
-	//
-	// @RequestParam("sortOrder") String sortOrder, @RequestParam("searchData")
-	// String searchData) {
-	// Page<User> kycList = kycService.getSubmitedKycList(pageNumber, pageSize,
-	// sortBy, sortOrder, searchData);
-	// return ResponseHandler.response(HttpStatus.OK, false,
-	// localeService.getMessage("submitted.kyc.list"), kycList);
-	// }
-
-	/**
-	 * 
 	 * @param kycId
 	 * 
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.GET_KYC_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getKycById(@PathVariable("kycId") Long kycId) {
 		UserKyc userKyc = kycService.getUserKycById(kycId);
@@ -162,30 +143,6 @@ public class KYCController {
 
 	/**
 	 * 
-	 * @param kycId
-	 * @return
-	 */
-	// @RequestMapping(value = UrlConstant.GET_KYC_BY_USER_ID, method =
-	// RequestMethod.GET)
-	// public ResponseEntity<Object> getKycByuSERId(@RequestParam Long userId) {
-	// User user = userService.findByUserId(userId);
-	// return null;
-	//
-	//// if(user!=null)
-	//// {
-	////
-	//// }
-	//// if (userKyc != null) {
-	//// return ResponseHandler.response(HttpStatus.OK, false,
-	//// localeService.getMessage("user.kyc.get.by.id.success"), userKyc);
-	//// } else {
-	//// return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-	//// localeService.getMessage("user.kyc.get.by.id.failed"), null);
-	//// }
-	// }
-
-	/**
-	 * 
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortBy
@@ -193,6 +150,7 @@ public class KYCController {
 	 * @param searchData
 	 * @return
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getListOfKyc(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortBy") String sortBy,
@@ -208,6 +166,7 @@ public class KYCController {
 	 * @return
 	 * 
 	 */
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST_OF_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getListOfKycOfParticularUser() {
 		User user = GenericUtils.getLoggedInUser();
@@ -222,6 +181,7 @@ public class KYCController {
 	 * @return
 	 * 
 	 */
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_BY_USER_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getKycByUserId(@RequestParam("userId") Long userId) {
 		User user = userService.findByUserId(userId);

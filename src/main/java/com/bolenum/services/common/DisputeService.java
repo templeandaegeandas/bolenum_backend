@@ -41,4 +41,6 @@ public interface DisputeService {
 	DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentForDisputeRaiser,
 			String commentForDisputeRaisedAgainst, DisputeStatus disputeStatus);
 
+	DisputeOrder raiseDisputeBySeller(Orders order);
+
 }

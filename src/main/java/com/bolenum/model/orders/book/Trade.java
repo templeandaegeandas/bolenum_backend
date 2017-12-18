@@ -41,9 +41,29 @@ public class Trade {
 	private Double sellerTradeFee;
 	private Boolean isFeeDeductedBuyer;
 	private Boolean isFeeDeductedSeller;
+	/**
+	 * buyer transaction status, true means from buyer side transaction has been
+	 * done
+	 */
+	private Boolean isTxBuyer;
+	/**
+	 * Seller transaction status, true means from Seller side transaction has
+	 * been done
+	 */
+	private Boolean isTxSeller;
+	/**
+	 * trade status, true means both buyer and seller has performed transaction
+	 */
+	private Boolean status;
+
+	@OneToOne
+	private Orders matchedOrder;
+
+	@OneToOne
+	private Orders requestingOrder;
 
 	public Trade(Double price, Double volume, User buyer, User seller, CurrencyPair pair, OrderStandard orderStandard,
-			Double buyerTradeFee, Double sellerTradeFee) {
+			Double buyerTradeFee, Double sellerTradeFee, Orders matchedOrder, Orders requestingOrder) {
 		this.price = price;
 		this.volume = volume;
 		this.buyer = buyer;
@@ -52,6 +72,8 @@ public class Trade {
 		this.orderStandard = orderStandard;
 		this.buyerTradeFee = buyerTradeFee;
 		this.sellerTradeFee = sellerTradeFee;
+		this.matchedOrder = matchedOrder;
+		this.requestingOrder = requestingOrder;
 	}
 
 	public Trade() {
@@ -180,6 +202,79 @@ public class Trade {
 	 */
 	public void setIsFeeDeductedSeller(Boolean isFeeDeductedSeller) {
 		this.isFeeDeductedSeller = isFeeDeductedSeller;
+	}
+
+	/**
+	 * @return the isTxBuyer
+	 */
+	public Boolean getIsTxBuyer() {
+		return isTxBuyer;
+	}
+
+	/**
+	 * @param isTxBuyer
+	 *            the isTxBuyer to set
+	 */
+	public void setIsTxBuyer(Boolean isTxBuyer) {
+		this.isTxBuyer = isTxBuyer;
+	}
+
+	/**
+	 * @return the isTxSeller
+	 */
+	public Boolean getIsTxSeller() {
+		return isTxSeller;
+	}
+
+	/**
+	 * @param isTxSeller
+	 *            the isTxSeller to set
+	 */
+	public void setIsTxSeller(Boolean isTxSeller) {
+		this.isTxSeller = isTxSeller;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public Boolean getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status
+	 *            the status to set
+	 */
+	public void setStatus(Boolean status) {
+		this.status = status;
+	}
+
+	/**
+	 * @return the matchedOrder
+	 */
+	public Orders getMatchedOrder() {
+		return matchedOrder;
+	}
+
+	/**
+	 * @param matchedOrder the matchedOrder to set
+	 */
+	public void setMatchedOrder(Orders matchedOrder) {
+		this.matchedOrder = matchedOrder;
+	}
+
+	/**
+	 * @return the requestingOrder
+	 */
+	public Orders getRequestingOrder() {
+		return requestingOrder;
+	}
+
+	/**
+	 * @param requestingOrder the requestingOrder to set
+	 */
+	public void setRequestingOrder(Orders requestingOrder) {
+		this.requestingOrder = requestingOrder;
 	}
 
 }

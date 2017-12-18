@@ -82,7 +82,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 		List<CurrencyPair> allCurrencyPair = currencyPairService.findAllCurrencyPair();
 		List<Currency> allCurrencies = currencyRepo.findAll();
 		Iterator<CurrencyPair> iterator = allCurrencyPair.iterator();
-		List<Currency> listOfToCurrency = new ArrayList<Currency>();
+		List<Currency> listOfToCurrency = new ArrayList<>();
 		while (iterator.hasNext()) {
 			listOfToCurrency.add(iterator.next().getToCurrency().get(0));
 		}
@@ -109,7 +109,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 	@Override
 	public List<Currency> getCurrencyListByName(String tokenName) {
 		Currency currency = currencyRepo.findByCurrencyAbbreviation(tokenName);
-		List<Currency> list = new ArrayList<Currency>();
+		List<Currency> list = new ArrayList<>();
 		list.add(currency);
 		return list;
 	}

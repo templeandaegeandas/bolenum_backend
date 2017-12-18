@@ -81,31 +81,22 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 
 		} catch (InvalidKeyException e) {
 			logger.error("InvalidKeyException: {}", e.getMessage());
-			e.printStackTrace();
 		} catch (NoSuchPaddingException e) {
 			logger.error("NoSuchPaddingException: {}", e.getMessage());
-			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
 			logger.error("IllegalBlockSizeException: {}", e.getMessage());
-			e.printStackTrace();
 		} catch (BadPaddingException e) {
 			logger.error("BadPaddingException: {}", e.getMessage());
-			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("NoSuchAlgorithmException: {}", e.getMessage());
-			e.printStackTrace();
 		} catch (NoSuchProviderException e) {
 			logger.error("NoSuchProviderException: {}", e.getMessage());
-			e.printStackTrace();
 		} catch (InvalidAlgorithmParameterException e) {
 			logger.error("InvalidAlgorithmParameterException: {}", e.getMessage());
-			e.printStackTrace();
 		} catch (CipherException e) {
 			logger.error("CipherException: {}", e.getMessage());
-			e.printStackTrace();
 		} catch (IOException e) {
 			logger.error("IOException: {}", e.getMessage());
-			e.printStackTrace();
 		}
 	}
 
@@ -143,7 +134,6 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 			return GenericUtils.getDecimalFormat(amountInEther.doubleValue());
 		} catch (IOException e) {
 			logger.error("get wallet balance error: {}", e.getMessage());
-			e.printStackTrace();
 		}
 		return amount.doubleValue();
 	}
