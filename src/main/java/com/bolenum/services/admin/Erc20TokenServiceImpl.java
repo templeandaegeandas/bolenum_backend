@@ -205,8 +205,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		logger.debug("Transfering amount in Unit256: {}", transferFunds);
 		logger.debug("Contract loaded with credentials: {}", erc20Token.getContractAddress());
 		TransactionReceipt receipt = token.transfer(new Address(toAddress), transferFunds);
-		TransactionReceipt approved = token.approve(new Address(toAddress), transferFunds);
-		logger.debug("transaction approved: {}", approved.getTransactionHash());
 		logger.debug("Fund transfer transaction hash: {}", receipt.getTransactionHash());
 		return receipt;
 	}
@@ -264,14 +262,13 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			}
 		} else {
 			logger.debug("saving else transaction listenr for user: {}", toUser.getEmailId());
-			// tx.setTxHash(transaction._transactionHash);
 			tx.setFromAddress(transaction._from.getValue());
 			tx.setToAddress(transaction._to.getValue());
 			if (erc20Token != null) {
 				tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
+				logger.debug("Balance else part returned by the listner: {}",
+						transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			}
-			logger.debug("Balance else part returned by the listner: {}",
-					transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			tx.setTransactionType(TransactionType.OUTGOING);
 			if (TransactionStatus.WITHDRAW.equals(tx.getTransactionStatus())) {
 				tx.setTransactionType(TransactionType.INCOMING);
@@ -279,10 +276,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setCurrencyName(tokenName);
 			logger.debug("from else user id: {}", toUser.getUserId());
 			tx.setToUser(toUser);
-			/*
-			 * try { Thread.sleep(1000); } catch (InterruptedException e) { //
-			 * TODO Auto-generated catch block e.printStackTrace(); }
-			 */
 			Transaction saved = transactionRepo.saveAndFlush(tx);
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {}", toUser.getEmailId());
