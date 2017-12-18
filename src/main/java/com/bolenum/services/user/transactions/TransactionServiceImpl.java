@@ -851,9 +851,13 @@ public class TransactionServiceImpl implements TransactionService {
 						transaction.setTxStatus(status);
 						logger.debug("confirmation of hash :::::::::::::: {} {}", transaction.getNoOfConfirmations(),
 								transaction.getTxStatus());
+						transactionRepo.save(transaction);
+						
 					} else {
 						transaction.setNoOfConfirmations(confirmation);
+						transactionRepo.save(transaction);
 					}
+				
 				}
 
 			} catch (JSONException | IOException e) {
