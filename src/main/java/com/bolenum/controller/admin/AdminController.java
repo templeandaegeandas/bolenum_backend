@@ -217,7 +217,6 @@ public class AdminController {
 
 		Page<SubscribedUser> listOfSubscribedUser = subscribedUserService.getSubscribedUserList(pageNumber, pageSize,
 				sortBy, sortOrder);
-		System.out.println(listOfSubscribedUser.getTotalElements());
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.subscribed.user.list"),
 				listOfSubscribedUser);
 	}
