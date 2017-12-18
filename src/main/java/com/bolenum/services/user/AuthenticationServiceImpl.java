@@ -53,7 +53,7 @@ public class AuthenticationServiceImpl implements AuthenticationTokenService {
 		c.setTime(endDate);
 		c.add(Calendar.DATE, -7);
 		Date startDate = c.getTime();
-		return authenticationTokenRepo.countAuthenticationTokenByTokentypeCreatedOnBetween(TokenType.AUTHENTICATION,
+		return authenticationTokenRepo.countAuthenticationTokenByTokentypeAndCreatedOnBetween(TokenType.AUTHENTICATION,
 				startDate, endDate);
 
 	}

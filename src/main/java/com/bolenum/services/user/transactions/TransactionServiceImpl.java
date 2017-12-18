@@ -3,13 +3,21 @@
  */
 package com.bolenum.services.user.transactions;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -17,6 +25,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -163,7 +172,6 @@ public class TransactionServiceImpl implements TransactionService {
 		File walletFile = new File(fileName);
 		try {
 			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
-			// logger.debug("decr password: {}", decrPwd);
 			EthSendTransaction ethSendTransaction = null;
 			try {
 				logger.debug("ETH transaction credentials load started");
@@ -176,7 +184,7 @@ public class TransactionServiceImpl implements TransactionService {
 						tradeId);
 				errorService.saveError(error);
 				logger.debug("error saved: {}", error);
-				return new AsyncResult<Boolean>(false);
+				return new AsyncResult(false);
 			}
 			logger.debug("ETH transaction send fund completed");
 			String txHash = ethSendTransaction.getTransactionHash();
@@ -207,15 +215,14 @@ public class TransactionServiceImpl implements TransactionService {
 							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult<Boolean>(true);
+					return new AsyncResult(true);
 				}
 			}
 		} catch (InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException
 				| IllegalBlockSizeException | BadPaddingException e1) {
-			logger.error("ETH transaction failed:  {}", e1.getMessage());
-			e1.printStackTrace();
+			logger.error("ETH transaction failed:  {}", e1);
 		}
-		return new AsyncResult<Boolean>(false);
+		return new AsyncResult(false);
 	}
 
 	private EthSendTransaction transferEth(Credentials credentials, String toAddress, Double amount) {
@@ -242,8 +249,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("ETH transaction hex Value calculated and send started");
 			return web3j.ethSendRawTransaction(hexValue).send();
 		} catch (IOException e) {
-			logger.error("ethereum transaction failed: {}", e.getMessage());
-			e.printStackTrace();
+			logger.error("ethereum transaction failed: {}", e);
 			return null;
 		}
 	}
@@ -271,7 +277,7 @@ public class TransactionServiceImpl implements TransactionService {
 		if (fee != null) {
 			txFeePerKb = fee.getFee();
 		}
-		logger.debug("perform btc trnsaction with fee/KB: {}", GenericUtils.getDecimalFormat().format(txFeePerKb));
+		logger.debug("perform btc trnsaction with fee/KB: {}", GenericUtils.getDecimalFormatString(txFeePerKb));
 		RestTemplate restTemplate = new RestTemplate();
 		String url = btcUrl + UrlConstant.CREATE_TX;
 		HttpHeaders headers = new HttpHeaders();
@@ -283,10 +289,9 @@ public class TransactionServiceImpl implements TransactionService {
 			request.put("receiverAddress", toAddress);
 			request.put("transactionFee", txFeePerKb);
 		} catch (JSONException e) {
-			logger.error("json parse error: {}", e.getMessage());
-			e.printStackTrace();
+			logger.error("json parse error: {}", e);
 		}
-		HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+		HttpEntity<String> entity = new HttpEntity(request.toString(), headers);
 		try {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
@@ -324,7 +329,7 @@ public class TransactionServiceImpl implements TransactionService {
 								UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 								com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-						return new AsyncResult<Boolean>(true);
+						return new AsyncResult(true);
 					}
 				} else {
 					logger.debug(" transaction exist hash: {}", transaction.getTxHash());
@@ -336,17 +341,15 @@ public class TransactionServiceImpl implements TransactionService {
 					amount, false, tradeId);
 			errorService.saveError(error);
 			logger.debug("error saved: {}", error);
-			logger.error("btc transaction exception:  {}", e.getMessage());
-			e.printStackTrace();
+			logger.error("btc transaction exception:  {}", e);
 		} catch (RestClientException e) {
 			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress, e.getMessage(), "BTC", amount, false,
 					tradeId);
 			errorService.saveError(error);
 			logger.debug("error saved: {}", error);
-			logger.error("btc transaction exception:  {}", e.getMessage());
-			e.printStackTrace();
+			logger.error("btc transaction exception:  {}", e);
 		}
-		return new AsyncResult<Boolean>(false);
+		return new AsyncResult(false);
 	}
 
 	@Override
@@ -391,11 +394,10 @@ public class TransactionServiceImpl implements TransactionService {
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult<Boolean>(true);
+					return new AsyncResult(true);
 				}
 			} else {
 				logger.debug("transaction else part already saved: {}", transaction.getTxHash());
-				// transaction.setTxHash(transactionReceipt.getTransactionHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
@@ -419,16 +421,15 @@ public class TransactionServiceImpl implements TransactionService {
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction else part saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult<Boolean>(true);
+					return new AsyncResult(true);
 				}
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException | IOException | CipherException | TransactionException | InterruptedException
 				| ExecutionException e) {
-			logger.error("{} transaction failed:  {}", tokenName, e.getMessage());
-			e.printStackTrace();
+			logger.error("{} transaction failed:  {}", tokenName, e);
 		}
-		return new AsyncResult<Boolean>(false);
+		return new AsyncResult(false);
 	}
 
 	@Override
@@ -437,7 +438,8 @@ public class TransactionServiceImpl implements TransactionService {
 			boolean isFee, Long tradeId) {
 
 		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
-		String msg = "", msg1 = "";
+		String msg = "";
+		String msg1 = "";
 		logger.debug("perform transaction for admin fee: {}", isFee);
 		if (!isFee) {
 			msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
@@ -458,8 +460,7 @@ public class TransactionServiceImpl implements TransactionService {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
 					/**
-					 * if transaction for users, then return result with mail
-					 * notification to users
+					 * if transaction for users, then return result with mail notification to users
 					 */
 					if (res && !isFee) {
 						notificationService.sendNotification(seller, msg);
@@ -468,20 +469,19 @@ public class TransactionServiceImpl implements TransactionService {
 						notificationService.saveNotification(buyer, seller, msg1);
 						logger.debug("Message : {}", msg);
 						logger.debug("Message : {}", msg1);
-						return new AsyncResult<Boolean>(res);
+						return new AsyncResult(res);
 					}
 					/**
-					 * if transaction for admin, then return result without mail
-					 * notification
+					 * if transaction for admin, then return result without mail notification
 					 */
 					if (res && isFee) {
-						return new AsyncResult<Boolean>(res);
+						return new AsyncResult(res);
 					}
 				} catch (InterruptedException | ExecutionException e) {
-					logger.error("BTC transaction failed: {}", e.getMessage());
-					e.printStackTrace();
-					return new AsyncResult<Boolean>(false);
+					logger.error("BTC transaction failed: {}", e);
+					return new AsyncResult(false);
 				}
+				break;
 			case "ETH":
 				logger.debug("ETH transaction started");
 				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null, null, tradeId);
@@ -489,8 +489,7 @@ public class TransactionServiceImpl implements TransactionService {
 					boolean res = txStatus.get();
 					logger.debug("is ETH transaction successed: {}", res);
 					/**
-					 * if transaction for users, then return result with mail
-					 * notification to users
+					 * if transaction for users, then return result with mail notification to users
 					 */
 					if (res && !isFee) {
 						notificationService.sendNotification(seller, msg);
@@ -499,19 +498,17 @@ public class TransactionServiceImpl implements TransactionService {
 						notificationService.saveNotification(buyer, seller, msg1);
 						logger.debug("Message : {}", msg);
 						logger.debug("Message : {}", msg1);
-						return new AsyncResult<Boolean>(res);
+						return new AsyncResult(res);
 					}
 					/**
-					 * if transaction for admin, then return result without mail
-					 * notification
+					 * if transaction for admin, then return result without mail notification
 					 */
 					if (res && isFee) {
-						return new AsyncResult<Boolean>(res);
+						return new AsyncResult(res);
 					}
 				} catch (InterruptedException | ExecutionException e) {
-					logger.error("ETH transaction failed: {}", e.getMessage());
-					e.printStackTrace();
-					return new AsyncResult<Boolean>(false);
+					logger.error("ETH transaction failed: {}", e);
+					return new AsyncResult(false);
 				}
 			}
 			break;
@@ -524,8 +521,7 @@ public class TransactionServiceImpl implements TransactionService {
 				boolean res = txStatus.get();
 				logger.debug("is ERC20TOKEN transaction successed: {}", res);
 				/**
-				 * if transaction for users, then return result with mail
-				 * notification to users
+				 * if transaction for users, then return result with mail notification to users
 				 */
 				if (res && !isFee) {
 					notificationService.sendNotification(seller, msg);
@@ -534,24 +530,23 @@ public class TransactionServiceImpl implements TransactionService {
 					notificationService.saveNotification(buyer, seller, msg1);
 					logger.debug("Message : {}", msg);
 					logger.debug("Message : {}", msg1);
-					return new AsyncResult<Boolean>(res);
+					return new AsyncResult(res);
 				}
 				/**
-				 * if transaction for admin, then return result without mail
-				 * notification
+				 * if transaction for admin, then return result without mail notification
 				 */
 				if (res && isFee) {
-					return new AsyncResult<Boolean>(res);
+					return new AsyncResult(res);
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				logger.error("ERC20TOKEN transaction failed: {}", e.getMessage());
-				e.printStackTrace();
-				return new AsyncResult<Boolean>(false);
+				logger.error("ERC20TOKEN transaction failed: {}", e);
+				return new AsyncResult(false);
 			}
+			break;
 		default:
 			break;
 		}
-		return new AsyncResult<Boolean>(false);
+		return new AsyncResult(false);
 	}
 
 	/**
@@ -569,11 +564,18 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		if (TransactionStatus.WITHDRAW.equals(transactionStatus)) {
-			return transactionRepo.findByFromUserAndTransactionStatus(user, transactionStatus, pageRequest);
+			Page<Transaction> list = transactionRepo.findByFromUserAndTransactionStatus(user, transactionStatus,
+					pageRequest);
+			fetchTransactionConfirmation(list);
+			fetchBTCConfirmation(list);
+			return list;
 		} else {
-			return transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user, pageRequest);
+			Page<Transaction> list = transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user,
+					pageRequest);
+			fetchTransactionConfirmation(list);
+			fetchBTCConfirmation(list);
+			return list;
 		}
-
 	}
 
 	@Override
@@ -584,11 +586,11 @@ public class TransactionServiceImpl implements TransactionService {
 		try {
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {
-			logger.error("exception: {}", e.getMessage());
-			e.printStackTrace();
+			logger.error("exception: {}", e);
 		}
 		logger.debug("thread: {} waked up after for 10 Secs ", Thread.currentThread().getName());
-		String msg = "", msg1 = "";
+		String msg = "";
+		String msg1 = "";
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
 		// finding currency pair
@@ -634,14 +636,10 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 
 		if (qtr != null && Double.valueOf(qtr) > 0) {
-			// process tx buyers and sellers
-			// double buyerQty = GenericUtils.getDecimalFormat(qtyTraded -
-			// sellerTradeFee);
 			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(),
 					GenericUtils.getDecimalFormatString(qtyTraded), toCurrAbrrivaiton);
 			/**
-			 * Seller performing transaction; to send ETH to buyer in case of
-			 * ETH/BTC pair
+			 * Seller performing transaction; to send ETH to buyer in case of ETH/BTC pair
 			 */
 			Future<Boolean> txStatus = performTransaction(toCurrAbrrivaiton, qtyTraded, buyer, seller, false,
 					trade.getId());
@@ -678,17 +676,13 @@ public class TransactionServiceImpl implements TransactionService {
 					notificationService.saveNotification(seller, buyer, msg1);
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				logger.error("Exception: {}", e.getMessage());
-				e.printStackTrace();
+				logger.error("Exception: {}", e);
 			}
 			double sellerQty = GenericUtils.getDecimalFormat(Double.valueOf(qtr) - sellerTradeFee);
-			// double sellerQty =
-			// GenericUtils.getDecimalFormat(Double.valueOf(qtr));
 			logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
 					pairCurrAbrrivaiton);
 			/**
-			 * Buyer performing transaction; to send BTC to Seller in case of
-			 * ETH/BTC pair
+			 * Buyer performing transaction; to send BTC to Seller in case of ETH/BTC pair
 			 */
 			txStatus = performTransaction(pairCurrAbrrivaiton, sellerQty, seller, buyer, false, trade.getId());
 
@@ -727,26 +721,11 @@ public class TransactionServiceImpl implements TransactionService {
 					notificationService.saveNotification(buyer, seller, msg);
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				logger.error("Exception: {}", e.getMessage());
-				e.printStackTrace();
+				logger.error("Exception: {}", e);
 			}
 
 			// fee deduction for admin
 			User admin = userService.findByEmail(adminEmail);
-			/*
-			 * Future<Boolean> feeStatus; logger.debug("actual quantity admin
-			 * will get from seller: {} {} of trade Id: {} ",
-			 * GenericUtils.getDecimalFormat(sellerTradeFee), toCurrAbrrivaiton,
-			 * trade.getId()); feeStatus = performTransaction(toCurrAbrrivaiton,
-			 * sellerTradeFee, admin, seller, true); boolean res =
-			 * feeStatus.get(); if (res) { trade.setIsFeeDeductedSeller(true);
-			 * logger.debug("Set seller trade fee is deducted: {}",
-			 * trade.getSellerTradeFee());
-			 * logger.debug("Saving trade fee for seller started"); trade =
-			 * orderAsyncServices.saveTrade(trade);
-			 * logger.debug("Saving trade fee for seller completed: {}",
-			 * trade.getSellerTradeFee()); }
-			 */
 			double tfee = GenericUtils.getDecimalFormat(buyerTradeFee + sellerTradeFee);
 			logger.debug(
 					"actual quantity admin will get from buyer: {} and seller: {} total fee: {} {} of trade Id: {} ",
@@ -759,8 +738,7 @@ public class TransactionServiceImpl implements TransactionService {
 			try {
 				res = feeStatus.get();
 			} catch (InterruptedException | ExecutionException e) {
-				logger.error("Exception: {}", e.getMessage());
-				e.printStackTrace();
+				logger.error("Exception: {}", e);
 			}
 			if (res) {
 				trade.setIsFeeDeductedBuyer(true);
@@ -776,6 +754,111 @@ public class TransactionServiceImpl implements TransactionService {
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
 		}
-		return new AsyncResult<Boolean>(true);
+		return new AsyncResult(true);
+	}
+
+	@Override
+	public void fetchTransactionConfirmation(Page<Transaction> page) {
+		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
+		List<Transaction> list = new ArrayList();
+		String status = "CONFIRMED";
+		page.forEach(transaction -> {
+			try {
+				if (!"BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
+						&& !status.equals(transaction.getTxStatus())) {
+					TransactionReceipt transactionReceipt = web3j.ethGetTransactionReceipt(transaction.getTxHash())
+							.send().getResult();
+					if (transactionReceipt != null) {
+						BigInteger txBlockNumber = transactionReceipt.getBlockNumber();
+						BigInteger ethBlockNumber = web3j.ethBlockNumber().send().getBlockNumber();
+						BigInteger blockNumber = ethBlockNumber.subtract(txBlockNumber);
+						logger.debug("number: {}", blockNumber);
+						if (blockNumber.compareTo(BigInteger.valueOf(12)) > 0) {
+							transaction.setNoOfConfirmations(12);
+							transaction.setTxStatus(status);
+						} else {
+							transaction.setNoOfConfirmations(blockNumber.intValue());
+						}
+						list.add(transaction);
+					}
+				}
+			} catch (IOException e) {
+				logger.error("fetch tx confirmation error: {}", e);
+			}
+		});
+		transactionRepo.save(list);
+	}
+
+	public void fetchBTCConfirmation(Page<Transaction> page) {
+		String status = "CONFIRMED";
+		List<String> btcHash = new ArrayList();
+		page.forEach(transaction -> {
+
+			if ("BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
+					&& !status.equals(transaction.getTxStatus())) {
+				btcHash.add(transaction.getTxHash());
+			}
+
+			if (btcHash.isEmpty()) {
+				return;
+			}
+			StringBuilder hash = new StringBuilder();
+			Map<String, Integer> map = new HashMap();
+			for (int i = 0; i < btcHash.size(); i++) {
+				if (i == btcHash.size() - 1) {
+					hash.append(btcHash.get(i));
+				} else {
+					hash.append(btcHash.get(i) + ",");
+				}
+			}
+			String url = btcUrl + UrlConstant.HASH_CONFIRMATION + "?hash=" + hash;
+			try {
+				URL obj = new URL(url);
+				HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+				con.setRequestMethod("GET");
+
+				// add request header
+				con.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+				int responseCode = con.getResponseCode();
+				logger.debug("Sending 'GET' request to URL : {}", url);
+				logger.debug("Response Code : {}", responseCode);
+				if (responseCode == 200) {
+					BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+					String inputLine;
+					StringBuilder response = new StringBuilder();
+
+					while ((inputLine = in.readLine()) != null) {
+						response.append(inputLine);
+					}
+					in.close();
+					JSONObject responseJson;
+					responseJson = new JSONObject(response.toString());
+					JSONArray data = responseJson.getJSONArray("data");
+
+					String hash1 = null;
+					for (int i = 0; i < data.length(); i++) {
+						JSONObject object = (JSONObject) data.get(i);
+						String conf = (String) object.get("confirmations");
+						hash1 = (String) object.get("transactonHash");
+						map.put(hash1, Integer.valueOf(conf));
+						logger.debug("confiramtion of hash: {} {}", hash1, conf);
+					}
+
+					int confirmation = map.get(hash1);
+					if (confirmation >= 6) {
+						transaction.setNoOfConfirmations(6);
+						transaction.setTxStatus(status);
+						logger.debug("confirmation of hash :::::::::::::: {} {}", transaction.getNoOfConfirmations(),
+								transaction.getTxStatus());
+					} else {
+						transaction.setNoOfConfirmations(confirmation);
+					}
+				}
+
+			} catch (JSONException | IOException e) {
+				logger.error("error send request: {}", e);
+			}
+		});
 	}
 }
