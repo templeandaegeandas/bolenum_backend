@@ -39,4 +39,6 @@ public interface TransactionService {
 			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade)
 			throws InterruptedException, ExecutionException;
 
+	public void fetchTransactionConfirmation(Page<Transaction> page);
+
 }
