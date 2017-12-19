@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.erc20token.Erc20Token;
-import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.common.erc20token.Erc20TokenService;
 import com.bolenum.util.ResponseHandler;
 
 /**

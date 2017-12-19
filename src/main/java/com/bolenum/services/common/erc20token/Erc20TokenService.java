@@ -1,4 +1,4 @@
-package com.bolenum.services.admin;
+package com.bolenum.services.common.erc20token;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -74,4 +74,6 @@ public interface Erc20TokenService {
 
 
 	Erc20Token getByCoin(String coin);
+
+	void createErc20Wallet(User user, String tokenName);
 }

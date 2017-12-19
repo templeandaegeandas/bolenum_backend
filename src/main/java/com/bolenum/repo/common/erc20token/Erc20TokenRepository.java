@@ -1,4 +1,4 @@
-package com.bolenum.repo.admin;
+package com.bolenum.repo.common.erc20token;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

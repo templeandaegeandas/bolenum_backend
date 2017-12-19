@@ -40,6 +40,7 @@ import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.common.erc20token.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.SubscribedUserService;
@@ -75,10 +76,13 @@ public class UserController {
 	private AuthenticationTokenService authenticationTokenService;
 
 	@Autowired
-	BTCWalletService btcWalletService;
+	private BTCWalletService btcWalletService;
 
 	@Autowired
-	EtherumWalletService etherumWalletService;
+	private EtherumWalletService etherumWalletService;
+	
+	@Autowired
+	private Erc20TokenService erc20TokenService;
 
 	@Autowired
 	private CountryAndStateService countryAndStateService;
@@ -154,7 +158,7 @@ public class UserController {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
 						localService.getMessage("link.already.verified"), null);
 			}
-
+			erc20TokenService.createErc20Wallet(user, "BLN");
 			etherumWalletService.createWallet(user);
 			String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", uuid);
