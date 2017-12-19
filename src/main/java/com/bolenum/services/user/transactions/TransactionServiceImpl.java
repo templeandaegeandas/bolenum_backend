@@ -184,7 +184,7 @@ public class TransactionServiceImpl implements TransactionService {
 						tradeId);
 				errorService.saveError(error);
 				logger.debug("error saved: {}", error);
-				return new AsyncResult(false);
+				return new AsyncResult<Boolean>(false);
 			}
 			logger.debug("ETH transaction send fund completed");
 			String txHash = ethSendTransaction.getTransactionHash();
@@ -215,14 +215,14 @@ public class TransactionServiceImpl implements TransactionService {
 							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult(true);
+					return new AsyncResult<Boolean>(true);
 				}
 			}
 		} catch (InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException
 				| IllegalBlockSizeException | BadPaddingException e1) {
 			logger.error("ETH transaction failed:  {}", e1);
 		}
-		return new AsyncResult(false);
+		return new AsyncResult<Boolean>(false);
 	}
 
 	private EthSendTransaction transferEth(Credentials credentials, String toAddress, Double amount) {
@@ -291,7 +291,7 @@ public class TransactionServiceImpl implements TransactionService {
 		} catch (JSONException e) {
 			logger.error("json parse error: {}", e);
 		}
-		HttpEntity<String> entity = new HttpEntity(request.toString(), headers);
+		HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
 		try {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
@@ -329,7 +329,7 @@ public class TransactionServiceImpl implements TransactionService {
 								UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 								com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-						return new AsyncResult(true);
+						return new AsyncResult<Boolean>(true);
 					}
 				} else {
 					logger.debug(" transaction exist hash: {}", transaction.getTxHash());
@@ -349,7 +349,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("error saved: {}", error);
 			logger.error("btc transaction exception:  {}", e);
 		}
-		return new AsyncResult(false);
+		return new AsyncResult<Boolean>(false);
 	}
 
 	@Override
@@ -394,7 +394,7 @@ public class TransactionServiceImpl implements TransactionService {
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult(true);
+					return new AsyncResult<Boolean>(true);
 				}
 			} else {
 				logger.debug("transaction else part already saved: {}", transaction.getTxHash());
@@ -421,7 +421,7 @@ public class TransactionServiceImpl implements TransactionService {
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction else part saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult(true);
+					return new AsyncResult<Boolean>(true);
 				}
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
@@ -429,7 +429,7 @@ public class TransactionServiceImpl implements TransactionService {
 				| ExecutionException e) {
 			logger.error("{} transaction failed:  {}", tokenName, e);
 		}
-		return new AsyncResult(false);
+		return new AsyncResult<Boolean>(false);
 	}
 
 	@Override
@@ -469,17 +469,17 @@ public class TransactionServiceImpl implements TransactionService {
 						notificationService.saveNotification(buyer, seller, msg1);
 						logger.debug("Message : {}", msg);
 						logger.debug("Message : {}", msg1);
-						return new AsyncResult(res);
+						return new AsyncResult<Boolean>(res);
 					}
 					/**
 					 * if transaction for admin, then return result without mail notification
 					 */
 					if (res && isFee) {
-						return new AsyncResult(res);
+						return new AsyncResult<Boolean>(res);
 					}
 				} catch (InterruptedException | ExecutionException e) {
 					logger.error("BTC transaction failed: {}", e);
-					return new AsyncResult(false);
+					return new AsyncResult<Boolean>(false);
 				}
 				break;
 			case "ETH":
@@ -498,17 +498,17 @@ public class TransactionServiceImpl implements TransactionService {
 						notificationService.saveNotification(buyer, seller, msg1);
 						logger.debug("Message : {}", msg);
 						logger.debug("Message : {}", msg1);
-						return new AsyncResult(res);
+						return new AsyncResult<Boolean>(res);
 					}
 					/**
 					 * if transaction for admin, then return result without mail notification
 					 */
 					if (res && isFee) {
-						return new AsyncResult(res);
+						return new AsyncResult<Boolean>(res);
 					}
 				} catch (InterruptedException | ExecutionException e) {
 					logger.error("ETH transaction failed: {}", e);
-					return new AsyncResult(false);
+					return new AsyncResult<Boolean>(false);
 				}
 			}
 			break;
@@ -530,23 +530,23 @@ public class TransactionServiceImpl implements TransactionService {
 					notificationService.saveNotification(buyer, seller, msg1);
 					logger.debug("Message : {}", msg);
 					logger.debug("Message : {}", msg1);
-					return new AsyncResult(res);
+					return new AsyncResult<Boolean>(res);
 				}
 				/**
 				 * if transaction for admin, then return result without mail notification
 				 */
 				if (res && isFee) {
-					return new AsyncResult(res);
+					return new AsyncResult<Boolean>(res);
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				logger.error("ERC20TOKEN transaction failed: {}", e);
-				return new AsyncResult(false);
+				return new AsyncResult<Boolean>(false);
 			}
 			break;
 		default:
 			break;
 		}
-		return new AsyncResult(false);
+		return new AsyncResult<Boolean>(false);
 	}
 
 	/**
@@ -754,13 +754,13 @@ public class TransactionServiceImpl implements TransactionService {
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
 		}
-		return new AsyncResult(true);
+		return new AsyncResult<Boolean>(true);
 	}
 
 	@Override
 	public void fetchTransactionConfirmation(Page<Transaction> page) {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-		List<Transaction> list = new ArrayList();
+		List<Transaction> list = new ArrayList<Transaction>();
 		String status = "CONFIRMED";
 		page.forEach(transaction -> {
 			try {
@@ -791,7 +791,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 	public void fetchBTCConfirmation(Page<Transaction> page) {
 		String status = "CONFIRMED";
-		List<String> btcHash = new ArrayList();
+		List<String> btcHash = new ArrayList<String>();
 		page.forEach(transaction -> {
 
 			if ("BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
@@ -803,7 +803,7 @@ public class TransactionServiceImpl implements TransactionService {
 				return;
 			}
 			StringBuilder hash = new StringBuilder();
-			Map<String, Integer> map = new HashMap();
+			Map<String, Integer> map = new HashMap<String, Integer>();
 			for (int i = 0; i < btcHash.size(); i++) {
 				if (i == btcHash.size() - 1) {
 					hash.append(btcHash.get(i));
@@ -852,12 +852,12 @@ public class TransactionServiceImpl implements TransactionService {
 						logger.debug("confirmation of hash :::::::::::::: {} {}", transaction.getNoOfConfirmations(),
 								transaction.getTxStatus());
 						transactionRepo.save(transaction);
-						
+
 					} else {
 						transaction.setNoOfConfirmations(confirmation);
 						transactionRepo.save(transaction);
 					}
-				
+
 				}
 
 			} catch (JSONException | IOException e) {
