@@ -37,6 +37,7 @@ import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.erc20token.Erc20Token;
+import com.bolenum.model.erc20token.UserErc20Token;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
@@ -220,8 +221,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			availableBalance = etherumWalletService.getWalletBalance(user);
 			networkFee = GenericUtils.getEstimetedFeeEthereum();
 			/**
-			 * network fee required for sending to the receiver address and
-			 * admin address, so networkFee = networkFee * 2;
+			 * network fee required for sending to the receiver address and admin address,
+			 * so networkFee = networkFee * 2;
 			 * 
 			 */
 			networkFee = networkFee * 2;
@@ -246,23 +247,18 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			WithdrawalFee withdrawalFee) {
-		Double bolenumFee = 0.0, networkFee = 0.0, availableBalanceETH = 0.0, lockVolume = 0.0;
-		Double availableBalance = 0.0;
+		Double bolenumFee = 0.0;
+		Double lockVolume = 0.0;
+		Double availableBalance;
 		if (withdrawalFee != null) {
 			bolenumFee = withdrawalFee.getFee();
 			lockVolume = withdrawalFee.getLockVolume();
 		}
-		networkFee = GenericUtils.getEstimetedFeeEthereum();
 		/**
-		 * network fee required for sending to the receiver address and admin
-		 * address, so networkFee = networkFee * 2;
+		 * network fee required for sending to the receiver address and admin address,
+		 * so networkFee = networkFee * 2;
 		 * 
 		 */
-		networkFee = networkFee * 2;
-		availableBalanceETH = etherumWalletService.getWalletBalance(user);
-		if (networkFee > availableBalanceETH) {
-			throw new InsufficientBalanceException(localeService.getMessage("contact.support"));
-		}
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(erc20Token.getCurrency().getCurrencyId())
 				.getMinWithDrawAmount();
@@ -270,7 +266,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
-		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
+		UserErc20Token userErc20Token = erc20TokenService.erc20WalletBalance(user, erc20Token);
+		if (userErc20Token == null) {
+			return false;
+		}
+		availableBalance = userErc20Token.getBalance();
 		logger.debug("Available balance: {}", availableBalance);
 
 		availableBalance = availableBalance - lockVolume;
@@ -353,6 +353,10 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 			break;
 		case "ERC20TOKEN":
+			boolean result = transactionService.deductErc20Balance(user, amount, coinCode);
+			if (!result) {
+				new AsyncResult<Boolean>(false);
+			}
 			Future<Boolean> res1 = transactionService.performErc20Transaction(user, coinCode, toAddress, amount,
 					TransactionStatus.WITHDRAW, bolenumFee, null);
 			try {

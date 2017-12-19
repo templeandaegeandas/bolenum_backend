@@ -17,6 +17,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 
 import com.bolenum.model.User;
 import com.bolenum.model.erc20token.Erc20Token;
+import com.bolenum.model.erc20token.UserErc20Token;
 
 /**
  * 
@@ -63,7 +64,7 @@ public interface Erc20TokenService {
 	 */
 	Long countErc20Token();
 
-	Double getErc20WalletBalance(User user, Erc20Token erc20Token);
+//	Double getErc20WalletBalance(User user, Erc20Token erc20Token);
 
 	TransactionReceipt transferErc20Token(User user, Erc20Token erc20Token, String toAddress, Double fund)
 			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
@@ -76,4 +77,6 @@ public interface Erc20TokenService {
 	Erc20Token getByCoin(String coin);
 
 	void createErc20Wallet(User user, String tokenName);
+
+	UserErc20Token erc20WalletBalance(User user, Erc20Token erc20Token);
 }

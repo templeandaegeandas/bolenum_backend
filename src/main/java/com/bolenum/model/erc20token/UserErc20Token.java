@@ -40,6 +40,10 @@ public class UserErc20Token {
 	@ManyToOne
 	@JsonBackReference
 	private User user;
+	
+	public UserErc20Token() {
+		
+	}
 
 	/**
 	 * @param id

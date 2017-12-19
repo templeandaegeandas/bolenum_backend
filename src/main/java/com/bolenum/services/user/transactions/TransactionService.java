@@ -41,4 +41,6 @@ public interface TransactionService {
 
 	public void fetchTransactionConfirmation(Page<Transaction> page);
 
+	boolean deductErc20Balance(User user, double amount, String tokenName);
+
 }

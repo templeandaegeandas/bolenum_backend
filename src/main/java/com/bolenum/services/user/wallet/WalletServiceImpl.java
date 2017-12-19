@@ -61,7 +61,7 @@ public class WalletServiceImpl implements WalletService {
 			break;
 		case "ERC20TOKEN":
 			Erc20Token erc20Token = erc20TokenService.getByCoin(ticker);
-			balance = String.valueOf(erc20TokenService.getErc20WalletBalance(user, erc20Token));
+			balance = String.valueOf(erc20TokenService.erc20WalletBalance(user, erc20Token).getBalance());
 			break;
 		case "FIAT":
 			break;

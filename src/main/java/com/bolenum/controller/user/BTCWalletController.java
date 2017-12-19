@@ -29,6 +29,7 @@ import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.erc20token.Erc20Token;
+import com.bolenum.model.erc20token.UserErc20Token;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
@@ -117,15 +118,15 @@ public class BTCWalletController {
 			break;
 		case "ERC20TOKEN":
 			Erc20Token erc20Token = erc20TokenService.getByCoin(coinCode);
-			Double balance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
-			if (balance == null) {
+			UserErc20Token userErc20Token = erc20TokenService.erc20WalletBalance(user, erc20Token);
+			if (userErc20Token == null) {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 						localService.getMessage("There is an error for getting balance of user for: " + coinCode),
 						null);
 			}
 			Map<String, Object> mapAddress = new HashMap<>();
-			mapAddress.put("address", user.getEthWalletaddress());
-			mapAddress.put("balance", GenericUtils.getDecimalFormat(balance));
+			mapAddress.put("address", userErc20Token.getWalletAddress());
+			mapAddress.put("balance", GenericUtils.getDecimalFormat(userErc20Token.getBalance()));
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":
