@@ -151,24 +151,10 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 					logger.error("eth wallet info not saved of user");
 				}
 
-			} catch (InvalidKeyException e) {
-				logger.error("InvalidKeyException: {}", e.getMessage());
-			} catch (NoSuchPaddingException e) {
-				logger.error("NoSuchPaddingException: {}", e.getMessage());
-			} catch (IllegalBlockSizeException e) {
-				logger.error("IllegalBlockSizeException: {}", e.getMessage());
-			} catch (BadPaddingException e) {
-				logger.error("BadPaddingException: {}", e.getMessage());
-			} catch (NoSuchAlgorithmException e) {
-				logger.error("NoSuchAlgorithmException: {}", e.getMessage());
-			} catch (NoSuchProviderException e) {
-				logger.error("NoSuchProviderException: {}", e.getMessage());
-			} catch (InvalidAlgorithmParameterException e) {
-				logger.error("InvalidAlgorithmParameterException: {}", e.getMessage());
-			} catch (CipherException e) {
-				logger.error("CipherException: {}", e.getMessage());
-			} catch (IOException e) {
-				logger.error("IOException: {}", e.getMessage());
+			} catch (InvalidKeyException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException
+					| NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException
+					| CipherException | IOException e) {
+				logger.error("Exception: {}", e);
 			}
 		}
 	}
