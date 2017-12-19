@@ -188,6 +188,7 @@ public class BTCWalletController {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), bolenumFee, admin);
 			}
+			
 			/*
 			 * switch (coinCode) { case "BTC": logger.debug("Validate balance: {}",
 			 * validWithdrawAmount); if (validWithdrawAmount) {

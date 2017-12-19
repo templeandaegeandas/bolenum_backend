@@ -33,6 +33,7 @@ public class AuthenticationToken {
 
 	@Enumerated(EnumType.STRING)
 	private TokenType tokentype;
+	
 	@NotBlank
 	private String token;
 	

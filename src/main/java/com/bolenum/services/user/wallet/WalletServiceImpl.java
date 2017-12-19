@@ -34,6 +34,16 @@ public class WalletServiceImpl implements WalletService {
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
+	/**
+	 * to get the balance of user wallet
+	 * 
+	 * @param currency
+	 *            Abbrivation (ETH, BTC, BLN)
+	 * @param currencyType,
+	 *            CRYPTO, ERC20TOKEN
+	 * @param user
+	 * @return balance of user wallet
+	 */
 	@Override
 	public String getBalance(String ticker, String currencyType, User user) {
 		logger.debug("get wallet balance ticker: {}", ticker);
