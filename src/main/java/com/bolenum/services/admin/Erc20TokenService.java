@@ -15,8 +15,8 @@ import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-import com.bolenum.model.Erc20Token;
 import com.bolenum.model.User;
+import com.bolenum.model.erc20token.Erc20Token;
 
 /**
  * 

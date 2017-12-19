@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.model.CurrencyPair;
-import com.bolenum.model.Erc20Token;
 import com.bolenum.model.User;
+import com.bolenum.model.erc20token.Erc20Token;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.util.GenericUtils;
