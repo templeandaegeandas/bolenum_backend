@@ -72,14 +72,16 @@ import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.erc20token.Erc20Token;
+import com.bolenum.model.erc20token.UserErc20Token;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
+import com.bolenum.repo.common.erc20token.UserErc20TokenRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.CurrencyService;
-import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
+import com.bolenum.services.common.erc20token.Erc20TokenService;
 import com.bolenum.services.order.book.OrderAsyncService;
 import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.UserService;
@@ -143,6 +145,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private WalletService walletService;
+
+	@Autowired
+	private UserErc20TokenRepository userErc20TokenRepository;
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
@@ -358,8 +363,9 @@ public class TransactionServiceImpl implements TransactionService {
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
 		try {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
-			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(fromUser, erc20Token,
-					toAddress, amount);
+			User admin = userRepository.findByEmailId(adminEmail);
+			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(admin, erc20Token, toAddress,
+					amount);
 			logger.debug("{} transaction send fund completed", tokenName);
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
@@ -864,5 +870,16 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.error("error send request: {}", e);
 			}
 		});
+	}
+
+	@Override
+	public boolean deductErc20Balance(User user, double amount, String tokenName) {
+		UserErc20Token userErc20Token = userErc20TokenRepository.findByTokenNameAndUser(tokenName, user);
+		if (userErc20Token != null) {
+			userErc20Token.setBalance(userErc20Token.getBalance() - amount);
+			userErc20TokenRepository.save(userErc20Token);
+			return true;
+		}
+		return false;
 	}
 }

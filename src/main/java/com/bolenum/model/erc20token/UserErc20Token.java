@@ -36,10 +36,37 @@ public class UserErc20Token {
 	private Date deletedOn;
 
 	private Boolean isDeleted = false;
-	
+
 	@ManyToOne
 	@JsonBackReference
 	private User user;
+	
+	public UserErc20Token() {
+		
+	}
+
+	/**
+	 * @param id
+	 * @param walletAddress
+	 * @param balance
+	 * @param tokenName
+	 * @param walletJsonFile
+	 * @param walletPassword
+	 * @param createdOn
+	 * @param deletedOn
+	 * @param isDeleted
+	 * @param user
+	 */
+	public UserErc20Token(String walletAddress, Double balance, String tokenName, String walletJsonFile,
+			String walletPassword, User user) {
+		super();
+		this.walletAddress = walletAddress;
+		this.balance = balance;
+		this.tokenName = tokenName;
+		this.walletJsonFile = walletJsonFile;
+		this.walletPassword = walletPassword;
+		this.user = user;
+	}
 
 	/**
 	 * @return the id
@@ -184,7 +211,8 @@ public class UserErc20Token {
 	}
 
 	/**
-	 * @param user the user to set
+	 * @param user
+	 *            the user to set
 	 */
 	public void setUser(User user) {
 		this.user = user;

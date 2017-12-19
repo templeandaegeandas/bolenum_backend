@@ -13,7 +13,7 @@ import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.erc20token.Erc20Token;
 import com.bolenum.model.orders.book.Orders;
-import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.common.erc20token.Erc20TokenService;
 import com.bolenum.util.GenericUtils;
 
 /**
@@ -61,7 +61,7 @@ public class WalletServiceImpl implements WalletService {
 			break;
 		case "ERC20TOKEN":
 			Erc20Token erc20Token = erc20TokenService.getByCoin(ticker);
-			balance = String.valueOf(erc20TokenService.getErc20WalletBalance(user, erc20Token));
+			balance = String.valueOf(erc20TokenService.erc20WalletBalance(user, erc20Token).getBalance());
 			break;
 		case "FIAT":
 			break;
