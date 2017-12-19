@@ -29,6 +29,7 @@ import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.services.common.AuthService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.TwoFactorAuthService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.ErrorCollectionUtil;
@@ -60,6 +61,9 @@ public class AuthController {
 
 	@Autowired
 	private LocaleService localeService;
+
+	@Autowired
+	private AuthenticationTokenService authenticationTokenService;
 
 	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -174,6 +178,13 @@ public class AuthController {
 		User verifiedUser = authService.verifyTokenForResetPassword(token);
 		if (verifiedUser == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("token.invalid"),
+					null);
+		}
+		AuthenticationToken authenticationToken = authenticationTokenService.findByToken(token);
+		boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
+		logger.debug("user mail verify token expired: {}", isExpired);
+		if (isExpired) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localeService.getMessage("token.expired"),
 					null);
 		}
 		if (result.hasErrors()) {

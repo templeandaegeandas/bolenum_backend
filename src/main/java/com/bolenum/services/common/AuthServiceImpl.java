@@ -177,6 +177,14 @@ public class AuthServiceImpl implements AuthService {
 	public void resetPassword(User user, ResetPasswordForm resetPasswordForm) {
 		user.setPassword(passwordEncoder.encode(resetPasswordForm.getNewPassword()));
 		userRepository.save(user);
+		List<AuthenticationToken> previousToken = authenticationTokenRepo.findByUserAndTokentype(user,
+				TokenType.FORGOT_PASSWORD);
+
+		for (AuthenticationToken token : previousToken) {
+			if (token.getTokentype() == TokenType.FORGOT_PASSWORD) {
+				authenticationTokenRepo.delete(token);
+			}
+		}
 	}
 
 }
