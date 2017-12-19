@@ -8,4 +8,6 @@ import com.bolenum.model.erc20token.UserErc20Token;
 public interface UserErc20TokenRepository extends JpaRepository<UserErc20Token, Long> {
 
 	UserErc20Token findByTokenNameAndUser(String tokenName, User user);
+	
+	UserErc20Token findByWalletAddress(String walletAddress);
 }

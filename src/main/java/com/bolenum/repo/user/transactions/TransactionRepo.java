@@ -33,5 +33,8 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 	@Query("select t from Transaction t where t.toUser=:toUser and (t.transactionStatus='WITHDRAW' or t.transactionStatus='DEPOSIT')")
 	Page<Transaction> findByToUserAndTransactionStatusOrTransactionStatus(@Param("toUser") User toUser,
 			Pageable pageable);
+	
+	@Query("select t from Transaction t where t.txStatus=:txStatus order by createdOn asc limit 1")
+	Transaction findByTxStatus(@Param("txStatus") String txStatus);
 
 }

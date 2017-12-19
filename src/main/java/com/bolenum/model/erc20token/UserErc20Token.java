@@ -28,7 +28,9 @@ public class UserErc20Token {
 
 	private String walletJsonFile;
 
-	private String walletPassword;
+	private String walletPwd;
+
+	private String walletPwdKey;
 
 	@CreationTimestamp
 	private Date createdOn;
@@ -40,9 +42,9 @@ public class UserErc20Token {
 	@ManyToOne
 	@JsonBackReference
 	private User user;
-	
+
 	public UserErc20Token() {
-		
+
 	}
 
 	/**
@@ -58,13 +60,14 @@ public class UserErc20Token {
 	 * @param user
 	 */
 	public UserErc20Token(String walletAddress, Double balance, String tokenName, String walletJsonFile,
-			String walletPassword, User user) {
+			String walletPwd, String walletPwdKey, User user) {
 		super();
 		this.walletAddress = walletAddress;
 		this.balance = balance;
 		this.tokenName = tokenName;
 		this.walletJsonFile = walletJsonFile;
-		this.walletPassword = walletPassword;
+		this.walletPwd = walletPwd;
+		this.walletPwdKey = walletPwdKey;
 		this.user = user;
 	}
 
@@ -144,18 +147,33 @@ public class UserErc20Token {
 	}
 
 	/**
-	 * @return the walletPassword
+	 * @return the walletPwd
 	 */
-	public String getWalletPassword() {
-		return walletPassword;
+	public String getWalletPwd() {
+		return walletPwd;
 	}
 
 	/**
-	 * @param walletPassword
-	 *            the walletPassword to set
+	 * @param walletPwd
+	 *            the walletPwd to set
 	 */
-	public void setWalletPassword(String walletPassword) {
-		this.walletPassword = walletPassword;
+	public void setWalletPwd(String walletPwd) {
+		this.walletPwd = walletPwd;
+	}
+
+	/**
+	 * @return the walletPwdKey
+	 */
+	public String getWalletPwdKey() {
+		return walletPwdKey;
+	}
+
+	/**
+	 * @param walletPwdKey
+	 *            the walletPwdKey to set
+	 */
+	public void setWalletPwdKey(String walletPwdKey) {
+		this.walletPwdKey = walletPwdKey;
 	}
 
 	/**
