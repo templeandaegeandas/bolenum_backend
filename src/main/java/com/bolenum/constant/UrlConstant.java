@@ -68,6 +68,8 @@ public class UrlConstant {
 	public static final String COUNT_BUYER_SELLER_DASHBOARD = "buyer/seller";
 	public static final String DISPLAY_LATEST_ORDER = "latest/order/list";
 	public static final String CURRENCY_NGN_PRICE_SAVE = "set/bln_ngn";
+	public static final String ADMIN_WITHDRAW = "withdraw";
+	public static final String ADMIN_DEPOSIT = "deposit";
 
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "kyc/upload";

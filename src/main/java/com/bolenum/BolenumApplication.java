@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.bolenum.services.common.erc20token.Erc20TokenService;
 import com.bolenum.services.order.book.MarketPriceService;
 
 import io.swagger.annotations.Api;
@@ -23,7 +24,6 @@ import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
-@EnableAutoConfiguration
 @SpringBootApplication
 @EnableAsync
 public class BolenumApplication {
@@ -58,9 +58,13 @@ public class BolenumApplication {
 
 	@Autowired
 	private MarketPriceService marketPriceService;
+	
+	@Autowired
+	private Erc20TokenService erc20TokenService;
 
 	@Scheduled(fixedRate = 20 * 1000)
 	public void fetchCoinPrice() {
+		erc20TokenService.sendUserTokenToAdmin();
 		marketPriceService.priceFromCoinMarketCap();
 	}
 }

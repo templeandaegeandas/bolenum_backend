@@ -84,7 +84,7 @@ public class BTCWalletController {
 	 * ResponseEntity<Map<String,Object>> @exception
 	 *
 	 */
-	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.DEPOSIT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWalletAddressAndBalance(@RequestParam(name = "currencyType") String currencyType,
 			@RequestParam(name = "code") String coinCode) {
@@ -159,7 +159,7 @@ public class BTCWalletController {
 	 * @throws InterruptedException
 	 * @throws InsufficientBalanceException
 	 */
-	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmount(@RequestParam(name = "currencyType") String currencyType,
 			@Valid @RequestBody WithdrawBalanceForm withdrawBalanceForm, @RequestParam(name = "code") String coinCode,
@@ -189,7 +189,7 @@ public class BTCWalletController {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), bolenumFee, admin);
 			}
-			
+
 			/*
 			 * switch (coinCode) { case "BTC": logger.debug("Validate balance: {}",
 			 * validWithdrawAmount); if (validWithdrawAmount) {
@@ -212,7 +212,7 @@ public class BTCWalletController {
 
 		case "ERC20TOKEN":
 			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode,
-					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee);
+					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee, withdrawBalanceForm.getToAddress());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
