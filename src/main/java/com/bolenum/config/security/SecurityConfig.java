@@ -38,8 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 		http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 				.authorizeRequests().antMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
-				.antMatchers(HttpMethod.POST, "/api/v1/user/register").permitAll()
-				.anyRequest().authenticated();
+				.antMatchers(HttpMethod.POST, "/api/v1/user/register").permitAll().anyRequest().authenticated();
 
 		// Implementing Token based authentication in this filter
 		final TokenAuthenticationFilter tokenFilter = new TokenAuthenticationFilter();
@@ -67,6 +66,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.DEPOSIT_TRANSACTION_STATUS);
 		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.SUBSCRIBE_USER);
 		web.ignoring().antMatchers(UrlConstant.BASE_ADMIN_URI_V1 + UrlConstant.TRADING_FEES);
+		web.ignoring().antMatchers(UrlConstant.BASE_USER_URI_V1 + UrlConstant.CREATE_ACCOUNT);
 
 		// Check if Active profiles contains "dev" or "stag"
 		if (Arrays.stream(environment.getActiveProfiles())

@@ -27,6 +27,7 @@ import com.bolenum.enums.OrderType;
 import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.TradingFee;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
@@ -76,13 +77,13 @@ public class AdminController {
 
 	@Autowired
 	private SubscribedUserService subscribedUserService;
-	
+
 	@Autowired
 	private BTCWalletService btcWalletService;
-	
+
 	@Autowired
 	private EtherumWalletService etherumWalletService;
-	
+
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
@@ -268,9 +269,10 @@ public class AdminController {
 				map.put("data", mapAddressAndBal);
 				break;
 			case "ETH":
-				Double balance = etherumWalletService.getWalletBalance(user);
+				UserCoin userCoin = etherumWalletService.ethWalletBalance(user, coinCode);
+				Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
 				Map<String, Object> mapAddress = new HashMap<>();
-				mapAddress.put("address", user.getEthWalletaddress());
+				mapAddress.put("address", userCoin.getWalletAddress());
 				mapAddress.put("balance", balance);
 				map.put("data", mapAddress);
 				break;
@@ -283,7 +285,7 @@ public class AdminController {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(coinCode);
 			Double balance = erc20TokenService.getAdminErc20WalletBalance(user, erc20Token);
 			Map<String, Object> mapAddress = new HashMap<>();
-			mapAddress.put("address", user.getEthWalletaddress());
+			mapAddress.put("address", erc20Token.getWalletAddress());
 			mapAddress.put("balance", GenericUtils.getDecimalFormat(balance));
 			map.put("data", mapAddress);
 			break;

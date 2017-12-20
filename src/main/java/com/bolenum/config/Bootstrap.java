@@ -270,7 +270,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			}
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
-			etherumWalletService.createWallet(user);
+			etherumWalletService.createEthWallet(user, "ETH");
 			String address = btcWalletService.getBtcAccountAddress("");
 			UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
 			List<UserCoin> userCoins = new ArrayList<>();

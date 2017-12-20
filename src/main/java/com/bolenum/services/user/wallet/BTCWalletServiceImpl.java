@@ -248,7 +248,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			String balance = getBtcAccountBalance(user.getBtcWalletUuid());
 			availableBalance = Double.valueOf(balance);
 		} else {
-			availableBalance = etherumWalletService.getWalletBalance(user);
+			UserCoin ethUserCoin=etherumWalletService.ethWalletBalance(user, tokenName);
+			availableBalance = ethUserCoin.getBalance();
 			networkFee = GenericUtils.getEstimetedFeeEthereum();
 			/**
 			 * network fee required for sending to the receiver address and
