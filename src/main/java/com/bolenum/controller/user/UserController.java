@@ -169,6 +169,7 @@ public class UserController {
 			String address = btcWalletService.createBtcAccount(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", address);
 			if (!address.isEmpty()) {
+				user.setBtcWalletUuid(String.valueOf(user.getUserId()));
 				user.setIsEnabled(true);
 				UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
 				if (userCoin == null) {

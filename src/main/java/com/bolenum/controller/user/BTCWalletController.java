@@ -100,7 +100,7 @@ public class BTCWalletController {
 			switch (coinCode) {
 			case "BTC":
 				Map<String, Object> mapAddressAndBal = new HashMap<>();
-				mapAddressAndBal.put("address", btcWalletService.getWalletAddress(user.getBtcWalletUuid()));
+				mapAddressAndBal.put("address", btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
 				mapAddressAndBal.put("balance", btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
 				map.put("data", mapAddressAndBal);
 				break;
@@ -183,7 +183,7 @@ public class BTCWalletController {
 		switch (currencyType) {
 		case "CRYPTO":
 			validWithdrawAmount = btcWalletService.validateCryptoWithdrawAmount(user, coinCode,
-					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee, currency);
+					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee, currency, withdrawBalanceForm.getToAddress());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),

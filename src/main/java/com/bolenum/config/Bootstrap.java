@@ -30,9 +30,9 @@ import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.TradingFee;
 import com.bolenum.model.fees.WithdrawalFee;
-import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.fees.TradingFeeService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
@@ -100,9 +100,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired
 	private CurrencyService currencyService;
-
-	@Autowired
-	private AdminService adminService;
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;
@@ -274,18 +271,17 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
 			etherumWalletService.createWallet(user);
-			String uuid = adminService.createAdminHotWallet("adminWallet");
-			logger.debug("user mail verify wallet uuid: {}", uuid);
-			if (!uuid.isEmpty()) {
-				String walletAddress = btcWalletService.getWalletAddress(uuid);
-				user.setBtcWalletAddress(walletAddress);
-				user.setBtcWalletUuid(uuid);
-				user.setIsEnabled(true);
-				User savedUser = userService.saveUser(user);
-				logger.debug("savedUser as Admin: {}", savedUser.getEmailId());
-			} else {
-				logger.debug("admin exist");
-			}
+			String address = btcWalletService.getBtcAccountAddress("");
+			UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
+			List<UserCoin> userCoins = new ArrayList<>();
+			userCoins.add(userCoin);
+			user.setUserCoin(userCoins);
+			user.setBtcWalletUuid("");
+			user.setIsEnabled(true);
+			User savedUser = userService.saveUser(user);
+			logger.debug("savedUser as Admin: {}", savedUser.getEmailId());
+		} else {
+			logger.debug("admin exist");
 		}
 	}
 

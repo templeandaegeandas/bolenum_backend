@@ -224,12 +224,20 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@Override
 	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
-			WithdrawalFee withdrawalFee, Currency currency) {
+			WithdrawalFee withdrawalFee, Currency currency, String toAddress) {
 		Double availableBalance = 0.0, minWithdrawAmount = 0.0, bolenumFee = 0.0, networkFee = 0.0, lockVolume = 0.0;
 		if (withdrawalFee != null) {
 			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
 			bolenumFee = withdrawalFee.getFee();
 			lockVolume = withdrawalFee.getLockVolume();
+		}
+		
+		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
+		if (userCoin == null) {
+			return false;
+		}
+		if (toAddress.equals(userCoin.getWalletAddress())) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
 		}
 		logger.debug("Minimum withdraw ammount:{} Withdraw fee: {} of currency: {}", minWithdrawAmount, bolenumFee,
 				currency.getCurrencyName());
@@ -288,17 +296,17 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		 * 
 		 */
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
-		UserCoin userErc20Token = erc20TokenService.erc20WalletBalance(user, erc20Token);
-		if (userErc20Token == null) {
+		UserCoin userCoin = erc20TokenService.erc20WalletBalance(user, erc20Token);
+		if (userCoin == null) {
 			return false;
 		}
-		if (toAddress.equals(userErc20Token.getWalletAddress())) {
+		if (toAddress.equals(userCoin.getWalletAddress())) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
 		}
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
-		availableBalance = userErc20Token.getBalance();
+		availableBalance = userCoin.getBalance();
 		logger.debug("Available balance: {}", availableBalance);
 
 		availableBalance = availableBalance - lockVolume;

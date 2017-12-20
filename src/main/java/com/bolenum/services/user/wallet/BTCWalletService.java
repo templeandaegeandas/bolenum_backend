@@ -36,9 +36,6 @@ public interface BTCWalletService {
 
 	Transaction setDepositeList(Transaction transaction);
 
-	boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
-			WithdrawalFee withdrawalFee, Currency currency);
-
 	Future<Boolean> withdrawAmount(String currencyType, String coinCode, User user, String toAddress, Double amount,
 			Double bolenumFee, User admin);
 
@@ -56,4 +53,7 @@ public interface BTCWalletService {
 			Erc20Token erc20Token);
 
 	public void blockEventListener();
+
+	boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			WithdrawalFee withdrawalFee, Currency currency, String toAddress);
 }
