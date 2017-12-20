@@ -449,6 +449,10 @@ public class TransactionServiceImpl implements TransactionService {
 		return new AsyncResult<>(false);
 	}
 
+
+	/**
+	 * 
+	 */
 	@Override
 	@Async
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
@@ -807,6 +811,12 @@ public class TransactionServiceImpl implements TransactionService {
 		});
 		transactionRepo.save(list);
 	}
+	
+	
+	/**
+	 * 
+	 * @param page
+	 */
 
 	public void fetchBTCConfirmation(Page<Transaction> page) {
 		String status = "CONFIRMED";
@@ -882,7 +892,7 @@ public class TransactionServiceImpl implements TransactionService {
 			}
 		});
 	}
-
+	
 	@Override
 	public boolean withdrawErc20Token(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {

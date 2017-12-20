@@ -55,7 +55,7 @@ import com.bolenum.util.ResponseHandler;
 import io.swagger.annotations.Api;
 
 /**
- * @Author Himanshu
+ * @Author Himanshu Kumar
  * @Date 11-Sep-2017
  */
 
@@ -126,11 +126,16 @@ public class UserController {
 	}
 
 	/**
+	 * 
 	 * for mail verify at the time of sign up user as well as re register
 	 * 
 	 * @param token
 	 * 
 	 * @return
+	 * 
+	 * 
+	 * @modified by Himanshu Kumar 
+	 * added expiry condition in reset password
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
