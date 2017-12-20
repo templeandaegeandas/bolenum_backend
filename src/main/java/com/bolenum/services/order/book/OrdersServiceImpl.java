@@ -76,7 +76,9 @@ public class OrdersServiceImpl implements OrdersService {
 	public String checkOrderEligibility(User user, Orders orders, Long pairId) {
 		CurrencyPair currencyPair = currencyPairService.findCurrencypairByPairId(pairId);
 		orders.setPair(currencyPair);
-		String tickter = null, minOrderVol = null, currencyType = null;
+		String tickter = null;
+		String minOrderVol = null;
+		String currencyType = null;
 		/**
 		 * to get the placed volume of selling currency
 		 */
@@ -100,7 +102,7 @@ public class OrdersServiceImpl implements OrdersService {
 		double userPlacedOrderVolume = getPlacedOrderVolumeOfCurrency(user, OrderStatus.SUBMITTED, OrderType.SELL,
 				currency);
 		double userPlacedLockedOrderVolume = getLockedOrderVolumeOfCurrency(user, OrderStatus.COMPLETED, currency);
-		
+
 		logger.debug("user:{} placed order volume: {}, locked volume: {}, and order volume: {}", user.getEmailId(),
 				GenericUtils.getDecimalFormatString(userPlacedOrderVolume),
 				GenericUtils.getDecimalFormatString(userPlacedLockedOrderVolume),
@@ -408,8 +410,10 @@ public class OrdersServiceImpl implements OrdersService {
 			throws InterruptedException, ExecutionException {
 		// fetching order type BUY or SELL
 		OrderType orderType = orders.getOrderType();
-		User buyer, seller;
-		double buyerTradeFee, sellerTradeFee;
+		User buyer;
+		User seller;
+		double buyerTradeFee;
+		double sellerTradeFee;
 		String toCA = pair.getToCurrency().get(0).getCurrencyAbbreviation();
 		String pairCA = pair.getPairedCurrency().get(0).getCurrencyAbbreviation();
 		logger.debug("process order list remainingVolume: {}", remainingVolume);
@@ -451,7 +455,6 @@ public class OrdersServiceImpl implements OrdersService {
 				matchedOrder.setOrderStatus(OrderStatus.COMPLETED);
 				// adding to order list by setting the new volume and status of
 				// processed order
-				// ordersList.add(matchedOrder);
 				logger.debug("matching buy/sell completed");
 			}
 			// checking the order type BUY
@@ -501,9 +504,8 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			// buyer and seller must be different user
 			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
-			// if (buyer.getUserId() != seller.getUserId()) {
 			buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
-			sellerTradeFee = buyerTradeFee;// tradingFeeService.calculateFee(qtyTraded);
+			sellerTradeFee = buyerTradeFee;
 			buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
 			sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
 			logger.info("buyer trade fee: {} seller trade fee: {}", GenericUtils.getDecimalFormatString(buyerTradeFee),
@@ -515,11 +517,10 @@ public class OrdersServiceImpl implements OrdersService {
 					buyerTradeFee, sellerTradeFee, matchedOrder, orders);
 			trade = orderAsyncServices.saveTrade(trade);
 
-			// tradeList.add(trade);
-			logger.debug("trade saved id: {} with matche orders id: {} ,requested order id: {}", trade.getId(), matchedOrder.getId(), orders.getId());
+			logger.debug("trade saved id: {} with matche orders id: {} ,requested order id: {}", trade.getId(),
+					matchedOrder.getId(), orders.getId());
 			transactionService.processTransaction(matchedOrder, orders, qtyTraded, buyer, seller, remainingVolume,
 					buyerTradeFee, sellerTradeFee, trade);
-			// }
 		}
 		return remainingVolume;
 	}
@@ -528,16 +529,14 @@ public class OrdersServiceImpl implements OrdersService {
 	public Page<Orders> getBuyOrdersListByPair(Long pairId) {
 		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		return ordersRepository.findBuyOrderList(pair, OrderType.BUY, OrderStatus.SUBMITTED,
-				pageRequest);
+		return ordersRepository.findBuyOrderList(pair, OrderType.BUY, OrderStatus.SUBMITTED, pageRequest);
 	}
 
 	@Override
 	public Page<Orders> getSellOrdersListByPair(Long pairId) {
 		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
 		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
-		return ordersRepository.findSellOrderList(pair, OrderType.SELL, OrderStatus.SUBMITTED,
-				pageRequest);
+		return ordersRepository.findSellOrderList(pair, OrderType.SELL, OrderStatus.SUBMITTED, pageRequest);
 	}
 
 	/**
