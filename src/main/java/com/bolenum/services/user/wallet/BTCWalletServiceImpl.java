@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -33,6 +34,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.enums.TransferStatus;
 import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
@@ -57,6 +59,12 @@ import com.neemre.btcdcli4j.core.BitcoindException;
 import com.neemre.btcdcli4j.core.CommunicationException;
 import com.neemre.btcdcli4j.core.client.BtcdClient;
 import com.neemre.btcdcli4j.core.domain.AddressInfo;
+import com.neemre.btcdcli4j.core.domain.Block;
+import com.neemre.btcdcli4j.core.domain.PaymentOverview;
+import com.neemre.btcdcli4j.core.domain.enums.PaymentCategories;
+import com.neemre.btcdcli4j.daemon.BtcdDaemon;
+import com.neemre.btcdcli4j.daemon.BtcdDaemonImpl;
+import com.neemre.btcdcli4j.daemon.event.BlockListener;
 
 /**
  * @author chandan kumar singh
@@ -90,12 +98,15 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Autowired
 	private TransactionService transactionService;
-	
+
 	@Autowired
 	private UserCoinRepository userCoinRepository;
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
+	
+	@Value("${admin.email}")
+	private String adminEmail;
 
 	/**
 	 * 
@@ -213,14 +224,23 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@Override
 	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
-			WithdrawalFee withdrawalFee, Currency currency) {
+			WithdrawalFee withdrawalFee, Currency currency, String toAddress) {
 		Double availableBalance;
 		Double minWithdrawAmount = 0.0;
 		if (withdrawalFee != null) {
 			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
 		}
-		logger.debug("Minimum withdraw ammount:{}  of currency: {}", minWithdrawAmount,
-				currency.getCurrencyName());
+		logger.debug("Minimum withdraw ammount:{}  of currency: {}", minWithdrawAmount, currency.getCurrencyName());
+
+		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
+
+		if (userCoin == null) {
+			return false;
+		}
+		if (toAddress.equals(userCoin.getWalletAddress())) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+		}
+
 		if (withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
@@ -228,19 +248,22 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			String balance = getBtcAccountBalance(user.getBtcWalletUuid());
 			availableBalance = Double.valueOf(balance);
 		} else {
-			UserCoin userCoin=etherumWalletService.ethWalletBalance(user, tokenName);
-			availableBalance = userCoin.getBalance();
-//			networkFee = GenericUtils.getEstimetedFeeEthereum();
-//			/**
-//			 * network fee required for sending to the receiver address and
-//			 * admin address, so networkFee = networkFee * 2;
-//			 * 
-//			 */
-//			networkFee = networkFee * 2;
+			UserCoin ethUserCoin = etherumWalletService.ethWalletBalance(user, tokenName);
+			availableBalance = ethUserCoin.getBalance();
+
+			// networkFee = GenericUtils.getEstimetedFeeEthereum();
+			// /**
+			// * network fee required for sending to the receiver address and
+			// * admin address, so networkFee = networkFee * 2;
+			// *
+			// */
+			// networkFee = networkFee * 2;
 		}
-//		logger.debug("Available balance: {} estimeted network fee: {}", availableBalance,
-//				GenericUtils.getDecimalFormat().format(networkFee));
-//		availableBalance = GenericUtils.getDecimalFormat(availableBalance - lockVolume);
+		// logger.debug("Available balance: {} estimeted network fee: {}",
+		// availableBalance,
+		// GenericUtils.getDecimalFormat().format(networkFee));
+		// availableBalance = GenericUtils.getDecimalFormat(availableBalance -
+		// lockVolume);
 		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
 
 		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, currency, currency);
@@ -250,8 +273,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (availableBalance >= volume) {
 			return true;
 		} else {
-			throw new InsufficientBalanceException(MessageFormat.format(
-					localeService.getMessage("insufficient.balance"), withdrawAmount, placeOrderVolume));
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("insufficient.balance"), withdrawAmount, placeOrderVolume));
 		}
 	}
 
@@ -267,13 +290,13 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			lockVolume = withdrawalFee.getLockVolume();
 			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
 		}
-		
+
 		if (withdrawAmount <= bolenumFee) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.balance.more.than.fee"));
 		}
 		/**
-		 * network fee required for sending to the receiver address and admin
-		 * address, so networkFee = networkFee * 2;
+		 * network fee required for sending to the receiver address and admin address,
+		 * so networkFee = networkFee * 2;
 		 * 
 		 */
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
@@ -281,7 +304,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (userErc20Token == null) {
 			return false;
 		}
-		if(toAddress.equals(userErc20Token.getWalletAddress())) {
+		if (toAddress.equals(userErc20Token.getWalletAddress())) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
 		}
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
@@ -381,7 +404,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return new AsyncResult<>(true);
 	}
-	
+
 	@Override
 	public boolean adminWithdrawCryptoAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
 		if ("BTC".equals(tokenName)) {
@@ -404,17 +427,19 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	@Override
-	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
+	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress) {
 		return false;
 	}
 
 	@Override
-	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress, Erc20Token erc20Token) {
+	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress, Erc20Token erc20Token) {
 		UserCoin userErc20Token = userCoinRepository.findByWalletAddress(toAddress);
 		if (toAddress.equals(user.getEthWalletaddress())) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
 		}
-		if(userErc20Token != null) {
+		if (userErc20Token != null) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.in.app.wallet"));
 		}
 		Double adminWalletBalance = erc20TokenService.getAdminErc20WalletBalance(user, erc20Token);
@@ -503,4 +528,101 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 		return false;
 	}
+	
+	@Override
+	public void blockEventListener() {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			BtcdDaemon daemon = new BtcdDaemonImpl(client);
+			daemon.addBlockListener(new BlockListener() {
+				@Override
+				public void blockDetected(Block block) {
+					transactions(block.getTx(), client);
+					
+				}
+			});
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("blockEventListener error: {}", e);
+		}
+	}
+	
+	
+	private void transactions(List<String> txs, BtcdClient client) {
+		if (txs.isEmpty()) {
+			return;
+		}
+		txs.forEach(txId -> {
+			try {
+				com.neemre.btcdcli4j.core.domain.Transaction tran = client.getTransaction(txId);
+				List<PaymentOverview> details = tran.getDetails();
+				details.forEach(paymentOverview -> {
+					if (PaymentCategories.RECEIVE.equals(paymentOverview.getCategory())) {
+						String account = paymentOverview.getAccount();
+						if (account.isEmpty()) {
+							saveTxForAdmin(tran);
+						} else {
+							saveTxForUser(account, tran);
+						}
+					}
+				});
+			} catch (BitcoindException | CommunicationException e) {
+				logger.error("transaactions error: {}", e);
+			}
+		});
+	}
+	
+	/**
+	 * save deposit transaction of users
+	 * 
+	 */
+	private void saveTxForUser(String account, com.neemre.btcdcli4j.core.domain.Transaction tran) {
+		try {
+			Long userId = Long.valueOf(account);
+			User user = userRepository.findByUserId(userId);
+			UserCoin coin = userCoinRepository.findByTokenNameAndUser("BTC", user);
+			Transaction transaction = transactionRepo.findByTxHash(tran.getTxId());
+			if (transaction == null) {
+				transaction = new Transaction();
+				transaction.setToUser(user);
+				transaction.setTxHash(tran.getTxId());
+				transaction.setTransactionType(TransactionType.INCOMING);
+				transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
+				transaction.setCurrencyName("BTC");
+				transaction.setTransferStatus(TransferStatus.COMPLETED);
+				transaction.setToAddress(coin.getWalletAddress());
+				transactionRepo.save(transaction);
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + user.getUserId(),
+						com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
+			}
+		} catch (NumberFormatException e) {
+			logger.error("invalid account of user {}", e);
+		}
+
+	}
+	
+	/**
+	 * save deposit transaction of admin
+	 * 
+	 */
+
+	private void saveTxForAdmin(com.neemre.btcdcli4j.core.domain.Transaction tran) {
+		User admin = userRepository.findByEmailId(adminEmail);
+		UserCoin coin = userCoinRepository.findByTokenNameAndUser("BTC", admin);
+		Transaction transaction = transactionRepo.findByTxHash(tran.getTxId());
+		if (transaction == null) {
+			transaction = new Transaction();
+			transaction.setToUser(admin);
+			transaction.setTxHash(tran.getTxId());
+			transaction.setTransactionType(TransactionType.INCOMING);
+			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
+			transaction.setCurrencyName("BTC");
+			transaction.setTransferStatus(TransferStatus.COMPLETED);
+			transaction.setToAddress(coin.getWalletAddress());
+			transactionRepo.save(transaction);
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ADMIN,
+					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
+		}
+	}
+
 }

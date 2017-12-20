@@ -1,7 +1,9 @@
 
 package com.bolenum.controller.user;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
@@ -31,6 +34,7 @@ import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
 import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.WithdrawalFee;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
@@ -73,6 +77,9 @@ public class BTCWalletController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private UserCoinRepository userCoinRepository;
+
 	@Value("${admin.email}")
 	private String adminEmail;
 
@@ -100,7 +107,7 @@ public class BTCWalletController {
 			switch (coinCode) {
 			case "BTC":
 				Map<String, Object> mapAddressAndBal = new HashMap<>();
-				mapAddressAndBal.put("address", btcWalletService.getWalletAddress(user.getBtcWalletUuid()));
+				mapAddressAndBal.put("address", btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
 				mapAddressAndBal.put("balance", btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
 				map.put("data", mapAddressAndBal);
 				break;
@@ -189,7 +196,7 @@ public class BTCWalletController {
 		switch (currencyType) {
 		case "CRYPTO":
 			validWithdrawAmount = btcWalletService.validateCryptoWithdrawAmount(user, coinCode,
-					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee, currency);
+					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee, currency, withdrawBalanceForm.getToAddress());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
@@ -271,6 +278,37 @@ public class BTCWalletController {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localService.getMessage("Deposit saved successfully!"), transactionResponse);
 		}
+	}
+
+	/**
+	 * 
+	 * @param currencyAbbreviation
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.CREATE_ACCOUNT, method = RequestMethod.POST)
+	public ResponseEntity<Object> createAccount(@RequestParam("uuid") long uuid) {
+		User user = userService.findByUserId(uuid);
+		if (user != null) {
+			String address = btcWalletService.createBtcAccount(String.valueOf(uuid));
+			logger.debug("address: {}", address);
+			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("BTC", user);
+			if (userCoin == null) {
+				userCoin = new UserCoin();
+				userCoin.setTokenName("BTC");
+				userCoin.setWalletAddress(address);
+				userCoin.setCurrencyType(CurrencyType.CRYPTO);
+				userCoin.setUser(user);
+				userCoin = userCoinRepository.save(userCoin);
+				List<UserCoin> list = new ArrayList();
+				list.add(userCoin);
+				user.setUserCoin(list);
+				userService.saveUser(user);
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
+						Optional.empty());
+			}
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("message.error"),
+				Optional.empty());
 	}
 
 }
