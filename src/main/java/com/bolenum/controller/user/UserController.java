@@ -1,6 +1,7 @@
 package com.bolenum.controller.user;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import com.bolenum.model.States;
 import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.common.coin.Erc20TokenService;
@@ -80,7 +82,7 @@ public class UserController {
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;
-	
+
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
@@ -134,8 +136,7 @@ public class UserController {
 	 * @return
 	 * 
 	 * 
-	 * @modified by Himanshu Kumar 
-	 * added expiry condition in reset password
+	 * @modified by Himanshu Kumar added expiry condition in reset password
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
@@ -165,13 +166,18 @@ public class UserController {
 			}
 			erc20TokenService.createErc20Wallet(user, "BLN");
 			etherumWalletService.createWallet(user);
-			String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
-			logger.debug("user mail verify wallet uuid: {}", uuid);
-
-			if (!uuid.isEmpty()) {
-				user.setBtcWalletUuid(uuid);
-				user.setBtcWalletAddress(btcWalletService.getWalletAddress(uuid));
+			String address = btcWalletService.createBtcAccount(String.valueOf(user.getUserId()));
+			logger.debug("user mail verify wallet uuid: {}", address);
+			if (!address.isEmpty()) {
 				user.setIsEnabled(true);
+				UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
+				if (userCoin == null) {
+					return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+							localService.getMessage("message.error"), null);
+				}
+				List<UserCoin> userCoins = new ArrayList<>();
+				userCoins.add(userCoin);
+				user.setUserCoin(userCoins);
 				User savedUser = userService.saveUser(user);
 				logger.debug("user mail verify savedUser: {}", savedUser);
 				if (savedUser != null) {
