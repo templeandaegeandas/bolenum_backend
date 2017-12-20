@@ -345,19 +345,14 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		case "CRYPTO":
 			switch (coinCode) {
 			case "BTC":
-				Future<Boolean> res = transactionService.performBtcTransaction(user, toAddress, amount,
+				boolean result = transactionService.withdrawBTC(user, coinCode, toAddress, amount,
 						TransactionStatus.WITHDRAW, bolenumFee, null);
-				try {
-					if (res.get() && bolenumFee > 0) {
-						transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(), bolenumFee,
-								TransactionStatus.FEE, null, null);
-					}
-				} catch (InterruptedException | ExecutionException e1) {
-					e1.printStackTrace();
+				if (!result) {
+					return new AsyncResult<>(false);
 				}
 				break;
 			case "ETH":
-				res = transactionService.performEthTransaction(user, toAddress, amount, TransactionStatus.WITHDRAW,
+				Future<Boolean> res = transactionService.performEthTransaction(user, toAddress, amount, TransactionStatus.WITHDRAW,
 						bolenumFee, null);
 				try {
 					if (res.get() && bolenumFee > 0) {
@@ -386,8 +381,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public boolean adminWithdrawCryptoAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
 		if ("BTC".equals(tokenName)) {
-			transactionService.performBtcTransaction(user, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
-					null);
+			transactionService.withdrawBTC(user, tokenName, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0, null);
 			return true;
 		} else if ("ETH".equals(tokenName)) {
 			transactionService.performEthTransaction(user, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
@@ -406,16 +400,31 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Override
 	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
+		if ("BTC".equals(tokenName)) {
+			UserCoin fromUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
+			UserCoin userCoin = userCoinRepository.findByWalletAddress(toAddress);
+			if (toAddress.equals(fromUserCoin.getWalletAddress())) {
+				throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+			}
+			if(userCoin != null) {
+				throw new InsufficientBalanceException(localeService.getMessage("withdraw.in.app.wallet"));
+			}
+			return true;
+		} else if ("ETH".equals(tokenName)) {
+			transactionService.performEthTransaction(user, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
+					null);
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress, Erc20Token erc20Token) {
-		UserCoin userErc20Token = userCoinRepository.findByWalletAddress(toAddress);
+		UserCoin userCoin = userCoinRepository.findByWalletAddress(toAddress);
 		if (toAddress.equals(user.getEthWalletaddress())) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
 		}
-		if(userErc20Token != null) {
+		if(userCoin != null) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.in.app.wallet"));
 		}
 		Double adminWalletBalance = erc20TokenService.getAdminErc20WalletBalance(user, erc20Token);

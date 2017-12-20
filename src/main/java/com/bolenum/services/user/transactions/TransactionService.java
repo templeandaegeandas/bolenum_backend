@@ -46,4 +46,7 @@ public interface TransactionService {
 	boolean withdrawErc20Token(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId);
 
+	boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount,
+			TransactionStatus transactionStatus, Double fee, Long tradeId);
+
 }
