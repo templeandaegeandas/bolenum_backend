@@ -168,6 +168,30 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	 */
 	@Override
 	public Boolean performEthTrade(User seller, String currencyAbr, User buyer, double qtyTraded, Long tradeId) {
+		UserCoin userEthSeller = userCoinRepository.findByTokenNameAndUser(currencyAbr, seller);
+		UserCoin userEthBuyer = userCoinRepository.findByTokenNameAndUser(currencyAbr, buyer);
+		if (userEthSeller.getBalance() > 0) {
+			Double newBalanceSeller = userEthSeller.getBalance() - qtyTraded;
+			Double newBalanceBuyer = userEthBuyer.getBalance() + qtyTraded;
+
+			logger.debug("seller: {}, existing balance: {} {}", seller.getEmailId(), userEthSeller.getBalance(),
+					currencyAbr);
+			logger.debug("After trade seller:{}, new balance: {} {}", seller.getEmailId(),
+					GenericUtils.getDecimalFormatString(newBalanceSeller), currencyAbr);
+			userEthSeller.setBalance(newBalanceSeller);
+
+			logger.debug("buyer: {}, existing balance: {} {}", buyer.getEmailId(), userEthBuyer.getBalance(),
+					currencyAbr);
+			logger.debug("After trade buyer:{}, new balance: {} {}", buyer.getEmailId(),
+					GenericUtils.getDecimalFormatString(newBalanceBuyer), currencyAbr);
+
+			userEthBuyer.setBalance(newBalanceBuyer);
+			logger.debug("saving trade transaction started for: {} tradeId: {}", currencyAbr, tradeId);
+			userCoinRepository.save(userEthBuyer);
+			userCoinRepository.save(userEthSeller);
+			logger.debug("saving trade transaction completed for: {} tradeId: {}", currencyAbr, tradeId);
+			return true;
+		}
 		return false;
 	}
 
