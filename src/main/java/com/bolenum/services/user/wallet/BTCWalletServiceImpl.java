@@ -429,7 +429,30 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			String toAddress) {
-		return false;
+		Double availableBalance;
+		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
+		if (userCoin == null) {
+			return false;
+		}
+		if (toAddress.equals(userCoin.getWalletAddress())) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+		}
+		if ("BTC".equals(tokenName)) {
+			String balance = getBtcAccountBalance(user.getBtcWalletUuid());
+			availableBalance = Double.valueOf(balance);
+		} else {
+			availableBalance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
+		}
+		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
+
+		double volume = GenericUtils.getDecimalFormat(withdrawAmount);
+		logger.debug("addition of withdraw amount, place order, fee and network fee volume: {}", volume);
+		if (availableBalance >= volume) {
+			return true;
+		} else {
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("insufficient.balance"), withdrawAmount, 0.0));
+		}
 	}
 
 	@Override
