@@ -1,6 +1,7 @@
 package com.bolenum.controller.user;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import com.bolenum.model.States;
 import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.common.coin.Erc20TokenService;
@@ -80,7 +82,7 @@ public class UserController {
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;
-	
+
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
@@ -134,8 +136,7 @@ public class UserController {
 	 * @return
 	 * 
 	 * 
-	 * @modified by Himanshu Kumar 
-	 * added expiry condition in reset password
+	 * @modified by Himanshu Kumar added expiry condition in reset password
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
@@ -143,49 +144,52 @@ public class UserController {
 		logger.debug("user mail verify token: {}", token);
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localService.getMessage("token.invalid"));
-		} else {
-			AuthenticationToken authenticationToken = authenticationTokenService.findByToken(token);
-			if (authenticationToken == null) {
-				logger.debug("user mail verify authenticationToken is null");
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"),
-						null);
-			}
+		}
+		AuthenticationToken authenticationToken = authenticationTokenService.findByToken(token);
+		if (authenticationToken == null) {
+			logger.debug("user mail verify authenticationToken is null");
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"),
+					null);
+		}
 
-			boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
-			logger.debug("user mail verify token expired: {}", isExpired);
-			if (isExpired) {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"),
-						null);
-			}
+		boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
+		logger.debug("user mail verify token expired: {}", isExpired);
+		if (isExpired) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"),
+					null);
+		}
 
-			User user = authenticationToken.getUser();
-			if (user.getIsEnabled()) {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
-						localService.getMessage("link.already.verified"), null);
+		User user = authenticationToken.getUser();
+		if (user.getIsEnabled()) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+					localService.getMessage("link.already.verified"), null);
+		}
+		erc20TokenService.createErc20Wallet(user, "BLN");
+		etherumWalletService.createEthWallet(user, "ETH");
+		String address = btcWalletService.createBtcAccount(String.valueOf(user.getUserId()));
+		logger.debug("user mail verify wallet uuid: {}", address);
+		if (!address.isEmpty()) {
+			UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
+			if (userCoin == null) {
+				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+						localService.getMessage("message.error"), Optional.empty());
 			}
-			erc20TokenService.createErc20Wallet(user, "BLN");
-			//etherumWalletService.createWallet(user);
-			etherumWalletService.createEthWallet(user, "ETH");
-			String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
-			logger.debug("user mail verify wallet uuid: {}", uuid);
-
-			if (!uuid.isEmpty()) {
-				user.setBtcWalletUuid(uuid);
-				user.setBtcWalletAddress(btcWalletService.getWalletAddress(uuid));
-				user.setIsEnabled(true);
-				User savedUser = userService.saveUser(user);
-				logger.debug("user mail verify savedUser: {}", savedUser);
-				if (savedUser != null) {
-					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
-							null);
-				} else {
-					return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-							localService.getMessage("message.error"), null);
-				}
+			user.setBtcWalletUuid(String.valueOf(user.getUserId()));
+			user.setIsEnabled(true);
+			List<UserCoin> userCoins = new ArrayList<>();
+			userCoins.add(userCoin);
+			user.setUserCoin(userCoins);
+			User savedUser = userService.saveUser(user);
+			logger.debug("user mail verify savedUser: {}", savedUser);
+			if (savedUser != null) {
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
 			} else {
 				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
 						localService.getMessage("message.error"), null);
 			}
+		} else {
+			return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+					localService.getMessage("message.error"), null);
 		}
 	}
 

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.TokenType;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
@@ -25,8 +26,10 @@ import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.OTP;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.common.RoleRepo;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.OTPRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.common.KYCService;
@@ -75,6 +78,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private KYCService kycService;
 
+	@Autowired
+	private UserCoinRepository userCoinRepository;
+
 	@Value("${bolenum.profile.image.location}")
 	private String uploadedFileLocation;
 
@@ -122,6 +128,20 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User saveUser(User user) {
 		return userRepository.saveAndFlush(user);
+	}
+
+	@Override
+	public UserCoin saveUserCoin(String walletAddress, User user, String tokenName) {
+		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
+		if (userCoin == null) {
+			userCoin = new UserCoin();
+			userCoin.setWalletAddress(walletAddress);
+			userCoin.setTokenName(tokenName);
+			userCoin.setUser(user);
+			userCoin.setCurrencyType(CurrencyType.CRYPTO);
+			userCoin = userCoinRepository.save(userCoin);
+		}
+		return userCoin;
 	}
 
 	/**

@@ -3,6 +3,8 @@ package com.bolenum.model.coin;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -32,7 +34,7 @@ public class UserCoin {
 	private String walletPwd;
 
 	private String walletPwdKey;
-
+	@Enumerated(EnumType.STRING)
 	private CurrencyType currencyType;
 
 	@CreationTimestamp

@@ -10,6 +10,7 @@ import com.bolenum.exceptions.InvalidPasswordException;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.UserCoin;
 
 /**
  * 
@@ -66,4 +67,6 @@ public interface UserService {
 			throws IOException, PersistenceException, MaxSizeExceedException;
 
 	public boolean isKycVerified(User user);
+
+	UserCoin saveUserCoin(String walletAddress, User user, String tokenName);
 }

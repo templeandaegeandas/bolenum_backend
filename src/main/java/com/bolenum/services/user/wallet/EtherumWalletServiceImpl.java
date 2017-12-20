@@ -77,7 +77,8 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 	// logger.debug("wallet file encPwd: {}", encPwd);
 	// File jsonFile = new File(file + "/" + fileName);
 	// logger.debug("wallet file jsonFile: {}", jsonFile);
-	// Credentials credentials = WalletUtils.loadCredentials(password, jsonFile);
+	// Credentials credentials = WalletUtils.loadCredentials(password,
+	// jsonFile);
 	// logger.debug("wallet address: {}", credentials.getAddress());
 	// user.setEthWalletaddress(credentials.getAddress());
 	// user.setEthWalletPwdKey(passwordKey);
@@ -85,7 +86,8 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 	// user.setEthWalletJsonFileName(fileName);
 	// User savedUser = userService.saveUser(user);
 	// if (savedUser != null) {
-	// logger.debug("eth wallet info saved of user: {}", savedUser.getFullName());
+	// logger.debug("eth wallet info saved of user: {}",
+	// savedUser.getFullName());
 	// } else {
 	// logger.error("eth wallet info not saved of user");
 	// }
@@ -126,7 +128,7 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 				logger.debug("wallet file passwordKey: {}", passwordKey);
 				String encPwd = CryptoUtil.encrypt(password, passwordKey);
 				logger.debug("wallet file encPwd: {}", encPwd);
-				File jsonFile = new File(file + "/" + fileName);
+				File jsonFile = new File(file + File.separator + fileName);
 				logger.debug("wallet file jsonFile: {}", jsonFile);
 				Credentials credentials = WalletUtils.loadCredentials(password, jsonFile);
 				logger.debug("wallet address: {}", credentials.getAddress());
@@ -161,28 +163,29 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 			logger.debug("web3 client version: {}", clientVersion);
 			return clientVersion;
 		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+			logger.error("ethereum client version error: {}", e);
 		}
 		return "";
 	}
 
-	
 	/**
 	 * 
 	 */
 	@Override
 	public Double getEthWalletBalanceForAdmin(UserCoin userCoin) {
 		BigInteger amount = BigInteger.valueOf(0);
-		
-//		UserCoin userCoin=userCoinRepository.findByTokenNameAndUser(tokenName, user);
-//		
-//		if (userCoin.getWalletAddress() == null) {
-//			logger.debug("user does not have ethtereum wallet address: {}", user.getEmailId());
-//			// createWallet(user);
-//
-//			createEthWallet(user, "ETH");
-//			return amount.doubleValue();
-//		}
+
+		// UserCoin
+		// userCoin=userCoinRepository.findByTokenNameAndUser(tokenName, user);
+		//
+		// if (userCoin.getWalletAddress() == null) {
+		// logger.debug("user does not have ethtereum wallet address: {}",
+		// user.getEmailId());
+		// // createWallet(user);
+		//
+		// createEthWallet(user, "ETH");
+		// return amount.doubleValue();
+		// }
 		try {
 			amount = EthereumServiceUtil.getWeb3jInstance()
 					.ethGetBalance(userCoin.getWalletAddress(), DefaultBlockParameterName.fromString("latest")).send()
@@ -190,14 +193,14 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 			BigDecimal balance = new BigDecimal(amount);
 			BigDecimal conversionRate = new BigDecimal(new BigInteger("1000000000000000000"));
 			BigDecimal amountInEther = balance.divide(conversionRate);
-			logger.debug("Ethtereum wallet balance: {} of user: {} ", amountInEther.doubleValue(), userCoin.getUser().getEmailId());
+			logger.debug("Ethtereum wallet balance: {} of user: {} ", amountInEther.doubleValue(),
+					userCoin.getUser().getEmailId());
 			return GenericUtils.getDecimalFormat(amountInEther.doubleValue());
 		} catch (IOException e) {
 			logger.error("get wallet balance error: {}", e.getMessage());
 		}
 		return amount.doubleValue();
 	}
-	
 
 	/**
 	 * 
