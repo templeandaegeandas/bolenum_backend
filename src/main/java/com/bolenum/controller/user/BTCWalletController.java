@@ -299,7 +299,7 @@ public class BTCWalletController {
 				userCoin.setCurrencyType(CurrencyType.CRYPTO);
 				userCoin.setUser(user);
 				userCoin = userCoinRepository.save(userCoin);
-				List<UserCoin> list = new ArrayList();
+				List<UserCoin> list = new ArrayList<>();
 				list.add(userCoin);
 				user.setUserCoin(list);
 				userService.saveUser(user);
