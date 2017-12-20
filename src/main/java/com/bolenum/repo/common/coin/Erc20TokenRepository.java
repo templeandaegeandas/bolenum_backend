@@ -1,10 +1,10 @@
-package com.bolenum.repo.common.erc20token;
+package com.bolenum.repo.common.coin;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.bolenum.model.erc20token.Erc20Token;
+import com.bolenum.model.coin.Erc20Token;
 
 /**
  * 

@@ -20,7 +20,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.bolenum.enums.TwoFactorAuthOption;
-import com.bolenum.model.erc20token.UserErc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -116,8 +116,8 @@ public class User {
 	@OneToMany
 	@Fetch(FetchMode.JOIN)
 	@JsonManagedReference
-	private List<UserErc20Token> userErc20Tokens;
-
+	private List<UserCoin> userCoin;
+	
 	public String getBtcWalletAddress() {
 		return btcWalletAddress;
 	}
@@ -446,15 +446,14 @@ public class User {
 	/**
 	 * @return the userErc20Tokens
 	 */
-	public List<UserErc20Token> getUserErc20Tokens() {
-		return userErc20Tokens;
+	public List<UserCoin> getUserCoin() {
+		return userCoin;
 	}
 
 	/**
 	 * @param userErc20Tokens the userErc20Tokens to set
 	 */
-	public void setUserErc20Tokens(List<UserErc20Token> userErc20Tokens) {
-		this.userErc20Tokens = userErc20Tokens;
+	public void setUserCoin(List<UserCoin> userCoin) {
+		this.userCoin = userCoin;
 	}
-
 }

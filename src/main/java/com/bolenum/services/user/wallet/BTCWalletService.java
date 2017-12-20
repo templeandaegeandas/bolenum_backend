@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.Erc20Token;
 import com.bolenum.model.fees.WithdrawalFee;
 
 /**
@@ -30,8 +31,8 @@ public interface BTCWalletService {
 
 	boolean validateBtcAddresss(String btcWalletUuid, String toAddress);
 
-	boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
-			WithdrawalFee withdrawalFee);
+	boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, WithdrawalFee withdrawalFee,
+			String toAddress);
 
 	Transaction setDepositeList(Transaction transaction);
 
@@ -44,4 +45,13 @@ public interface BTCWalletService {
 	String getBtcAccountBalance(String uuid);
 
 	String getBolenumBtcAccountBalance();
+
+	boolean adminWithdrawCryptoAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
+
+	Future<Boolean> adminWithdrawErc20TokenAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
+
+	boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
+
+	boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress,
+			Erc20Token erc20Token);
 }

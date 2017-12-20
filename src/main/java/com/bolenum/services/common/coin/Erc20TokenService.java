@@ -1,4 +1,4 @@
-package com.bolenum.services.common.erc20token;
+package com.bolenum.services.common.coin;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -16,8 +16,8 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import com.bolenum.model.User;
-import com.bolenum.model.erc20token.Erc20Token;
-import com.bolenum.model.erc20token.UserErc20Token;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 
 /**
  * 
@@ -78,5 +78,9 @@ public interface Erc20TokenService {
 
 	void createErc20Wallet(User user, String tokenName);
 
-	UserErc20Token erc20WalletBalance(User user, Erc20Token erc20Token);
+	UserCoin erc20WalletBalance(User user, Erc20Token erc20Token);
+
+	void sendUserTokenToAdmin();
+
+	Double getAdminErc20WalletBalance(User user, Erc20Token erc20Token);
 }

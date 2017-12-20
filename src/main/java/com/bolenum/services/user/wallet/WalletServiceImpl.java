@@ -6,14 +6,15 @@ package com.bolenum.services.user.wallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
-import com.bolenum.model.erc20token.Erc20Token;
+import com.bolenum.model.coin.Erc20Token;
 import com.bolenum.model.orders.book.Orders;
-import com.bolenum.services.common.erc20token.Erc20TokenService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.util.GenericUtils;
 
 /**
@@ -26,6 +27,7 @@ public class WalletServiceImpl implements WalletService {
 	private Logger logger = LoggerFactory.getLogger(WalletServiceImpl.class);
 
 	@Autowired
+	@Lazy
 	private BTCWalletService btcWalletService;
 
 	@Autowired

@@ -72,17 +72,17 @@ import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
-import com.bolenum.model.erc20token.Erc20Token;
-import com.bolenum.model.erc20token.UserErc20Token;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
-import com.bolenum.repo.common.erc20token.UserErc20TokenRepository;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
-import com.bolenum.services.common.erc20token.Erc20TokenService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrderAsyncService;
 import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.UserService;
@@ -153,7 +153,7 @@ public class TransactionServiceImpl implements TransactionService {
 	private WalletService walletService;
 
 	@Autowired
-	private UserErc20TokenRepository userErc20TokenRepository;
+	private UserCoinRepository userCoinRepository;
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
@@ -198,7 +198,7 @@ public class TransactionServiceImpl implements TransactionService {
 						tradeId);
 				errorService.saveError(error);
 				logger.debug("error saved: {}", error);
-				return new AsyncResult<Boolean>(false);
+				return new AsyncResult<>(false);
 			}
 			logger.debug("ETH transaction send fund completed");
 			String txHash = ethSendTransaction.getTransactionHash();
@@ -229,14 +229,14 @@ public class TransactionServiceImpl implements TransactionService {
 							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult<Boolean>(true);
+					return new AsyncResult<>(true);
 				}
 			}
 		} catch (InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException
 				| IllegalBlockSizeException | BadPaddingException e1) {
 			logger.error("ETH transaction failed:  {}", e1);
 		}
-		return new AsyncResult<Boolean>(false);
+		return new AsyncResult<>(false);
 	}
 
 	private EthSendTransaction transferEth(Credentials credentials, String toAddress, Double amount) {
@@ -306,7 +306,7 @@ public class TransactionServiceImpl implements TransactionService {
 		} catch (JSONException e) {
 			logger.error("json parse error: {}", e);
 		}
-		HttpEntity<String> entity = new HttpEntity<String>(request.toString(), headers);
+		HttpEntity<String> entity = new HttpEntity<>(request.toString(), headers);
 		try {
 			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 			if (txRes.getStatusCode() == HttpStatus.OK) {
@@ -344,7 +344,7 @@ public class TransactionServiceImpl implements TransactionService {
 								UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 								com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 						logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-						return new AsyncResult<Boolean>(true);
+						return new AsyncResult<>(true);
 					}
 				} else {
 					logger.debug(" transaction exist hash: {}", transaction.getTxHash());
@@ -364,13 +364,14 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("error saved: {}", error);
 			logger.error("btc transaction exception:  {}", e);
 		}
-		return new AsyncResult<Boolean>(false);
+		return new AsyncResult<>(false);
 	}
 
 	@Override
 	@Async
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
+		logger.debug("transaction started: {}", fromUser.getEmailId());
 		try {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 			User admin = userRepository.findByEmailId(adminEmail);
@@ -410,42 +411,48 @@ public class TransactionServiceImpl implements TransactionService {
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult<Boolean>(true);
+					return new AsyncResult<>(true);
 				}
-			} else {
-				logger.debug("transaction else part already saved: {}", transaction.getTxHash());
-				transaction.setFromAddress(fromUser.getEthWalletaddress());
-				transaction.setToAddress(toAddress);
-				transaction.setTxAmount(amount);
-				transaction.setTransactionType(TransactionType.OUTGOING);
-				transaction.setTransactionStatus(transactionStatus);
-				transaction.setFromUser(fromUser);
-				transaction.setCurrencyName(tokenName);
-				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
-				logger.debug("receiver else part: {}", receiverUser);
-				if (receiverUser != null) {
-					logger.debug("receiver else part saved with user: {}", receiverUser.getUserId());
-					transaction.setToUser(receiverUser);
-
-				}
-				transaction.setTradeId(tradeId);
-				Transaction saved = transactionRepo.saveAndFlush(transaction);
-				logger.debug("transaction else part saved completed: {}", fromUser.getEmailId());
-				if (saved != null) {
-					simpMessagingTemplate.convertAndSend(
-							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
-							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
-					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
-					logger.debug("transaction else part saved successfully of user: {}", fromUser.getEmailId());
-					return new AsyncResult<Boolean>(true);
-				}
+				// } else {
+				// logger.debug("transaction else part already saved: {}",
+				// transaction.getTxHash());
+				// transaction.setFromAddress(fromUser.getEthWalletaddress());
+				// transaction.setToAddress(toAddress);
+				// transaction.setTxAmount(amount);
+				// transaction.setTransactionType(TransactionType.OUTGOING);
+				// transaction.setTransactionStatus(transactionStatus);
+				// transaction.setFromUser(fromUser);
+				// transaction.setCurrencyName(tokenName);
+				// User receiverUser = userRepository.findByEthWalletaddress(toAddress);
+				// logger.debug("receiver else part: {}", receiverUser);
+				// if (receiverUser != null) {
+				// logger.debug("receiver else part saved with user: {}",
+				// receiverUser.getUserId());
+				// transaction.setToUser(receiverUser);
+				//
+				// }
+				// transaction.setTradeId(tradeId);
+				// Transaction saved = transactionRepo.saveAndFlush(transaction);
+				// logger.debug("transaction else part saved completed: {}",
+				// fromUser.getEmailId());
+				// if (saved != null) {
+				// simpMessagingTemplate.convertAndSend(
+				// UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" +
+				// fromUser.getUserId(),
+				// com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+				// logger.debug("message sent to websocket: {}",
+				// com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+				// logger.debug("transaction else part saved successfully of user: {}",
+				// fromUser.getEmailId());
+				// return new AsyncResult(true);
+				// }
 			}
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException | IOException | CipherException | TransactionException | InterruptedException
 				| ExecutionException e) {
 			logger.error("{} transaction failed:  {}", tokenName, e);
 		}
-		return new AsyncResult<Boolean>(false);
+		return new AsyncResult<>(false);
 	}
 
 	/**
@@ -489,18 +496,18 @@ public class TransactionServiceImpl implements TransactionService {
 						notificationService.saveNotification(buyer, seller, msg1);
 						logger.debug("Message : {}", msg);
 						logger.debug("Message : {}", msg1);
-						return new AsyncResult(res);
+						return new AsyncResult<>(res);
 					}
 					/**
 					 * if transaction for admin, then return result without mail
 					 * notification
 					 */
 					if (res && isFee) {
-						return new AsyncResult(res);
+						return new AsyncResult<>(res);
 					}
 				} catch (InterruptedException | ExecutionException e) {
 					logger.error("BTC transaction failed: {}", e);
-					return new AsyncResult(false);
+					return new AsyncResult<>(false);
 				}
 				break;
 			case "ETH":
@@ -520,18 +527,18 @@ public class TransactionServiceImpl implements TransactionService {
 						notificationService.saveNotification(buyer, seller, msg1);
 						logger.debug("Message : {}", msg);
 						logger.debug("Message : {}", msg1);
-						return new AsyncResult(res);
+						return new AsyncResult<>(res);
 					}
 					/**
 					 * if transaction for admin, then return result without mail
 					 * notification
 					 */
 					if (res && isFee) {
-						return new AsyncResult(res);
+						return new AsyncResult<>(res);
 					}
 				} catch (InterruptedException | ExecutionException e) {
 					logger.error("ETH transaction failed: {}", e);
-					return new AsyncResult(false);
+					return new AsyncResult<>(false);
 				}
 			}
 			break;
@@ -556,14 +563,14 @@ public class TransactionServiceImpl implements TransactionService {
 				notificationService.saveNotification(buyer, seller, msg1);
 				logger.debug("Message : {}", msg);
 				logger.debug("Message : {}", msg1);
-				return new AsyncResult(res);
+				return new AsyncResult<>(res);
 			}
 			/**
 			 * if transaction for admin, then return result without mail
 			 * notification
 			 */
 			if (res && isFee) {
-				return new AsyncResult(res);
+				return new AsyncResult<>(res);
 			}
 			// } catch (InterruptedException | ExecutionException e) {
 			// logger.error("ERC20TOKEN transaction failed: {}", e);
@@ -573,7 +580,7 @@ public class TransactionServiceImpl implements TransactionService {
 		default:
 			break;
 		}
-		return new AsyncResult(false);
+		return new AsyncResult<>(false);
 	}
 
 	/**
@@ -783,13 +790,13 @@ public class TransactionServiceImpl implements TransactionService {
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
 		}
-		return new AsyncResult<Boolean>(true);
+		return new AsyncResult<>(true);
 	}
 
 	@Override
 	public void fetchTransactionConfirmation(Page<Transaction> page) {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-		List<Transaction> list = new ArrayList<Transaction>();
+		List<Transaction> list = new ArrayList<>();
 		String status = "CONFIRMED";
 		page.forEach(transaction -> {
 			try {
@@ -825,8 +832,8 @@ public class TransactionServiceImpl implements TransactionService {
 
 	public void fetchBTCConfirmation(Page<Transaction> page) {
 		String status = "CONFIRMED";
-		List<String> btcHash = new ArrayList();
-		Map<String, Integer> map = new HashMap();
+		List<String> btcHash = new ArrayList<>();
+		Map<String, Integer> map = new HashMap<>();
 		page.forEach(transaction -> {
 			if ("BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
 					&& !status.equals(transaction.getTxStatus())) {
@@ -899,12 +906,43 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
-	public boolean deductErc20Balance(User user, double amount, String tokenName) {
-		UserErc20Token userErc20Token = userErc20TokenRepository.findByTokenNameAndUser(tokenName, user);
-		if (userErc20Token != null) {
-			userErc20Token.setBalance(userErc20Token.getBalance() - amount);
-			userErc20TokenRepository.save(userErc20Token);
-			return true;
+	public boolean withdrawErc20Token(User fromUser, String tokenName, String toAddress, Double amount,
+			TransactionStatus transactionStatus, Double fee, Long tradeId) {
+		UserCoin senderUserErc20Token = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
+		if (senderUserErc20Token != null) {
+			senderUserErc20Token.setBalance(senderUserErc20Token.getBalance() - amount);
+			userCoinRepository.save(senderUserErc20Token);
+			UserCoin receiverUserErc20Token = userCoinRepository.findByWalletAddress(toAddress);
+			if (receiverUserErc20Token != null) {
+				receiverUserErc20Token.setBalance(receiverUserErc20Token.getBalance() + (amount - fee));
+				userCoinRepository.save(receiverUserErc20Token);
+				Transaction transaction = new Transaction();
+				transaction.setFromAddress(senderUserErc20Token.getWalletAddress());
+				transaction.setToAddress(toAddress);
+				transaction.setTxAmount(amount - fee);
+				transaction.setTransactionType(TransactionType.OUTGOING);
+				transaction.setTransactionStatus(transactionStatus);
+				transaction.setFromUser(fromUser);
+				transaction.setCurrencyName(tokenName);
+				transaction.setFee(fee);
+				transaction.setToUser(receiverUserErc20Token.getUser());
+				transaction.setTradeId(tradeId);
+				transaction.setInAppTransaction(true);
+				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
+				if (saved != null) {
+					simpMessagingTemplate.convertAndSend(
+							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
+							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
+					return true;
+				}
+			} else {
+				performErc20Transaction(fromUser, tokenName, toAddress, amount - fee, TransactionStatus.WITHDRAW, fee,
+						null);
+				return true;
+			}
 		}
 		return false;
 	}

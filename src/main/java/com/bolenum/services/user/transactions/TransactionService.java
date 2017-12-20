@@ -43,6 +43,7 @@ public interface TransactionService {
 
 	public void fetchTransactionConfirmation(Page<Transaction> page);
 
-	boolean deductErc20Balance(User user, double amount, String tokenName);
+	boolean withdrawErc20Token(User fromUser, String tokenName, String toAddress, Double amount,
+			TransactionStatus transactionStatus, Double fee, Long tradeId);
 
 }

@@ -1,4 +1,4 @@
-package com.bolenum.model.erc20token;
+package com.bolenum.model.coin;
 
 import java.util.Date;
 

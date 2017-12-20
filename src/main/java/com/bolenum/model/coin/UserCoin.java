@@ -1,4 +1,4 @@
-package com.bolenum.model.erc20token;
+package com.bolenum.model.coin;
 
 import java.util.Date;
 
@@ -10,11 +10,12 @@ import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
-public class UserErc20Token {
+public class UserCoin {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,6 +33,8 @@ public class UserErc20Token {
 
 	private String walletPwdKey;
 
+	private CurrencyType currencyType;
+
 	@CreationTimestamp
 	private Date createdOn;
 
@@ -43,7 +46,7 @@ public class UserErc20Token {
 	@JsonBackReference
 	private User user;
 
-	public UserErc20Token() {
+	public UserCoin() {
 
 	}
 
@@ -59,8 +62,8 @@ public class UserErc20Token {
 	 * @param isDeleted
 	 * @param user
 	 */
-	public UserErc20Token(String walletAddress, Double balance, String tokenName, String walletJsonFile,
-			String walletPwd, String walletPwdKey, User user) {
+	public UserCoin(String walletAddress, Double balance, String tokenName, String walletJsonFile, String walletPwd,
+			String walletPwdKey, CurrencyType currencyType, User user) {
 		super();
 		this.walletAddress = walletAddress;
 		this.balance = balance;
@@ -68,6 +71,7 @@ public class UserErc20Token {
 		this.walletJsonFile = walletJsonFile;
 		this.walletPwd = walletPwd;
 		this.walletPwdKey = walletPwdKey;
+		this.currencyType = currencyType;
 		this.user = user;
 	}
 
@@ -174,6 +178,21 @@ public class UserErc20Token {
 	 */
 	public void setWalletPwdKey(String walletPwdKey) {
 		this.walletPwdKey = walletPwdKey;
+	}
+
+	/**
+	 * @return the currencyType
+	 */
+	public CurrencyType getCurrencyType() {
+		return currencyType;
+	}
+
+	/**
+	 * @param currencyType
+	 *            the currencyType to set
+	 */
+	public void setCurrencyType(CurrencyType currencyType) {
+		this.currencyType = currencyType;
 	}
 
 	/**

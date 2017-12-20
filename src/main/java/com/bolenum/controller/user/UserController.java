@@ -40,7 +40,7 @@ import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
-import com.bolenum.services.common.erc20token.Erc20TokenService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.SubscribedUserService;

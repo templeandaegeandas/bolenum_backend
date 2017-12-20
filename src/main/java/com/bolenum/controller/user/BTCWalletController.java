@@ -28,13 +28,13 @@ import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
-import com.bolenum.model.erc20token.Erc20Token;
-import com.bolenum.model.erc20token.UserErc20Token;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
-import com.bolenum.services.common.erc20token.Erc20TokenService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
@@ -84,7 +84,7 @@ public class BTCWalletController {
 	 * ResponseEntity<Map<String,Object>> @exception
 	 *
 	 */
-	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.DEPOSIT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWalletAddressAndBalance(@RequestParam(name = "currencyType") String currencyType,
 			@RequestParam(name = "code") String coinCode) {
@@ -118,7 +118,7 @@ public class BTCWalletController {
 			break;
 		case "ERC20TOKEN":
 			Erc20Token erc20Token = erc20TokenService.getByCoin(coinCode);
-			UserErc20Token userErc20Token = erc20TokenService.erc20WalletBalance(user, erc20Token);
+			UserCoin userErc20Token = erc20TokenService.erc20WalletBalance(user, erc20Token);
 			if (userErc20Token == null) {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 						localService.getMessage("There is an error for getting balance of user for: " + coinCode),
@@ -159,7 +159,7 @@ public class BTCWalletController {
 	 * @throws InterruptedException
 	 * @throws InsufficientBalanceException
 	 */
-	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmount(@RequestParam(name = "currencyType") String currencyType,
 			@Valid @RequestBody WithdrawBalanceForm withdrawBalanceForm, @RequestParam(name = "code") String coinCode,
@@ -217,7 +217,7 @@ public class BTCWalletController {
 
 		case "ERC20TOKEN":
 			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode,
-					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee);
+					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee, withdrawBalanceForm.getToAddress());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
