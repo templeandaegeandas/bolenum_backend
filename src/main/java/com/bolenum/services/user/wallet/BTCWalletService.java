@@ -16,22 +16,19 @@ import com.bolenum.model.fees.WithdrawalFee;
  */
 public interface BTCWalletService {
 
-	/**
-	 * @description createHotWallet @param @return String @exception
-	 * 
-	 */
 	String createHotWallet(String uuid);
+
+	String createBtcAccount(String uuid);
 
 	String getWalletBalance(String uuid);
 
-	/**
-	 * @description getWalletAddress @param @return
-	 *              Map<String,Object> @exception
-	 * 
-	 */
 	String getWalletAddress(String walletUuid);
 
+	String getBtcAccountAddress(String walletUuid);
+
 	boolean validateAddresss(String btcWalletUuid, String toAddress);
+
+	boolean validateBtcAddresss(String btcWalletUuid, String toAddress);
 
 	boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			WithdrawalFee withdrawalFee);
@@ -43,4 +40,8 @@ public interface BTCWalletService {
 
 	Future<Boolean> withdrawAmount(String currencyType, String coinCode, User user, String toAddress, Double amount,
 			Double bolenumFee, User admin);
+
+	String getBtcAccountBalance(String uuid);
+
+	String getBolenumBtcAccountBalance();
 }

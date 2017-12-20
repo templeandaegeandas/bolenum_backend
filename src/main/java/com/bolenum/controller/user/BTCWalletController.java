@@ -101,7 +101,7 @@ public class BTCWalletController {
 			case "BTC":
 				Map<String, Object> mapAddressAndBal = new HashMap<>();
 				mapAddressAndBal.put("address", btcWalletService.getWalletAddress(user.getBtcWalletUuid()));
-				mapAddressAndBal.put("balance", btcWalletService.getWalletBalance(user.getBtcWalletUuid()));
+				mapAddressAndBal.put("balance", btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
 				map.put("data", mapAddressAndBal);
 				break;
 			case "ETH":
@@ -189,22 +189,27 @@ public class BTCWalletController {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), bolenumFee, admin);
 			}
-			
+
 			/*
-			 * switch (coinCode) { case "BTC": logger.debug("Validate balance: {}",
-			 * validWithdrawAmount); if (validWithdrawAmount) {
+			 * switch (coinCode) { case "BTC":
+			 * logger.debug("Validate balance: {}", validWithdrawAmount); if
+			 * (validWithdrawAmount) {
 			 * transactionService.performBtcTransaction(user,
-			 * withdrawBalanceForm.getToAddress(), withdrawBalanceForm.getWithdrawAmount(),
+			 * withdrawBalanceForm.getToAddress(),
+			 * withdrawBalanceForm.getWithdrawAmount(),
 			 * TransactionStatus.WITHDRAW, bolenumFee); if (bolenumFee > 0) {
-			 * transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(),
-			 * bolenumFee, TransactionStatus.FEE, null); } } break; case "ETH":
+			 * transactionService.performBtcTransaction(user,
+			 * admin.getBtcWalletAddress(), bolenumFee, TransactionStatus.FEE,
+			 * null); } } break; case "ETH":
 			 * logger.debug("Validate balance: {}", validWithdrawAmount); if
 			 * (validWithdrawAmount) { Future<Boolean> res =
 			 * transactionService.performEthTransaction(user,
-			 * withdrawBalanceForm.getToAddress(), withdrawBalanceForm.getWithdrawAmount(),
-			 * TransactionStatus.WITHDRAW, bolenumFee); if (res.get() && bolenumFee > 0) {
-			 * transactionService.performEthTransaction(user, admin.getEthWalletaddress(),
-			 * bolenumFee, TransactionStatus.FEE, null); } } break; default: return
+			 * withdrawBalanceForm.getToAddress(),
+			 * withdrawBalanceForm.getWithdrawAmount(),
+			 * TransactionStatus.WITHDRAW, bolenumFee); if (res.get() &&
+			 * bolenumFee > 0) { transactionService.performEthTransaction(user,
+			 * admin.getEthWalletaddress(), bolenumFee, TransactionStatus.FEE,
+			 * null); } } break; default: return
 			 * ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 			 * localService.getMessage("invalid.coin.code"), null); }
 			 */
@@ -218,12 +223,15 @@ public class BTCWalletController {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), bolenumFee, admin);
 				/*
-				 * Future<Boolean> res = transactionService.performErc20Transaction(user,
-				 * coinCode, withdrawBalanceForm.getToAddress(),
-				 * withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW,
-				 * bolenumFee); if (res.get() && bolenumFee > 0) {
+				 * Future<Boolean> res =
 				 * transactionService.performErc20Transaction(user, coinCode,
-				 * admin.getEthWalletaddress(), bolenumFee, TransactionStatus.FEE, null); }
+				 * withdrawBalanceForm.getToAddress(),
+				 * withdrawBalanceForm.getWithdrawAmount(),
+				 * TransactionStatus.WITHDRAW, bolenumFee); if (res.get() &&
+				 * bolenumFee > 0) {
+				 * transactionService.performErc20Transaction(user, coinCode,
+				 * admin.getEthWalletaddress(), bolenumFee,
+				 * TransactionStatus.FEE, null); }
 				 */
 			}
 			break;

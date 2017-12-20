@@ -66,6 +66,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.Error;
@@ -91,6 +92,10 @@ import com.bolenum.services.user.wallet.WalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.EthereumServiceUtil;
 import com.bolenum.util.GenericUtils;
+import com.bolenum.util.ResourceUtils;
+import com.neemre.btcdcli4j.core.BitcoindException;
+import com.neemre.btcdcli4j.core.CommunicationException;
+import com.neemre.btcdcli4j.core.client.BtcdClient;
 
 /**
  * @author chandan kumar singh
@@ -273,6 +278,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 */
 	@Override
 	@Async
+	@Deprecated
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double feeE, Long tradeId) {
 		logger.debug("performing btc tx : {} to address: {}, amount:{}", fromUser.getEmailId(), toAddress,
@@ -442,7 +448,6 @@ public class TransactionServiceImpl implements TransactionService {
 		return new AsyncResult<Boolean>(false);
 	}
 
-
 	/**
 	 * 
 	 */
@@ -474,7 +479,8 @@ public class TransactionServiceImpl implements TransactionService {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
 					/**
-					 * if transaction for users, then return result with mail notification to users
+					 * if transaction for users, then return result with mail
+					 * notification to users
 					 */
 					if (res && !isFee) {
 						notificationService.sendNotification(seller, msg);
@@ -486,7 +492,8 @@ public class TransactionServiceImpl implements TransactionService {
 						return new AsyncResult(res);
 					}
 					/**
-					 * if transaction for admin, then return result without mail notification
+					 * if transaction for admin, then return result without mail
+					 * notification
 					 */
 					if (res && isFee) {
 						return new AsyncResult(res);
@@ -503,7 +510,8 @@ public class TransactionServiceImpl implements TransactionService {
 					boolean res = txStatus.get();
 					logger.debug("is ETH transaction successed: {}", res);
 					/**
-					 * if transaction for users, then return result with mail notification to users
+					 * if transaction for users, then return result with mail
+					 * notification to users
 					 */
 					if (res && !isFee) {
 						notificationService.sendNotification(seller, msg);
@@ -515,7 +523,8 @@ public class TransactionServiceImpl implements TransactionService {
 						return new AsyncResult(res);
 					}
 					/**
-					 * if transaction for admin, then return result without mail notification
+					 * if transaction for admin, then return result without mail
+					 * notification
 					 */
 					if (res && isFee) {
 						return new AsyncResult(res);
@@ -537,7 +546,8 @@ public class TransactionServiceImpl implements TransactionService {
 			// boolean res = txStatus.get();
 			logger.debug("is ERC20TOKEN transaction successed: {}", res);
 			/**
-			 * if transaction for users, then return result with mail notification to users
+			 * if transaction for users, then return result with mail
+			 * notification to users
 			 */
 			if (res && !isFee) {
 				notificationService.sendNotification(seller, msg);
@@ -549,7 +559,8 @@ public class TransactionServiceImpl implements TransactionService {
 				return new AsyncResult(res);
 			}
 			/**
-			 * if transaction for admin, then return result without mail notification
+			 * if transaction for admin, then return result without mail
+			 * notification
 			 */
 			if (res && isFee) {
 				return new AsyncResult(res);
@@ -655,7 +666,8 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(),
 					GenericUtils.getDecimalFormatString(qtyTraded), toCurrAbrrivaiton);
 			/**
-			 * Seller performing transaction; to send ETH to buyer in case of ETH/BTC pair
+			 * Seller performing transaction; to send ETH to buyer in case of
+			 * ETH/BTC pair
 			 */
 			Future<Boolean> txStatus = performTransaction(toCurrAbrrivaiton, qtyTraded, buyer, seller, false,
 					trade.getId());
@@ -698,7 +710,8 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
 					pairCurrAbrrivaiton);
 			/**
-			 * Buyer performing transaction; to send BTC to Seller in case of ETH/BTC pair
+			 * Buyer performing transaction; to send BTC to Seller in case of
+			 * ETH/BTC pair
 			 */
 			txStatus = performTransaction(pairCurrAbrrivaiton, sellerQty, seller, buyer, false, trade.getId());
 
@@ -804,8 +817,7 @@ public class TransactionServiceImpl implements TransactionService {
 		});
 		transactionRepo.save(list);
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param page
@@ -885,7 +897,7 @@ public class TransactionServiceImpl implements TransactionService {
 			}
 		});
 	}
-	
+
 	@Override
 	public boolean deductErc20Balance(User user, double amount, String tokenName) {
 		UserErc20Token userErc20Token = userErc20TokenRepository.findByTokenNameAndUser(tokenName, user);
@@ -893,6 +905,54 @@ public class TransactionServiceImpl implements TransactionService {
 			userErc20Token.setBalance(userErc20Token.getBalance() - amount);
 			userErc20TokenRepository.save(userErc20Token);
 			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * this will do real btc transaction from user account to btc address
+	 */
+	@Override
+	public Boolean performBtcTransaction(User fromUser, String toAddress, Double amount, Double fee) {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			BigDecimal currentBal = client.getBalance(String.valueOf(fromUser.getUserId()));
+			BigDecimal balance = BigDecimal.valueOf(amount);
+			logger.debug("user: {} has current account balance:{} and withdraw amount: {}", fromUser.getEmailId(),
+					GenericUtils.getDecimalFormatString(currentBal.doubleValue()),
+					GenericUtils.getDecimalFormatString(balance.doubleValue()));
+			if (currentBal.compareTo(balance) > 0) {
+				throw new InsufficientBalanceException("You have insufficent balance ");
+			}
+			String txHash = client.sendFrom(String.valueOf(fromUser.getUserId()), toAddress,
+					BigDecimal.valueOf(amount));
+			if (txHash == null) {
+				return false;
+			}
+			logger.debug("transaction hash: {} of btc tx of user: {} amount: {}", txHash, fromUser.getEmailId(),
+					GenericUtils.getDecimalFormatString(balance.doubleValue()));
+			Transaction transaction = transactionRepo.findByTxHash(txHash);
+			if (transaction == null) {
+				transaction = new Transaction();
+				transaction.setTxHash(txHash);
+				transaction.setToAddress(toAddress);
+				transaction.setTxAmount(amount);
+				transaction.setTransactionType(TransactionType.OUTGOING);
+				transaction.setFromUser(fromUser);
+				transaction.setCurrencyName("BTC");
+				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				if (saved != null) {
+					simpMessagingTemplate.convertAndSend(
+							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
+							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
+					return true;
+				}
+			} else {
+				logger.debug(" transaction exist hash: {}", transaction.getTxHash());
+			}
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("BTC account balance error: {}", e);
 		}
 		return false;
 	}

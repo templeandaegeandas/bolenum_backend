@@ -4,6 +4,7 @@
 package com.bolenum.services.user.wallet;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,10 +48,15 @@ import com.bolenum.services.common.erc20token.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.util.GenericUtils;
+import com.bolenum.util.ResourceUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neemre.btcdcli4j.core.BitcoindException;
+import com.neemre.btcdcli4j.core.CommunicationException;
+import com.neemre.btcdcli4j.core.client.BtcdClient;
+import com.neemre.btcdcli4j.core.domain.AddressInfo;
 
 /**
  * @author chandan kumar singh
@@ -102,6 +108,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * @return wallet Id
 	 */
 	@Override
+	@Deprecated
 	public String createHotWallet(String uuid) {
 		String url = btcUrl + UrlConstant.HOT_WALLET;
 		RestTemplate restTemplate = new RestTemplate();
@@ -132,9 +139,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	/**
-	 * to get Bitcoin wallet balance
+	 * to get Bitcoin wallet balance, depricated code
 	 */
+
 	@SuppressWarnings("unchecked")
+	@Deprecated
 	@Override
 	public String getWalletBalance(String uuid) {
 		String url = btcUrl + UrlConstant.WALLET_BAL;
@@ -157,6 +166,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
+	@Deprecated
 	public String getWalletAddress(String walletUuid) {
 		String url = btcUrl + UrlConstant.WALLET_ADDR;
 		RestTemplate restTemplate = new RestTemplate();
@@ -180,6 +190,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * to vaidate address of user wallet
 	 */
 	@Override
+	@Deprecated
 	public boolean validateAddresss(String btcWalletUuid, String toAddress) {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = btcUrl + UrlConstant.WALLET_ADDR;
@@ -215,14 +226,14 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
 		if ("BTC".equals(tokenName)) {
-			String balance = getWalletBalance(user.getBtcWalletUuid());
+			String balance = getBtcAccountBalance(user.getBtcWalletUuid());
 			availableBalance = Double.valueOf(balance);
 		} else {
 			availableBalance = etherumWalletService.getWalletBalance(user);
 			networkFee = GenericUtils.getEstimetedFeeEthereum();
 			/**
-			 * network fee required for sending to the receiver address and admin address,
-			 * so networkFee = networkFee * 2;
+			 * network fee required for sending to the receiver address and
+			 * admin address, so networkFee = networkFee * 2;
 			 * 
 			 */
 			networkFee = networkFee * 2;
@@ -255,8 +266,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			lockVolume = withdrawalFee.getLockVolume();
 		}
 		/**
-		 * network fee required for sending to the receiver address and admin address,
-		 * so networkFee = networkFee * 2;
+		 * network fee required for sending to the receiver address and admin
+		 * address, so networkFee = networkFee * 2;
 		 * 
 		 */
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
@@ -372,5 +383,85 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			new AsyncResult<Boolean>(false);
 		}
 		return new AsyncResult<Boolean>(true);
+	}
+
+	/**
+	 * to create account in btc wallet of a user
+	 * 
+	 * @param userid
+	 * @return btc address
+	 */
+	@Override
+	public String createBtcAccount(String uuid) {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			return client.getAccountAddress(uuid);
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("BTC account creation error: {}", e);
+		}
+		return null;
+	}
+
+	/**
+	 * to get the user account balance
+	 * 
+	 * @param userid
+	 * @return user account balance
+	 */
+	@Override
+	public String getBtcAccountBalance(String uuid) {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			BigDecimal balance = client.getBalance(uuid);
+			String bal = GenericUtils.getDecimalFormatString(balance.doubleValue());
+			logger.info("btc balance: {} of user: {} ", bal, uuid);
+			return bal;
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("BTC account balance error: {}", e);
+		}
+		return "0";
+	}
+
+	/**
+	 * to get the Bolenum server account balance
+	 * 
+	 * @return server account balance
+	 */
+	@Override
+	public String getBolenumBtcAccountBalance() {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			String bal = GenericUtils.getDecimalFormatString(client.getBalance().doubleValue());
+			logger.info("btc balance of bolenum: {} ", bal);
+			return bal;
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("BTC account balance error: {}", e);
+		}
+		return "0";
+	}
+
+	/**
+	 * to get the account address of existing user
+	 * 
+	 * @return account address
+	 */
+	@Override
+	public String getBtcAccountAddress(String walletUuid) {
+		return createBtcAccount(walletUuid);
+	}
+
+	@Override
+	public boolean validateBtcAddresss(String btcWalletUuid, String toAddress) {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			AddressInfo address = client.validateAddress(toAddress);
+			if (address.getIsValid()) {
+				return true;
+			}
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("validate adrress error: {}", e);
+		}
+
+		return false;
 	}
 }

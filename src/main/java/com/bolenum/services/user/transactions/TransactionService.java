@@ -26,6 +26,8 @@ public interface TransactionService {
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId);
 
+	public Boolean performBtcTransaction(User fromUser, String toAddress, Double amount, Double fee);
+
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
 			boolean isFee, Long tradeID) throws InterruptedException, ExecutionException;
 
