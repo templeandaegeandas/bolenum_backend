@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -33,6 +34,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.enums.TransferStatus;
 import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
@@ -46,6 +48,7 @@ import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
+import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResourceUtils;
@@ -57,6 +60,12 @@ import com.neemre.btcdcli4j.core.BitcoindException;
 import com.neemre.btcdcli4j.core.CommunicationException;
 import com.neemre.btcdcli4j.core.client.BtcdClient;
 import com.neemre.btcdcli4j.core.domain.AddressInfo;
+import com.neemre.btcdcli4j.core.domain.Block;
+import com.neemre.btcdcli4j.core.domain.PaymentOverview;
+import com.neemre.btcdcli4j.core.domain.enums.PaymentCategories;
+import com.neemre.btcdcli4j.daemon.BtcdDaemon;
+import com.neemre.btcdcli4j.daemon.BtcdDaemonImpl;
+import com.neemre.btcdcli4j.daemon.event.BlockListener;
 
 /**
  * @author chandan kumar singh
@@ -90,12 +99,15 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Autowired
 	private TransactionService transactionService;
-	
+
 	@Autowired
 	private UserCoinRepository userCoinRepository;
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
+
+	@Value("${admin.email}")
+	private String adminEmail;
 
 	/**
 	 * 
@@ -267,7 +279,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			lockVolume = withdrawalFee.getLockVolume();
 			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
 		}
-		
+
 		if (withdrawAmount <= bolenumFee) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.balance.more.than.fee"));
 		}
@@ -281,7 +293,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (userErc20Token == null) {
 			return false;
 		}
-		if(toAddress.equals(userErc20Token.getWalletAddress())) {
+		if (toAddress.equals(userErc20Token.getWalletAddress())) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
 		}
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
@@ -381,7 +393,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 		return new AsyncResult<>(true);
 	}
-	
+
 	@Override
 	public boolean adminWithdrawCryptoAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
 		if ("BTC".equals(tokenName)) {
@@ -404,17 +416,19 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	@Override
-	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
+	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress) {
 		return false;
 	}
 
 	@Override
-	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress, Erc20Token erc20Token) {
+	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress, Erc20Token erc20Token) {
 		UserCoin userErc20Token = userCoinRepository.findByWalletAddress(toAddress);
 		if (toAddress.equals(user.getEthWalletaddress())) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
 		}
-		if(userErc20Token != null) {
+		if (userErc20Token != null) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.in.app.wallet"));
 		}
 		Double adminWalletBalance = erc20TokenService.getAdminErc20WalletBalance(user, erc20Token);
@@ -500,7 +514,101 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		} catch (BitcoindException | CommunicationException e) {
 			logger.error("validate adrress error: {}", e);
 		}
-
 		return false;
+	}
+
+	@Override
+	public void blockEventListener() {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			BtcdDaemon daemon = new BtcdDaemonImpl(client);
+			daemon.addBlockListener(new BlockListener() {
+				@Override
+				public void blockDetected(Block block) {
+					transactions(block.getTx(), client);
+					System.out.printf("New block detected! (Event details: '%s')\n", block);
+				}
+			});
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("blockEventListener error: {}", e);
+		}
+	}
+
+	private void transactions(List<String> txs, BtcdClient client) {
+		if (txs.isEmpty()) {
+			return;
+		}
+		txs.forEach(txId -> {
+			try {
+				com.neemre.btcdcli4j.core.domain.Transaction tran = client.getTransaction(txId);
+				List<PaymentOverview> details = tran.getDetails();
+				details.forEach(paymentOverview -> {
+					if (PaymentCategories.RECEIVE.equals(paymentOverview.getCategory())) {
+						String account = paymentOverview.getAccount();
+						if (account.isEmpty()) {
+							saveTxForAdmin(tran);
+						} else {
+							saveTxForUser(account, tran);
+						}
+					}
+				});
+			} catch (BitcoindException | CommunicationException e) {
+				logger.error("transaactions error: {}", e);
+			}
+		});
+	}
+
+	/**
+	 * save deposit transaction of users
+	 * 
+	 */
+	private void saveTxForUser(String account, com.neemre.btcdcli4j.core.domain.Transaction tran) {
+		try {
+			Long userId = Long.valueOf(account);
+			User user = userRepository.findByUserId(userId);
+			UserCoin coin = userCoinRepository.findByTokenNameAndUser("BTC", user);
+			Transaction transaction = transactionRepo.findByTxHash(tran.getTxId());
+			if (transaction == null) {
+				transaction = new Transaction();
+				transaction.setToUser(user);
+				transaction.setTxHash(tran.getTxId());
+				transaction.setTransactionType(TransactionType.INCOMING);
+				transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
+				transaction.setCurrencyName("BTC");
+				transaction.setTransferStatus(TransferStatus.COMPLETED);
+				transaction.setToAddress(coin.getWalletAddress());
+				transactionRepo.save(transaction);
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + user.getUserId(),
+						com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
+			}
+		} catch (NumberFormatException e) {
+			logger.error("invalid account of user {}", e);
+		}
+
+	}
+
+	/**
+	 * save deposit transaction of admin
+	 * 
+	 */
+
+	private void saveTxForAdmin(com.neemre.btcdcli4j.core.domain.Transaction tran) {
+		User admin = userRepository.findByEmailId(adminEmail);
+		UserCoin coin = userCoinRepository.findByTokenNameAndUser("BTC", admin);
+		Transaction transaction = transactionRepo.findByTxHash(tran.getTxId());
+		if (transaction == null) {
+			transaction = new Transaction();
+			transaction.setToUser(admin);
+			transaction.setTxHash(tran.getTxId());
+			transaction.setTransactionType(TransactionType.INCOMING);
+			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
+			transaction.setCurrencyName("BTC");
+			transaction.setTransferStatus(TransferStatus.COMPLETED);
+			transaction.setToAddress(coin.getWalletAddress());
+			transactionRepo.save(transaction);
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ADMIN,
+					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
+		}
 	}
 }
