@@ -13,6 +13,7 @@ import com.bolenum.enums.OrderStandard;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.util.GenericUtils;
@@ -57,7 +58,8 @@ public class WalletServiceImpl implements WalletService {
 				balance = btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid());
 				break;
 			case "ETH":
-				balance = String.valueOf(etherumWalletService.getWalletBalance(user));
+				UserCoin userCoin=etherumWalletService.ethWalletBalance(user, ticker);
+				balance = String.valueOf(userCoin.getBalance());
 				break;
 			}
 			break;

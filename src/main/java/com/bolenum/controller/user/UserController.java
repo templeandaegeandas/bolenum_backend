@@ -164,7 +164,8 @@ public class UserController {
 						localService.getMessage("link.already.verified"), null);
 			}
 			erc20TokenService.createErc20Wallet(user, "BLN");
-			etherumWalletService.createWallet(user);
+			//etherumWalletService.createWallet(user);
+			etherumWalletService.createEthWallet(user, "ETH");
 			String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 
