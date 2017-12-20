@@ -273,7 +273,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			}
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
-			etherumWalletService.createWallet(user);
+			etherumWalletService.createEthWallet(user, "ETH");
 			String uuid = adminService.createAdminHotWallet("adminWallet");
 			logger.debug("user mail verify wallet uuid: {}", uuid);
 			if (!uuid.isEmpty()) {

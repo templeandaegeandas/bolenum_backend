@@ -144,54 +144,54 @@ public class UserController {
 		logger.debug("user mail verify token: {}", token);
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localService.getMessage("token.invalid"));
-		} else {
-			AuthenticationToken authenticationToken = authenticationTokenService.findByToken(token);
-			if (authenticationToken == null) {
-				logger.debug("user mail verify authenticationToken is null");
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"),
-						null);
-			}
+		}
+		AuthenticationToken authenticationToken = authenticationTokenService.findByToken(token);
+		if (authenticationToken == null) {
+			logger.debug("user mail verify authenticationToken is null");
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"),
+					null);
+		}
 
-			boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
-			logger.debug("user mail verify token expired: {}", isExpired);
-			if (isExpired) {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"),
-						null);
-			}
+		boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
+		logger.debug("user mail verify token expired: {}", isExpired);
+		if (isExpired) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"),
+					null);
+		}
 
-			User user = authenticationToken.getUser();
-			if (user.getIsEnabled()) {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
-						localService.getMessage("link.already.verified"), null);
+		User user = authenticationToken.getUser();
+		if (user.getIsEnabled()) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+					localService.getMessage("link.already.verified"), null);
+		}
+		erc20TokenService.createErc20Wallet(user, "BLN");
+		String address = btcWalletService.createBtcAccount(String.valueOf(user.getUserId()));
+		logger.debug("user mail verify wallet uuid: {}", address);
+		if (!address.isEmpty()) {
+			// etherumWalletService.createWallet(user);
+			etherumWalletService.createEthWallet(user, "ETH");
+			user.setIsEnabled(true);
+			UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
+			if (userCoin == null) {
+				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+						localService.getMessage("message.error"), Optional.empty());
 			}
-			erc20TokenService.createErc20Wallet(user, "BLN");
-			etherumWalletService.createWallet(user);
-			String address = btcWalletService.createBtcAccount(String.valueOf(user.getUserId()));
-			logger.debug("user mail verify wallet uuid: {}", address);
-			if (!address.isEmpty()) {
-				user.setIsEnabled(true);
-				UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
-				if (userCoin == null) {
-					return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-							localService.getMessage("message.error"), null);
-				}
-				List<UserCoin> userCoins = new ArrayList<>();
-				userCoins.add(userCoin);
-				user.setUserCoin(userCoins);
-				User savedUser = userService.saveUser(user);
-				logger.debug("user mail verify savedUser: {}", savedUser);
-				if (savedUser != null) {
-					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
-							null);
-				} else {
-					return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-							localService.getMessage("message.error"), null);
-				}
+			List<UserCoin> userCoins = new ArrayList<>();
+			userCoins.add(userCoin);
+			user.setUserCoin(userCoins);
+			User savedUser = userService.saveUser(user);
+			logger.debug("user mail verify savedUser: {}", savedUser);
+			if (savedUser != null) {
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
 			} else {
 				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
 						localService.getMessage("message.error"), null);
 			}
+		} else {
+			return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+					localService.getMessage("message.error"), null);
 		}
+
 	}
 
 	/**
@@ -386,8 +386,8 @@ public class UserController {
 
 	/**
 	 * 
-	 * used to get list of transaction done by a particular user, user can only see
-	 * his own transactions at the time of deposited to his wallet
+	 * used to get list of transaction done by a particular user, user can only
+	 * see his own transactions at the time of deposited to his wallet
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
@@ -408,8 +408,8 @@ public class UserController {
 	}
 
 	/**
-	 * used to get list of transaction done by a particular user, user can only see
-	 * his own transactions at the time of deposited to his wallet
+	 * used to get list of transaction done by a particular user, user can only
+	 * see his own transactions at the time of deposited to his wallet
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
