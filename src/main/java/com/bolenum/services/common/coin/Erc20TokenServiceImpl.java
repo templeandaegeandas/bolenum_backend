@@ -224,46 +224,10 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		erc20TokenRepository.save(erc20Tokens);
 	}
 
-	private Credentials getAdminCredentials(User user, String tokenName)
+	private Credentials getCredentials(UserCoin userCoin, String tokenName)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
 			BadPaddingException, IOException, CipherException {
 		File file = new File(ethWalletLocation);
-		File jsonFile = new File(file + "/" + user.getEthWalletJsonFileName());
-		logger.debug("JSON file of the user is: {}", user.getEthWalletJsonFileName());
-		String passwordKey = user.getEthWalletPwdKey();
-		String decPwd = CryptoUtil.decrypt(user.getEthWalletPwd(), passwordKey);
-		logger.debug("Decrypted password of the user is: {}", decPwd);
-		return WalletUtils.loadCredentials(decPwd, jsonFile);
-	}
-
-	@Override
-	public Double getAdminErc20WalletBalance(User user, Erc20Token erc20Token) {
-		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-		Double amount = 0.0;
-		Credentials credentials;
-		Erc20TokenWrapper token = null;
-		try {
-			credentials = getAdminCredentials(user, erc20Token.getCurrency().getCurrencyAbbreviation());
-			logger.debug("Requested token name is: {}", erc20Token.getCurrency().getCurrencyAbbreviation());
-			logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
-			token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials, Contract.GAS_PRICE,
-					Contract.GAS_LIMIT);
-			logger.debug("contract loaded");
-			amount = token.balanceOf(new Address(user.getEthWalletaddress())).getValue().doubleValue();
-			logger.debug("Balance of the user is: {}", GenericUtils.getDecimalFormatString(amount));
-			return amount / createDecimals(token.decimals().getValue().intValue());
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException | IOException | CipherException e) {
-			logger.debug("User getting balance for: {} failed", erc20Token.getCurrency().getCurrencyAbbreviation());
-			return null;
-		}
-	}
-
-	private Credentials getCredentials(User user, String tokenName)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException {
-		File file = new File(ethWalletLocation);
-		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
 		File jsonFile = new File(file + "/" + userCoin.getWalletJsonFile());
 		logger.debug("JSON file of the user is: {}", userCoin.getWalletJsonFile());
 		String passwordKey = userCoin.getWalletPwdKey();
@@ -272,13 +236,15 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		return WalletUtils.loadCredentials(decPwd, jsonFile);
 	}
 
-	public Double getErc20WalletBalance(UserCoin userCoin, Erc20Token erc20Token) {
+	@Override
+	public Double getErc20WalletBalance(User user, Erc20Token erc20Token, String tokenName) {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 		Double amount = 0.0;
 		Credentials credentials;
 		Erc20TokenWrapper token = null;
 		try {
-			credentials = getCredentials(userCoin.getUser(), erc20Token.getCurrency().getCurrencyAbbreviation());
+			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
+			credentials = getCredentials(userCoin, erc20Token.getCurrency().getCurrencyAbbreviation());
 			logger.debug("Requested token name is: {}", erc20Token.getCurrency().getCurrencyAbbreviation());
 			logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
 			token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials, Contract.GAS_PRICE,
@@ -300,7 +266,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException,
 			ExecutionException {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-		Credentials credentials = getAdminCredentials(user, erc20Token.getCurrency().getCurrencyAbbreviation());
+		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(erc20Token.getCurrency().getCurrencyAbbreviation(), user);
+		Credentials credentials = getCredentials(userCoin, erc20Token.getCurrency().getCurrencyAbbreviation());
 		logger.debug("Credentials created of the user: {}", user.getEmailId());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
@@ -412,7 +379,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			try {
 				if (result) {
 					try {
-						Double balance = getErc20WalletBalance(userCoin, erc20Token);
+						Double balance = getErc20WalletBalance(transaction.getToUser(), erc20Token, transaction.getCurrencyName());
 						logger.debug("wallet balance is: {}", balance);
 						userCoin.setBalance(userCoin.getBalance() + totalBalance);
 						userCoinRepository.save(userCoin);

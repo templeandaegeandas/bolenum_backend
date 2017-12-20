@@ -31,6 +31,7 @@ import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.TradingFee;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.fees.TradingFeeService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
@@ -86,6 +87,9 @@ public class AdminController {
 
 	@Autowired
 	private Erc20TokenService erc20TokenService;
+	
+	@Autowired
+	private UserCoinRepository userCoinRepository;
 
 	public static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
@@ -283,9 +287,10 @@ public class AdminController {
 			break;
 		case "ERC20TOKEN":
 			Erc20Token erc20Token = erc20TokenService.getByCoin(coinCode);
-			Double balance = erc20TokenService.getAdminErc20WalletBalance(user, erc20Token);
+			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("ETH", user);
+			Double balance = erc20TokenService.getErc20WalletBalance(user, erc20Token, "ETH");
 			Map<String, Object> mapAddress = new HashMap<>();
-			mapAddress.put("address", erc20Token.getWalletAddress());
+			mapAddress.put("address", userCoin.getWalletAddress());
 			mapAddress.put("balance", GenericUtils.getDecimalFormat(balance));
 			map.put("data", mapAddress);
 			break;

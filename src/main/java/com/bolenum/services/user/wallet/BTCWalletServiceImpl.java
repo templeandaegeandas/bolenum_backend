@@ -450,7 +450,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (userCoin != null) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.in.app.wallet"));
 		}
-		Double adminWalletBalance = erc20TokenService.getAdminErc20WalletBalance(user, erc20Token);
+		Double adminWalletBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token, tokenName);
 		if (adminWalletBalance < withdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.invalid.available.balance"));
 		}
