@@ -21,6 +21,7 @@ public class UrlConstant {
 	public static final String ADMIN_HOT_WALLET = "hotwallet/create/adminwallet";
 	public static final String WALLET_ADDRESS = "hotwallet/address";
 	public static final String HASH_CONFIRMATION = "transaction/hash/confirmation";
+	public static final String CREATE_ACCOUNT = "create/account";
 	/**
 	 * USER API
 	 */
