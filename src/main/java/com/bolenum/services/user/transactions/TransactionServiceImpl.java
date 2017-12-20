@@ -71,17 +71,17 @@ import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
-import com.bolenum.model.erc20token.Erc20Token;
-import com.bolenum.model.erc20token.UserErc20Token;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
-import com.bolenum.repo.common.erc20token.UserErc20TokenRepository;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
-import com.bolenum.services.common.erc20token.Erc20TokenService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrderAsyncService;
 import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.UserService;
@@ -148,7 +148,7 @@ public class TransactionServiceImpl implements TransactionService {
 	private WalletService walletService;
 
 	@Autowired
-	private UserErc20TokenRepository userErc20TokenRepository;
+	private UserCoinRepository userCoinRepository;
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
@@ -896,14 +896,14 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public boolean withdrawErc20Token(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
-		UserErc20Token senderUserErc20Token = userErc20TokenRepository.findByTokenNameAndUser(tokenName, fromUser);
+		UserCoin senderUserErc20Token = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
 		if (senderUserErc20Token != null) {
 			senderUserErc20Token.setBalance(senderUserErc20Token.getBalance() - amount);
-			userErc20TokenRepository.save(senderUserErc20Token);
-			UserErc20Token receiverUserErc20Token = userErc20TokenRepository.findByWalletAddress(toAddress);
+			userCoinRepository.save(senderUserErc20Token);
+			UserCoin receiverUserErc20Token = userCoinRepository.findByWalletAddress(toAddress);
 			if (receiverUserErc20Token != null) {
 				receiverUserErc20Token.setBalance(receiverUserErc20Token.getBalance() + (amount - fee));
-				userErc20TokenRepository.save(receiverUserErc20Token);
+				userCoinRepository.save(receiverUserErc20Token);
 				Transaction transaction = new Transaction();
 				transaction.setFromAddress(senderUserErc20Token.getWalletAddress());
 				transaction.setToAddress(toAddress);

@@ -8,7 +8,7 @@ import java.util.concurrent.Future;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
-import com.bolenum.model.erc20token.Erc20Token;
+import com.bolenum.model.coin.Erc20Token;
 import com.bolenum.model.fees.WithdrawalFee;
 
 /**

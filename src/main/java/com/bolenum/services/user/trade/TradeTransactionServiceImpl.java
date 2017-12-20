@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.model.User;
-import com.bolenum.model.erc20token.UserErc20Token;
-import com.bolenum.repo.common.erc20token.UserErc20TokenRepository;
+import com.bolenum.model.coin.UserCoin;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.services.admin.CurrencyService;
-import com.bolenum.services.common.erc20token.Erc20TokenService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.util.GenericUtils;
 
@@ -30,7 +30,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	private NotificationService notificationService;
 
 	@Autowired
-	private UserErc20TokenRepository userErc20TokenRepository;
+	private UserCoinRepository userCoinRepository;
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
@@ -144,8 +144,8 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	 */
 	@Override
 	public Boolean performErc20Trade(User seller, String currencyAbr, User buyer, double qtyTraded, Long tradeId) {
-		UserErc20Token userErc20TokenSeller = userErc20TokenRepository.findByTokenNameAndUser(currencyAbr, seller);
-		UserErc20Token userErc20TokenBuyer = userErc20TokenRepository.findByTokenNameAndUser(currencyAbr, buyer);
+		UserCoin userErc20TokenSeller = userCoinRepository.findByTokenNameAndUser(currencyAbr, seller);
+		UserCoin userErc20TokenBuyer = userCoinRepository.findByTokenNameAndUser(currencyAbr, buyer);
 		// TODO remove once existing users has created their wallet
 		if (userErc20TokenSeller == null || userErc20TokenBuyer == null) {
 			erc20TokenService.createErc20Wallet(buyer, currencyAbr);
@@ -169,8 +169,8 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 
 			userErc20TokenBuyer.setBalance(newBalanceBuyer);
 			logger.debug("saving trade transaction started for: {} tradeId: {}", currencyAbr, tradeId);
-			userErc20TokenRepository.save(userErc20TokenBuyer);
-			userErc20TokenRepository.save(userErc20TokenSeller);
+			userCoinRepository.save(userErc20TokenBuyer);
+			userCoinRepository.save(userErc20TokenSeller);
 			logger.debug("saving trade transaction completed for: {} tradeId: {}", currencyAbr, tradeId);
 			return true;
 		}

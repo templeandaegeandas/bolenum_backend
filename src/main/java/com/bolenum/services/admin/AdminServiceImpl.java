@@ -22,8 +22,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
-import com.bolenum.model.erc20token.Erc20Token;
-import com.bolenum.repo.common.erc20token.Erc20TokenRepository;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.repo.common.coin.Erc20TokenRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.fasterxml.jackson.core.JsonParseException;

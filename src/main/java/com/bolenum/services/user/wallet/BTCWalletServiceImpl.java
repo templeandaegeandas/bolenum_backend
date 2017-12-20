@@ -36,14 +36,14 @@ import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
-import com.bolenum.model.erc20token.Erc20Token;
-import com.bolenum.model.erc20token.UserErc20Token;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.WithdrawalFee;
-import com.bolenum.repo.common.erc20token.UserErc20TokenRepository;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.common.LocaleService;
-import com.bolenum.services.common.erc20token.Erc20TokenService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.util.GenericUtils;
@@ -86,7 +86,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	private TransactionService transactionService;
 	
 	@Autowired
-	private UserErc20TokenRepository userErc20TokenRepository;
+	private UserCoinRepository userCoinRepository;
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
@@ -266,7 +266,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		 * 
 		 */
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
-		UserErc20Token userErc20Token = erc20TokenService.erc20WalletBalance(user, erc20Token);
+		UserCoin userErc20Token = erc20TokenService.erc20WalletBalance(user, erc20Token);
 		if (userErc20Token == null) {
 			return false;
 		}
@@ -399,7 +399,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Override
 	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress, Erc20Token erc20Token) {
-		UserErc20Token userErc20Token = userErc20TokenRepository.findByWalletAddress(toAddress);
+		UserCoin userErc20Token = userCoinRepository.findByWalletAddress(toAddress);
 		if (toAddress.equals(user.getEthWalletaddress())) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
 		}
