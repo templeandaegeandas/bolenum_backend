@@ -39,6 +39,7 @@ import com.bolenum.model.User;
 import com.bolenum.model.erc20token.Erc20Token;
 import com.bolenum.model.erc20token.UserErc20Token;
 import com.bolenum.model.fees.WithdrawalFee;
+import com.bolenum.repo.common.erc20token.UserErc20TokenRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.common.LocaleService;
@@ -83,6 +84,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Autowired
 	private TransactionService transactionService;
+	
+	@Autowired
+	private UserErc20TokenRepository userErc20TokenRepository;
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
@@ -395,8 +399,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Override
 	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress, Erc20Token erc20Token) {
+		UserErc20Token userErc20Token = userErc20TokenRepository.findByWalletAddress(toAddress);
 		if (toAddress.equals(user.getEthWalletaddress())) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+		}
+		if(userErc20Token != null) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.in.app.wallet"));
 		}
 		Double adminWalletBalance = erc20TokenService.getAdminErc20WalletBalance(user, erc20Token);
 		if (adminWalletBalance < withdrawAmount) {
