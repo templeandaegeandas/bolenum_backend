@@ -421,6 +421,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 */
 	@Override
 	@Async
+	@Deprecated
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
 			boolean isFee, Long tradeId) {
 
