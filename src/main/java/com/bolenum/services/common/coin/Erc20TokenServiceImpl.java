@@ -68,6 +68,7 @@ import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.ErrorService;
+import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.Erc20TokenWrapper;
 import com.bolenum.util.Erc20TokenWrapper.TransferEventResponse;
@@ -112,6 +113,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private ErrorService errorService;
+
+	@Autowired
+	private EtherumWalletService etherumWalletService;
 
 	private static final Logger logger = LoggerFactory.getLogger(Erc20TokenServiceImpl.class);
 
@@ -295,7 +299,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException,
 			ExecutionException {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(erc20Token.getCurrency().getCurrencyAbbreviation(), user);
+		UserCoin userCoin = userCoinRepository
+				.findByTokenNameAndUser(erc20Token.getCurrency().getCurrencyAbbreviation(), user);
 		Credentials credentials = getCredentials(userCoin, erc20Token.getCurrency().getCurrencyAbbreviation());
 		logger.debug("Credentials created of the user: {}", user.getEmailId());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
@@ -394,12 +399,13 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		}
 		logger.debug("total transaction balance: {} of user: {}", totalBalance, transaction.getToUser().getEmailId());
 		Erc20Token erc20Token = erc20TokenRepository.findByCurrencyCurrencyAbbreviation(transaction.getCurrencyName());
+		User admin = userRepository.findByEmailId(adminEmail);
+		UserCoin adminCoin = userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(), admin);
 		if (erc20Token != null && CurrencyType.ERC20TOKEN.equals(erc20Token.getCurrency().getCurrencyType())) {
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
 					transaction.getToUser());
 			logger.debug("userErc20Token: {}", userCoin);
-			User admin = userRepository.findByEmailId(adminEmail);
-			Boolean result = performEthTransaction(admin, userCoin.getWalletAddress(),
+			Boolean result = performEthTransaction(adminCoin, userCoin.getWalletAddress(),
 					GenericUtils.getEstimetedFeeEthereum(), TransactionStatus.FEE, null, null);
 			for (int i = 0; i < transactions.size(); i++) {
 				transactions.get(i).setTransferStatus(TransferStatus.PENDING);
@@ -408,7 +414,8 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			try {
 				if (result) {
 					try {
-						Double balance = getErc20WalletBalance(transaction.getToUser(), erc20Token, transaction.getCurrencyName());
+						Double balance = getErc20WalletBalance(transaction.getToUser(), erc20Token,
+								transaction.getCurrencyName());
 						logger.debug("wallet balance is: {}", balance);
 						userCoin.setBalance(userCoin.getBalance() + totalBalance);
 						userCoinRepository.save(userCoin);
@@ -432,7 +439,17 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			if ("BTC".equals(transaction.getCurrencyName())) {
 
 			} else if ("ETH".equals(transaction.getCurrencyName())) {
-
+				UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
+						transaction.getToUser());
+				Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
+				if (balance != 0) {
+					performEthTransaction(userCoin, adminCoin.getWalletAddress(), balance, TransactionStatus.FEE, null,
+							null);
+				}
+				for (int i = 0; i < transactions.size(); i++) {
+					transactions.get(i).setTransferStatus(TransferStatus.COMPLETED);
+				}
+				transactionRepo.save(transactions);
 			} else {
 				return;
 			}
@@ -441,18 +458,18 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		}
 	}
 
-	private Boolean performEthTransaction(User fromUser, String toAddress, Double amount,
+	private Boolean performEthTransaction(UserCoin userCoin, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
-		logger.debug("performing eth transaction: {} to address: {}, amount: {}", fromUser.getEmailId(), toAddress,
-				GenericUtils.getDecimalFormatString(amount));
-		String passwordKey = fromUser.getEthWalletPwdKey();
+		logger.debug("performing eth transaction: {} to address: {}, amount: {}", userCoin.getUser().getEmailId(),
+				toAddress, GenericUtils.getDecimalFormatString(amount));
+		String passwordKey = userCoin.getWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
 
-		String fileName = ethWalletLocation + fromUser.getEthWalletJsonFileName();
+		String fileName = ethWalletLocation + userCoin.getWalletJsonFile();
 		logger.debug("user eth wallet file name: {}", fileName);
 		File walletFile = new File(fileName);
 		try {
-			String decrPwd = CryptoUtil.decrypt(fromUser.getEthWalletPwd(), passwordKey);
+			String decrPwd = CryptoUtil.decrypt(userCoin.getWalletPwd(), passwordKey);
 			EthSendTransaction ethSendTransaction = null;
 			try {
 				logger.debug("ETH transaction credentials load started");
@@ -461,7 +478,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				ethSendTransaction = transferEth(credentials, toAddress, amount);
 				logger.debug("ETH transaction send completed: {}", ethSendTransaction.getTransactionHash());
 			} catch (Exception e) {
-				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount, false,
+				Error error = new Error(userCoin.getWalletAddress(), toAddress, e.getMessage(), "ETH", amount, false,
 						tradeId);
 				errorService.saveError(error);
 				logger.debug("error saved: {}", error);
@@ -469,18 +486,19 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			}
 			logger.debug("ETH transaction send fund completed");
 			String txHash = ethSendTransaction.getTransactionHash();
-			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
+			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, userCoin.getUser().getEmailId(),
+					amount);
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
 				transaction = new Transaction();
 				transaction.setTxHash(ethSendTransaction.getTransactionHash());
-				transaction.setFromAddress(fromUser.getEthWalletaddress());
+				transaction.setFromAddress(userCoin.getWalletAddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
-				transaction.setFromUser(fromUser);
+				transaction.setFromUser(userCoin.getUser());
 				transaction.setCurrencyName("ETH");
 				if (fee != null) {
 					transaction.setFee(fee);
@@ -492,7 +510,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				transaction.setTradeId(tradeId);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
-					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
+					logger.debug("transaction saved successfully of user: {}", userCoin.getUser().getEmailId());
 					return true;
 				}
 			}
