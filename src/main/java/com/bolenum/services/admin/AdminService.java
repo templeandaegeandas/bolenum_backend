@@ -1,5 +1,7 @@
 package com.bolenum.services.admin;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.springframework.data.domain.Page;
@@ -42,5 +44,9 @@ public interface AdminService {
 	boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
 
 	boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
+
+	List<User> getListOfUsers();
+
+	void writeUserBalanceIntoFile(List<User> listOfUsers) throws InterruptedException, ExecutionException;
 
 }

@@ -83,4 +83,6 @@ public interface Erc20TokenService {
 	void sendUserTokenToAdmin();
 
 	Double getErc20WalletBalance(User user, Erc20Token erc20Token, String tokenName);
+
+	Double getErc20WalletBalanceTemp(User user, Erc20Token erc20Token);
 }

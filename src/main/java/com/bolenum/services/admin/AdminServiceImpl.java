@@ -1,8 +1,11 @@
 package com.bolenum.services.admin;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -19,12 +22,21 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.http.HttpService;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
+import com.bolenum.model.coin.WalletBalance;
+import com.bolenum.repo.admin.WalletBalanceRepo;
 import com.bolenum.repo.common.coin.Erc20TokenRepository;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -50,8 +62,21 @@ public class AdminServiceImpl implements AdminService {
 	@Autowired
 	private Erc20TokenRepository erc20TokenRepository;
 
+	@Autowired
+	private WalletBalanceRepo walletBalanceRepo;
+	
+	@Autowired
+	private Erc20TokenService erc20TokenService;
+	
+	
+	@Autowired
+	private UserCoinRepository userCoinRepository;
+
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
+
+	@Value("${bolenum.file.location}")
+	private String fileLocation;
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
@@ -141,13 +166,97 @@ public class AdminServiceImpl implements AdminService {
 	}
 
 	@Override
-	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
+	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress) {
 		Erc20Token erc20Token = erc20TokenRepository.findByCurrencyCurrencyAbbreviation(tokenName);
-		return btcWalletService.adminValidateErc20WithdrawAmount(user, tokenName, withdrawAmount, toAddress, erc20Token);
+		return btcWalletService.adminValidateErc20WithdrawAmount(user, tokenName, withdrawAmount, toAddress,
+				erc20Token);
 	}
 
 	@Override
-	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
+	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress) {
 		return btcWalletService.adminValidateCryptoWithdrawAmount(user, tokenName, withdrawAmount, toAddress);
 	}
+
+	@Override
+	public List<User> getListOfUsers() {
+
+		return userRepository.findAll();
+	}
+
+	/**
+	 * temporary function
+	 */
+	@Override
+	public void writeUserBalanceIntoFile(List<User> listOfUsers) throws InterruptedException, ExecutionException {
+
+		HttpService httpService = new HttpService("http://165.227.86.165:8000");
+		Web3j web3 = Web3j.build(httpService);
+
+		for (User user : listOfUsers) {
+			if (user.getIsEnabled()) {
+				WalletBalance walletBalance = new WalletBalance();
+
+				try {
+					String uuid = user.getBtcWalletUuid();
+					String btcBalance = btcWalletService.getWalletBalance(uuid);
+
+					walletBalance.setUserId(user.getUserId());
+					walletBalance.setBalanceBTC(btcBalance);
+				} catch (Exception e) {
+					walletBalance.setBalanceBTC("0.0");
+				}
+
+				try {
+					String ethWalletAddress = user.getEthWalletaddress();
+
+					EthGetBalance ethGetBalance = web3.ethGetBalance(ethWalletAddress, DefaultBlockParameterName.LATEST)
+							.sendAsync().get();
+					BigInteger balanceOfEth = ethGetBalance.getBalance();
+
+					Double balanceOfEthereum = balanceOfEth.doubleValue();
+					walletBalance.setBalanceETH(balanceOfEthereum);
+				} catch (Exception e) {
+					walletBalance.setBalanceETH(0.0);
+				}
+				
+				
+				try
+				{
+					Erc20Token erc20Token = erc20TokenService.getByCoin("BLN");
+					Double balanceBLN = erc20TokenService.getErc20WalletBalanceTemp(user, erc20Token);
+					walletBalance.setBalanceBLN(balanceBLN);
+				}
+				catch(Exception e)
+				{
+					walletBalance.setBalanceBLN(0.0);
+				}
+
+				walletBalanceRepo.save(walletBalance);
+
+				// try {
+				// File file = new File("/opt/bolenum/file/balance.txt");
+				//
+				// if (!file.exists()) {
+				// file.createNewFile();
+				// }
+				//
+				// FileWriter fw = new FileWriter(file);
+				// BufferedWriter bw = new BufferedWriter(fw);
+				// bw.write(uuid+"=============="+btcBalance);
+				// System.out.println(uuid+"======================");
+				// System.out.println(user.getBtcWalletUuid());
+				// System.out.println(btcBalance);
+				// } catch (Exception e) {
+				// System.out.println(e);
+				// }
+				// System.out.println("Success...");
+				// }
+
+			}
+
+		}
+	}
+
 }
