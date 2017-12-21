@@ -174,18 +174,6 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 	@Override
 	public Double getEthWalletBalanceForAdmin(UserCoin userCoin) {
 		BigInteger amount = BigInteger.valueOf(0);
-
-		// UserCoin
-		// userCoin=userCoinRepository.findByTokenNameAndUser(tokenName, user);
-		//
-		// if (userCoin.getWalletAddress() == null) {
-		// logger.debug("user does not have ethtereum wallet address: {}",
-		// user.getEmailId());
-		// // createWallet(user);
-		//
-		// createEthWallet(user, "ETH");
-		// return amount.doubleValue();
-		// }
 		try {
 			amount = EthereumServiceUtil.getWeb3jInstance()
 					.ethGetBalance(userCoin.getWalletAddress(), DefaultBlockParameterName.fromString("latest")).send()
