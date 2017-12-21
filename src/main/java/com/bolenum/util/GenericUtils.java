@@ -80,7 +80,7 @@ public class GenericUtils {
 		}
 		return estimedtedFee;
 	}
-
+	
 	public static DecimalFormat getDecimalFormat() {
 		DecimalFormat df = new DecimalFormat("0");
 		df.setMaximumFractionDigits(8);
