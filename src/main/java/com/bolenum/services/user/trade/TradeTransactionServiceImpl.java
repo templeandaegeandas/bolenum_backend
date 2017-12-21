@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.UserCoin;
 import com.bolenum.repo.common.coin.UserCoinRepository;
@@ -54,7 +53,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 		Boolean txStatus;
 		switch (currencyType) {
 		case "CRYPTO":
-			if (currencyAbr == "BTC") {
+			if ("BTC".equalsIgnoreCase(currencyAbr)) {
 				logger.debug("BTC trade started");
 				txStatus = performBtcTrade(seller, buyer, qtyTraded, tradeId);
 				logger.debug("is BTC trade successed: {}", txStatus);
@@ -69,7 +68,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 					notificationService.saveNotification(buyer, seller, msg1);
 					return true;
 				}
-			} else if (currencyAbr == "ETH") {
+			} else if ("ETH".equalsIgnoreCase(currencyAbr)) {
 				logger.debug("ETH transaction started");
 				txStatus = performEthTrade(seller, currencyAbr, buyer, qtyTraded, tradeId);
 				logger.debug("is ETH transaction successed: {}", txStatus);
@@ -214,10 +213,14 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 			logger.debug("user: {} has current account balance:{} and trade amount: {}", fromUser.getEmailId(),
 					GenericUtils.getDecimalFormatString(currentBal.doubleValue()),
 					GenericUtils.getDecimalFormatString(balance.doubleValue()));
-			if (currentBal.compareTo(balance) > 0) {
-				throw new InsufficientBalanceException("You have insufficent balance");
+			logger.debug("Comparaison result of BTC balance move: {}", currentBal.compareTo(balance) < 0);
+			if (currentBal.compareTo(balance) < 0) {
+				logger.debug("user: {} dont have sufficient BTC balance to move of tradeId:{}", fromUser.getEmailId(),
+						tradeId);
+				return false;
 			}
 			boolean res = client.move(fromUser.getUserId().toString(), toUser.getUserId().toString(), balance);
+			logger.debug("btc trade res: {}", res);
 			if (res) {
 				logger.info("from user: {} to user: {} amount: {} for tradeId: {} success", fromUser.getEmailId(),
 						toUser.getEmailId(), GenericUtils.getDecimalFormatString(balance.doubleValue()), tradeId);
@@ -237,14 +240,14 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 		Boolean txStatus;
 		switch (currencyType) {
 		case "CRYPTO":
-			if (currencyAbr == "BTC") {
+			if ("BTC".equalsIgnoreCase(currencyAbr)) {
 				logger.debug("BTC trade fee started");
 				txStatus = performBtcTrade(seller, buyer, tradeFee, tradeId);
 				logger.debug("is BTC trade fee successed: {}", txStatus);
 				if (txStatus) {
 					return true;
 				}
-			} else if (currencyAbr == "ETH") {
+			} else if ("ETH".equalsIgnoreCase(currencyAbr)) {
 				logger.debug("ETH trade fee started");
 				txStatus = performEthTrade(seller, currencyAbr, buyer, tradeFee, tradeId);
 				logger.debug("is ETH trade fee successed: {}", txStatus);

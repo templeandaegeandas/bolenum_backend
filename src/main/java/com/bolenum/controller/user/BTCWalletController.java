@@ -171,6 +171,7 @@ public class BTCWalletController {
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 * @throws InsufficientBalanceException
+	 * 
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
@@ -267,7 +268,6 @@ public class BTCWalletController {
 	 * @return
 	 * 
 	 */
-
 	@RequestMapping(value = UrlConstant.DEPOSIT_TRANSACTION_STATUS, method = RequestMethod.POST)
 	public ResponseEntity<Object> depositTransactionStatus(@RequestBody Transaction transaction) {
 		Transaction transactionResponse = btcWalletService.setDepositeList(transaction);

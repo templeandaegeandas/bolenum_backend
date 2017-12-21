@@ -54,10 +54,10 @@ public class ResourceUtils {
 		nodeConfig.setProperty("node.bitcoind.rpc.port", port);
 		nodeConfig.setProperty("node.bitcoind.rpc.user", user);
 		nodeConfig.setProperty("node.bitcoind.rpc.password", password);
-		nodeConfig.setProperty("node.bitcoind.rpc.auth_scheme", authScheme);
-		nodeConfig.setProperty("node.bitcoind.rpc.alert.port", alertPort);
-		nodeConfig.setProperty("node.bitcoind.rpc.block.port", blockPort);
-		nodeConfig.setProperty("node.bitcoind.rpc.wallet.port", walletPort);
+		nodeConfig.setProperty("node.bitcoind.http.auth_scheme", authScheme);
+		nodeConfig.setProperty("node.bitcoind.notification.alert.port", alertPort);
+		nodeConfig.setProperty("node.bitcoind.notification.block.port", blockPort);
+		nodeConfig.setProperty("node.bitcoind.notification.wallet.port", walletPort);
 	}
 
 	private ResourceUtils() {

@@ -71,6 +71,7 @@ public class UrlConstant {
 	public static final String CURRENCY_NGN_PRICE_SAVE = "set/bln_ngn";
 	public static final String ADMIN_WITHDRAW = "withdraw";
 	public static final String ADMIN_DEPOSIT = "deposit";
+	public static final String USER_WALLETS_BALANCE = "action/users/wallet/balance";
 
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "kyc/upload";
@@ -144,5 +145,6 @@ public class UrlConstant {
 	public static final String RAISED_DISPUTE_ORDER = "raised/dispute";
 	public static final String RAISED_DISPUTE_LIST = "raised/dispute/list";
 	public static final String ACTION_ON_RAISED_DISPUTE_ORDER = "action/raised/dispute";
+
 
 }

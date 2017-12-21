@@ -17,7 +17,6 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.enums.TransferStatus;
@@ -95,7 +94,7 @@ public class Transaction {
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
+			String txDescription, TransactionType transactionType, Double gas,
 			Double gasPrice, User fromUser, User toUser) {
 
 		this.txHash = txHash;

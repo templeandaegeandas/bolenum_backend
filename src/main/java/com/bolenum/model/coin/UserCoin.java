@@ -34,6 +34,7 @@ public class UserCoin {
 	private String walletPwd;
 
 	private String walletPwdKey;
+	
 	@Enumerated(EnumType.STRING)
 	private CurrencyType currencyType;
 
