@@ -663,6 +663,9 @@ public class TransactionServiceImpl implements TransactionService {
 					logger.debug("seller unlock volume: {}, remaining locked volume: {} ",
 							GenericUtils.getDecimalFormatString(qtyTraded),
 							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
 					matchedOrder.setLockedVolume(lockedVolRemaining);
 					orderAsyncServices.saveOrder(matchedOrder);
 					logger.debug("seller locked volume, unlocking completed amount: {}", qtyTraded);
@@ -671,6 +674,9 @@ public class TransactionServiceImpl implements TransactionService {
 					logger.debug("seller unlock volume: {}, remaining locked volume: {} ",
 							GenericUtils.getDecimalFormatString(qtyTraded),
 							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
 					orders.setLockedVolume(lockedVolRemaining);
 					orderAsyncServices.saveOrder(orders);
 					logger.debug("seller locked volume, unlocking completed amount: {}",
@@ -707,23 +713,31 @@ public class TransactionServiceImpl implements TransactionService {
 				 */
 				logger.debug("buyer locked volume, unlocking started");
 				if (OrderType.BUY.equals(orders.getOrderType())) {
-					double lockedVolRemaining = orders.getLockedVolume() - (matchedOrder.getPrice() * qtyTraded);
+					double uvol = matchedOrder.getPrice() * qtyTraded - buyerTradeFee;
+					double lockedVolRemaining = orders.getLockedVolume() - uvol;
 					logger.debug("buyer unlock volume: {}, remaining locked volume: {} ",
-							GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded),
+							GenericUtils.getDecimalFormatString(uvol),
 							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
 					orders.setLockedVolume(lockedVolRemaining);
 					orderAsyncServices.saveOrder(orders);
 					logger.debug("buyer locked volume, unlocking completed for amount: {}",
-							GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded));
+							GenericUtils.getDecimalFormatString(uvol));
 				} else {
-					double lockedVolRemaining = matchedOrder.getLockedVolume() - (matchedOrder.getPrice() * qtyTraded);
+					double uvol = matchedOrder.getPrice() * qtyTraded - buyerTradeFee;
+					double lockedVolRemaining = matchedOrder.getLockedVolume() - uvol;
 					logger.debug("buyer unlock volume: {}, remaining locked volume: {} ",
-							GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded),
+							GenericUtils.getDecimalFormatString(uvol),
 							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
 					matchedOrder.setLockedVolume(lockedVolRemaining);
 					orderAsyncServices.saveOrder(matchedOrder);
 					logger.debug("buyer locked volume, unlocking completed amount: {}",
-							GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded));
+							GenericUtils.getDecimalFormatString(uvol));
 				}
 				notificationService.sendNotification(buyer, msg);
 				notificationService.saveNotification(buyer, seller, msg);
@@ -762,6 +776,35 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("Saving trade fee for buyer started");
 				trade = orderAsyncServices.saveTrade(trade);
 				logger.debug("Saving trade fee for buyer completed: {}", trade.getIsFeeDeductedBuyer());
+
+				logger.debug("buyer fee locked volume, unlocking started");
+				if (OrderType.BUY.equals(orders.getOrderType())) {
+					double uvol = buyerTradeFee * 2;
+					double lockedVolRemaining = orders.getLockedVolume() - uvol;
+					logger.debug("buyer fee unlock volume: {}, remaining locked volume: {} ",
+							GenericUtils.getDecimalFormatString(uvol),
+							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
+					orders.setLockedVolume(lockedVolRemaining);
+					orderAsyncServices.saveOrder(orders);
+					logger.debug("buyer fee locked volume, unlocking completed for amount: {}",
+							GenericUtils.getDecimalFormatString(buyerTradeFee));
+				} else {
+					double uvol = buyerTradeFee * 2;
+					double lockedVolRemaining = matchedOrder.getLockedVolume() - uvol;
+					logger.debug("buyer fee unlock volume: {}, remaining locked volume: {} ",
+							GenericUtils.getDecimalFormatString(uvol),
+							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
+					matchedOrder.setLockedVolume(lockedVolRemaining);
+					orderAsyncServices.saveOrder(matchedOrder);
+					logger.debug("buyer locked volume, unlocking completed amount: {}",
+							GenericUtils.getDecimalFormatString(uvol));
+				}
 			}
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");

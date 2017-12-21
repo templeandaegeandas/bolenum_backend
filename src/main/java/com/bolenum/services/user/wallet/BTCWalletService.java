@@ -52,8 +52,6 @@ public interface BTCWalletService {
 	boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress,
 			Erc20Token erc20Token);
 
-	public void blockEventListener();
-
 	boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			WithdrawalFee withdrawalFee, Currency currency, String toAddress);
 }

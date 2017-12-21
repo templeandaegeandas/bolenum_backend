@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -34,7 +33,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
-import com.bolenum.enums.TransferStatus;
 import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
@@ -59,13 +57,6 @@ import com.neemre.btcdcli4j.core.BitcoindException;
 import com.neemre.btcdcli4j.core.CommunicationException;
 import com.neemre.btcdcli4j.core.client.BtcdClient;
 import com.neemre.btcdcli4j.core.domain.AddressInfo;
-import com.neemre.btcdcli4j.core.domain.Block;
-import com.neemre.btcdcli4j.core.domain.PaymentOverview;
-import com.neemre.btcdcli4j.core.domain.enums.PaymentCategories;
-import com.neemre.btcdcli4j.daemon.BtcdDaemon;
-import com.neemre.btcdcli4j.daemon.BtcdDaemonImpl;
-import com.neemre.btcdcli4j.daemon.Notifications;
-import com.neemre.btcdcli4j.daemon.event.BlockListener;
 
 /**
  * @author chandan kumar singh
@@ -296,8 +287,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.balance.more.than.fee"));
 		}
 		/**
-		 * network fee required for sending to the receiver address and admin address,
-		 * so networkFee = networkFee * 2;
+		 * network fee required for sending to the receiver address and admin
+		 * address, so networkFee = networkFee * 2;
 		 * 
 		 */
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
@@ -547,107 +538,4 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 		return false;
 	}
-
-	@Override
-	public void blockEventListener() {
-		try {
-			BtcdClient client = ResourceUtils.getBtcdProvider();
-			BtcdDaemon daemon = new BtcdDaemonImpl(client);
-			System.out.println("Verifying that the daemon started successfully:");
-			daemon.isMonitoring(Notifications.ALERT);
-			daemon.isMonitoring(Notifications.BLOCK);
-			daemon.isMonitoring(Notifications.WALLET);
-			daemon.isMonitoringAny();
-			daemon.isMonitoringAll();
-
-			daemon.addBlockListener(new BlockListener() {
-				@Override
-				public void blockDetected(Block block) {
-					transactions(block.getTx(), client);
-
-				}
-			});
-		} catch (BitcoindException | CommunicationException e) {
-			logger.error("blockEventListener error: {}", e);
-		}
-	}
-
-	private void transactions(List<String> txs, BtcdClient client) {
-		if (txs.isEmpty()) {
-			return;
-		}
-		txs.forEach(txId -> {
-			try {
-				com.neemre.btcdcli4j.core.domain.Transaction tran = client.getTransaction(txId);
-				List<PaymentOverview> details = tran.getDetails();
-				details.forEach(paymentOverview -> {
-					if (PaymentCategories.RECEIVE.equals(paymentOverview.getCategory())) {
-						String account = paymentOverview.getAccount();
-						if (account.isEmpty()) {
-							saveTxForAdmin(tran);
-						} else {
-							saveTxForUser(account, tran);
-						}
-					}
-				});
-			} catch (BitcoindException | CommunicationException e) {
-				logger.error("transaactions error: {}", e);
-			}
-		});
-	}
-
-	/**
-	 * save deposit transaction of users
-	 * 
-	 */
-	private void saveTxForUser(String account, com.neemre.btcdcli4j.core.domain.Transaction tran) {
-		try {
-			Long userId = Long.valueOf(account);
-			User user = userRepository.findByUserId(userId);
-			UserCoin coin = userCoinRepository.findByTokenNameAndUser("BTC", user);
-			Transaction transaction = transactionRepo.findByTxHash(tran.getTxId());
-			if (transaction == null) {
-				transaction = new Transaction();
-				transaction.setToUser(user);
-				transaction.setTxHash(tran.getTxId());
-				transaction.setTransactionType(TransactionType.INCOMING);
-				transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
-				transaction.setCurrencyName("BTC");
-				transaction.setTransferStatus(TransferStatus.COMPLETED);
-				transaction.setToAddress(coin.getWalletAddress());
-				transactionRepo.save(transaction);
-				simpMessagingTemplate.convertAndSend(
-						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + user.getUserId(),
-						com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
-			}
-		} catch (NumberFormatException e) {
-			logger.error("invalid account of user {}", e);
-		}
-
-	}
-
-	/**
-	 * save deposit transaction of admin
-	 * 
-	 */
-
-	private void saveTxForAdmin(com.neemre.btcdcli4j.core.domain.Transaction tran) {
-		User admin = userRepository.findByEmailId(adminEmail);
-		UserCoin coin = userCoinRepository.findByTokenNameAndUser("BTC", admin);
-		Transaction transaction = transactionRepo.findByTxHash(tran.getTxId());
-		if (transaction == null) {
-			transaction = new Transaction();
-			transaction.setToUser(admin);
-			transaction.setTxHash(tran.getTxId());
-			transaction.setTransactionType(TransactionType.INCOMING);
-			transaction.setTransactionStatus(TransactionStatus.DEPOSIT);
-			transaction.setCurrencyName("BTC");
-			transaction.setTransferStatus(TransferStatus.COMPLETED);
-			transaction.setToAddress(coin.getWalletAddress());
-			transactionRepo.save(transaction);
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ADMIN,
-					com.bolenum.enums.MessageType.DEPOSIT_NOTIFICATION);
-		}
-	}
-
 }

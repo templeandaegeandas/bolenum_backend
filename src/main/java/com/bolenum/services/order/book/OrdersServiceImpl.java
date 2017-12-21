@@ -457,6 +457,10 @@ public class OrdersServiceImpl implements OrdersService {
 				// processed order
 				logger.debug("matching buy/sell completed");
 			}
+			buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
+			sellerTradeFee = buyerTradeFee;
+			logger.info("buyer trade fee: {} seller trade fee: {}", GenericUtils.getDecimalFormatString(buyerTradeFee),
+					GenericUtils.getDecimalFormatString(sellerTradeFee));
 			// checking the order type BUY
 			if (OrderType.BUY.equals(orderType)) {
 				// buyer is coming order's user
@@ -474,7 +478,8 @@ public class OrdersServiceImpl implements OrdersService {
 				matchedOrder.setLockedVolume(lockVol);
 				logger.debug("buyer existing locked volume: {} {}, locked volume: {} {}", orders.getLockedVolume(),
 						pairCA, matchedOrder.getPrice() * qtyTraded, pairCA);
-				lockVol = orders.getLockedVolume() + (matchedOrder.getPrice() * qtyTraded);
+				// locking with trade fee
+				lockVol = orders.getLockedVolume() + (matchedOrder.getPrice() * qtyTraded) + buyerTradeFee;
 				logger.debug("buyer total locked volume: {} {}", lockVol, pairCA);
 				orders.setLockedVolume(lockVol);
 			} else {
@@ -489,7 +494,8 @@ public class OrdersServiceImpl implements OrdersService {
 				 */
 				logger.debug("buyer existing locked volume: {} {}, locked volume: {} {}",
 						matchedOrder.getLockedVolume(), pairCA, matchedOrder.getPrice() * qtyTraded, pairCA);
-				double lockVol = matchedOrder.getLockedVolume() + (matchedOrder.getPrice() * qtyTraded);
+				// locking with trade fee
+				double lockVol = matchedOrder.getLockedVolume() + (matchedOrder.getPrice() * qtyTraded) + buyerTradeFee;
 				logger.debug("buyer total locked volume: {} {}", lockVol, pairCA);
 				matchedOrder.setLockedVolume(lockVol);
 				logger.debug("buyer total locked volume after set: {} {}", matchedOrder.getLockedVolume(), pairCA);
@@ -500,16 +506,7 @@ public class OrdersServiceImpl implements OrdersService {
 				logger.debug("seller total locked volume: {} {}", lockVol, toCA);
 				orders.setLockedVolume(lockVol);
 				logger.debug("seller total locked volume after set: {} {}", orders.getLockedVolume(), toCA);
-
 			}
-			// buyer and seller must be different user
-			logger.debug("byuer id: {} seller id: {}", buyer.getUserId(), seller.getUserId());
-			buyerTradeFee = tradingFeeService.calculateFee(qtyTraded * matchedOrder.getPrice());
-			sellerTradeFee = buyerTradeFee;
-			buyerTradeFee = GenericUtils.getDecimalFormat(buyerTradeFee);
-			sellerTradeFee = GenericUtils.getDecimalFormat(sellerTradeFee);
-			logger.info("buyer trade fee: {} seller trade fee: {}", GenericUtils.getDecimalFormatString(buyerTradeFee),
-					GenericUtils.getDecimalFormatString(sellerTradeFee));
 			// saving the processed BUY/SELL order in trade
 			logger.debug("matched order id: {}", matchedOrder.getId());
 			logger.debug("orders id: {}", orders.getId());
