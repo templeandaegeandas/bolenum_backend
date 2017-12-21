@@ -521,7 +521,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@Override
 	public String getBtcAccountAddress(String walletUuid) {
-		return createBtcAccount(walletUuid);
+		User user = GenericUtils.getLoggedInUser();
+		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("BTC", user);
+		if (userCoin == null) {
+			return createBtcAccount(walletUuid);
+		}
+		return userCoin.getWalletAddress();
 	}
 
 	@Override
