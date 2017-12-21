@@ -46,6 +46,7 @@ import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
+import com.bolenum.services.user.trade.TradeTransactionService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResourceUtils;
@@ -99,6 +100,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Value("${admin.email}")
 	private String adminEmail;
+	@Autowired
+	private TradeTransactionService tradeTransactionService;
 
 	/**
 	 * 
@@ -359,37 +362,31 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		case "CRYPTO":
 			switch (coinCode) {
 			case "BTC":
-				boolean result = transactionService.withdrawBTC(user, coinCode, toAddress, amount,
-						TransactionStatus.WITHDRAW, bolenumFee, null);
-				if (!result) {
-					return new AsyncResult<>(false);
+				boolean result = transactionService.withdrawBTC(user, coinCode, toAddress, amount, bolenumFee);
+				if (result) {
+					if (bolenumFee > 0) {
+						tradeTransactionService.performBtcTrade(user, admin, bolenumFee, null);
+					}
+					return new AsyncResult(true);
 				}
 				break;
 			case "ETH":
-				Future<Boolean> res = transactionService.performEthTransaction(user, toAddress, amount,
-						TransactionStatus.WITHDRAW, bolenumFee, null);
-				try {
-					if (res.get() && bolenumFee > 0) {
-						transactionService.performEthTransaction(user, admin.getEthWalletaddress(), bolenumFee,
-								TransactionStatus.FEE, null, null);
-					}
-				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
-				}
+				transactionService.performEthTransaction(user, toAddress, amount, TransactionStatus.WITHDRAW,
+						bolenumFee, null);
 				break;
 			}
 			break;
 		case "ERC20TOKEN":
 			boolean result = transactionService.withdrawErc20Token(user, coinCode, toAddress, amount,
 					TransactionStatus.WITHDRAW, bolenumFee, null);
-			if (!result) {
-				return new AsyncResult<>(false);
+			if (result) {
+				return new AsyncResult<>(true);
 			}
 			break;
 		default:
 			return new AsyncResult<>(false);
 		}
-		return new AsyncResult<>(true);
+		return new AsyncResult<>(false);
 	}
 
 	@Override

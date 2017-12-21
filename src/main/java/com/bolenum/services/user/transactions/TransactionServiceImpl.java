@@ -12,6 +12,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -59,7 +60,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
-import com.bolenum.exceptions.InsufficientBalanceException;
+import com.bolenum.enums.TransferStatus;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.Error;
@@ -920,8 +921,8 @@ public class TransactionServiceImpl implements TransactionService {
 			if (receiverUserCoin != null) {
 				receiverUserCoin.setBalance(receiverUserCoin.getBalance() + (amount - fee));
 				userCoinRepository.save(receiverUserCoin);
-				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, transactionStatus,
-						tokenName, amount, fee);
+				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName, amount,
+						fee);
 			} else {
 				performErc20Transaction(fromUser, tokenName, toAddress, amount - fee, TransactionStatus.WITHDRAW, fee,
 						null);
@@ -932,34 +933,38 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
-	public boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee, Long tradeId) {
+	public boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount, Double fee) {
 		UserCoin senderUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
+		logger.debug("withdraw btc of user: {} amount: {}, to address: {}", fromUser.getEmailId(), amount, toAddress);
 		if (senderUserCoin != null) {
 			UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress);
+			logger.debug("btc withdraw in app user: {}", receiverUserCoin);
 			if (receiverUserCoin != null) {
 				boolean result = tradeTransactionService.performBtcTrade(fromUser, receiverUserCoin.getUser(), amount,
-						tradeId);
+						null);
 				if (result) {
-					return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress,
-							transactionStatus, tokenName, amount, fee);
+					return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName,
+							amount, fee);
 				}
 				return false;
 			} else {
 				return performBtcTransaction(fromUser, toAddress, amount, fee);
 			}
 		}
+		logger.error("btc withdraw user not exist: {}", senderUserCoin);
 		return false;
 	}
 
 	private boolean saveInAppTransaction(User fromUser, UserCoin senderUserCoin, UserCoin receiverUserCoin,
-			String toAddress, TransactionStatus transactionStatus, String tokenName, Double amount, Double fee) {
+			String toAddress, String tokenName, Double amount, Double fee) {
 		Transaction transaction = new Transaction();
+		String txHash = UUID.randomUUID().toString();
+		transaction.setTxHash("InApp-" + txHash);
 		transaction.setFromAddress(senderUserCoin.getWalletAddress());
 		transaction.setToAddress(toAddress);
 		transaction.setTxAmount(amount - fee);
 		transaction.setTransactionType(TransactionType.OUTGOING);
-		transaction.setTransactionStatus(transactionStatus);
+		transaction.setTransactionStatus(TransactionStatus.WITHDRAW);
 		transaction.setFromUser(fromUser);
 		transaction.setCurrencyName(tokenName);
 		transaction.setFee(fee);
@@ -990,8 +995,9 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("user: {} has current account balance:{} and withdraw amount: {}", fromUser.getEmailId(),
 					GenericUtils.getDecimalFormatString(currentBal.doubleValue()),
 					GenericUtils.getDecimalFormatString(balance.doubleValue()));
-			if (currentBal.compareTo(balance) > 0) {
-				throw new InsufficientBalanceException("You have insufficent balance ");
+			if (currentBal.compareTo(balance) < 0) {
+				logger.error("User: {} has insufficent balance to withdraw amount: {}", fromUser.getEmailId(), balance);
+				return false;
 			}
 			String txHash = client.sendFrom(String.valueOf(fromUser.getUserId()), toAddress,
 					BigDecimal.valueOf(amount));
@@ -1007,8 +1013,11 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
+				transaction.setTransactionStatus(TransactionStatus.WITHDRAW);
+				transaction.setTransferStatus(TransferStatus.COMPLETED);
 				transaction.setFromUser(fromUser);
 				transaction.setCurrencyName("BTC");
+				transaction.setFee(fee);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(
