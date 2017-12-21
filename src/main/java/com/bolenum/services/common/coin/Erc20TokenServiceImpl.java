@@ -313,6 +313,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Uint256 transferFunds = new Uint256(fundInBig);
 		logger.debug("Transfering amount in Unit256: {}", transferFunds);
 		logger.debug("Contract loaded with credentials: {}", erc20Token.getContractAddress());
+		logger.debug("To address: {}", toAddress);
 		TransactionReceipt receipt = token.transfer(new Address(toAddress), transferFunds);
 		logger.debug("Fund transfer transaction hash: {}", receipt.getTransactionHash());
 		return receipt;
@@ -402,7 +403,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		logger.debug("total transaction balance: {} of user: {}", totalBalance, transaction.getToUser().getEmailId());
 		Erc20Token erc20Token = erc20TokenRepository.findByCurrencyCurrencyAbbreviation(transaction.getCurrencyName());
 		User admin = userRepository.findByEmailId(adminEmail);
-		UserCoin adminCoin = userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(), admin);
+		UserCoin adminCoin = userCoinRepository.findByTokenNameAndUser("ETH", admin);
 		if (erc20Token != null && CurrencyType.ERC20TOKEN.equals(erc20Token.getCurrency().getCurrencyType())) {
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
 					transaction.getToUser());
@@ -422,7 +423,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 						userCoin.setBalance(userCoin.getBalance() + totalBalance);
 						userCoinRepository.save(userCoin);
 						logger.debug("saved!");
-						transferErc20Token(userCoin.getUser(), erc20Token, admin.getEthWalletaddress(), balance, "BLN");
+						transferErc20Token(userCoin.getUser(), erc20Token, adminCoin.getWalletAddress(), balance, "BLN");
 						for (int i = 0; i < transactions.size(); i++) {
 							transactions.get(i).setTransferStatus(TransferStatus.COMPLETED);
 						}
