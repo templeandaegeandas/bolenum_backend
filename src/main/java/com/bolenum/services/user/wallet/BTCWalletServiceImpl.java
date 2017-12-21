@@ -64,6 +64,7 @@ import com.neemre.btcdcli4j.core.domain.PaymentOverview;
 import com.neemre.btcdcli4j.core.domain.enums.PaymentCategories;
 import com.neemre.btcdcli4j.daemon.BtcdDaemon;
 import com.neemre.btcdcli4j.daemon.BtcdDaemonImpl;
+import com.neemre.btcdcli4j.daemon.Notifications;
 import com.neemre.btcdcli4j.daemon.event.BlockListener;
 
 /**
@@ -557,6 +558,13 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		try {
 			BtcdClient client = ResourceUtils.getBtcdProvider();
 			BtcdDaemon daemon = new BtcdDaemonImpl(client);
+			System.out.println("Verifying that the daemon started successfully:");
+			daemon.isMonitoring(Notifications.ALERT);
+			daemon.isMonitoring(Notifications.BLOCK);
+			daemon.isMonitoring(Notifications.WALLET);
+			daemon.isMonitoringAny();
+			daemon.isMonitoringAll();
+			
 			daemon.addBlockListener(new BlockListener() {
 				@Override
 				public void blockDetected(Block block) {
