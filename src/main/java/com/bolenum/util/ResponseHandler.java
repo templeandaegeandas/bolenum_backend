@@ -23,12 +23,12 @@ public class ResponseHandler {
 
 	public static ResponseEntity<Object> response(HttpStatus httpStatus, Boolean isError, String message,
 			Object responseObject) {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap();
 		map.put("timestamp", new Date().getTime());
 		map.put("status", httpStatus.value());
 		map.put("isError", isError);
 		map.put("message", message);
 		map.put("data", responseObject);
-		return new ResponseEntity<Object>(map, httpStatus);
+		return new ResponseEntity(map, httpStatus);
 	}
 }

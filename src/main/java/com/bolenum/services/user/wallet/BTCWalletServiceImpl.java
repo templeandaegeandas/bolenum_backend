@@ -4,6 +4,7 @@
 package com.bolenum.services.user.wallet;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,22 +35,28 @@ import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
-import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.WithdrawalFee;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
-import com.bolenum.services.admin.Erc20TokenService;
-import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.util.GenericUtils;
+import com.bolenum.util.ResourceUtils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neemre.btcdcli4j.core.BitcoindException;
+import com.neemre.btcdcli4j.core.CommunicationException;
+import com.neemre.btcdcli4j.core.client.BtcdClient;
+import com.neemre.btcdcli4j.core.domain.AddressInfo;
 
 /**
  * @author chandan kumar singh
@@ -65,9 +72,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Autowired
 	private OrdersService ordersService;
-
-	@Autowired
-	private WithdrawalFeeService withdrawalFeeService;
 
 	@Autowired
 	private TransactionRepo transactionRepo;
@@ -87,8 +91,14 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Autowired
 	private TransactionService transactionService;
 
+	@Autowired
+	private UserCoinRepository userCoinRepository;
+
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
+
+	@Value("${admin.email}")
+	private String adminEmail;
 
 	/**
 	 * 
@@ -101,6 +111,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * @return wallet Id
 	 */
 	@Override
+	@Deprecated
 	public String createHotWallet(String uuid) {
 		String url = btcUrl + UrlConstant.HOT_WALLET;
 		RestTemplate restTemplate = new RestTemplate();
@@ -131,9 +142,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	}
 
 	/**
-	 * to get Bitcoin wallet balance
+	 * to get Bitcoin wallet balance, depricated code
 	 */
+
 	@SuppressWarnings("unchecked")
+	@Deprecated
 	@Override
 	public String getWalletBalance(String uuid) {
 		String url = btcUrl + UrlConstant.WALLET_BAL;
@@ -156,6 +169,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
+	@Deprecated
 	public String getWalletAddress(String walletUuid) {
 		String url = btcUrl + UrlConstant.WALLET_ADDR;
 		RestTemplate restTemplate = new RestTemplate();
@@ -179,6 +193,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 * to vaidate address of user wallet
 	 */
 	@Override
+	@Deprecated
 	public boolean validateAddresss(String btcWalletUuid, String toAddress) {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = btcUrl + UrlConstant.WALLET_ADDR;
@@ -201,76 +216,93 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@Override
 	public boolean validateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
-			WithdrawalFee withdrawalFee, Currency currency) {
-		Double availableBalance = 0.0, minWithdrawAmount = 0.0, bolenumFee = 0.0, networkFee = 0.0, lockVolume = 0.0;
+			WithdrawalFee withdrawalFee, Currency currency, String toAddress) {
+		Double availableBalance;
+		Double minWithdrawAmount = 0.0;
 		if (withdrawalFee != null) {
 			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
-			bolenumFee = withdrawalFee.getFee();
-			lockVolume = withdrawalFee.getLockVolume();
 		}
-		logger.debug("Minimum withdraw ammount:{} Withdraw fee: {} of currency: {}", minWithdrawAmount, bolenumFee,
-				currency.getCurrencyName());
+		logger.debug("Minimum withdraw ammount:{}  of currency: {}", minWithdrawAmount, currency.getCurrencyName());
+
+		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
+
+		if (userCoin == null) {
+			return false;
+		}
+		if (toAddress.equals(userCoin.getWalletAddress())) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+		}
+
 		if (withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
 		if ("BTC".equals(tokenName)) {
-			String balance = getWalletBalance(user.getBtcWalletUuid());
+			String balance = getBtcAccountBalance(user.getBtcWalletUuid());
 			availableBalance = Double.valueOf(balance);
 		} else {
-			availableBalance = etherumWalletService.getWalletBalance(user);
-			networkFee = GenericUtils.getEstimetedFeeEthereum();
-			/**
-			 * network fee required for sending to the receiver address and
-			 * admin address, so networkFee = networkFee * 2;
-			 * 
-			 */
-			networkFee = networkFee * 2;
+			UserCoin ethUserCoin = etherumWalletService.ethWalletBalance(user, tokenName);
+			availableBalance = ethUserCoin.getBalance();
+
+			// networkFee = GenericUtils.getEstimetedFeeEthereum();
+			// /**
+			// * network fee required for sending to the receiver address and
+			// * admin address, so networkFee = networkFee * 2;
+			// *
+			// */
+			// networkFee = networkFee * 2;
 		}
-		logger.debug("Available balance: {} estimeted network fee: {}", availableBalance,
-				GenericUtils.getDecimalFormat().format(networkFee));
-		availableBalance = GenericUtils.getDecimalFormat(availableBalance - lockVolume);
+		// logger.debug("Available balance: {} estimeted network fee: {}",
+		// availableBalance,
+		// GenericUtils.getDecimalFormat().format(networkFee));
+		// availableBalance = GenericUtils.getDecimalFormat(availableBalance -
+		// lockVolume);
 		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
 
 		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, currency, currency);
 		logger.debug("Order Book balance:{} of user: {}", placeOrderVolume, user.getEmailId());
-		double volume = GenericUtils.getDecimalFormat(withdrawAmount + placeOrderVolume + bolenumFee + networkFee);
+		double volume = GenericUtils.getDecimalFormat(withdrawAmount + placeOrderVolume);
 		logger.debug("addition of withdraw amount, place order, fee and network fee volume: {}", volume);
 		if (availableBalance >= volume) {
 			return true;
 		} else {
-			throw new InsufficientBalanceException(MessageFormat.format(
-					localeService.getMessage("insufficient.balance"), withdrawAmount, lockVolume, placeOrderVolume));
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("insufficient.balance"), withdrawAmount, placeOrderVolume));
 		}
 	}
 
 	@Override
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
-			WithdrawalFee withdrawalFee) {
-		Double bolenumFee = 0.0, networkFee = 0.0, availableBalanceETH = 0.0, lockVolume = 0.0;
-		Double availableBalance = 0.0;
+			WithdrawalFee withdrawalFee, String toAddress) {
+		Double bolenumFee = 0.0;
+		Double lockVolume = 0.0;
+		Double minWithdrawAmount = 0.0;
+		Double availableBalance;
 		if (withdrawalFee != null) {
 			bolenumFee = withdrawalFee.getFee();
 			lockVolume = withdrawalFee.getLockVolume();
+			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
 		}
-		networkFee = GenericUtils.getEstimetedFeeEthereum();
+
+		if (withdrawAmount <= bolenumFee) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.balance.more.than.fee"));
+		}
 		/**
 		 * network fee required for sending to the receiver address and admin
 		 * address, so networkFee = networkFee * 2;
 		 * 
 		 */
-		networkFee = networkFee * 2;
-		availableBalanceETH = etherumWalletService.getWalletBalance(user);
-		if (networkFee > availableBalanceETH) {
-			throw new InsufficientBalanceException(localeService.getMessage("contact.support"));
-		}
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
-		Double minWithdrawAmount = withdrawalFeeService.getWithdrawalFee(erc20Token.getCurrency().getCurrencyId())
-				.getMinWithDrawAmount();
-
+		UserCoin userErc20Token = erc20TokenService.erc20WalletBalance(user, erc20Token);
+		if (userErc20Token == null) {
+			return false;
+		}
+		if (toAddress.equals(userErc20Token.getWalletAddress())) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+		}
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
-		availableBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
+		availableBalance = userErc20Token.getBalance();
 		logger.debug("Available balance: {}", availableBalance);
 
 		availableBalance = availableBalance - lockVolume;
@@ -281,7 +313,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 		logger.debug("Order Book balance: {} of user: {}", placeOrderVolume, user.getEmailId());
 
-		double volume = withdrawAmount + placeOrderVolume + bolenumFee;
+		double volume = withdrawAmount + placeOrderVolume;
 		logger.debug("addition of withdraw amount, place order and fee volume: {}", volume);
 
 		if (availableBalance >= volume) {
@@ -327,20 +359,15 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		case "CRYPTO":
 			switch (coinCode) {
 			case "BTC":
-				Future<Boolean> res = transactionService.performBtcTransaction(user, toAddress, amount,
+				boolean result = transactionService.withdrawBTC(user, coinCode, toAddress, amount,
 						TransactionStatus.WITHDRAW, bolenumFee, null);
-				try {
-					if (res.get() && bolenumFee > 0) {
-						transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(), bolenumFee,
-								TransactionStatus.FEE, null, null);
-					}
-				} catch (InterruptedException | ExecutionException e1) {
-					e1.printStackTrace();
+				if (!result) {
+					return new AsyncResult<>(false);
 				}
 				break;
 			case "ETH":
-				res = transactionService.performEthTransaction(user, toAddress, amount, TransactionStatus.WITHDRAW,
-						bolenumFee, null);
+				Future<Boolean> res = transactionService.performEthTransaction(user, toAddress, amount,
+						TransactionStatus.WITHDRAW, bolenumFee, null);
 				try {
 					if (res.get() && bolenumFee > 0) {
 						transactionService.performEthTransaction(user, admin.getEthWalletaddress(), bolenumFee,
@@ -353,20 +380,162 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 			break;
 		case "ERC20TOKEN":
-			Future<Boolean> res1 = transactionService.performErc20Transaction(user, coinCode, toAddress, amount,
+			boolean result = transactionService.withdrawErc20Token(user, coinCode, toAddress, amount,
 					TransactionStatus.WITHDRAW, bolenumFee, null);
-			try {
-				if (res1.get() && bolenumFee > 0) {
-					transactionService.performErc20Transaction(user, coinCode, admin.getEthWalletaddress(), bolenumFee,
-							TransactionStatus.FEE, null, null);
-				}
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+			if (!result) {
+				return new AsyncResult<>(false);
 			}
 			break;
 		default:
-			new AsyncResult<Boolean>(false);
+			return new AsyncResult<>(false);
 		}
-		return new AsyncResult<Boolean>(true);
+		return new AsyncResult<>(true);
+	}
+
+	@Override
+	public boolean adminWithdrawCryptoAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
+		if ("BTC".equals(tokenName)) {
+			transactionService.performBtcTransaction(user, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
+					null);
+			return true;
+		} else if ("ETH".equals(tokenName)) {
+			transactionService.performEthTransaction(user, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
+					null);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public Future<Boolean> adminWithdrawErc20TokenAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress) {
+		return transactionService.performErc20Transaction(user, tokenName, toAddress, withdrawAmount,
+				TransactionStatus.WITHDRAW, 0.0, null);
+	}
+
+	@Override
+	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress) {
+		Double availableBalance;
+		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
+		if (userCoin == null) {
+			return false;
+		}
+		if (toAddress.equals(userCoin.getWalletAddress())) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+		}
+		if ("BTC".equals(tokenName)) {
+			String balance = getBtcAccountBalance(user.getBtcWalletUuid());
+			availableBalance = Double.valueOf(balance);
+		} else {
+			availableBalance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
+		}
+		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
+
+		double volume = GenericUtils.getDecimalFormat(withdrawAmount);
+		logger.debug("addition of withdraw amount, place order, fee and network fee volume: {}", volume);
+		if (availableBalance >= volume) {
+			return true;
+		} else {
+			throw new InsufficientBalanceException(
+					MessageFormat.format(localeService.getMessage("insufficient.balance"), withdrawAmount, 0.0));
+		}
+	}
+
+	@Override
+	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress, Erc20Token erc20Token) {
+		UserCoin userErc20Token = userCoinRepository.findByWalletAddress(toAddress);
+		if (toAddress.equals(user.getEthWalletaddress())) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+		}
+		if (userErc20Token != null) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.in.app.wallet"));
+		}
+		Double adminWalletBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token, tokenName);
+		if (adminWalletBalance < withdrawAmount) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.invalid.available.balance"));
+		}
+		return true;
+	}
+
+	/**
+	 * to create account in btc wallet of a user
+	 * 
+	 * @param userid
+	 * @return btc address
+	 */
+	@Override
+	public String createBtcAccount(String uuid) {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			return client.getAccountAddress(uuid);
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("BTC account creation error: {}", e);
+		}
+		return null;
+	}
+
+	/**
+	 * to get the user account balance
+	 * 
+	 * @param userid
+	 * @return user account balance
+	 */
+	@Override
+	public String getBtcAccountBalance(String uuid) {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			BigDecimal balance = client.getBalance(uuid);
+			String bal = GenericUtils.getDecimalFormatString(balance.doubleValue());
+			logger.info("btc balance: {} of user: {} ", bal, uuid);
+			return bal;
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("BTC account balance error: {}", e);
+		}
+		return "0";
+	}
+
+	/**
+	 * to get the Bolenum server account balance
+	 * 
+	 * @return server account balance
+	 */
+	@Override
+	public String getBolenumBtcAccountBalance() {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			String bal = GenericUtils.getDecimalFormatString(client.getBalance().doubleValue());
+			logger.info("btc balance of bolenum: {} ", bal);
+			return bal;
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("BTC account balance error: {}", e);
+		}
+		return "0";
+	}
+
+	/**
+	 * to get the account address of existing user
+	 * 
+	 * @return account address
+	 */
+	@Override
+	public String getBtcAccountAddress(String walletUuid) {
+		return createBtcAccount(walletUuid);
+	}
+
+	@Override
+	public boolean validateBtcAddresss(String btcWalletUuid, String toAddress) {
+		try {
+			BtcdClient client = ResourceUtils.getBtcdProvider();
+			AddressInfo address = client.validateAddress(toAddress);
+			if (address.getIsValid()) {
+				return true;
+			}
+		} catch (BitcoindException | CommunicationException e) {
+			logger.error("validate adrress error: {}", e);
+		}
+
+		return false;
 	}
 }

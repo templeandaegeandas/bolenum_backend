@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
@@ -33,6 +34,7 @@ public class AuthenticationToken {
 
 	@Enumerated(EnumType.STRING)
 	private TokenType tokentype;
+	
 	@NotBlank
 	private String token;
 	

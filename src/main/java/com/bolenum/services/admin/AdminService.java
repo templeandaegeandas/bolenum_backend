@@ -1,5 +1,7 @@
 package com.bolenum.services.admin;
 
+import java.util.concurrent.Future;
+
 import org.springframework.data.domain.Page;
 
 import com.bolenum.model.User;
@@ -32,5 +34,13 @@ public interface AdminService {
 	String createAdminHotWallet(String uuid);
 
 	String getAdminWalletBalnce(String uuid);
+	
+	boolean adminWithdrawCryptoAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
+
+	Future<Boolean> adminWithdrawErc20TokenAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
+
+	boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
+
+	boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
 
 }

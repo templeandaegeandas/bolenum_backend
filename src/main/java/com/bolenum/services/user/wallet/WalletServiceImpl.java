@@ -6,14 +6,16 @@ package com.bolenum.services.user.wallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.model.CurrencyPair;
-import com.bolenum.model.Erc20Token;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.orders.book.Orders;
-import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.util.GenericUtils;
 
 /**
@@ -26,6 +28,7 @@ public class WalletServiceImpl implements WalletService {
 	private Logger logger = LoggerFactory.getLogger(WalletServiceImpl.class);
 
 	@Autowired
+	@Lazy
 	private BTCWalletService btcWalletService;
 
 	@Autowired
@@ -34,6 +37,16 @@ public class WalletServiceImpl implements WalletService {
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
+	/**
+	 * to get the balance of user wallet
+	 * 
+	 * @param currency
+	 *            Abbrivation (ETH, BTC, BLN)
+	 * @param currencyType,
+	 *            CRYPTO, ERC20TOKEN
+	 * @param user
+	 * @return balance of user wallet
+	 */
 	@Override
 	public String getBalance(String ticker, String currencyType, User user) {
 		logger.debug("get wallet balance ticker: {}", ticker);
@@ -42,16 +55,17 @@ public class WalletServiceImpl implements WalletService {
 		case "CRYPTO":
 			switch (ticker) {
 			case "BTC":
-				balance = btcWalletService.getWalletBalance(user.getBtcWalletUuid());
+				balance = btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid());
 				break;
 			case "ETH":
-				balance = String.valueOf(etherumWalletService.getWalletBalance(user));
+				UserCoin userCoin=etherumWalletService.ethWalletBalance(user, ticker);
+				balance = String.valueOf(userCoin.getBalance());
 				break;
 			}
 			break;
 		case "ERC20TOKEN":
 			Erc20Token erc20Token = erc20TokenService.getByCoin(ticker);
-			balance = String.valueOf(erc20TokenService.getErc20WalletBalance(user, erc20Token));
+			balance = String.valueOf(erc20TokenService.erc20WalletBalance(user, erc20Token).getBalance());
 			break;
 		case "FIAT":
 			break;

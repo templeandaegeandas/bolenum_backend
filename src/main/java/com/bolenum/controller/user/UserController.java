@@ -1,6 +1,7 @@
 package com.bolenum.controller.user;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +39,10 @@ import com.bolenum.model.States;
 import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.SubscribedUserService;
@@ -54,7 +57,7 @@ import com.bolenum.util.ResponseHandler;
 import io.swagger.annotations.Api;
 
 /**
- * @Author Himanshu
+ * @Author Himanshu Kumar
  * @Date 11-Sep-2017
  */
 
@@ -75,10 +78,13 @@ public class UserController {
 	private AuthenticationTokenService authenticationTokenService;
 
 	@Autowired
-	BTCWalletService btcWalletService;
+	private BTCWalletService btcWalletService;
 
 	@Autowired
-	EtherumWalletService etherumWalletService;
+	private EtherumWalletService etherumWalletService;
+
+	@Autowired
+	private Erc20TokenService erc20TokenService;
 
 	@Autowired
 	private CountryAndStateService countryAndStateService;
@@ -122,11 +128,15 @@ public class UserController {
 	}
 
 	/**
+	 * 
 	 * for mail verify at the time of sign up user as well as re register
 	 * 
 	 * @param token
 	 * 
 	 * @return
+	 * 
+	 * 
+	 * @modified by Himanshu Kumar added expiry condition in reset password
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
@@ -134,48 +144,52 @@ public class UserController {
 		logger.debug("user mail verify token: {}", token);
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localService.getMessage("token.invalid"));
-		} else {
-			AuthenticationToken authenticationToken = authenticationTokenService.findByToken(token);
-			if (authenticationToken == null) {
-				logger.debug("user mail verify authenticationToken is null");
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"),
-						null);
+		}
+		AuthenticationToken authenticationToken = authenticationTokenService.findByToken(token);
+		if (authenticationToken == null) {
+			logger.debug("user mail verify authenticationToken is null");
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.invalid"),
+					null);
+		}
+
+		boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
+		logger.debug("user mail verify token expired: {}", isExpired);
+		if (isExpired) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"),
+					null);
+		}
+
+		User user = authenticationToken.getUser();
+		if (user.getIsEnabled()) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
+					localService.getMessage("link.already.verified"), null);
+		}
+		erc20TokenService.createErc20Wallet(user, "BLN");
+		etherumWalletService.createEthWallet(user, "ETH");
+		String address = btcWalletService.createBtcAccount(String.valueOf(user.getUserId()));
+		logger.debug("user mail verify wallet uuid: {}", address);
+		if (!address.isEmpty()) {
+			UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
+			if (userCoin == null) {
+				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+						localService.getMessage("message.error"), Optional.empty());
 			}
-
-			boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
-			logger.debug("user mail verify token expired: {}", isExpired);
-			if (isExpired) {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localService.getMessage("token.expired"),
-						null);
-			}
-
-			User user = authenticationToken.getUser();
-			if (user.getIsEnabled()) {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, false,
-						localService.getMessage("link.already.verified"), null);
-			}
-
-			etherumWalletService.createWallet(user);
-			String uuid = btcWalletService.createHotWallet(String.valueOf(user.getUserId()));
-			logger.debug("user mail verify wallet uuid: {}", uuid);
-
-			if (!uuid.isEmpty()) {
-				user.setBtcWalletUuid(uuid);
-				user.setBtcWalletAddress(btcWalletService.getWalletAddress(uuid));
-				user.setIsEnabled(true);
-				User savedUser = userService.saveUser(user);
-				logger.debug("user mail verify savedUser: {}", savedUser);
-				if (savedUser != null) {
-					return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
-							null);
-				} else {
-					return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-							localService.getMessage("message.error"), null);
-				}
+			user.setBtcWalletUuid(String.valueOf(user.getUserId()));
+			user.setIsEnabled(true);
+			List<UserCoin> userCoins = new ArrayList<>();
+			userCoins.add(userCoin);
+			user.setUserCoin(userCoins);
+			User savedUser = userService.saveUser(user);
+			logger.debug("user mail verify savedUser: {}", savedUser);
+			if (savedUser != null) {
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
 			} else {
 				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
 						localService.getMessage("message.error"), null);
 			}
+		} else {
+			return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+					localService.getMessage("message.error"), null);
 		}
 	}
 

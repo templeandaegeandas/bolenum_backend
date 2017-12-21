@@ -25,21 +25,21 @@ import org.web3j.crypto.CipherException;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Countries;
 import com.bolenum.model.Currency;
-import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.TradingFee;
 import com.bolenum.model.fees.WithdrawalFee;
-import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.CurrencyService;
-import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.fees.TradingFeeService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
@@ -100,9 +100,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired
 	private CurrencyService currencyService;
-
-	@Autowired
-	private AdminService adminService;
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;
@@ -273,19 +270,18 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			}
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
-			etherumWalletService.createWallet(user);
-			String uuid = adminService.createAdminHotWallet("adminWallet");
-			logger.debug("user mail verify wallet uuid: {}", uuid);
-			if (!uuid.isEmpty()) {
-				String walletAddress = btcWalletService.getWalletAddress(uuid);
-				user.setBtcWalletAddress(walletAddress);
-				user.setBtcWalletUuid(uuid);
-				user.setIsEnabled(true);
-				User savedUser = userService.saveUser(user);
-				logger.debug("savedUser as Admin: {}", savedUser.getEmailId());
-			} else {
-				logger.debug("admin exist");
-			}
+			etherumWalletService.createEthWallet(user, "ETH");
+			String address = btcWalletService.getBtcAccountAddress("");
+			UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
+			List<UserCoin> userCoins = new ArrayList<>();
+			userCoins.add(userCoin);
+			user.setUserCoin(userCoins);
+			user.setBtcWalletUuid("");
+			user.setIsEnabled(true);
+			User savedUser = userService.saveUser(user);
+			logger.debug("savedUser as Admin: {}", savedUser.getEmailId());
+		} else {
+			logger.debug("admin exist");
 		}
 	}
 

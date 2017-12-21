@@ -17,9 +17,9 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.enums.TransferStatus;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -80,13 +80,21 @@ public class Transaction {
 	 * for trade Id, to get the details of trade
 	 */
 	private Long tradeId;
+	
+	private boolean inAppTransaction = false;
+	
+	/**
+	 * for checking transfer status(amount transfered to admin or not)
+	 */
+	@Enumerated(EnumType.STRING)
+	private TransferStatus transferStatus;
 
 	public Transaction() {
 
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
+			String txDescription, TransactionType transactionType, Double gas,
 			Double gasPrice, User fromUser, User toUser) {
 
 		this.txHash = txHash;
@@ -370,6 +378,34 @@ public class Transaction {
 	 */
 	public void setTradeId(Long tradeId) {
 		this.tradeId = tradeId;
+	}
+
+	/**
+	 * @return the inAppTransaction
+	 */
+	public boolean isInAppTransaction() {
+		return inAppTransaction;
+	}
+
+	/**
+	 * @param inAppTransaction the inAppTransaction to set
+	 */
+	public void setInAppTransaction(boolean inAppTransaction) {
+		this.inAppTransaction = inAppTransaction;
+	}
+
+	/**
+	 * @return the transferStatus
+	 */
+	public TransferStatus getTransferStatus() {
+		return transferStatus;
+	}
+
+	/**
+	 * @param transferStatus the transferStatus to set
+	 */
+	public void setTransferStatus(TransferStatus transferStatus) {
+		this.transferStatus = transferStatus;
 	}
 	
 }

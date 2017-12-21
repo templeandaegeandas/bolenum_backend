@@ -1,7 +1,9 @@
 
 package com.bolenum.controller.user;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -24,16 +26,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
-import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.WithdrawalFee;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.services.admin.CurrencyService;
-import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
@@ -72,6 +77,9 @@ public class BTCWalletController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private UserCoinRepository userCoinRepository;
+
 	@Value("${admin.email}")
 	private String adminEmail;
 
@@ -83,7 +91,7 @@ public class BTCWalletController {
 	 * ResponseEntity<Map<String,Object>> @exception
 	 *
 	 */
-	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.DEPOSIT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWalletAddressAndBalance(@RequestParam(name = "currencyType") String currencyType,
 			@RequestParam(name = "code") String coinCode) {
@@ -99,15 +107,21 @@ public class BTCWalletController {
 			switch (coinCode) {
 			case "BTC":
 				Map<String, Object> mapAddressAndBal = new HashMap<>();
-				mapAddressAndBal.put("address", btcWalletService.getWalletAddress(user.getBtcWalletUuid()));
-				mapAddressAndBal.put("balance", btcWalletService.getWalletBalance(user.getBtcWalletUuid()));
+				mapAddressAndBal.put("address", btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
+				mapAddressAndBal.put("balance", btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
 				map.put("data", mapAddressAndBal);
 				break;
 			case "ETH":
-				Double balance = etherumWalletService.getWalletBalance(user);
+				//Double balance = etherumWalletService.getWalletBalance(user);
+				UserCoin userCoin = etherumWalletService.ethWalletBalance(user, coinCode);
+				if (userCoin == null) {
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+							localService.getMessage("There is an error for getting balance of user for: " + coinCode),
+							null);
+				}
 				Map<String, Object> mapAddress = new HashMap<>();
-				mapAddress.put("address", user.getEthWalletaddress());
-				mapAddress.put("balance", balance);
+				mapAddress.put("address", userCoin.getWalletAddress());
+				mapAddress.put("balance", userCoin.getBalance());
 				map.put("data", mapAddress);
 				break;
 			default:
@@ -117,15 +131,15 @@ public class BTCWalletController {
 			break;
 		case "ERC20TOKEN":
 			Erc20Token erc20Token = erc20TokenService.getByCoin(coinCode);
-			Double balance = erc20TokenService.getErc20WalletBalance(user, erc20Token);
-			if (balance == null) {
+			UserCoin userCoin = erc20TokenService.erc20WalletBalance(user, erc20Token);
+			if (userCoin == null) {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 						localService.getMessage("There is an error for getting balance of user for: " + coinCode),
 						null);
 			}
 			Map<String, Object> mapAddress = new HashMap<>();
-			mapAddress.put("address", user.getEthWalletaddress());
-			mapAddress.put("balance", GenericUtils.getDecimalFormat(balance));
+			mapAddress.put("address", userCoin.getWalletAddress());
+			mapAddress.put("balance", GenericUtils.getDecimalFormat(userCoin.getBalance()));
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":
@@ -158,7 +172,7 @@ public class BTCWalletController {
 	 * @throws InterruptedException
 	 * @throws InsufficientBalanceException
 	 */
-	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmount(@RequestParam(name = "currencyType") String currencyType,
 			@Valid @RequestBody WithdrawBalanceForm withdrawBalanceForm, @RequestParam(name = "code") String coinCode,
@@ -182,27 +196,33 @@ public class BTCWalletController {
 		switch (currencyType) {
 		case "CRYPTO":
 			validWithdrawAmount = btcWalletService.validateCryptoWithdrawAmount(user, coinCode,
-					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee, currency);
+					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee, currency, withdrawBalanceForm.getToAddress());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), bolenumFee, admin);
 			}
+
 			/*
-			 * switch (coinCode) { case "BTC": logger.debug("Validate balance: {}",
-			 * validWithdrawAmount); if (validWithdrawAmount) {
+			 * switch (coinCode) { case "BTC":
+			 * logger.debug("Validate balance: {}", validWithdrawAmount); if
+			 * (validWithdrawAmount) {
 			 * transactionService.performBtcTransaction(user,
-			 * withdrawBalanceForm.getToAddress(), withdrawBalanceForm.getWithdrawAmount(),
+			 * withdrawBalanceForm.getToAddress(),
+			 * withdrawBalanceForm.getWithdrawAmount(),
 			 * TransactionStatus.WITHDRAW, bolenumFee); if (bolenumFee > 0) {
-			 * transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(),
-			 * bolenumFee, TransactionStatus.FEE, null); } } break; case "ETH":
+			 * transactionService.performBtcTransaction(user,
+			 * admin.getBtcWalletAddress(), bolenumFee, TransactionStatus.FEE,
+			 * null); } } break; case "ETH":
 			 * logger.debug("Validate balance: {}", validWithdrawAmount); if
 			 * (validWithdrawAmount) { Future<Boolean> res =
 			 * transactionService.performEthTransaction(user,
-			 * withdrawBalanceForm.getToAddress(), withdrawBalanceForm.getWithdrawAmount(),
-			 * TransactionStatus.WITHDRAW, bolenumFee); if (res.get() && bolenumFee > 0) {
-			 * transactionService.performEthTransaction(user, admin.getEthWalletaddress(),
-			 * bolenumFee, TransactionStatus.FEE, null); } } break; default: return
+			 * withdrawBalanceForm.getToAddress(),
+			 * withdrawBalanceForm.getWithdrawAmount(),
+			 * TransactionStatus.WITHDRAW, bolenumFee); if (res.get() &&
+			 * bolenumFee > 0) { transactionService.performEthTransaction(user,
+			 * admin.getEthWalletaddress(), bolenumFee, TransactionStatus.FEE,
+			 * null); } } break; default: return
 			 * ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 			 * localService.getMessage("invalid.coin.code"), null); }
 			 */
@@ -210,18 +230,21 @@ public class BTCWalletController {
 
 		case "ERC20TOKEN":
 			validWithdrawAmount = btcWalletService.validateErc20WithdrawAmount(user, coinCode,
-					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee);
+					withdrawBalanceForm.getWithdrawAmount(), withdrawalFee, withdrawBalanceForm.getToAddress());
 			logger.debug("Validate balance: {}", validWithdrawAmount);
 			if (validWithdrawAmount) {
 				btcWalletService.withdrawAmount(currencyType, coinCode, user, withdrawBalanceForm.getToAddress(),
 						withdrawBalanceForm.getWithdrawAmount(), bolenumFee, admin);
 				/*
-				 * Future<Boolean> res = transactionService.performErc20Transaction(user,
-				 * coinCode, withdrawBalanceForm.getToAddress(),
-				 * withdrawBalanceForm.getWithdrawAmount(), TransactionStatus.WITHDRAW,
-				 * bolenumFee); if (res.get() && bolenumFee > 0) {
+				 * Future<Boolean> res =
 				 * transactionService.performErc20Transaction(user, coinCode,
-				 * admin.getEthWalletaddress(), bolenumFee, TransactionStatus.FEE, null); }
+				 * withdrawBalanceForm.getToAddress(),
+				 * withdrawBalanceForm.getWithdrawAmount(),
+				 * TransactionStatus.WITHDRAW, bolenumFee); if (res.get() &&
+				 * bolenumFee > 0) {
+				 * transactionService.performErc20Transaction(user, coinCode,
+				 * admin.getEthWalletaddress(), bolenumFee,
+				 * TransactionStatus.FEE, null); }
 				 */
 			}
 			break;
@@ -255,6 +278,37 @@ public class BTCWalletController {
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localService.getMessage("Deposit saved successfully!"), transactionResponse);
 		}
+	}
+
+	/**
+	 * 
+	 * @param currencyAbbreviation
+	 * @return
+	 */
+	@RequestMapping(value = UrlConstant.CREATE_ACCOUNT, method = RequestMethod.POST)
+	public ResponseEntity<Object> createAccount(@RequestParam("uuid") long uuid) {
+		User user = userService.findByUserId(uuid);
+		if (user != null) {
+			String address = btcWalletService.createBtcAccount(String.valueOf(uuid));
+			logger.debug("address: {}", address);
+			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("BTC", user);
+			if (userCoin == null) {
+				userCoin = new UserCoin();
+				userCoin.setTokenName("BTC");
+				userCoin.setWalletAddress(address);
+				userCoin.setCurrencyType(CurrencyType.CRYPTO);
+				userCoin.setUser(user);
+				userCoin = userCoinRepository.save(userCoin);
+				List<UserCoin> list = new ArrayList<>();
+				list.add(userCoin);
+				user.setUserCoin(list);
+				userService.saveUser(user);
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
+						Optional.empty());
+			}
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localService.getMessage("message.error"),
+				Optional.empty());
 	}
 
 }

@@ -3,6 +3,7 @@ package com.bolenum.services.admin;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.repo.common.coin.Erc20TokenRepository;
 import com.bolenum.repo.user.UserRepository;
+import com.bolenum.services.user.wallet.BTCWalletService;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -39,6 +43,12 @@ public class AdminServiceImpl implements AdminService {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private BTCWalletService btcWalletService;
+
+	@Autowired
+	private Erc20TokenRepository erc20TokenRepository;
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
@@ -117,5 +127,27 @@ public class AdminServiceImpl implements AdminService {
 			logger.error("get Wallet balance RCE:  {}", e.getMessage());
 		}
 		return "";
+	}
+
+	@Override
+	public boolean adminWithdrawCryptoAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
+		return btcWalletService.adminWithdrawCryptoAmount(user, tokenName, withdrawAmount, toAddress);
+	}
+
+	@Override
+	public Future<Boolean> adminWithdrawErc20TokenAmount(User user, String tokenName, Double withdrawAmount,
+			String toAddress) {
+		return btcWalletService.adminWithdrawErc20TokenAmount(user, tokenName, withdrawAmount, toAddress);
+	}
+
+	@Override
+	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
+		Erc20Token erc20Token = erc20TokenRepository.findByCurrencyCurrencyAbbreviation(tokenName);
+		return btcWalletService.adminValidateErc20WithdrawAmount(user, tokenName, withdrawAmount, toAddress, erc20Token);
+	}
+
+	@Override
+	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
+		return btcWalletService.adminValidateCryptoWithdrawAmount(user, tokenName, withdrawAmount, toAddress);
 	}
 }
