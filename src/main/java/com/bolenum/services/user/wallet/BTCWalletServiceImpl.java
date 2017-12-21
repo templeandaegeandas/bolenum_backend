@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -31,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.exceptions.InsufficientBalanceException;
@@ -518,10 +518,20 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	 */
 	@Override
 	public String getBtcAccountAddress(String walletUuid) {
+		if (walletUuid.isEmpty()) {
+			return createBtcAccount(walletUuid);
+		}
 		User user = GenericUtils.getLoggedInUser();
 		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("BTC", user);
 		if (userCoin == null) {
-			return createBtcAccount(walletUuid);
+			String address = createBtcAccount(walletUuid);
+			userCoin = new UserCoin();
+			userCoin.setWalletAddress(address);
+			userCoin.setTokenName("BTC");
+			userCoin.setUser(user);
+			userCoin.setCurrencyType(CurrencyType.CRYPTO);
+			userCoin = userCoinRepository.save(userCoin);
+			return userCoin.getWalletAddress();
 		}
 		return userCoin.getWalletAddress();
 	}
