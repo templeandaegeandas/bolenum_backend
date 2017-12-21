@@ -9,6 +9,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -318,6 +319,11 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		logger.debug("Fund transfer transaction hash: {}", receipt.getTransactionHash());
 		return receipt;
 	}
+	
+	private double getEstimetedFeeErc20Token() {
+		BigInteger gasPrice = Contract.GAS_PRICE, gasLimit = Contract.GAS_LIMIT;
+		return gasPrice.doubleValue() * gasLimit.doubleValue();
+	}
 
 	@Override
 	public void saveIncomingErc20Transaction(String tokenName) throws IOException, CipherException {
@@ -409,7 +415,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 					transaction.getToUser());
 			logger.debug("userErc20Token: {}", userCoin);
 			Boolean result = performEthTransaction(adminCoin, userCoin.getWalletAddress(),
-					GenericUtils.getEstimetedFeeEthereum(), TransactionStatus.FEE, null, null);
+					getEstimetedFeeErc20Token(), TransactionStatus.FEE, null, null);
 			for (int i = 0; i < transactions.size(); i++) {
 				transactions.get(i).setTransferStatus(TransferStatus.PENDING);
 			}
