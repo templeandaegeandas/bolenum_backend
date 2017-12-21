@@ -30,11 +30,9 @@ import org.web3j.protocol.http.HttpService;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
-import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.coin.WalletBalance;
 import com.bolenum.repo.admin.WalletBalanceRepo;
 import com.bolenum.repo.common.coin.Erc20TokenRepository;
-import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.user.wallet.BTCWalletService;
@@ -68,15 +66,8 @@ public class AdminServiceImpl implements AdminService {
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 	
-	
-	@Autowired
-	private UserCoinRepository userCoinRepository;
-
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
-
-	@Value("${bolenum.file.location}")
-	private String fileLocation;
 
 	private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
 
@@ -191,7 +182,7 @@ public class AdminServiceImpl implements AdminService {
 	@Override
 	public void writeUserBalanceIntoFile(List<User> listOfUsers) throws InterruptedException, ExecutionException {
 
-		HttpService httpService = new HttpService("http://165.227.86.165:8000");
+		HttpService httpService = new HttpService("http://159.203.187.133:8000");
 		Web3j web3 = Web3j.build(httpService);
 
 		for (User user : listOfUsers) {

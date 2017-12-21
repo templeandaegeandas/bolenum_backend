@@ -288,6 +288,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			return amount / createDecimals(token.decimals().getValue().intValue());
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
 				| BadPaddingException | IOException | CipherException e) {
+			e.printStackTrace();
 			logger.debug("User getting balance for: {} failed", erc20Token.getCurrency().getCurrencyAbbreviation());
 			return null;
 		}
