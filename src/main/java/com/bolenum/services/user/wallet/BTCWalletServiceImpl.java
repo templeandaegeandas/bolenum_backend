@@ -105,7 +105,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Value("${bitcoin.service.url}")
 	private String btcUrl;
-	
+
 	@Value("${admin.email}")
 	private String adminEmail;
 
@@ -368,20 +368,15 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		case "CRYPTO":
 			switch (coinCode) {
 			case "BTC":
-				Future<Boolean> res = transactionService.performBtcTransaction(user, toAddress, amount,
+				boolean result = transactionService.withdrawBTC(user, coinCode, toAddress, amount,
 						TransactionStatus.WITHDRAW, bolenumFee, null);
-				try {
-					if (res.get() && bolenumFee > 0) {
-						transactionService.performBtcTransaction(user, admin.getBtcWalletAddress(), bolenumFee,
-								TransactionStatus.FEE, null, null);
-					}
-				} catch (InterruptedException | ExecutionException e1) {
-					e1.printStackTrace();
+				if (!result) {
+					return new AsyncResult<>(false);
 				}
 				break;
 			case "ETH":
-				res = transactionService.performEthTransaction(user, toAddress, amount, TransactionStatus.WITHDRAW,
-						bolenumFee, null);
+				Future<Boolean> res = transactionService.performEthTransaction(user, toAddress, amount,
+						TransactionStatus.WITHDRAW, bolenumFee, null);
 				try {
 					if (res.get() && bolenumFee > 0) {
 						transactionService.performEthTransaction(user, admin.getEthWalletaddress(), bolenumFee,
@@ -451,8 +446,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (availableBalance >= volume) {
 			return true;
 		} else {
-			throw new InsufficientBalanceException(MessageFormat
-					.format(localeService.getMessage("insufficient.balance"), withdrawAmount, 0.0));
+			throw new InsufficientBalanceException(
+					MessageFormat.format(localeService.getMessage("insufficient.balance"), withdrawAmount, 0.0));
 		}
 	}
 
@@ -552,7 +547,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 		return false;
 	}
-	
+
 	@Override
 	public void blockEventListener() {
 		try {
@@ -564,20 +559,19 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			daemon.isMonitoring(Notifications.WALLET);
 			daemon.isMonitoringAny();
 			daemon.isMonitoringAll();
-			
+
 			daemon.addBlockListener(new BlockListener() {
 				@Override
 				public void blockDetected(Block block) {
 					transactions(block.getTx(), client);
-					
+
 				}
 			});
 		} catch (BitcoindException | CommunicationException e) {
 			logger.error("blockEventListener error: {}", e);
 		}
 	}
-	
-	
+
 	private void transactions(List<String> txs, BtcdClient client) {
 		if (txs.isEmpty()) {
 			return;
@@ -601,7 +595,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 		});
 	}
-	
+
 	/**
 	 * save deposit transaction of users
 	 * 
@@ -631,7 +625,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 
 	}
-	
+
 	/**
 	 * save deposit transaction of admin
 	 * 
