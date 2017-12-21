@@ -228,7 +228,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		erc20TokenRepository.save(erc20Tokens);
 	}
 
-	private Credentials getCredentials(UserCoin userCoin, String tokenName)
+	private Credentials getCredentials(UserCoin userCoin)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
 			BadPaddingException, IOException, CipherException {
 		File file = new File(ethWalletLocation);
@@ -248,7 +248,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Erc20TokenWrapper token = null;
 		try {
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
-			credentials = getCredentials(userCoin, erc20Token.getCurrency().getCurrencyAbbreviation());
+			credentials = getCredentials(userCoin);
 			logger.debug("Requested token name is: {}", erc20Token.getCurrency().getCurrencyAbbreviation());
 			logger.debug("Contract address of the currency is: {}", erc20Token.getContractAddress());
 			token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials, Contract.GAS_PRICE,
@@ -295,14 +295,14 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	}
 
 	@Override
-	public TransactionReceipt transferErc20Token(User user, Erc20Token erc20Token, String toAddress, Double fund)
+	public TransactionReceipt transferErc20Token(User user, Erc20Token erc20Token, String toAddress, Double fund, String tokenName)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
 			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException,
 			ExecutionException {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 		UserCoin userCoin = userCoinRepository
-				.findByTokenNameAndUser(erc20Token.getCurrency().getCurrencyAbbreviation(), user);
-		Credentials credentials = getCredentials(userCoin, erc20Token.getCurrency().getCurrencyAbbreviation());
+				.findByTokenNameAndUser(tokenName, user);
+		Credentials credentials = getCredentials(userCoin);
 		logger.debug("Credentials created of the user: {}", user.getEmailId());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
 				Contract.GAS_PRICE, Contract.GAS_LIMIT);
@@ -359,6 +359,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			}
 			tx.setCurrencyName(tokenName);
+			tx.setTransferStatus(TransferStatus.INITIATED);
 			Transaction saved = transactionRepo.save(tx);
 			if (saved != null) {
 				logger.debug("new incoming transaction saved of user: {} and hash: {}", saved.getFromAddress(),
@@ -421,7 +422,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 						userCoin.setBalance(userCoin.getBalance() + totalBalance);
 						userCoinRepository.save(userCoin);
 						logger.debug("saved!");
-						transferErc20Token(userCoin.getUser(), erc20Token, admin.getEthWalletaddress(), balance);
+						transferErc20Token(userCoin.getUser(), erc20Token, admin.getEthWalletaddress(), balance, "BLN");
 						for (int i = 0; i < transactions.size(); i++) {
 							transactions.get(i).setTransferStatus(TransferStatus.COMPLETED);
 						}

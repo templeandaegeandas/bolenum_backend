@@ -370,7 +370,7 @@ public class TransactionServiceImpl implements TransactionService {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 			User admin = userRepository.findByEmailId(adminEmail);
 			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(admin, erc20Token, toAddress,
-					amount);
+					amount, "ETH");
 			logger.debug("{} transaction send fund completed", tokenName);
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
