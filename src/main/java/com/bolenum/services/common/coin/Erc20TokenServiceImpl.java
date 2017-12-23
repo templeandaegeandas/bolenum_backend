@@ -298,7 +298,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		Credentials credentials = getCredentials(userCoin);
 		logger.debug("Credentials created of the user: {}", user.getEmailId());
 		Erc20TokenWrapper token = Erc20TokenWrapper.load(erc20Token.getContractAddress(), web3j, credentials,
-				Contract.GAS_PRICE, Contract.GAS_LIMIT);
+				web3j.ethGasPrice().send().getGasPrice(), new BigInteger("21000"));
 		logger.debug("Transfering amount in Double: {}", token.decimals().getValue().intValue());
 		BigInteger fundInBig = BigDecimal.valueOf(fund * createDecimals(token.decimals().getValue().intValue()))
 				.toBigInteger();
@@ -312,10 +312,12 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		return receipt;
 	}
 
-	private double getEstimetedFeeErc20Token() {
-		BigInteger gasPrice = Contract.GAS_PRICE, gasLimit = Contract.GAS_LIMIT;
-		return gasPrice.doubleValue() * gasLimit.doubleValue();
-	}
+//	private double getEstimetedFeeErc20Token() {
+//		BigInteger gasPrice = Contract.GAS_PRICE, gasLimit = Contract.GAS_LIMIT;
+//		double fee = gasPrice.doubleValue() * gasLimit.doubleValue();
+//		logger.debug("BLN transaction fee would be: {}", fee);
+//		return fee;
+//	}
 
 	@Override
 	public void saveIncomingErc20Transaction(String tokenName) throws IOException, CipherException {
@@ -409,7 +411,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
 					transaction.getToUser());
 			logger.debug("userErc20Token: {}", userCoin);
-			Boolean result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), getEstimetedFeeErc20Token(),
+			Boolean result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), GenericUtils.getEstimetedFeeEthereum(),
 					TransactionStatus.FEE, null, null);
 			for (int i = 0; i < transactions.size(); i++) {
 				transactions.get(i).setTransferStatus(TransferStatus.PENDING);
@@ -485,7 +487,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
 			logger.debug("ETH transaction credentials load completed");
 			TransactionReceipt ethSendTransaction = transferEth(credentials, userCoin.getWalletAddress(),
-					getEstimetedFeeErc20Token());
+					GenericUtils.getEstimetedFeeEthereum());
 			logger.debug("transaction hash: {}", ethSendTransaction.getTransactionHash());
 			if (ethSendTransaction.getTransactionHash() != null) {
 				Erc20Token erc20Token = erc20TokenRepository.findByCurrencyCurrencyAbbreviation("BLN");
