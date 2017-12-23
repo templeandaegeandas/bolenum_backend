@@ -72,6 +72,7 @@ public class GenericUtils {
 		double estimedtedFee = 0.0;
 		try {
 			gasPrice = web.ethGasPrice().send().getGasPrice();
+			//gasPrice = gasPrice.add(gasPrice.multiply(new BigInteger("40")).divide(new BigInteger("100")));
 			ptb = gasPrice.multiply(gasLimit);
 			estimedtedFee = GenericUtils.convertWeiToEther(ptb);
 			logger.debug("estimedted Fee: {}", df.format(estimedtedFee));

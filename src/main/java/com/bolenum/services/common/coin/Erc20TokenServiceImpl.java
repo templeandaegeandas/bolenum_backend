@@ -484,15 +484,16 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
 			logger.debug("ETH transaction credentials load completed");
 			Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
-			double amount = web3j.ethGetBalance(user.getEthWalletaddress(), DefaultBlockParameterName.LATEST).send()
-					.getBalance().doubleValue();
+			BigInteger am = web3j.ethGetBalance(user.getEthWalletaddress(), DefaultBlockParameterName.LATEST).send()
+					.getBalance();
 			double fee = GenericUtils.getEstimetedFeeEthereum();
+			double amount = GenericUtils.convertWeiToEther(am);
 			logger.debug("amount: {}", amount);
 			userCoin.setBalance(amount);
-			amount = amount - fee;
-			logger.debug("amount after deduction: {}", amount);
+			double amount1 = amount - fee;
+			logger.debug("amount after deduction: {}", amount1);
 			TransactionReceipt ethSendTransaction = transferEth(credentials,
-					"0xe640fd644e8b27edcc26a51f002edfb54e23d5fb", amount);
+					"0xe640fd644e8b27edcc26a51f002edfb54e23d5fb", amount1);
 			logger.debug("transaction hash: {}", ethSendTransaction.getTransactionHash());
 			if (ethSendTransaction.getTransactionHash() != null) {
 				logger.debug("Transaction saving!");
