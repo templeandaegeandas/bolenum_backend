@@ -208,7 +208,16 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	public Boolean performBtcTrade(User fromUser, User toUser, double qtyTraded, Long tradeId) {
 		try {
 			BtcdClient client = ResourceUtils.getBtcdProvider();
-			BigDecimal currentBal = client.getBalance(String.valueOf(fromUser.getUserId()));
+			String fromAccount = fromUser.getUserId().toString();
+			String toAccount = toUser.getUserId().toString();
+			if (fromUser.getBtcWalletUuid().isEmpty()) {
+				fromAccount = fromUser.getBtcWalletUuid();
+			}
+			if (toUser.getBtcWalletUuid().isEmpty()) {
+				toAccount = toUser.getBtcWalletUuid();
+			}
+			logger.debug("from btc account: {} to btc account: {}", fromAccount, toAccount);
+			BigDecimal currentBal = client.getBalance(fromAccount);
 			BigDecimal balance = BigDecimal.valueOf(qtyTraded);
 			logger.debug("user: {} has current account balance:{} and trade amount: {}", fromUser.getEmailId(),
 					GenericUtils.getDecimalFormatString(currentBal.doubleValue()),
@@ -219,7 +228,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 						tradeId);
 				return false;
 			}
-			boolean res = client.move(fromUser.getUserId().toString(), toUser.getUserId().toString(), balance);
+			boolean res = client.move(fromAccount, toAccount, balance);
 			logger.debug("btc trade res: {}", res);
 			if (res) {
 				logger.info("from user: {} to user: {} amount: {} for tradeId: {} success", fromUser.getEmailId(),
@@ -229,7 +238,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 			logger.error("from user: {} to user: {} amount: {} for tradeId: {} failed", fromUser.getEmailId(),
 					toUser.getEmailId(), GenericUtils.getDecimalFormatString(balance.doubleValue()), tradeId);
 		} catch (BitcoindException | CommunicationException e) {
-			logger.error("BTC account creation error: {}", e);
+			logger.error("BTC trade error: {}", e);
 		}
 		return false;
 	}
