@@ -37,12 +37,6 @@ public class ResourceUtils {
 	private String password;
 	@Value("${bitcoind.http.authScheme}")
 	private String authScheme;
-	@Value("${bitcoind.notification.alert.port}")
-	private String alertPort;
-	@Value("${bitcoind.notification.block.port}")
-	private String blockPort;
-	@Value("${bitcoind.notification.wallet.port}")
-	private String walletPort;
 
 	private static Properties nodeConfig;
 
@@ -55,9 +49,6 @@ public class ResourceUtils {
 		nodeConfig.setProperty("node.bitcoind.rpc.user", user);
 		nodeConfig.setProperty("node.bitcoind.rpc.password", password);
 		nodeConfig.setProperty("node.bitcoind.http.auth_scheme", authScheme);
-		nodeConfig.setProperty("node.bitcoind.notification.alert.port", alertPort);
-		nodeConfig.setProperty("node.bitcoind.notification.block.port", blockPort);
-		nodeConfig.setProperty("node.bitcoind.notification.wallet.port", walletPort);
 	}
 
 	private ResourceUtils() {

@@ -66,11 +66,6 @@ public interface Erc20TokenService {
 
 //	Double getErc20WalletBalance(User user, Erc20Token erc20Token);
 
-	TransactionReceipt transferErc20Token(User user, Erc20Token erc20Token, String toAddress, Double fund)
-			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException,
-			ExecutionException;
-
 	void saveIncomingErc20Transaction(String tokenName) throws IOException, CipherException;
 
 
@@ -83,4 +78,11 @@ public interface Erc20TokenService {
 	void sendUserTokenToAdmin();
 
 	Double getErc20WalletBalance(User user, Erc20Token erc20Token, String tokenName);
+
+	Double getErc20WalletBalanceTemp(User user, Erc20Token erc20Token);
+
+	TransactionReceipt transferErc20Token(User user, Erc20Token erc20Token, String toAddress, Double fund,
+			String tokenName) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException, IOException, CipherException, TransactionException,
+			InterruptedException, ExecutionException;
 }

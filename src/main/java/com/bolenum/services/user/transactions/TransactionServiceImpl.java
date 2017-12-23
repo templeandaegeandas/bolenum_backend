@@ -12,6 +12,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -59,7 +60,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
-import com.bolenum.exceptions.InsufficientBalanceException;
+import com.bolenum.enums.TransferStatus;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.Error;
@@ -370,7 +371,7 @@ public class TransactionServiceImpl implements TransactionService {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 			User admin = userRepository.findByEmailId(adminEmail);
 			TransactionReceipt transactionReceipt = erc20TokenService.transferErc20Token(admin, erc20Token, toAddress,
-					amount);
+					amount, "ETH");
 			logger.debug("{} transaction send fund completed", tokenName);
 			String txHash = transactionReceipt.getTransactionHash();
 			logger.debug("{} transaction hash: {} of user: {}, amount: {}", tokenName, txHash, fromUser.getEmailId(),
@@ -663,6 +664,9 @@ public class TransactionServiceImpl implements TransactionService {
 					logger.debug("seller unlock volume: {}, remaining locked volume: {} ",
 							GenericUtils.getDecimalFormatString(qtyTraded),
 							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
 					matchedOrder.setLockedVolume(lockedVolRemaining);
 					orderAsyncServices.saveOrder(matchedOrder);
 					logger.debug("seller locked volume, unlocking completed amount: {}", qtyTraded);
@@ -671,6 +675,9 @@ public class TransactionServiceImpl implements TransactionService {
 					logger.debug("seller unlock volume: {}, remaining locked volume: {} ",
 							GenericUtils.getDecimalFormatString(qtyTraded),
 							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
 					orders.setLockedVolume(lockedVolRemaining);
 					orderAsyncServices.saveOrder(orders);
 					logger.debug("seller locked volume, unlocking completed amount: {}",
@@ -707,23 +714,31 @@ public class TransactionServiceImpl implements TransactionService {
 				 */
 				logger.debug("buyer locked volume, unlocking started");
 				if (OrderType.BUY.equals(orders.getOrderType())) {
-					double lockedVolRemaining = orders.getLockedVolume() - (matchedOrder.getPrice() * qtyTraded);
+					double uvol = matchedOrder.getPrice() * qtyTraded - buyerTradeFee;
+					double lockedVolRemaining = orders.getLockedVolume() - uvol;
 					logger.debug("buyer unlock volume: {}, remaining locked volume: {} ",
-							GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded),
+							GenericUtils.getDecimalFormatString(uvol),
 							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
 					orders.setLockedVolume(lockedVolRemaining);
 					orderAsyncServices.saveOrder(orders);
 					logger.debug("buyer locked volume, unlocking completed for amount: {}",
-							GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded));
+							GenericUtils.getDecimalFormatString(uvol));
 				} else {
-					double lockedVolRemaining = matchedOrder.getLockedVolume() - (matchedOrder.getPrice() * qtyTraded);
+					double uvol = matchedOrder.getPrice() * qtyTraded - buyerTradeFee;
+					double lockedVolRemaining = matchedOrder.getLockedVolume() - uvol;
 					logger.debug("buyer unlock volume: {}, remaining locked volume: {} ",
-							GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded),
+							GenericUtils.getDecimalFormatString(uvol),
 							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
 					matchedOrder.setLockedVolume(lockedVolRemaining);
 					orderAsyncServices.saveOrder(matchedOrder);
 					logger.debug("buyer locked volume, unlocking completed amount: {}",
-							GenericUtils.getDecimalFormatString(matchedOrder.getPrice() * qtyTraded));
+							GenericUtils.getDecimalFormatString(uvol));
 				}
 				notificationService.sendNotification(buyer, msg);
 				notificationService.saveNotification(buyer, seller, msg);
@@ -762,6 +777,35 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("Saving trade fee for buyer started");
 				trade = orderAsyncServices.saveTrade(trade);
 				logger.debug("Saving trade fee for buyer completed: {}", trade.getIsFeeDeductedBuyer());
+
+				logger.debug("buyer fee locked volume, unlocking started");
+				if (OrderType.BUY.equals(orders.getOrderType())) {
+					double uvol = buyerTradeFee * 2;
+					double lockedVolRemaining = orders.getLockedVolume() - uvol;
+					logger.debug("buyer fee unlock volume: {}, remaining locked volume: {} ",
+							GenericUtils.getDecimalFormatString(uvol),
+							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
+					orders.setLockedVolume(lockedVolRemaining);
+					orderAsyncServices.saveOrder(orders);
+					logger.debug("buyer fee locked volume, unlocking completed for amount: {}",
+							GenericUtils.getDecimalFormatString(buyerTradeFee));
+				} else {
+					double uvol = buyerTradeFee * 2;
+					double lockedVolRemaining = matchedOrder.getLockedVolume() - uvol;
+					logger.debug("buyer fee unlock volume: {}, remaining locked volume: {} ",
+							GenericUtils.getDecimalFormatString(uvol),
+							GenericUtils.getDecimalFormatString(lockedVolRemaining));
+					if (lockedVolRemaining < 0) {
+						lockedVolRemaining = 0;
+					}
+					matchedOrder.setLockedVolume(lockedVolRemaining);
+					orderAsyncServices.saveOrder(matchedOrder);
+					logger.debug("buyer locked volume, unlocking completed amount: {}",
+							GenericUtils.getDecimalFormatString(uvol));
+				}
 			}
 		} else {
 			logger.debug("transaction processing failed due to paired currency volume");
@@ -877,8 +921,8 @@ public class TransactionServiceImpl implements TransactionService {
 			if (receiverUserCoin != null) {
 				receiverUserCoin.setBalance(receiverUserCoin.getBalance() + (amount - fee));
 				userCoinRepository.save(receiverUserCoin);
-				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, transactionStatus,
-						tokenName, amount, fee);
+				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName, amount,
+						fee);
 			} else {
 				performErc20Transaction(fromUser, tokenName, toAddress, amount - fee, TransactionStatus.WITHDRAW, fee,
 						null);
@@ -889,34 +933,38 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	@Override
-	public boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee, Long tradeId) {
+	public boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount, Double fee) {
 		UserCoin senderUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
+		logger.debug("withdraw btc of user: {} amount: {}, to address: {}", fromUser.getEmailId(), amount, toAddress);
 		if (senderUserCoin != null) {
 			UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress);
+			logger.debug("btc withdraw in app user: {}", receiverUserCoin);
 			if (receiverUserCoin != null) {
 				boolean result = tradeTransactionService.performBtcTrade(fromUser, receiverUserCoin.getUser(), amount,
-						tradeId);
+						null);
 				if (result) {
-					return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress,
-							transactionStatus, tokenName, amount, fee);
+					return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName,
+							amount, fee);
 				}
 				return false;
 			} else {
 				return performBtcTransaction(fromUser, toAddress, amount, fee);
 			}
 		}
+		logger.error("btc withdraw user not exist: {}", senderUserCoin);
 		return false;
 	}
 
 	private boolean saveInAppTransaction(User fromUser, UserCoin senderUserCoin, UserCoin receiverUserCoin,
-			String toAddress, TransactionStatus transactionStatus, String tokenName, Double amount, Double fee) {
+			String toAddress, String tokenName, Double amount, Double fee) {
 		Transaction transaction = new Transaction();
+		String txHash = UUID.randomUUID().toString();
+		transaction.setTxHash("InApp-" + txHash);
 		transaction.setFromAddress(senderUserCoin.getWalletAddress());
 		transaction.setToAddress(toAddress);
 		transaction.setTxAmount(amount - fee);
 		transaction.setTransactionType(TransactionType.OUTGOING);
-		transaction.setTransactionStatus(transactionStatus);
+		transaction.setTransactionStatus(TransactionStatus.WITHDRAW);
 		transaction.setFromUser(fromUser);
 		transaction.setCurrencyName(tokenName);
 		transaction.setFee(fee);
@@ -947,8 +995,9 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("user: {} has current account balance:{} and withdraw amount: {}", fromUser.getEmailId(),
 					GenericUtils.getDecimalFormatString(currentBal.doubleValue()),
 					GenericUtils.getDecimalFormatString(balance.doubleValue()));
-			if (currentBal.compareTo(balance) > 0) {
-				throw new InsufficientBalanceException("You have insufficent balance ");
+			if (currentBal.compareTo(balance) < 0) {
+				logger.error("User: {} has insufficent balance to withdraw amount: {}", fromUser.getEmailId(), balance);
+				return false;
 			}
 			String txHash = client.sendFrom(String.valueOf(fromUser.getUserId()), toAddress,
 					BigDecimal.valueOf(amount));
@@ -964,8 +1013,11 @@ public class TransactionServiceImpl implements TransactionService {
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
+				transaction.setTransactionStatus(TransactionStatus.WITHDRAW);
+				transaction.setTransferStatus(TransferStatus.COMPLETED);
 				transaction.setFromUser(fromUser);
 				transaction.setCurrencyName("BTC");
+				transaction.setFee(fee);
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(

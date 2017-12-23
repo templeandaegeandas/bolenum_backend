@@ -1,8 +1,10 @@
 package com.bolenum.controller.admin;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import javax.validation.Valid;
 
@@ -87,7 +89,7 @@ public class AdminController {
 
 	@Autowired
 	private Erc20TokenService erc20TokenService;
-	
+
 	@Autowired
 	private UserCoinRepository userCoinRepository;
 
@@ -350,6 +352,18 @@ public class AdminController {
 		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("withdraw.coin.success"),
 				Optional.empty());
+	}
+
+	@RequestMapping(value = UrlConstant.USER_WALLETS_BALANCE, method = RequestMethod.GET)
+	public ResponseEntity<Object> getUserWalletBalance() throws InterruptedException, ExecutionException {
+
+		List<User> listOfUsers = adminService.getListOfUsers();
+		if (listOfUsers != null) {
+			adminService.writeUserBalanceIntoFile(listOfUsers);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.list"),
+					listOfUsers);
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(""), Optional.empty());
 	}
 
 }

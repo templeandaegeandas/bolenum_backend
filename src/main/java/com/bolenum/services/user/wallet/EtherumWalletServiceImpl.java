@@ -48,6 +48,7 @@ import com.bolenum.util.GenericUtils;
  */
 @Service
 public class EtherumWalletServiceImpl implements EtherumWalletService {
+	
 	@Value("${bolenum.ethwallet.location}")
 	private String ethWalletLocation;
 
