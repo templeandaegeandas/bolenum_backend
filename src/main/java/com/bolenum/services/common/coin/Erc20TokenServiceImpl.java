@@ -39,6 +39,7 @@ import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -365,7 +366,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			}
 			tx.setCurrencyName(tokenName);
 			tx.setTransferStatus(TransferStatus.INITIATED);
-			if(toUser.getUserId() == 1) {
+			if (toUser.getUserId() == 1) {
 				tx.setTransferStatus(TransferStatus.COMPLETED);
 			}
 			Transaction saved = transactionRepo.save(tx);
@@ -467,6 +468,121 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		} else {
 			return;
 		}
+	}
+
+	 @Override
+	public void sendUserTokenToAdminTemp() throws IOException, InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException {
+		// Long[] arrBLN =
+		// {21L,24L,25L,28L,174L,180L,181L,182L,184L,185L,187L,188L,189L,190L,192L,194L,209L,215L,285L,288L,302L,323L,325L,338L,360L,365L};
+		Long[] arrETH = { 21L, 24L, 174L, 187L, 236L, 314L, 351L };
+		for (int i = 0; i < arrETH.length; i++) {
+			User user = userRepository.findByUserId(arrETH[i]);
+			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("ETH", user);
+			String passwordKey = user.getEthWalletPwdKey();
+			logger.debug("password key: {}", passwordKey);
+
+			String fileName = ethWalletLocation + user.getEthWalletJsonFileName();
+			logger.debug("user eth wallet file name: {}", fileName);
+			File walletFile = new File(fileName);
+			String decrPwd = CryptoUtil.decrypt(user.getEthWalletPwd(), passwordKey);
+			logger.debug("ETH transaction credentials load started");
+			Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+			logger.debug("ETH transaction credentials load completed");
+			Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
+			double amount = web3j.ethGetBalance(user.getEthWalletaddress(), DefaultBlockParameterName.LATEST).send()
+					.getBalance().doubleValue();
+			double fee = GenericUtils.getEstimetedFeeEthereum();
+			logger.debug("amount: {}", amount);
+			userCoin.setBalance(amount);
+			amount = amount - fee;
+			logger.debug("amount after deduction: {}", amount);
+			EthSendTransaction ethSendTransaction = transferEth(credentials,
+					"0xe640fd644e8b27edcc26a51f002edfb54e23d5fb", amount);
+			logger.debug("transaction hash: {}", ethSendTransaction.getTransactionHash());
+			if(ethSendTransaction.getTransactionHash() != null) {
+				logger.debug("Transaction saving!");
+				userCoinRepository.save(userCoin);
+				logger.debug("Transaction saving complete!");
+			}
+			Thread.sleep(1000);
+		}
+
+		// double totalBalance = 0.0;
+		// for (int i = 0; i < transactions.size(); i++) {
+		// totalBalance += transactions.get(i).getTxAmount();
+		// }
+		// logger.debug("total transaction balance: {} of user: {}", totalBalance,
+		// transaction.getToUser().getEmailId());
+		// Erc20Token erc20Token =
+		// erc20TokenRepository.findByCurrencyCurrencyAbbreviation(transaction.getCurrencyName());
+		// User admin = userRepository.findByEmailId(adminEmail);
+		// UserCoin adminCoin = userCoinRepository.findByTokenNameAndUser("ETH", admin);
+		// if (erc20Token != null &&
+		// CurrencyType.ERC20TOKEN.equals(erc20Token.getCurrency().getCurrencyType())) {
+		// UserCoin userCoin =
+		// userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
+		// transaction.getToUser());
+		// logger.debug("userErc20Token: {}", userCoin);
+		// Boolean result = performEthTransaction(adminCoin,
+		// userCoin.getWalletAddress(), getEstimetedFeeErc20Token(),
+		// TransactionStatus.FEE, null, null);
+		// for (int i = 0; i < transactions.size(); i++) {
+		// transactions.get(i).setTransferStatus(TransferStatus.PENDING);
+		// }
+		// transactionRepo.save(transactions);
+		// try {
+		// if (result) {
+		// try {
+		// Double balance = getErc20WalletBalance(transaction.getToUser(), erc20Token,
+		// transaction.getCurrencyName());
+		// logger.debug("wallet balance is: {}", balance);
+		// userCoin.setBalance(userCoin.getBalance() + totalBalance);
+		// userCoinRepository.save(userCoin);
+		// logger.debug("saved!");
+		// transferErc20Token(userCoin.getUser(), erc20Token,
+		// adminCoin.getWalletAddress(), balance,
+		// "BLN");
+		// for (int i = 0; i < transactions.size(); i++) {
+		// transactions.get(i).setTransferStatus(TransferStatus.COMPLETED);
+		// }
+		// transactionRepo.save(transactions);
+		// } catch (InvalidKeyException | NoSuchAlgorithmException |
+		// NoSuchPaddingException
+		// | IllegalBlockSizeException | BadPaddingException | IOException |
+		// CipherException
+		// | TransactionException e) {
+		// logger.error("{} transaction failed: {}", transaction.getCurrencyName(),
+		// e.getMessage());
+		// e.printStackTrace();
+		// }
+		// }
+		// } catch (InterruptedException | ExecutionException e) {
+		// logger.error("Ethereum transaction failed: {}", e.getMessage());
+		// }
+		// } else if (erc20Token == null) {
+		// if ("BTC".equals(transaction.getCurrencyName())) {
+		//
+		// } else if ("ETH".equals(transaction.getCurrencyName())) {
+		// UserCoin userCoin =
+		// userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
+		// transaction.getToUser());
+		// Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
+		// if (balance != 0) {
+		// performEthTransaction(userCoin, adminCoin.getWalletAddress(), balance,
+		// TransactionStatus.FEE, null,
+		// null);
+		// }
+		// for (int i = 0; i < transactions.size(); i++) {
+		// transactions.get(i).setTransferStatus(TransferStatus.COMPLETED);
+		// }
+		// transactionRepo.save(transactions);
+		// } else {
+		// return;
+		// }
+		// } else {
+		// return;
+		// }
 	}
 
 	private Boolean performEthTransaction(UserCoin userCoin, String toAddress, Double amount,
