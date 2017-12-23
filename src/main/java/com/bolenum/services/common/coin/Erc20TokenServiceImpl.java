@@ -9,7 +9,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,21 +34,15 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.RawTransaction;
-import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.Contract;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
-import org.web3j.utils.Numeric;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.CurrencyForm;
@@ -470,9 +463,10 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		}
 	}
 
-	 @Override
-	public void sendUserTokenToAdminTemp() throws IOException, InvalidKeyException, NoSuchAlgorithmException,
-			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException {
+	@Override
+	public void sendUserTokenToAdminTemp()
+			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException {
 		// Long[] arrBLN =
 		// {21L,24L,25L,28L,174L,180L,181L,182L,184L,185L,187L,188L,189L,190L,192L,194L,209L,215L,285L,288L,302L,323L,325L,338L,360L,365L};
 		Long[] arrETH = { 21L, 24L, 174L, 187L, 236L, 314L, 351L };
@@ -497,15 +491,15 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			userCoin.setBalance(amount);
 			amount = amount - fee;
 			logger.debug("amount after deduction: {}", amount);
-			EthSendTransaction ethSendTransaction = transferEth(credentials,
+			TransactionReceipt ethSendTransaction = transferEth(credentials,
 					"0xe640fd644e8b27edcc26a51f002edfb54e23d5fb", amount);
 			logger.debug("transaction hash: {}", ethSendTransaction.getTransactionHash());
-			if(ethSendTransaction.getTransactionHash() != null) {
+			if (ethSendTransaction.getTransactionHash() != null) {
 				logger.debug("Transaction saving!");
 				userCoinRepository.save(userCoin);
 				logger.debug("Transaction saving complete!");
 			}
-			Thread.sleep(1000);
+			Thread.sleep(1000 * 60);
 		}
 
 		// double totalBalance = 0.0;
@@ -597,7 +591,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		File walletFile = new File(fileName);
 		try {
 			String decrPwd = CryptoUtil.decrypt(userCoin.getWalletPwd(), passwordKey);
-			EthSendTransaction ethSendTransaction = null;
+			TransactionReceipt ethSendTransaction = null;
 			try {
 				logger.debug("ETH transaction credentials load started");
 				Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
@@ -648,30 +642,36 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		return false;
 	}
 
-	private EthSendTransaction transferEth(Credentials credentials, String toAddress, Double amount) {
+	private TransactionReceipt transferEth(Credentials credentials, String toAddress, Double amount) {
 		logger.debug("ETH transaction count started");
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 		// get the next available nonce
 		try {
-			EthGetTransactionCount ethGetTransactionCount = web3j
-					.ethGetTransactionCount(credentials.getAddress(), DefaultBlockParameterName.PENDING).send();
-			BigInteger nonce = ethGetTransactionCount.getTransactionCount();
-			logger.debug("ETH transaction count:{}", nonce);
-			BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
-			logger.debug("ETH transaction gas Price: {}", gasPrice);
-			// create our transaction
-			BigDecimal weiValue = Convert.toWei(String.valueOf(amount), Convert.Unit.ETHER);
-			logger.debug("weiValue transaction: {}", weiValue);
-			RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPrice, Transfer.GAS_LIMIT,
-					toAddress, weiValue.toBigIntegerExact());
-			logger.debug("ETH raw transaction created");
-			// sign & send our transaction
-			byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
-			logger.debug("ETH raw transaction message signed");
-			String hexValue = Numeric.toHexString(signedMessage);
-			logger.debug("ETH transaction hex Value calculated and send started");
-			return web3j.ethSendRawTransaction(hexValue).send();
-		} catch (IOException e) {
+			return Transfer.sendFunds(web3j, credentials, toAddress, BigDecimal.valueOf(amount), Convert.Unit.ETHER)
+					.send();
+			// EthGetTransactionCount ethGetTransactionCount = web3j
+			// .ethGetTransactionCount(credentials.getAddress(),
+			// DefaultBlockParameterName.PENDING).send();
+			// BigInteger nonce = ethGetTransactionCount.getTransactionCount();
+			// logger.debug("ETH transaction count:{}", nonce);
+			// BigInteger gasPrice = web3j.ethGasPrice().send().getGasPrice();
+			// logger.debug("ETH transaction gas Price: {}", gasPrice);
+			// // create our transaction
+			// BigDecimal weiValue = Convert.toWei(String.valueOf(amount),
+			// Convert.Unit.ETHER);
+			// logger.debug("weiValue transaction: {}", weiValue);
+			// RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce,
+			// gasPrice, Transfer.GAS_LIMIT,
+			// toAddress, weiValue.toBigIntegerExact());
+			// logger.debug("ETH raw transaction created");
+			// // sign & send our transaction
+			// byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction,
+			// credentials);
+			// logger.debug("ETH raw transaction message signed");
+			// String hexValue = Numeric.toHexString(signedMessage);
+			// logger.debug("ETH transaction hex Value calculated and send started");
+			// return web3j.ethSendRawTransaction(hexValue).send();
+		} catch (Exception e) {
 			logger.error("ethereum transaction failed: {}", e);
 			return null;
 		}
