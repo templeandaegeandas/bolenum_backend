@@ -173,7 +173,7 @@ public class AdminServiceImpl implements AdminService {
 	@Override
 	public List<User> getListOfUsers() {
 
-		return userRepository.findAll();
+		return userRepository.findByIsEnabled(true);
 	}
 
 	/**

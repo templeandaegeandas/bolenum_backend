@@ -1,5 +1,6 @@
 package com.bolenum.controller.admin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.User;
@@ -34,6 +36,7 @@ import com.bolenum.model.fees.TradingFee;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.repo.common.coin.UserCoinRepository;
+import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.fees.TradingFeeService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
@@ -92,6 +95,9 @@ public class AdminController {
 
 	@Autowired
 	private UserCoinRepository userCoinRepository;
+
+	@Autowired
+	private UserRepository userRepository;
 
 	public static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
@@ -360,6 +366,63 @@ public class AdminController {
 		List<User> listOfUsers = adminService.getListOfUsers();
 		if (listOfUsers != null) {
 			adminService.writeUserBalanceIntoFile(listOfUsers);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.list"),
+					listOfUsers);
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(""), Optional.empty());
+	}
+
+	@RequestMapping(value = UrlConstant.USER_CREATE_WALLETS, method = RequestMethod.GET)
+	public ResponseEntity<Object> createUserWallet() {
+		List<User> listOfUsers = adminService.getListOfUsers();
+		logger.debug("size of list {}",listOfUsers.size());
+		if (listOfUsers != null) {
+			for (int i = 0; i < listOfUsers.size(); i++) {
+				User user = listOfUsers.get(i);
+				logger.debug("email id of user = {}",user.getEmailId());
+				UserCoin userCoinBLN = userCoinRepository.findByTokenNameAndUser("BLN", user);
+				if (!user.getEmailId().equals("chandan.kumar@oodlestechnologies.com")) {
+					if (userCoinBLN == null) {
+						userCoinBLN = new UserCoin();
+						userCoinBLN.setBalance(0.0);
+						userCoinBLN.setCurrencyType(CurrencyType.ERC20TOKEN);
+						userCoinBLN.setTokenName("BLN");
+						userCoinBLN.setWalletAddress(user.getEthWalletaddress());
+						userCoinBLN.setWalletJsonFile(user.getEthWalletJsonFileName());
+						userCoinBLN.setWalletPwd(user.getEthWalletPwd());
+						userCoinBLN.setWalletPwdKey(user.getEthWalletPwdKey());
+						userCoinBLN.setUser(user);
+						userCoinRepository.save(userCoinBLN);
+						List<UserCoin> userCoins = new ArrayList<>();
+						userCoins.add(userCoinBLN);
+						user.setUserCoin(userCoins);
+						userRepository.save(user);
+					}
+				}
+				if (!user.getEmailId().equals("chandan.kumar@oodlestechnologies.com")) {
+					UserCoin userCoinBTC = userCoinRepository.findByTokenNameAndUser("BTC", user);
+					if (userCoinBTC == null) {
+						String address = btcWalletService.createBtcAccount(user.getBtcWalletUuid());
+						userCoinBTC = new UserCoin();
+						userCoinBTC.setCurrencyType(CurrencyType.CRYPTO);
+						userCoinBTC.setTokenName("BTC");
+						userCoinBTC.setWalletAddress(address);
+						userCoinBTC.setUser(user);
+						userCoinRepository.save(userCoinBTC);
+						List<UserCoin> userCoins = new ArrayList<>();
+						userCoins.add(userCoinBTC);
+						user.setUserCoin(userCoins);
+						userRepository.save(user);
+					}
+				}
+				if (!user.getEmailId().equals("admin@bolenum.com")
+						|| user.getEmailId().equals("chandan.kumar@oodlestechnologies.com")) {
+					UserCoin userCoinETH = userCoinRepository.findByTokenNameAndUser("ETH", user);
+					if (userCoinETH == null) {
+						etherumWalletService.createEthWallet(user, "ETH");
+					}
+				}
+			}
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.list"),
 					listOfUsers);
 		}
