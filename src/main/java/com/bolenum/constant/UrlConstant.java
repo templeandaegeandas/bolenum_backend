@@ -71,7 +71,10 @@ public class UrlConstant {
 	public static final String CURRENCY_NGN_PRICE_SAVE = "set/bln_ngn";
 	public static final String ADMIN_WITHDRAW = "withdraw";
 	public static final String ADMIN_DEPOSIT = "deposit";
+	
+	/********************** TEMP API ***********************/
 	public static final String USER_WALLETS_BALANCE = "action/users/wallet/balance";
+	public static final String USER_CREATE_WALLETS = "action/users/wallet/create";
 
 	/********************** KYC API ***********************/
 	public static final String UPLOAD_DOCUMENT = BASE_URI_V1 + "kyc/upload";
