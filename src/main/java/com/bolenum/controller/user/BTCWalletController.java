@@ -103,7 +103,6 @@ public class BTCWalletController {
 		Map<String, Object> map = new HashMap<>();
 		switch (currencyType) {
 		case "CRYPTO":
-
 			switch (coinCode) {
 			case "BTC":
 				Map<String, Object> mapAddressAndBal = new HashMap<>();
