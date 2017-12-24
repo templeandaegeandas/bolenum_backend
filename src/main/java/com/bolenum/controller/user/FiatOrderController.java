@@ -306,13 +306,16 @@ public class FiatOrderController {
 		}
 		logger.debug("existing order id: {}", exitingOrder.getId());
 		String currencyAbr;
+		String currencyType;
 		if (!(CurrencyType.FIAT.equals(exitingOrder.getPair().getToCurrency().get(0).getCurrencyType()))) {
 			currencyAbr = exitingOrder.getPair().getToCurrency().get(0).getCurrencyAbbreviation();
+			currencyType = exitingOrder.getPair().getToCurrency().get(0).getCurrencyType().toString();
 		} else {
 			currencyAbr = exitingOrder.getPair().getPairedCurrency().get(0).getCurrencyAbbreviation();
+			currencyType = exitingOrder.getPair().getPairedCurrency().get(0).getCurrencyType().toString();
 		}
 		logger.debug("existing order currency Abr: {}", currencyAbr);
-		Future<Boolean> result = fiatOrderService.processTransactionFiatOrders(exitingOrder, currencyAbr);
+		Future<Boolean> result = fiatOrderService.processTransactionFiatOrders(exitingOrder, currencyAbr, currencyType);
 		logger.debug("existing order currency Abr: {}", currencyAbr);
 		try {
 			logger.debug("result of order: {}", result);
