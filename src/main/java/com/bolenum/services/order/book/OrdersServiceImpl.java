@@ -87,14 +87,14 @@ public class OrdersServiceImpl implements OrdersService {
 		 * if order type is SELL then only checking, user have selling volume
 		 */
 		if (OrderType.SELL.equals(orders.getOrderType())) {
-			currency = currencyPair.getToCurrency().get(0);
+			currency = currencyPair.getPairedCurrency().get(0);
 			tickter = currency.getCurrencyAbbreviation();
 			currencyType = currency.getCurrencyType().toString();
 			minOrderVol = String.valueOf(orders.getVolume());
 			logger.debug("user: {} should have: {} {}", user.getEmailId(), minOrderVol, tickter);
 		} else {
 			minOrderVol = walletService.getPairedBalance(orders, currencyPair, orders.getVolume());
-			currency = currencyPair.getPairedCurrency().get(0);
+			currency = currencyPair.getToCurrency().get(0);
 			tickter = currency.getCurrencyAbbreviation();
 			currencyType = currency.getCurrencyType().toString();
 			logger.debug("user: {} should have: {} {}", user.getEmailId(), minOrderVol, tickter);
@@ -129,7 +129,7 @@ public class OrdersServiceImpl implements OrdersService {
 	 */
 	private double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType,
 			Currency currency) {
-		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(user, orderStatus,
+		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairPairedCurrency(user, orderStatus,
 				orderType, currency);
 		double total = 0.0;
 		for (Orders order : orders) {
@@ -139,7 +139,7 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	private double getLockedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, Currency currency) {
-		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndPairToCurrency(user, orderStatus, currency);
+		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndPairPairedCurrency(user, orderStatus, currency);
 		double total = 0.0;
 		for (Orders order : orders) {
 			total = total + order.getVolume() + order.getLockedVolume();
@@ -414,8 +414,8 @@ public class OrdersServiceImpl implements OrdersService {
 		User seller;
 		double buyerTradeFee;
 		double sellerTradeFee;
-		String toCA = pair.getToCurrency().get(0).getCurrencyAbbreviation();
-		String pairCA = pair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		String toCA = pair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		String pairCA = pair.getToCurrency().get(0).getCurrencyAbbreviation();
 		logger.debug("process order list remainingVolume: {}", remainingVolume);
 		// process till order size and remaining volume is > 0
 		while ((!ordersList.isEmpty()) && (remainingVolume > 0)) {
