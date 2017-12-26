@@ -33,7 +33,7 @@ public interface FiatOrderService {
 
 	public boolean buyerPaidConfirmtion(Orders order);
 
-	public Future<Boolean> processTransactionFiatOrders(Orders order, String currencyAbr);
+	public Future<Boolean> processTransactionFiatOrders(Orders order, String currencyAbr, String currencyType);
 
 	public Page<Orders> existingOrders(Orders order, long pairId, int page, int size);
 

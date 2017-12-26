@@ -1,5 +1,7 @@
 package com.bolenum.repo.user;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,5 +44,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public User findByEthWalletaddress(String address);
 	
 	public User findByBtcWalletAddress(String address);
+	
+	public List<User> findByIsEnabled(Boolean enabled);
 
 }

@@ -587,10 +587,10 @@ public class TransactionServiceImpl implements TransactionService {
 		// finding currency pair
 		CurrencyPair currencyPair = matchedOrder.getPair();
 
-		String toCurrAbrrivaiton = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
-		String pairCurrAbrrivaiton = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
-		String toCurrencyType = currencyPair.getToCurrency().get(0).getCurrencyType().toString();
-		String pairCurrencyType = currencyPair.getPairedCurrency().get(0).getCurrencyType().toString();
+		String toCurrAbrrivaiton = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		String pairCurrAbrrivaiton = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+		String toCurrencyType = currencyPair.getPairedCurrency().get(0).getCurrencyType().toString();
+		String pairCurrencyType = currencyPair.getToCurrency().get(0).getCurrencyType().toString();
 		// fetching the limit price of order
 		String qtr = walletService.getPairedBalance(matchedOrder, currencyPair, qtyTraded);
 		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormatString(Double.valueOf(qtr)),

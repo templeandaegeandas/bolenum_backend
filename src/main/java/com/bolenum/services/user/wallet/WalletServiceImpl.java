@@ -85,9 +85,9 @@ public class WalletServiceImpl implements WalletService {
 		if (OrderStandard.LIMIT.equals(orders.getOrderStandard())) {
 			logger.debug("limit order buy on price: {} {} and quantity trading: {} {} ",
 					GenericUtils.getDecimalFormatString(orders.getPrice()),
-					currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation(),
+					currencyPair.getToCurrency().get(0).getCurrencyAbbreviation(),
 					GenericUtils.getDecimalFormatString(qtyTraded),
-					currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
+					currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
 			minBalance = String.valueOf(qtyTraded * orders.getPrice());
 		} else {
 			/**
