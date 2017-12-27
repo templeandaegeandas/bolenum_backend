@@ -84,7 +84,7 @@ public class OrderController {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);
 		}
 		if (!balance.equals("proceed")) {
-			return ResponseHandler.response(HttpStatus.OK, false,
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
 		orders.setUser(user);

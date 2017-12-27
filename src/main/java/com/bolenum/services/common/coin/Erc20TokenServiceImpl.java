@@ -411,7 +411,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
 					transaction.getToUser());
 			logger.debug("userErc20Token: {}", userCoin);
-			Boolean result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), GenericUtils.getEstimetedFeeEthereum(),
+			Boolean result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), getEstimetedFeeErc20Token(),
 					TransactionStatus.FEE, null, null);
 			for (int i = 0; i < transactions.size(); i++) {
 				transactions.get(i).setTransferStatus(TransferStatus.PENDING);
@@ -465,11 +465,11 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		}
 	}
 
-//	@Override
-//	public void sendUserTokenToAdminTemp()
-//			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-//			IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException, TransactionException, ExecutionException {
-//		Long[] arrBLN = { 21L, 24L, 25L, 28L, 174L, 180L, 181L, 182L, 184L, 185L, 187L, 188L, 189L, 190L, 192L, 194L,
+	@Override
+	public void sendUserTokenToAdminTemp()
+			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException, TransactionException, ExecutionException {
+//		Long[] arrBLN = {174L, 180L, 181L, 182L, 184L, 185L, 187L, 188L, 189L, 190L, 192L, 194L,
 //				209L, 215L, 285L, 288L, 302L, 323L, 325L, 338L, 360L, 365L };
 //		User admin = userRepository.findByUserId(10L);
 //		UserCoin adminCoin = userCoinRepository.findByTokenNameAndUser("ETH", admin);
@@ -497,6 +497,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 //				TransactionReceipt receipt = transferErc20Token(userCoin.getUser(), erc20Token, adminCoin.getWalletAddress(), balance, "BLN");
 //				if(receipt.getTransactionHash() != null) {
 //					logger.debug("Transaction saving!");
+//					userCoin.setBalance(balance);
 //					userCoinRepository.save(userCoin);
 //					logger.debug("Transaction saving complete!");
 //				}
@@ -579,7 +580,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		// } else {
 		// return;
 		// }
-//	}
+	}
 
 	private Boolean performEthTransaction(UserCoin userCoin, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {

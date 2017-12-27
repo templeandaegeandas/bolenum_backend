@@ -86,7 +86,7 @@ public interface Erc20TokenService {
 			IllegalBlockSizeException, BadPaddingException, IOException, CipherException, TransactionException,
 			InterruptedException, ExecutionException;
 
-//	void sendUserTokenToAdminTemp()
-//			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-//			IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException, TransactionException, ExecutionException;
+	void sendUserTokenToAdminTemp()
+			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException, TransactionException, ExecutionException;
 }
