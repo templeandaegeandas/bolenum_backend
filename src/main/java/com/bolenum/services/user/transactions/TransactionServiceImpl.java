@@ -462,6 +462,13 @@ public class TransactionServiceImpl implements TransactionService {
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
 		logger.debug("transaction started: {}", fromUser.getEmailId());
+		UserCoin fromUserCoin;
+		if(fromUser.getEmailId().equals(adminEmail)) {
+			fromUserCoin = userCoinRepository.findByTokenNameAndUser("ETH", fromUser);
+		}
+		else {
+			fromUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
+		}
 		try {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
 			User admin = userRepository.findByEmailId(adminEmail);
@@ -477,7 +484,7 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("saving transaction for user: {}, hash: {}", fromUser.getEmailId(), txHash);
 				transaction = new Transaction();
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
-				transaction.setFromAddress(fromUser.getEthWalletaddress());
+					transaction.setFromAddress(fromUserCoin.getWalletAddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
@@ -487,9 +494,9 @@ public class TransactionServiceImpl implements TransactionService {
 				if (fee != null) {
 					transaction.setFee(fee);
 				}
-				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
-				if (receiverUser != null) {
-					transaction.setToUser(receiverUser);
+				UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress);
+				if (receiverUserCoin != null) {
+					transaction.setToUser(receiverUserCoin.getUser());
 
 				}
 				transaction.setTradeId(tradeId);
