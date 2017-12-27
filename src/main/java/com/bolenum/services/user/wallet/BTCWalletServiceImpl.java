@@ -377,9 +377,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				boolean resultForEth = transactionService.withdrawETH(user, coinCode, toAddress, amount,
 						TransactionStatus.WITHDRAW, bolenumFee, null);
 				if (resultForEth) {
-					if (bolenumFee > 0) {
-						tradeTransactionService.performEthTrade(user,coinCode, admin, bolenumFee, null);
-					}
 					return new AsyncResult<Boolean>(true);
 				}
 				break;
@@ -406,7 +403,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 					null);
 			return true;
 		} else if ("ETH".equals(tokenName)) {
-			transactionService.performEthTransaction(user, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
+			transactionService.performEthTransaction(user,tokenName, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
 					null);
 			return true;
 		}

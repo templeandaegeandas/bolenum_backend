@@ -5,7 +5,6 @@ package com.bolenum.services.user.transactions;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -166,9 +165,8 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @param txAmount
 	 * @return true/false if transaction success return true else false
 	 */
-//	@Override
 //	@Async
-//	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
+//	public Future<Boolean> performEthTransaction1(User fromUser, String toAddress, Double amount,
 //			TransactionStatus transactionStatus, Double fee, Long tradeId) {
 //		logger.debug("performing eth transaction: {} to address: {}, amount: {}", fromUser.getEmailId(), toAddress,
 //				GenericUtils.getDecimalFormatString(amount));
@@ -213,7 +211,7 @@ public class TransactionServiceImpl implements TransactionService {
 //				if (fee != null) {
 //					transaction.setFee(fee);
 //				}
-//				
+//
 //				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
 //				if (receiverUser != null) {
 //					transaction.setToUser(receiverUser);
@@ -230,88 +228,97 @@ public class TransactionServiceImpl implements TransactionService {
 //			}
 //		} catch (InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException
 //				| IllegalBlockSizeException | BadPaddingException e1) {
-//			logger.error("ETH transaction failed:  {}", e1);
+//			logger.error("ETH transaction failed: {}", e1);
 //		}
 //		return new AsyncResult<>(false);
 //	}
 
-	
 	@Override
 	@Async
-	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
+	public Future<Boolean> performEthTransaction(User fromUser, String tokenName ,String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
 		logger.debug("performing eth transaction: {} to address: {}, amount: {}", fromUser.getEmailId(), toAddress,
 				GenericUtils.getDecimalFormatString(amount));
-		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("ETH", fromUser);
-		String passwordKey = userCoin.getWalletPwdKey();
+		
+		User admin = userRepository.findByEmailId(adminEmail);
+			
+		//admin user coin
+		UserCoin adminUserCoin= userCoinRepository.findByTokenNameAndUser(tokenName, admin);
+		
+		String passwordKey = adminUserCoin.getWalletPwdKey();
 		logger.debug("password key: {}", passwordKey);
 
-		String fileName = ethWalletLocation + userCoin.getWalletJsonFile();
+		String fileName = ethWalletLocation + adminUserCoin.getWalletJsonFile();
 		logger.debug("user eth wallet file name: {}", fileName);
 		File walletFile = new File(fileName);
 		try {
-			String decrPwd = CryptoUtil.decrypt(userCoin.getWalletPwd(), passwordKey);
+			String decrPwd = CryptoUtil.decrypt(adminUserCoin.getWalletPwd(), passwordKey);
+			Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+			
 			EthSendTransaction ethSendTransaction = null;
-			try {
-				logger.debug("ETH transaction credentials load started");
-				Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
-				logger.debug("ETH transaction credentials load completed");
-				ethSendTransaction = transferEth(credentials, toAddress, amount);
-				logger.debug("ETH transaction send completed: {}", ethSendTransaction.getTransactionHash());
-			} catch (Exception e) {
-				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount, false,
-						tradeId);
-				errorService.saveError(error);
-				logger.debug("error saved: {}", error);
-				return new AsyncResult<>(false);
-			}
+			
+			ethSendTransaction = transferEth(credentials,adminUserCoin.getWalletAddress() , amount);
+			
+			logger.debug("ETH transaction send completed: {}", ethSendTransaction.getTransactionHash());
+			
 			logger.debug("ETH transaction send fund completed");
 			String txHash = ethSendTransaction.getTransactionHash();
 			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
 			Transaction transaction = transactionRepo.findByTxHash(txHash);
 			logger.debug("transaction by hash: {}", transaction);
+			
 			if (transaction == null) {
+				logger.debug("saving transaction for user: {}, hash: {}", fromUser.getEmailId(), txHash);
 				transaction = new Transaction();
-				transaction.setTxHash(ethSendTransaction.getTransactionHash());
+				transaction.setTxHash(transaction.getTxHash());
 				transaction.setFromAddress(fromUser.getEthWalletaddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
 				transaction.setTransactionStatus(transactionStatus);
 				transaction.setFromUser(fromUser);
-				transaction.setCurrencyName("ETH");
+				transaction.setCurrencyName(tokenName);
+				
 				if (fee != null) {
 					transaction.setFee(fee);
 				}
 				
+				UserCoin receiverUserCoin=userCoinRepository.findByWalletAddress(toAddress);
 				
-				//userRepository.findByEthWalletaddress(toAddress);
+				User receiverUser = receiverUserCoin.getUser();
 				
-				UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress); 
-				
-				 User receiverUser=receiverUserCoin.getUser();
-				 if (receiverUser != null) {
+				if (receiverUser != null) {
 					transaction.setToUser(receiverUser);
 				}
+				
 				transaction.setTradeId(tradeId);
+				
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
+				logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 				if (saved != null) {
 					simpMessagingTemplate.convertAndSend(
 							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
 							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+					logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
 					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
+					
 					return new AsyncResult<>(true);
 				}
 			}
-		} catch (InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException
-				| IllegalBlockSizeException | BadPaddingException e1) {
-			logger.error("ETH transaction failed:  {}", e1);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+				| BadPaddingException | IOException | CipherException e) {
+			logger.error("{} transaction failed:  {}", tokenName, e);
 		}
 		return new AsyncResult<>(false);
 	}
 
-	
-	
+	/**
+	 * 
+	 * @param credentials
+	 * @param toAddress
+	 * @param amount
+	 * @return
+	 */
 	private EthSendTransaction transferEth(Credentials credentials, String toAddress, Double amount) {
 		logger.debug("ETH transaction count started");
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
@@ -551,7 +558,7 @@ public class TransactionServiceImpl implements TransactionService {
 				break;
 			case "ETH":
 				logger.debug("ETH transaction started");
-				txStatus = performEthTransaction(seller, buyer.getEthWalletaddress(), qtyTraded, null, null, tradeId);
+				txStatus = performEthTransaction(seller,"ETH", buyer.getEthWalletaddress(), qtyTraded, null, null, tradeId);
 				try {
 					boolean res = txStatus.get();
 					logger.debug("is ETH transaction successed: {}", res);
@@ -1027,8 +1034,7 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 
 	/**
-	 *   @created by Himanshu Kumar
-	 *    to withdraw ETH
+	 * @created by Himanshu Kumar to withdraw ETH
 	 */
 	@Override
 	public boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount,
@@ -1044,14 +1050,13 @@ public class TransactionServiceImpl implements TransactionService {
 				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName, amount,
 						fee);
 			} else {
-				performEthTransaction(fromUser, tokenName, amount - fee, TransactionStatus.WITHDRAW, fee,
-						null);
+				performEthTransaction(fromUser, tokenName, toAddress, amount - fee, TransactionStatus.WITHDRAW, fee, null);
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -1078,7 +1083,6 @@ public class TransactionServiceImpl implements TransactionService {
 		return false;
 	}
 
-	
 	private boolean saveInAppTransaction(User fromUser, UserCoin senderUserCoin, UserCoin receiverUserCoin,
 			String toAddress, String tokenName, Double amount, Double fee) {
 		Transaction transaction = new Transaction();
