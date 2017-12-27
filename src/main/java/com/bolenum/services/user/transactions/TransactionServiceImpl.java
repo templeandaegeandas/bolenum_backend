@@ -166,6 +166,76 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @param txAmount
 	 * @return true/false if transaction success return true else false
 	 */
+//	@Override
+//	@Async
+//	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
+//			TransactionStatus transactionStatus, Double fee, Long tradeId) {
+//		logger.debug("performing eth transaction: {} to address: {}, amount: {}", fromUser.getEmailId(), toAddress,
+//				GenericUtils.getDecimalFormatString(amount));
+//		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("ETH", fromUser);
+//		String passwordKey = userCoin.getWalletPwdKey();
+//		logger.debug("password key: {}", passwordKey);
+//
+//		String fileName = ethWalletLocation + userCoin.getWalletJsonFile();
+//		logger.debug("user eth wallet file name: {}", fileName);
+//		File walletFile = new File(fileName);
+//		try {
+//			String decrPwd = CryptoUtil.decrypt(userCoin.getWalletPwd(), passwordKey);
+//			EthSendTransaction ethSendTransaction = null;
+//			try {
+//				logger.debug("ETH transaction credentials load started");
+//				Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+//				logger.debug("ETH transaction credentials load completed");
+//				ethSendTransaction = transferEth(credentials, toAddress, amount);
+//				logger.debug("ETH transaction send completed: {}", ethSendTransaction.getTransactionHash());
+//			} catch (Exception e) {
+//				Error error = new Error(fromUser.getEthWalletaddress(), toAddress, e.getMessage(), "ETH", amount, false,
+//						tradeId);
+//				errorService.saveError(error);
+//				logger.debug("error saved: {}", error);
+//				return new AsyncResult<>(false);
+//			}
+//			logger.debug("ETH transaction send fund completed");
+//			String txHash = ethSendTransaction.getTransactionHash();
+//			logger.debug("eth transaction hash:{} of user: {}, amount: {}", txHash, fromUser.getEmailId(), amount);
+//			Transaction transaction = transactionRepo.findByTxHash(txHash);
+//			logger.debug("transaction by hash: {}", transaction);
+//			if (transaction == null) {
+//				transaction = new Transaction();
+//				transaction.setTxHash(ethSendTransaction.getTransactionHash());
+//				transaction.setFromAddress(fromUser.getEthWalletaddress());
+//				transaction.setToAddress(toAddress);
+//				transaction.setTxAmount(amount);
+//				transaction.setTransactionType(TransactionType.OUTGOING);
+//				transaction.setTransactionStatus(transactionStatus);
+//				transaction.setFromUser(fromUser);
+//				transaction.setCurrencyName("ETH");
+//				if (fee != null) {
+//					transaction.setFee(fee);
+//				}
+//				
+//				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
+//				if (receiverUser != null) {
+//					transaction.setToUser(receiverUser);
+//				}
+//				transaction.setTradeId(tradeId);
+//				Transaction saved = transactionRepo.saveAndFlush(transaction);
+//				if (saved != null) {
+//					simpMessagingTemplate.convertAndSend(
+//							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
+//							com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+//					logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
+//					return new AsyncResult<>(true);
+//				}
+//			}
+//		} catch (InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException
+//				| IllegalBlockSizeException | BadPaddingException e1) {
+//			logger.error("ETH transaction failed:  {}", e1);
+//		}
+//		return new AsyncResult<>(false);
+//	}
+
+	
 	@Override
 	@Async
 	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
@@ -213,8 +283,14 @@ public class TransactionServiceImpl implements TransactionService {
 				if (fee != null) {
 					transaction.setFee(fee);
 				}
-				User receiverUser = userRepository.findByEthWalletaddress(toAddress);
-				if (receiverUser != null) {
+				
+				
+				//userRepository.findByEthWalletaddress(toAddress);
+				
+				UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress); 
+				
+				 User receiverUser=receiverUserCoin.getUser();
+				 if (receiverUser != null) {
 					transaction.setToUser(receiverUser);
 				}
 				transaction.setTradeId(tradeId);
@@ -234,6 +310,8 @@ public class TransactionServiceImpl implements TransactionService {
 		return new AsyncResult<>(false);
 	}
 
+	
+	
 	private EthSendTransaction transferEth(Credentials credentials, String toAddress, Double amount) {
 		logger.debug("ETH transaction count started");
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
@@ -923,6 +1001,9 @@ public class TransactionServiceImpl implements TransactionService {
 
 	}
 
+	/**
+	 *    
+	 */
 	@Override
 	public boolean withdrawErc20Token(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
@@ -945,6 +1026,35 @@ public class TransactionServiceImpl implements TransactionService {
 		return false;
 	}
 
+	/**
+	 *   @created by Himanshu Kumar
+	 *    to withdraw ETH
+	 */
+	@Override
+	public boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount,
+			TransactionStatus transactionStatus, Double fee, Long tradeId) {
+		UserCoin senderUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
+		if (senderUserCoin != null) {
+			senderUserCoin.setBalance(senderUserCoin.getBalance() - amount);
+			userCoinRepository.save(senderUserCoin);
+			UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress);
+			if (receiverUserCoin != null) {
+				receiverUserCoin.setBalance(receiverUserCoin.getBalance() + (amount - fee));
+				userCoinRepository.save(receiverUserCoin);
+				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName, amount,
+						fee);
+			} else {
+				performEthTransaction(fromUser, tokenName, amount - fee, TransactionStatus.WITHDRAW, fee,
+						null);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 */
 	@Override
 	public boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount, Double fee) {
 		UserCoin senderUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
@@ -968,6 +1078,7 @@ public class TransactionServiceImpl implements TransactionService {
 		return false;
 	}
 
+	
 	private boolean saveInAppTransaction(User fromUser, UserCoin senderUserCoin, UserCoin receiverUserCoin,
 			String toAddress, String tokenName, Double amount, Double fee) {
 		Transaction transaction = new Transaction();
