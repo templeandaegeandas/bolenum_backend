@@ -20,7 +20,10 @@ import com.bolenum.model.orders.book.Trade;
  */
 public interface TransactionService {
 
-	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
+//	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
+			//TransactionStatus transactionStatus, Double fee, Long tradeId);
+	
+	Future<Boolean> performEthTransaction(User fromUser, String tokenName, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId);
 
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
@@ -47,4 +50,9 @@ public interface TransactionService {
 			TransactionStatus transactionStatus, Double fee, Long tradeId);
 
 	boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount, Double fee);
+
+	boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount,
+			TransactionStatus transactionStatus, Double fee, Long tradeId);
+
+	
 }
