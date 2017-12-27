@@ -290,8 +290,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.balance.more.than.fee"));
 		}
 		/**
-		 * network fee required for sending to the receiver address and admin
-		 * address, so networkFee = networkFee * 2;
+		 * network fee required for sending to the receiver address and admin address,
+		 * so networkFee = networkFee * 2;
 		 * 
 		 */
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
@@ -367,15 +367,24 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 					if (bolenumFee > 0) {
 						tradeTransactionService.performBtcTrade(user, admin, bolenumFee, null);
 					}
+
 					return new AsyncResult<>(true);
 				}
 				break;
+				
 			case "ETH":
-				transactionService.performEthTransaction(user, toAddress, amount, TransactionStatus.WITHDRAW,
-						bolenumFee, null);
+				// transactionService.performEthTransaction(user, toAddress,
+				// amount,TransactionStatus.WITHDRAW,bolenumFee, null);
+
+				boolean resultForEth = transactionService.withdrawETH(user, coinCode, toAddress, amount,
+						TransactionStatus.WITHDRAW, bolenumFee, null);
+				if (resultForEth) {
+					return new AsyncResult<Boolean>(true);
+				}
 				break;
 			}
 			break;
+
 		case "ERC20TOKEN":
 			boolean result = transactionService.withdrawErc20Token(user, coinCode, toAddress, amount,
 					TransactionStatus.WITHDRAW, bolenumFee, null);
@@ -396,7 +405,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 					null);
 			return true;
 		} else if ("ETH".equals(tokenName)) {
-			transactionService.performEthTransaction(user, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
+			transactionService.performEthTransaction(user,tokenName, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
 					null);
 			return true;
 		}

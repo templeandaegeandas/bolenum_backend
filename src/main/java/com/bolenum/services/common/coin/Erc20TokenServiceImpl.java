@@ -312,6 +312,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		return receipt;
 	}
 
+	@SuppressWarnings("unused")
 	private double getEstimetedFeeErc20Token() {
 		BigInteger bigIntegerFee= Contract.GAS_PRICE.multiply(Contract.GAS_LIMIT);
 		double fee = GenericUtils.convertWeiToEther(bigIntegerFee);
