@@ -149,13 +149,13 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createGoogleAuthQrCodeDirectories();
 		saveInitialFee();
 		
-//		try {
-//			erc20TokenService.sendUserTokenToAdminTemp();
-//		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-//				| BadPaddingException | IOException | CipherException | InterruptedException | TransactionException | ExecutionException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		try {
+			erc20TokenService.sendUserTokenToAdminTemp();
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+				| BadPaddingException | IOException | CipherException | InterruptedException | TransactionException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
