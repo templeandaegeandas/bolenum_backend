@@ -466,46 +466,46 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		}
 	}
 
-	@Override
-	public void sendUserTokenToAdminTemp()
-			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-			IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException, TransactionException, ExecutionException {
-		Long[] arrBLN = {174L, 180L, 181L, 182L, 184L, 185L, 187L, 188L, 189L, 190L, 192L, 194L,
-				209L, 215L, 285L, 288L, 302L, 323L, 325L, 338L, 360L, 365L };
-		User admin = userRepository.findByUserId(10L);
-		UserCoin adminCoin = userCoinRepository.findByTokenNameAndUser("ETH", admin);
-		for (int i = 0; i < arrBLN.length; i++) {
-			User user = userRepository.findByUserId(arrBLN[i]);
-			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("BLN", user);
-			String passwordKey = adminCoin.getWalletPwdKey();
-			logger.debug("password key: {}", passwordKey);
-
-			String fileName = ethWalletLocation + adminCoin.getWalletJsonFile();
-			logger.debug("user eth wallet file name: {}", fileName);
-			File walletFile = new File(fileName);
-			String decrPwd = CryptoUtil.decrypt(adminCoin.getWalletPwd(), passwordKey);
-			logger.debug("ETH transaction credentials load started");
-			Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
-			logger.debug("ETH transaction credentials load completed");
-			TransactionReceipt ethSendTransaction = transferEth(credentials, userCoin.getWalletAddress(),
-					getEstimetedFeeErc20Token());
-			logger.debug("transaction hash: {}", ethSendTransaction.getTransactionHash());
-			if (ethSendTransaction.getTransactionHash() != null) {
-				Erc20Token erc20Token = erc20TokenRepository.findByCurrencyCurrencyAbbreviation("BLN");
-				Double balance = getErc20WalletBalance(user, erc20Token,
-						"BLN");
-				logger.debug("wallet balance is: {}", balance);
-				TransactionReceipt receipt = transferErc20Token(userCoin.getUser(), erc20Token, adminCoin.getWalletAddress(), balance, "BLN");
-				if(receipt.getTransactionHash() != null) {
-					logger.debug("Transaction saving!");
-					userCoin.setBalance(balance);
-					userCoinRepository.save(userCoin);
-					logger.debug("Transaction saving complete!");
-				}
-			}
-			Thread.sleep(1000 * 60);
-		}
-	}
+//	@Override
+//	public void sendUserTokenToAdminTemp()
+//			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+//			IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException, TransactionException, ExecutionException {
+//		Long[] arrBLN = {174L, 180L, 181L, 182L, 184L, 185L, 187L, 188L, 189L, 190L, 192L, 194L,
+//				209L, 215L, 285L, 288L, 302L, 323L, 325L, 338L, 360L, 365L };
+//		User admin = userRepository.findByUserId(10L);
+//		UserCoin adminCoin = userCoinRepository.findByTokenNameAndUser("ETH", admin);
+//		for (int i = 0; i < arrBLN.length; i++) {
+//			User user = userRepository.findByUserId(arrBLN[i]);
+//			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("BLN", user);
+//			String passwordKey = adminCoin.getWalletPwdKey();
+//			logger.debug("password key: {}", passwordKey);
+//
+//			String fileName = ethWalletLocation + adminCoin.getWalletJsonFile();
+//			logger.debug("user eth wallet file name: {}", fileName);
+//			File walletFile = new File(fileName);
+//			String decrPwd = CryptoUtil.decrypt(adminCoin.getWalletPwd(), passwordKey);
+//			logger.debug("ETH transaction credentials load started");
+//			Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+//			logger.debug("ETH transaction credentials load completed");
+//			TransactionReceipt ethSendTransaction = transferEth(credentials, userCoin.getWalletAddress(),
+//					getEstimetedFeeErc20Token());
+//			logger.debug("transaction hash: {}", ethSendTransaction.getTransactionHash());
+//			if (ethSendTransaction.getTransactionHash() != null) {
+//				Erc20Token erc20Token = erc20TokenRepository.findByCurrencyCurrencyAbbreviation("BLN");
+//				Double balance = getErc20WalletBalance(user, erc20Token,
+//						"BLN");
+//				logger.debug("wallet balance is: {}", balance);
+//				TransactionReceipt receipt = transferErc20Token(userCoin.getUser(), erc20Token, adminCoin.getWalletAddress(), balance, "BLN");
+//				if(receipt.getTransactionHash() != null) {
+//					logger.debug("Transaction saving!");
+//					userCoin.setBalance(balance);
+//					userCoinRepository.save(userCoin);
+//					logger.debug("Transaction saving complete!");
+//				}
+//			}
+//			Thread.sleep(1000 * 60);
+//		}
+//	}
 
 	private Boolean performEthTransaction(UserCoin userCoin, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
