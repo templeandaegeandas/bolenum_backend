@@ -6,17 +6,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +21,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.web3j.crypto.CipherException;
-import org.web3j.protocol.exceptions.TransactionException;
 
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Countries;
@@ -148,15 +140,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createDocumentsDirectories();
 		createGoogleAuthQrCodeDirectories();
 		saveInitialFee();
-		
-		try {
-			erc20TokenService.sendUserTokenToAdminTemp();
-		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
-				| BadPaddingException | IOException | CipherException | InterruptedException | TransactionException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 	}
 
 	private void saveInitialFee() {
