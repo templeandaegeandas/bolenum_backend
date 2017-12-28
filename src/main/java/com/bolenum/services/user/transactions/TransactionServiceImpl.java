@@ -242,6 +242,7 @@ public class TransactionServiceImpl implements TransactionService {
 	// return new AsyncResult<>(false);
 	// }
 
+	
 	@Override
 	@Async
 	public Future<Boolean> performEthTransaction(User fromUser, String tokenName, String toAddress, Double amount,
@@ -457,6 +458,9 @@ public class TransactionServiceImpl implements TransactionService {
 		return new AsyncResult<>(false);
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	@Async
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
@@ -484,7 +488,7 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("saving transaction for user: {}, hash: {}", fromUser.getEmailId(), txHash);
 				transaction = new Transaction();
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
-					transaction.setFromAddress(fromUserCoin.getWalletAddress());
+				transaction.setFromAddress(fromUserCoin.getWalletAddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
