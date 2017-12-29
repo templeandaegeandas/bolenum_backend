@@ -222,7 +222,9 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			WithdrawalFee withdrawalFee, Currency currency, String toAddress) {
 		Double availableBalance;
 		Double minWithdrawAmount = 0.0;
+		Double bolenumFee = 0.0;
 		if (withdrawalFee != null) {
+			bolenumFee = withdrawalFee.getFee();
 			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
 		}
 		logger.debug("Minimum withdraw ammount:{}  of currency: {}", minWithdrawAmount, currency.getCurrencyName());
@@ -239,26 +241,16 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
 		}
+		if (withdrawAmount <= bolenumFee) {
+			throw new InsufficientBalanceException(localeService.getMessage("withdraw.balance.more.than.fee"));
+		}
 		if ("BTC".equals(tokenName)) {
 			String balance = getBtcAccountBalance(user.getBtcWalletUuid());
 			availableBalance = Double.valueOf(balance);
 		} else {
 			UserCoin ethUserCoin = etherumWalletService.ethWalletBalance(user, tokenName);
 			availableBalance = ethUserCoin.getBalance();
-
-			// networkFee = GenericUtils.getEstimetedFeeEthereum();
-			// /**
-			// * network fee required for sending to the receiver address and
-			// * admin address, so networkFee = networkFee * 2;
-			// *
-			// */
-			// networkFee = networkFee * 2;
 		}
-		// logger.debug("Available balance: {} estimeted network fee: {}",
-		// availableBalance,
-		// GenericUtils.getDecimalFormat().format(networkFee));
-		// availableBalance = GenericUtils.getDecimalFormat(availableBalance -
-		// lockVolume);
 		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
 
 		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, currency, currency);
@@ -362,24 +354,21 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		case "CRYPTO":
 			switch (coinCode) {
 			case "BTC":
-				boolean result = transactionService.withdrawBTC(user, coinCode, toAddress, amount, bolenumFee);
+				boolean result = transactionService.withdrawBTC(user, coinCode, toAddress, amount - bolenumFee,
+						bolenumFee);
 				if (result) {
 					if (bolenumFee > 0) {
 						tradeTransactionService.performBtcTrade(user, admin, bolenumFee, null);
 					}
-
 					return new AsyncResult<>(true);
 				}
 				break;
-				
 			case "ETH":
-				// transactionService.performEthTransaction(user, toAddress,
-				// amount,TransactionStatus.WITHDRAW,bolenumFee, null);
-
 				boolean resultForEth = transactionService.withdrawETH(user, coinCode, toAddress, amount,
 						TransactionStatus.WITHDRAW, bolenumFee, null);
 				if (resultForEth) {
-					return new AsyncResult<Boolean>(true);
+
+					return new AsyncResult<>(true);
 				}
 				break;
 			}
@@ -405,8 +394,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 					null);
 			return true;
 		} else if ("ETH".equals(tokenName)) {
-			transactionService.performEthTransaction(user,tokenName, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
-					null);
+			transactionService.performEthTransaction(user, tokenName, toAddress, withdrawAmount,
+					TransactionStatus.WITHDRAW, 0.0, null);
 			return true;
 		}
 		return false;
@@ -423,8 +412,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				return new AsyncResult<>(true);
 			}
 			return new AsyncResult<>(false);
-		}
-		else {
+		} else {
 			return transactionService.performErc20Transaction(user, tokenName, toAddress, withdrawAmount,
 					TransactionStatus.WITHDRAW, 0.0, null);
 		}
