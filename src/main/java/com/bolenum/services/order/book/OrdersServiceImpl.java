@@ -525,14 +525,14 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public Page<Orders> getBuyOrdersListByPair(Long pairId) {
 		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
-		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
+		PageRequest pageRequest = new PageRequest(0, Integer.MAX_VALUE, Direction.DESC, "price");
 		return ordersRepository.findBuyOrderList(pair, OrderType.BUY, OrderStatus.SUBMITTED, pageRequest);
 	}
 
 	@Override
 	public Page<Orders> getSellOrdersListByPair(Long pairId) {
 		CurrencyPair pair = currencyPairService.findCurrencypairByPairId(pairId);
-		PageRequest pageRequest = new PageRequest(0, 10, Direction.DESC, "price");
+		PageRequest pageRequest = new PageRequest(0, Integer.MAX_VALUE, Direction.DESC, "price");
 		return ordersRepository.findSellOrderList(pair, OrderType.SELL, OrderStatus.SUBMITTED, pageRequest);
 	}
 
