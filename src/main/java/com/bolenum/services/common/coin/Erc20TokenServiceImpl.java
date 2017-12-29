@@ -466,10 +466,10 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		}
 	}
 
-	@Override
-	public void sendUserTokenToAdminTemp()
-			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-			IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException, TransactionException, ExecutionException {
+//	@Override
+//	public void sendUserTokenToAdminTemp()
+//			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+//			IllegalBlockSizeException, BadPaddingException, CipherException, InterruptedException, TransactionException, ExecutionException {
 //		Long[] arrBLN = {174L, 180L, 181L, 182L, 184L, 185L, 187L, 188L, 189L, 190L, 192L, 194L,
 //				209L, 215L, 285L, 288L, 302L, 323L, 325L, 338L, 360L, 365L };
 //		User admin = userRepository.findByUserId(10L);
@@ -505,83 +505,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 //			}
 //			Thread.sleep(1000 * 60);
 //		}
-
-		// double totalBalance = 0.0;
-		// for (int i = 0; i < transactions.size(); i++) {
-		// totalBalance += transactions.get(i).getTxAmount();
-		// }
-		// logger.debug("total transaction balance: {} of user: {}", totalBalance,
-		// transaction.getToUser().getEmailId());
-		// Erc20Token erc20Token =
-		// erc20TokenRepository.findByCurrencyCurrencyAbbreviation(transaction.getCurrencyName());
-		// User admin = userRepository.findByEmailId(adminEmail);
-		// UserCoin adminCoin = userCoinRepository.findByTokenNameAndUser("ETH", admin);
-		// if (erc20Token != null &&
-		// CurrencyType.ERC20TOKEN.equals(erc20Token.getCurrency().getCurrencyType())) {
-		// UserCoin userCoin =
-		// userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
-		// transaction.getToUser());
-		// logger.debug("userErc20Token: {}", userCoin);
-		// Boolean result = performEthTransaction(adminCoin,
-		// userCoin.getWalletAddress(), getEstimetedFeeErc20Token(),
-		// TransactionStatus.FEE, null, null);
-		// for (int i = 0; i < transactions.size(); i++) {
-		// transactions.get(i).setTransferStatus(TransferStatus.PENDING);
-		// }
-		// transactionRepo.save(transactions);
-		// try {
-		// if (result) {
-		// try {
-		// Double balance = getErc20WalletBalance(transaction.getToUser(), erc20Token,
-		// transaction.getCurrencyName());
-		// logger.debug("wallet balance is: {}", balance);
-		// userCoin.setBalance(userCoin.getBalance() + totalBalance);
-		// userCoinRepository.save(userCoin);
-		// logger.debug("saved!");
-		// transferErc20Token(userCoin.getUser(), erc20Token,
-		// adminCoin.getWalletAddress(), balance,
-		// "BLN");
-		// for (int i = 0; i < transactions.size(); i++) {
-		// transactions.get(i).setTransferStatus(TransferStatus.COMPLETED);
-		// }
-		// transactionRepo.save(transactions);
-		// } catch (InvalidKeyException | NoSuchAlgorithmException |
-		// NoSuchPaddingException
-		// | IllegalBlockSizeException | BadPaddingException | IOException |
-		// CipherException
-		// | TransactionException e) {
-		// logger.error("{} transaction failed: {}", transaction.getCurrencyName(),
-		// e.getMessage());
-		// e.printStackTrace();
-		// }
-		// }
-		// } catch (InterruptedException | ExecutionException e) {
-		// logger.error("Ethereum transaction failed: {}", e.getMessage());
-		// }
-		// } else if (erc20Token == null) {
-		// if ("BTC".equals(transaction.getCurrencyName())) {
-		//
-		// } else if ("ETH".equals(transaction.getCurrencyName())) {
-		// UserCoin userCoin =
-		// userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
-		// transaction.getToUser());
-		// Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
-		// if (balance != 0) {
-		// performEthTransaction(userCoin, adminCoin.getWalletAddress(), balance,
-		// TransactionStatus.FEE, null,
-		// null);
-		// }
-		// for (int i = 0; i < transactions.size(); i++) {
-		// transactions.get(i).setTransferStatus(TransferStatus.COMPLETED);
-		// }
-		// transactionRepo.save(transactions);
-		// } else {
-		// return;
-		// }
-		// } else {
-		// return;
-		// }
-	}
+//	}
 
 	private Boolean performEthTransaction(UserCoin userCoin, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
