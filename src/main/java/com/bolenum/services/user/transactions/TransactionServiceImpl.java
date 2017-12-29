@@ -181,11 +181,13 @@ public class TransactionServiceImpl implements TransactionService {
 	// logger.debug("user eth wallet file name: {}", fileName);
 	// File walletFile = new File(fileName);
 	// try {
-	// String decrPwd = CryptoUtil.decrypt(userCoin.getWalletPwd(), passwordKey);
+	// String decrPwd = CryptoUtil.decrypt(userCoin.getWalletPwd(),
+	// passwordKey);
 	// EthSendTransaction ethSendTransaction = null;
 	// try {
 	// logger.debug("ETH transaction credentials load started");
-	// Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
+	// Credentials credentials = WalletUtils.loadCredentials(decrPwd,
+	// walletFile);
 	// logger.debug("ETH transaction credentials load completed");
 	// ethSendTransaction = transferEth(credentials, toAddress, amount);
 	// logger.debug("ETH transaction send completed: {}",
@@ -463,10 +465,9 @@ public class TransactionServiceImpl implements TransactionService {
 			TransactionStatus transactionStatus, Double fee, Long tradeId) {
 		logger.debug("transaction started: {}", fromUser.getEmailId());
 		UserCoin fromUserCoin;
-		if(fromUser.getEmailId().equals(adminEmail)) {
+		if (fromUser.getEmailId().equals(adminEmail)) {
 			fromUserCoin = userCoinRepository.findByTokenNameAndUser("ETH", fromUser);
-		}
-		else {
+		} else {
 			fromUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
 		}
 		try {
@@ -484,7 +485,7 @@ public class TransactionServiceImpl implements TransactionService {
 				logger.debug("saving transaction for user: {}, hash: {}", fromUser.getEmailId(), txHash);
 				transaction = new Transaction();
 				transaction.setTxHash(transactionReceipt.getTransactionHash());
-					transaction.setFromAddress(fromUserCoin.getWalletAddress());
+				transaction.setFromAddress(fromUserCoin.getWalletAddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
 				transaction.setTransactionType(TransactionType.OUTGOING);
@@ -551,7 +552,8 @@ public class TransactionServiceImpl implements TransactionService {
 					boolean res = txStatus.get();
 					logger.debug("is BTC transaction successed: {}", res);
 					/**
-					 * if transaction for users, then return result with mail notification to users
+					 * if transaction for users, then return result with mail
+					 * notification to users
 					 */
 					if (res && !isFee) {
 						notificationService.sendNotification(seller, msg);
@@ -563,7 +565,8 @@ public class TransactionServiceImpl implements TransactionService {
 						return new AsyncResult<>(res);
 					}
 					/**
-					 * if transaction for admin, then return result without mail notification
+					 * if transaction for admin, then return result without mail
+					 * notification
 					 */
 					if (res && isFee) {
 						return new AsyncResult<>(res);
@@ -581,7 +584,8 @@ public class TransactionServiceImpl implements TransactionService {
 					boolean res = txStatus.get();
 					logger.debug("is ETH transaction successed: {}", res);
 					/**
-					 * if transaction for users, then return result with mail notification to users
+					 * if transaction for users, then return result with mail
+					 * notification to users
 					 */
 					if (res && !isFee) {
 						notificationService.sendNotification(seller, msg);
@@ -593,7 +597,8 @@ public class TransactionServiceImpl implements TransactionService {
 						return new AsyncResult<>(res);
 					}
 					/**
-					 * if transaction for admin, then return result without mail notification
+					 * if transaction for admin, then return result without mail
+					 * notification
 					 */
 					if (res && isFee) {
 						return new AsyncResult<>(res);
@@ -615,7 +620,8 @@ public class TransactionServiceImpl implements TransactionService {
 			// boolean res = txStatus.get();
 			logger.debug("is ERC20TOKEN transaction successed: {}", res);
 			/**
-			 * if transaction for users, then return result with mail notification to users
+			 * if transaction for users, then return result with mail
+			 * notification to users
 			 */
 			if (res && !isFee) {
 				notificationService.sendNotification(seller, msg);
@@ -627,7 +633,8 @@ public class TransactionServiceImpl implements TransactionService {
 				return new AsyncResult<>(res);
 			}
 			/**
-			 * if transaction for admin, then return result without mail notification
+			 * if transaction for admin, then return result without mail
+			 * notification
 			 */
 			if (res && isFee) {
 				return new AsyncResult<>(res);
@@ -736,7 +743,8 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(),
 					GenericUtils.getDecimalFormatString(qtyTraded), toCurrAbrrivaiton);
 			/**
-			 * Seller performing transaction; to send ETH to buyer in case of ETH/BTC pair
+			 * Seller performing transaction; to send ETH to buyer in case of
+			 * ETH/BTC pair
 			 */
 			boolean res = tradeTransactionService.performTradeTransaction(toCurrAbrrivaiton, toCurrencyType, qtyTraded,
 					buyer, seller, trade.getId());
@@ -789,7 +797,8 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
 					pairCurrAbrrivaiton);
 			/**
-			 * Buyer performing transaction; to send BTC to Seller in case of ETH/BTC pair
+			 * Buyer performing transaction; to send BTC to Seller in case of
+			 * ETH/BTC pair
 			 */
 			boolean buyerRes = tradeTransactionService.performTradeTransaction(pairCurrAbrrivaiton, pairCurrencyType,
 					sellerQty, seller, buyer, trade.getId());
@@ -917,7 +926,7 @@ public class TransactionServiceImpl implements TransactionService {
 		page.forEach(transaction -> {
 			try {
 				if (!"BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
-						&& !status.equals(transaction.getTxStatus())) {
+						&& !status.equals(transaction.getTxStatus()) && !transaction.isInAppTransaction()) {
 					TransactionReceipt transactionReceipt = web3j.ethGetTransactionReceipt(transaction.getTxHash())
 							.send().getResult();
 					if (transactionReceipt != null) {
@@ -947,62 +956,10 @@ public class TransactionServiceImpl implements TransactionService {
 	 */
 
 	public void fetchBTCConfirmation(Page<Transaction> page) {
-		// String status = "CONFIRMED";
-		// List<String> btcHash = new ArrayList<>();
-		// Map<String, Integer> map = new HashMap<>();
-		/*
-		 * page.forEach(transaction -> { if
-		 * ("BTC".equalsIgnoreCase(transaction.getCurrencyName()) &&
-		 * transaction.getTxHash() != null && !status.equals(transaction.getTxStatus()))
-		 * { btcHash.add(transaction.getTxHash()); } }); if (btcHash.isEmpty()) {
-		 * return; } StringBuilder hash = new StringBuilder();
-		 * 
-		 * for (int i = 0; i < btcHash.size(); i++) { if (i == btcHash.size() - 1) {
-		 * hash.append(btcHash.get(i)); } else { hash.append(btcHash.get(i) + ","); } }
-		 */
-		/*
-		 * String url = btcUrl + UrlConstant.HASH_CONFIRMATION + "?hash=" + hash; try {
-		 * URL obj = new URL(url); HttpURLConnection con = (HttpURLConnection)
-		 * obj.openConnection(); con.setRequestMethod("GET");
-		 * 
-		 * // add request header con.setRequestProperty("User-Agent", "Mozilla/5.0");
-		 * 
-		 * int responseCode = con.getResponseCode();
-		 * logger.debug("Sending 'GET' request to URL : {}", url);
-		 * logger.debug("Response Code : {}", responseCode); if (responseCode == 200) {
-		 * BufferedReader in = new BufferedReader(new
-		 * InputStreamReader(con.getInputStream())); String inputLine; StringBuilder
-		 * response = new StringBuilder();
-		 * 
-		 * while ((inputLine = in.readLine()) != null) { response.append(inputLine); }
-		 * in.close(); JSONObject responseJson; responseJson = new
-		 * JSONObject(response.toString()); JSONArray data =
-		 * responseJson.getJSONArray("data");
-		 * 
-		 * String hash1 = null; for (int i = 0; i < data.length(); i++) { JSONObject
-		 * object = (JSONObject) data.get(i); String conf = (String)
-		 * object.get("confirmations"); hash1 = (String) object.get("transactonHash");
-		 * map.put(hash1, Integer.valueOf(conf));
-		 * logger.debug("confiramtion of hash: {} {}", hash1, conf); } }
-		 * 
-		 * } catch (JSONException | IOException e) {
-		 * logger.error("error send request: {}", e); }
-		 */
-		/*
-		 * page.forEach(transaction -> { Integer confirmation =
-		 * map.get(transaction.getTxHash()); if (confirmation != null && confirmation >=
-		 * 6) { transaction.setNoOfConfirmations(6); transaction.setTxStatus(status);
-		 * logger.debug("confirmation of hash :::::::::::::: {} {}",
-		 * transaction.getNoOfConfirmations(), transaction.getTxStatus());
-		 * transactionRepo.save(transaction); } else if (confirmation != null &&
-		 * confirmation >= 0) { transaction.setNoOfConfirmations(confirmation);
-		 * transactionRepo.save(transaction); } });
-		 */
-
 		String status = "CONFIRMED";
 		page.forEach(transaction -> {
 			if ("BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
-					&& !status.equals(transaction.getTxStatus())) {
+					&& !status.equals(transaction.getTxStatus()) && !transaction.isInAppTransaction()) {
 
 				try {
 					BtcdClient btcdClient = ResourceUtils.getBtcdProvider();
@@ -1016,10 +973,8 @@ public class TransactionServiceImpl implements TransactionService {
 						transaction.setNoOfConfirmations(transaction1.getConfirmations());
 						transactionRepo.save(transaction);
 					}
-				} catch (BitcoindException e) {
-					e.printStackTrace();
-				} catch (CommunicationException e) {
-					e.printStackTrace();
+				} catch (BitcoindException | CommunicationException e) {
+					logger.error("btc transaction confiramtion fetch error: {}", e);
 				}
 			}
 		});
