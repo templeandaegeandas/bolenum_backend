@@ -69,9 +69,9 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 					return true;
 				}
 			} else if ("ETH".equalsIgnoreCase(currencyAbr)) {
-				logger.debug("ETH trade started");
+				logger.debug("ETH transaction started");
 				txStatus = performEthTrade(seller, currencyAbr, buyer, qtyTraded, tradeId);
-				logger.debug("is ETH trade successed: {}", txStatus);
+				logger.debug("is ETH transaction successed: {}", txStatus);
 				/**
 				 * if transaction for users, then return result with mail
 				 * notification to users
