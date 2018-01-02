@@ -75,4 +75,6 @@ public interface OrdersService {
 			User user, OrderStatus orderStatus);
 
 	boolean cancelOrder(long orderId);
+	
+	double findUserOrderLockedVolume(User user, Currency toCurrency, Currency pairedCurrency);
 }
