@@ -40,7 +40,7 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 	public CurrencyPair saveCurrencyPair(CurrencyPair currencyPair) {
 		return currencyPairRepo.saveAndFlush(currencyPair);
 	}
-	
+
 	@Override
 	public CurrencyPair findByPairId(long pairId) {
 		return currencyPairRepo.findByPairId(pairId);
@@ -94,15 +94,8 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 				.findByCurrencyAbbreviation(currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
 		Currency pairedCurrencyByAbbreviation = currencyRepo
 				.findByCurrencyAbbreviation(currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
-
-		if (toCurrency != null && pairedCurrency != null && toCurrencyByAbbreviation != null
-				&& pairedCurrencyByAbbreviation != null
-				&& toCurrency.getCurrencyId() != pairedCurrency.getCurrencyId()) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		return toCurrency != null && pairedCurrency != null && toCurrencyByAbbreviation != null
+				&& pairedCurrencyByAbbreviation != null && toCurrency.getCurrencyId() != pairedCurrency.getCurrencyId();
 	}
 
 	/** 

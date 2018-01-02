@@ -208,6 +208,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	public Boolean performBtcTrade(User fromUser, User toUser, double qtyTraded, Long tradeId) {
 		try {
 			BtcdClient client = ResourceUtils.getBtcdProvider();
+			logger.debug("tx fee: {}",client.estimateFee(2));
 			String fromAccount = fromUser.getUserId().toString();
 			String toAccount = toUser.getUserId().toString();
 			if (fromUser.getBtcWalletUuid().isEmpty()) {

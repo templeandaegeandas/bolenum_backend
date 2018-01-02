@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,9 +22,11 @@ public class CurrencyPairForm {
 
 	@NotNull
 	private Currency toCurrency;
-	
+
 	@NotNull
 	private Currency pairedCurrency;
+
+	private String pairName;
 
 	public Long getPairId() {
 		return pairId;
@@ -50,16 +53,20 @@ public class CurrencyPairForm {
 	}
 
 	public CurrencyPair copy(CurrencyPair currencyPair) {
-		List<Currency> toListCurrency=new ArrayList<Currency>();
+		List<Currency> toListCurrency = new ArrayList();
 		toListCurrency.add(this.toCurrency);
 		currencyPair.setToCurrency(toListCurrency);
-		List<Currency> pairedListCurrency=new ArrayList<Currency>();
+		List<Currency> pairedListCurrency = new ArrayList();
 		pairedListCurrency.add(this.pairedCurrency);
 		currencyPair.setPairedCurrency(pairedListCurrency);
-		List<Currency> toCurrency = currencyPair.getToCurrency();
-		List<Currency> pairedCurrency = currencyPair.getPairedCurrency();
-		String pairName = toCurrency.get(0).getCurrencyAbbreviation() + "/"
-				+ pairedCurrency.get(0).getCurrencyAbbreviation();
+		if (CurrencyType.FIAT.equals(this.toCurrency.getCurrencyType())
+				|| CurrencyType.FIAT.equals(this.pairedCurrency.getCurrencyType())) {
+			pairName = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation() + "/"
+					+ currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		} else {
+			pairName = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation() + "/"
+					+ currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+		}
 		currencyPair.setPairName(pairName);
 		currencyPair.setIsEnabled(true);
 		return currencyPair;

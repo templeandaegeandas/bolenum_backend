@@ -791,8 +791,8 @@ public class TransactionServiceImpl implements TransactionService {
 					logger.debug("seller locked volume, unlocking completed amount: {}",
 							GenericUtils.getDecimalFormatString(qtyTraded));
 				}
-				notificationService.sendNotification(seller, msg1);
-				notificationService.saveNotification(seller, buyer, msg1);
+				//notificationService.sendNotification(seller, msg1);
+				//notificationService.saveNotification(seller, buyer, msg1);
 			}
 			// } catch (InterruptedException | ExecutionException e) {
 			// logger.error("Exception: {}", e);
@@ -848,8 +848,8 @@ public class TransactionServiceImpl implements TransactionService {
 					logger.debug("buyer locked volume, unlocking completed amount: {}",
 							GenericUtils.getDecimalFormatString(uvol));
 				}
-				notificationService.sendNotification(buyer, msg);
-				notificationService.saveNotification(buyer, seller, msg);
+				//notificationService.sendNotification(buyer, msg);
+				//notificationService.saveNotification(buyer, seller, msg);
 			}
 			// } catch (InterruptedException | ExecutionException e) {
 			// logger.error("Exception: {}", e);
@@ -999,7 +999,7 @@ public class TransactionServiceImpl implements TransactionService {
 			if (receiverUserCoin != null) {
 				receiverUserCoin.setBalance(receiverUserCoin.getBalance() + (amount - fee));
 				userCoinRepository.save(receiverUserCoin);
-				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName, amount,
+				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName, (amount - fee),
 						fee);
 			} else {
 				performErc20Transaction(fromUser, tokenName, toAddress, amount - fee, TransactionStatus.WITHDRAW, fee,
@@ -1024,7 +1024,7 @@ public class TransactionServiceImpl implements TransactionService {
 			if (receiverUserCoin != null) {
 				receiverUserCoin.setBalance(receiverUserCoin.getBalance() + (amount - fee));
 				userCoinRepository.save(receiverUserCoin);
-				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName, amount,
+				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName, (amount - fee),
 						fee);
 			} else {
 				performEthTransaction(fromUser, tokenName, toAddress, amount - fee, TransactionStatus.WITHDRAW, fee,
@@ -1068,7 +1068,7 @@ public class TransactionServiceImpl implements TransactionService {
 		transaction.setTxHash("InApp-" + txHash);
 		transaction.setFromAddress(senderUserCoin.getWalletAddress());
 		transaction.setToAddress(toAddress);
-		transaction.setTxAmount(amount - fee);
+		transaction.setTxAmount(amount);
 		transaction.setTransactionType(TransactionType.OUTGOING);
 		transaction.setTransactionStatus(TransactionStatus.WITHDRAW);
 		transaction.setFromUser(fromUser);
@@ -1076,6 +1076,7 @@ public class TransactionServiceImpl implements TransactionService {
 		transaction.setFee(fee);
 		transaction.setToUser(receiverUserCoin.getUser());
 		transaction.setInAppTransaction(true);
+		transaction.setTxStatus("CONFIRMED");
 		Transaction saved = transactionRepo.saveAndFlush(transaction);
 		logger.debug("transaction saved completed: {}", fromUser.getEmailId());
 		if (saved != null) {

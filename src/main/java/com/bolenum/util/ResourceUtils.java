@@ -3,6 +3,7 @@
  */
 package com.bolenum.util;
 
+import java.math.BigDecimal;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -62,7 +63,9 @@ public class ResourceUtils {
 	}
 
 	public static BtcdClient getBtcdProvider() throws BitcoindException, CommunicationException {
-		return new BtcdClientImpl(getHttpProvider(), getNodeConfig());
+		BtcdClient btcdClient = new BtcdClientImpl(getHttpProvider(), getNodeConfig());
+		btcdClient.setTxFee(BigDecimal.valueOf(0.001));
+		return btcdClient;
 	}
 
 	public static Properties getNodeConfig() {

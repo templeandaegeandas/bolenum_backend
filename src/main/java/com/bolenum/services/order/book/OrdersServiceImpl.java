@@ -127,10 +127,10 @@ public class OrdersServiceImpl implements OrdersService {
 	 *              double @exception
 	 * 
 	 */
-	private double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType,
+	public double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType,
 			Currency currency) {
-		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairPairedCurrency(user, orderStatus,
-				orderType, currency);
+		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairPairedCurrency(user,
+				orderStatus, orderType, currency);
 		double total = 0.0;
 		for (Orders order : orders) {
 			total = total + order.getVolume() + order.getLockedVolume();
@@ -138,8 +138,9 @@ public class OrdersServiceImpl implements OrdersService {
 		return total;
 	}
 
-	private double getLockedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, Currency currency) {
-		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndPairPairedCurrency(user, orderStatus, currency);
+	public double getLockedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, Currency currency) {
+		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndPairPairedCurrency(user, orderStatus,
+				currency);
 		double total = 0.0;
 		for (Orders order : orders) {
 			total = total + order.getVolume() + order.getLockedVolume();
@@ -383,7 +384,7 @@ public class OrdersServiceImpl implements OrdersService {
 					orders.setOrderStatus(OrderStatus.COMPLETED);
 				}
 				ordersList.add(orders);
-				if(OrderType.SELL.equals(orders.getOrderType())) {
+				if (OrderType.SELL.equals(orders.getOrderType())) {
 					orderAsyncServices.saveLastPrice(pair.getPairId(), price);
 				}
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
@@ -722,5 +723,17 @@ public class OrdersServiceImpl implements OrdersService {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public double findUserOrderLockedVolume(User user, Currency toCurrency, Currency pairedCurrency) {
+		List<Orders> toOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairToCurrency(user,
+				OrderStatus.COMPLETED, OrderType.SELL, toCurrency);
+		double total = 0.0;
+		for (Orders orders : toOrders) {
+			total = total + orders.getLockedVolume();
+		}
+		logger.debug("user : {} order locked volume: {}", user.getEmailId(), total);
+		return total;
 	}
 }
