@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.UrlConstant;
-import com.bolenum.controller.user.UserController;
 import com.bolenum.enums.DisputeStatus;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.MobileNotVerifiedException;
@@ -42,7 +41,7 @@ import io.swagger.annotations.Api;
 @RequestMapping(value = UrlConstant.BASE_URI_V1)
 public class DisputeController {
 
-	public static final Logger logger = LoggerFactory.getLogger(UserController.class);
+	public static final Logger logger = LoggerFactory.getLogger(DisputeController.class);
 
 	@Autowired
 	private LocaleService localeService;
@@ -75,32 +74,45 @@ public class DisputeController {
 		Orders orders = disputeService.checkEligibilityToDispute(orderId);
 
 		if (orders == null) {
+			logger.debug("order not exist");
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.not.eligible"), null);
 		}
 
 		Boolean isExpired = disputeService.checkExpiryToDispute(orders);
+		logger.debug("isExpired ={}", isExpired);
+		isExpired=false;
+		if (orders.isDispute()) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("dispute.already.raised"), null);
+		}
 
 		if (!isExpired) {
-			Boolean isExistDisputeOrder = disputeService.isAlreadyDisputed(orders, transactionId);
-			if (!isExistDisputeOrder) {
-				return ResponseHandler.response(HttpStatus.CONFLICT, true,
-						localeService.getMessage("dispute.already.raised"), null);
-			}
-			DisputeOrder response = disputeService.raiseDispute(orders, transactionId, commentByDisputeRaiser, file);
+			orders.setDispute(true);
+			DisputeOrder response = disputeService.raiseDisputeByBuyer(orders, transactionId, commentByDisputeRaiser, file);
 			if (response != null) {
+				orderAsyncService.saveOrder(orders);
+				logger.debug("response of raised dispute ={}", response.getCreatedOn().getDate());
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
+			} else {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localeService.getMessage("dispute.raised.failed"), null);
 			}
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.time.not.eligible"), null);
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("dispute.raised.failed"),
-				null);
-
 	}
 
+	/**
+	 * @created by Vishal Kumar
+	 * @param orderId
+	 * @return
+	 * 
+	 * @modified by Himanshu Kumar
+	 * 
+	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.RAISE_DISPUTE_BY_SELLER, method = RequestMethod.PUT)
 	public ResponseEntity<Object> requestDisputeBySeller(@RequestParam("orderId") Long orderId) {
@@ -108,6 +120,7 @@ public class DisputeController {
 		Orders orders = disputeService.checkEligibilityToDispute(orderId);
 
 		if (orders == null) {
+			logger.debug("order not exist");
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.not.eligible"), null);
 		}
@@ -116,21 +129,24 @@ public class DisputeController {
 					localeService.getMessage("dispute.already.raised"), null);
 		}
 		Boolean isExpired = disputeService.checkExpiryToDispute(orders);
-
+		logger.debug("isExpired ={}", isExpired);
+		isExpired=false;
 		if (!isExpired) {
 			orders.setDispute(true);
 			DisputeOrder response = disputeService.raiseDisputeBySeller(orders);
 			if (response != null) {
 				orderAsyncService.saveOrder(orders);
+				logger.debug("response of raised dispute ={}", response.getCreatedOn().getDate());
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
+			} else {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localeService.getMessage("dispute.raised.failed"), null);
 			}
 		} else {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.time.not.eligible"), null);
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("dispute.raised.failed"),
-				null);
 
 	}
 

@@ -34,4 +34,6 @@ public interface CurrencyPairService {
 	
 	List<CurrencyPair> findAllCurrencyPair();
 
+	CurrencyPair findByPairId(long pairId);
+
 }

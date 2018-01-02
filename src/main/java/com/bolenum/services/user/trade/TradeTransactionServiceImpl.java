@@ -69,9 +69,9 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 					return true;
 				}
 			} else if ("ETH".equalsIgnoreCase(currencyAbr)) {
-				logger.debug("ETH trade started");
+				logger.debug("ETH transaction started");
 				txStatus = performEthTrade(seller, currencyAbr, buyer, qtyTraded, tradeId);
-				logger.debug("is ETH trade successed: {}", txStatus);
+				logger.debug("is ETH transaction successed: {}", txStatus);
 				/**
 				 * if transaction for users, then return result with mail
 				 * notification to users
@@ -208,6 +208,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	public Boolean performBtcTrade(User fromUser, User toUser, double qtyTraded, Long tradeId) {
 		try {
 			BtcdClient client = ResourceUtils.getBtcdProvider();
+			logger.debug("tx fee: {}",client.estimateFee(2));
 			String fromAccount = fromUser.getUserId().toString();
 			String toAccount = toUser.getUserId().toString();
 			if (fromUser.getBtcWalletUuid().isEmpty()) {

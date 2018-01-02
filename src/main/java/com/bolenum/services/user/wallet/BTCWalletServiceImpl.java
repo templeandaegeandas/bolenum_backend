@@ -251,12 +251,14 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			UserCoin ethUserCoin = etherumWalletService.ethWalletBalance(user, tokenName);
 			availableBalance = ethUserCoin.getBalance();
 		}
-		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
 
 		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, currency, currency);
 		logger.debug("Order Book balance:{} of user: {}", placeOrderVolume, user.getEmailId());
-		double volume = GenericUtils.getDecimalFormat(withdrawAmount + placeOrderVolume);
-		logger.debug("addition of withdraw amount, place order, fee and network fee volume: {}", volume);
+		double lockedVolume = ordersService.findUserOrderLockedVolume(user, currency, currency);
+		logger.debug("Order locked volume :{} of user : {} ", lockedVolume, user.getEmailId());
+		double volume = placeOrderVolume + lockedVolume + withdrawAmount;
+		logger.debug("addition of withdraw amount, place order, fee and network fee volume: {}",
+				GenericUtils.getDecimalFormatString(volume));
 		if (availableBalance >= volume) {
 			return true;
 		} else {
@@ -282,8 +284,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.balance.more.than.fee"));
 		}
 		/**
-		 * network fee required for sending to the receiver address and admin address,
-		 * so networkFee = networkFee * 2;
+		 * network fee required for sending to the receiver address and admin
+		 * address, so networkFee = networkFee * 2;
 		 * 
 		 */
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
@@ -308,8 +310,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 		logger.debug("Order Book balance: {} of user: {}", placeOrderVolume, user.getEmailId());
 
-		double volume = withdrawAmount + placeOrderVolume;
-		logger.debug("addition of withdraw amount, place order and fee volume: {}", volume);
+		double lockedVolume = ordersService.findUserOrderLockedVolume(user, erc20Token.getCurrency(), erc20Token.getCurrency());
+		logger.debug("Order locked volume :{} of user : {} ", lockedVolume, user.getEmailId());
+		double volume = placeOrderVolume + lockedVolume + withdrawAmount;
+		
+		logger.debug("addition of withdraw amount, place order,lock order vol and fee volume: {}", GenericUtils.getDecimalFormatString(volume));
 
 		if (availableBalance >= volume) {
 			return true;
@@ -367,6 +372,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				boolean resultForEth = transactionService.withdrawETH(user, coinCode, toAddress, amount,
 						TransactionStatus.WITHDRAW, bolenumFee, null);
 				if (resultForEth) {
+
 					return new AsyncResult<>(true);
 				}
 				break;
@@ -389,12 +395,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public boolean adminWithdrawCryptoAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
 		if ("BTC".equals(tokenName)) {
-			transactionService.performBtcTransaction(user, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
-					null);
+			transactionService.withdrawBTC(user, tokenName, toAddress, withdrawAmount, null);
 			return true;
 		} else if ("ETH".equals(tokenName)) {
-			transactionService.performEthTransaction(user, tokenName, toAddress, withdrawAmount,
-					TransactionStatus.WITHDRAW, 0.0, null);
+			transactionService.withdrawETH(user, tokenName, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, null,
+					null);
 			return true;
 		}
 		return false;
