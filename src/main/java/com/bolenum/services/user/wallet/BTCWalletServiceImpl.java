@@ -367,6 +367,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				boolean resultForEth = transactionService.withdrawETH(user, coinCode, toAddress, amount,
 						TransactionStatus.WITHDRAW, bolenumFee, null);
 				if (resultForEth) {
+
 					return new AsyncResult<>(true);
 				}
 				break;

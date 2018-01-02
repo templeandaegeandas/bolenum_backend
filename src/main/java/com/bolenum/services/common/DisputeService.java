@@ -25,8 +25,10 @@ public interface DisputeService {
 
 	Boolean checkExpiryToDispute(Orders orders);
 
-	DisputeOrder raiseDispute(Orders orders, Long transactionid, String comment, MultipartFile file)
-			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException;
+	// DisputeOrder raiseDispute(Orders orders, Long transactionid, String comment,
+	// MultipartFile file)
+	// throws IOException, PersistenceException, MaxSizeExceedException,
+	// MobileNotVerifiedException;
 
 	Boolean isAlreadyDisputed(Orders orders, Long transactionId);
 
@@ -42,5 +44,9 @@ public interface DisputeService {
 			String commentForDisputeRaisedAgainst, DisputeStatus disputeStatus);
 
 	DisputeOrder raiseDisputeBySeller(Orders order);
+
+	DisputeOrder raiseDisputeByBuyer(Orders orders, Long transactionId, String commentByDisputeRaiser,
+			MultipartFile file)
+			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException;;
 
 }
