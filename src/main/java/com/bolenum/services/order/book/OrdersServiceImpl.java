@@ -383,7 +383,7 @@ public class OrdersServiceImpl implements OrdersService {
 					orders.setOrderStatus(OrderStatus.COMPLETED);
 				}
 				ordersList.add(orders);
-				if(OrderType.SELL.equals(orders.getOrderType())) {
+				if(OrderType.SELL.equals(orderType)) {
 					orderAsyncServices.saveLastPrice(pair.getPairId(), price);
 				}
 				logger.debug("qty remaining so added in book: {}", remainingVolume);
