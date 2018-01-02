@@ -40,6 +40,11 @@ public class CurrencyPairServiceImpl implements CurrencyPairService {
 	public CurrencyPair saveCurrencyPair(CurrencyPair currencyPair) {
 		return currencyPairRepo.saveAndFlush(currencyPair);
 	}
+	
+	@Override
+	public CurrencyPair findByPairId(long pairId) {
+		return currencyPairRepo.findByPairId(pairId);
+	}
 
 	/**
 	 * 

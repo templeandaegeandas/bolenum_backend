@@ -389,12 +389,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public boolean adminWithdrawCryptoAmount(User user, String tokenName, Double withdrawAmount, String toAddress) {
 		if ("BTC".equals(tokenName)) {
-			transactionService.performBtcTransaction(user, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, 0.0,
-					null);
+			transactionService.withdrawBTC(user, tokenName, toAddress, withdrawAmount, null);
 			return true;
 		} else if ("ETH".equals(tokenName)) {
-			transactionService.performEthTransaction(user, tokenName, toAddress, withdrawAmount,
-					TransactionStatus.WITHDRAW, 0.0, null);
+			transactionService.withdrawETH(user, tokenName, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, null,
+					null);
 			return true;
 		}
 		return false;
