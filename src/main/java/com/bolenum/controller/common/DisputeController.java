@@ -81,7 +81,7 @@ public class DisputeController {
 
 		Boolean isExpired = disputeService.checkExpiryToDispute(orders);
 		logger.debug("isExpired ={}", isExpired);
-
+		isExpired=false;
 		if (orders.isDispute()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.already.raised"), null);
@@ -91,6 +91,7 @@ public class DisputeController {
 			orders.setDispute(true);
 			DisputeOrder response = disputeService.raiseDisputeByBuyer(orders, transactionId, commentByDisputeRaiser, file);
 			if (response != null) {
+				orderAsyncService.saveOrder(orders);
 				logger.debug("response of raised dispute ={}", response.getCreatedOn().getDate());
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
@@ -119,6 +120,7 @@ public class DisputeController {
 		Orders orders = disputeService.checkEligibilityToDispute(orderId);
 
 		if (orders == null) {
+			logger.debug("order not exist");
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("dispute.not.eligible"), null);
 		}
@@ -127,12 +129,14 @@ public class DisputeController {
 					localeService.getMessage("dispute.already.raised"), null);
 		}
 		Boolean isExpired = disputeService.checkExpiryToDispute(orders);
-
+		logger.debug("isExpired ={}", isExpired);
+		isExpired=false;
 		if (!isExpired) {
 			orders.setDispute(true);
 			DisputeOrder response = disputeService.raiseDisputeBySeller(orders);
 			if (response != null) {
 				orderAsyncService.saveOrder(orders);
+				logger.debug("response of raised dispute ={}", response.getCreatedOn().getDate());
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
 			} else {
