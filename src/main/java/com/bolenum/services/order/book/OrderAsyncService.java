@@ -1,6 +1,7 @@
 package com.bolenum.services.order.book;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
@@ -14,5 +15,7 @@ public interface OrderAsyncService {
 	List<Trade> saveTrade(List<Trade> tradeList);
 
 	Trade saveTrade(Trade trade);
+
+	Future<Boolean> saveLastPrice(long pairId, Double price);
 
 }

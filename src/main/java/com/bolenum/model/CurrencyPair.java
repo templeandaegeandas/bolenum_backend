@@ -37,6 +37,8 @@ public class CurrencyPair {
 	@NotBlank
 	@Column(unique = true)
 	private String pairName;
+	
+	private Double lastPrice;
 
 	@ApiModelProperty(hidden = true)
 	@CreationTimestamp
@@ -85,6 +87,20 @@ public class CurrencyPair {
 
 	public void setPairName(String pairName) {
 		this.pairName = pairName;
+	}
+
+	/**
+	 * @return the lastPrice
+	 */
+	public Double getLastPrice() {
+		return lastPrice;
+	}
+
+	/**
+	 * @param lastPrice the lastPrice to set
+	 */
+	public void setLastPrice(Double lastPrice) {
+		this.lastPrice = lastPrice;
 	}
 
 	public Date getOnCreated() {
