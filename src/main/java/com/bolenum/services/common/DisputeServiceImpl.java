@@ -3,6 +3,8 @@ package com.bolenum.services.common;
 import java.io.IOException;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -49,6 +51,9 @@ public class DisputeServiceImpl implements DisputeService {
 
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
+	
+	public static final Logger logger = LoggerFactory.getLogger(DisputeServiceImpl.class);
+	
 
 	public DisputeServiceImpl() {
 
@@ -61,24 +66,23 @@ public class DisputeServiceImpl implements DisputeService {
 	public DisputeOrder uploadProofDocument(MultipartFile file, DisputeOrder disputeOrder, User disputeRaiser)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 
+		logger.debug("inside uploadProofDocument ");
 		long sizeLimit = 1024 * 1024 * 10L;
 		DisputeOrder savedDispute = null;
 		if (file != null) {
+			logger.debug("inside uploadProofDocument file found");
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
 			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, disputeRaiser, null,
 					validExtentions, sizeLimit);
 			disputeOrder.setFirstDocumenForProofToDispute(updatedFileName);
 			savedDispute = disputeOrderRepo.saveAndFlush(disputeOrder);
 			return savedDispute;
-
-		} else {
-			return null;
 		}
-
+		return null;
 	}
 
 	/**
-	 * 
+	 * @created
 	 */
 	@Override
 	public Boolean checkExpiryToDispute(Orders orders) {
@@ -95,13 +99,13 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public DisputeOrder raiseDispute(Orders order, Long transactionId, String commentByDisputeRaiser,
+	public DisputeOrder raiseDisputeByBuyer(Orders order, Long transactionId, String commentByDisputeRaiser,
 			MultipartFile file)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		Orders matchedOrder = order.getMatchedOrder();
 		User disputeRaisedAgainst = matchedOrder.getUser();
 		if (OrderStatus.LOCKED.equals(order.getOrderStatus()) && OrderType.BUY.equals(order.getOrderType())) {
-
+			logger.debug("inside raiseDispute by buyer ");
 			User disputeRaiser = order.getUser();
 			DisputeOrder disputeOrder = new DisputeOrder();
 			disputeOrder.setOrders(order);
@@ -114,20 +118,19 @@ public class DisputeServiceImpl implements DisputeService {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public DisputeOrder raiseDisputeBySeller(Orders order) {
 		Orders matchedOrder = order.getMatchedOrder();
 		User disputeRaisedAgainst = matchedOrder.getUser();
 		if (OrderStatus.LOCKED.equals(order.getOrderStatus()) && OrderType.BUY.equals(order.getOrderType())) {
-
 			User disputeRaiser = order.getUser();
 			DisputeOrder disputeOrder = new DisputeOrder();
 			disputeOrder.setOrders(order);
 			disputeOrder.setDisputeRaiser(disputeRaiser);
 			disputeOrder.setDisputeStatus(DisputeStatus.RAISED);
 			disputeOrder.setDisputeRaisedAgainst(disputeRaisedAgainst);
-			disputeOrderRepo.save(disputeOrder);
+			return disputeOrderRepo.save(disputeOrder);
 		}
 		return null;
 	}
@@ -139,9 +142,9 @@ public class DisputeServiceImpl implements DisputeService {
 	public Boolean isAlreadyDisputed(Orders orders, Long transactionId) {
 		DisputeOrder disputeOrder = disputeOrderRepo.findByOrdersOrTransactionId(orders, transactionId);
 		if (disputeOrder == null) {
-			return true;
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	/**
@@ -150,10 +153,6 @@ public class DisputeServiceImpl implements DisputeService {
 	@Override
 	public Orders checkEligibilityToDispute(Long orderId) {
 		return ordersRepository.findOne(orderId);
-//		if (OrderType.BUY.equals(order.getOrderType())) {
-//			return order;
-//		}
-//		return null;
 	}
 
 	/**
@@ -181,7 +180,7 @@ public class DisputeServiceImpl implements DisputeService {
 	}
 
 	/**
-	 *  perform action on raised dispute by admin with respect to Dispute Status
+	 * perform action on raised dispute by admin with respect to Dispute Status
 	 */
 	@Override
 	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentForDisputeRaiser,
