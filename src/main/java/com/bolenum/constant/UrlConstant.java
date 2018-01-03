@@ -120,6 +120,7 @@ public class UrlConstant {
 	public static final String ORDER_FIAT_CANCEL = "order/fiat/cancel";
 	public static final String ORDER_FIAT_PAID = "order/fiat/confirm";
 	public static final String ORDER_FIAT_TX = "order/fiat/tx";
+	public static final String COIN_MARKET_DATA = "order/coin/data";
 
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";

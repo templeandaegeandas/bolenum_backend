@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
@@ -60,11 +59,10 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 		return tradeRepository.save(trade);
 	}
 	
-	@Async
 	@Override
 	public Future<Boolean> saveLastPrice(long pairId, Double price) {
 		CurrencyPair currencyPair = currencyPairService.findByPairId(pairId);
-		if(currencyPair.getLastPrice() == null || currencyPair.getLastPrice() > price) {
+		if(currencyPair.getLastPrice() == null || currencyPair.getLastPrice() == 0 || currencyPair.getLastPrice() > price) {
 			currencyPair.setLastPrice(price);
 			currencyPairService.saveCurrencyPair(currencyPair);
 			JSONObject jsonObject = new JSONObject();
@@ -72,6 +70,8 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 				jsonObject.put("MARKET_UPDATE", MessageType.MARKET_UPDATE);
 				jsonObject.put("pairId", pairId);
 				jsonObject.put("price", price);
+				jsonObject.put("toCurrency", currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
+				jsonObject.put("pairedCurrency", currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
 			} catch (JSONException e) {
 				logger.error("Error in sending websocket message: {}", e);
 			}
