@@ -31,7 +31,7 @@ public interface TransactionService {
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
 			boolean isFee, Long tradeID) throws InterruptedException, ExecutionException;
 
-	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus withdraw, int pageNumber,
+	public Page<Transaction> getListOfUserTransaction(String currencyName, User user, TransactionStatus withdraw, int pageNumber,
 			int pageSize, String sortOrder, String sortBy);
 
 	Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
@@ -49,5 +49,5 @@ public interface TransactionService {
 	boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount, Double fee);
 
 	boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee, Long tradeId);
+			Double fee, Long tradeId);
 }

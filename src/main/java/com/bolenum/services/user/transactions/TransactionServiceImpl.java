@@ -566,8 +566,8 @@ public class TransactionServiceImpl implements TransactionService {
 	 *  
 	 */
 	@Override
-	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus transactionStatus, int pageNumber,
-			int pageSize, String sortOrder, String sortBy) {
+	public Page<Transaction> getListOfUserTransaction(String currencyName, User user,
+			TransactionStatus transactionStatus, int pageNumber, int pageSize, String sortOrder, String sortBy) {
 
 		Direction sort;
 		if (sortOrder.equals("desc")) {
@@ -577,14 +577,14 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		if (TransactionStatus.WITHDRAW.equals(transactionStatus)) {
-			Page<Transaction> list = transactionRepo.findByFromUserAndTransactionStatus(user, transactionStatus,
-					pageRequest);
+			Page<Transaction> list = transactionRepo.findByFromUserAndTransactionStatusAndCurrencyName(user,
+					transactionStatus, currencyName, pageRequest);
 			fetchTransactionConfirmation(list);
 			fetchBTCConfirmation(list);
 			return list;
 		} else {
-			Page<Transaction> list = transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user,
-					pageRequest);
+			Page<Transaction> list = transactionRepo.findByToUserAndCurrencyNameAndTransactionStatusOrTransactionStatus(
+					user, currencyName, pageRequest);
 			fetchTransactionConfirmation(list);
 			fetchBTCConfirmation(list);
 			return list;
@@ -867,8 +867,8 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @created by Himanshu Kumar to withdraw ETH
 	 */
 	@Override
-	public boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee, Long tradeId) {
+	public boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount, Double fee,
+			Long tradeId) {
 		UserCoin senderUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
 		if (senderUserCoin != null) {
 			UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress);
