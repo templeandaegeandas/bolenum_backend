@@ -165,7 +165,7 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @param txAmount
 	 * @return true/false if transaction success return true else false
 	 */
-	
+
 	@Override
 	@Async
 	public Future<Boolean> performEthTransaction(User fromUser, String tokenName, String toAddress, Double amount,
@@ -563,8 +563,8 @@ public class TransactionServiceImpl implements TransactionService {
 	 *  
 	 */
 	@Override
-	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus transactionStatus, int pageNumber,
-			int pageSize, String sortOrder, String sortBy) {
+	public Page<Transaction> getListOfUserTransaction(String currencyName, User user,
+			TransactionStatus transactionStatus, int pageNumber, int pageSize, String sortOrder, String sortBy) {
 
 		Direction sort;
 		if (sortOrder.equals("desc")) {
@@ -574,14 +574,14 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		if (TransactionStatus.WITHDRAW.equals(transactionStatus)) {
-			Page<Transaction> list = transactionRepo.findByFromUserAndTransactionStatus(user, transactionStatus,
-					pageRequest);
+			Page<Transaction> list = transactionRepo.findByFromUserAndTransactionStatusAndCurrencyName(user,
+					transactionStatus, currencyName, pageRequest);
 			fetchTransactionConfirmation(list);
 			fetchBTCConfirmation(list);
 			return list;
 		} else {
-			Page<Transaction> list = transactionRepo.findByToUserAndTransactionStatusOrTransactionStatus(user,
-					pageRequest);
+			Page<Transaction> list = transactionRepo.findByToUserAndCurrencyNameAndTransactionStatusOrTransactionStatus(
+					user, currencyName, pageRequest);
 			fetchTransactionConfirmation(list);
 			fetchBTCConfirmation(list);
 			return list;
