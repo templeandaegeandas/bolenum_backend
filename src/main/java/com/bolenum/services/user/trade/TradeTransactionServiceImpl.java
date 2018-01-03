@@ -124,7 +124,6 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	public Boolean performErc20Trade(User seller, String currencyAbr, User buyer, double qtyTraded, Long tradeId) {
 		UserCoin userErc20TokenSeller = userCoinRepository.findByTokenNameAndUser(currencyAbr, seller);
 		UserCoin userErc20TokenBuyer = userCoinRepository.findByTokenNameAndUser(currencyAbr, buyer);
-		// TODO remove once existing users has created their wallet
 		if (userErc20TokenSeller == null || userErc20TokenBuyer == null) {
 			erc20TokenService.createErc20Wallet(buyer, currencyAbr);
 			erc20TokenService.createErc20Wallet(seller, currencyAbr);

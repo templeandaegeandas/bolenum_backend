@@ -29,11 +29,11 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 	 */
 	Transaction findByTxHash(String txHash);
 
-	Page<Transaction> findByFromUserAndTransactionStatus(User fromUser, TransactionStatus transactionStatus,
+	Page<Transaction> findByFromUserAndTransactionStatusAndCurrencyName(User fromUser, TransactionStatus transactionStatus, String currencyName,
 			Pageable pageable);
 
-	@Query("select t from Transaction t where t.toUser=:toUser and (t.transactionStatus='WITHDRAW' or t.transactionStatus='DEPOSIT')")
-	Page<Transaction> findByToUserAndTransactionStatusOrTransactionStatus(@Param("toUser") User toUser,
+	@Query("select t from Transaction t where t.toUser=:toUser and t.currencyName=:currencyName and (t.transactionStatus='WITHDRAW' or t.transactionStatus='DEPOSIT')")
+	Page<Transaction> findByToUserAndCurrencyNameAndTransactionStatusOrTransactionStatus(@Param("toUser") User toUser, @Param("currencyName") String currencyName,
 			Pageable pageable);
 //	@Query("select t from Transaction t where t.transactionStatus=:transactionStatus and t.transferStatus=:transferStatus order by t.createdOn limit :size")
 //	Transaction findByTransactionStatusAndTransferStatus(@Param("transactionStatus")TransactionStatus transactionStatus, @Param("transferStatus") TransferStatus transferStatus, @Param("size") int size);

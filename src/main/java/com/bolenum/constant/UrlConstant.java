@@ -63,7 +63,7 @@ public class UrlConstant {
 	public static final String CURRENCY_LIST_FOR_MARKET = "currency/list/market";
 	public static final String CURRENCY_PAIR = "currency/pair";
 	public static final String CURRENCY_PAIR_LIST = "currency-pair/list";
-	public static final String TRADING_FEES = "get/trade/fees";
+	public static final String TRADING_FEES = "trade/fees";
 	public static final String WITHDRAWAL_FEES = "withdraw/fees";
 	public static final String PAIRED_CURRENCY = "paired/currency/list";
 	public static final String COUNT_BUYER_SELLER_DASHBOARD = "buyer/seller";
@@ -71,6 +71,8 @@ public class UrlConstant {
 	public static final String CURRENCY_NGN_PRICE_SAVE = "set/bln_ngn";
 	public static final String ADMIN_WITHDRAW = "withdraw";
 	public static final String ADMIN_DEPOSIT = "deposit";
+	public static final String USERS_ORDERS_IN_BOOK = "orders/book";
+	public static final String USERS_TRADE_HISTORY = "trade/history";
 	
 	/********************** TEMP API ***********************/
 	public static final String USER_WALLETS_BALANCE = "action/users/wallet/balance";
@@ -120,6 +122,7 @@ public class UrlConstant {
 	public static final String ORDER_FIAT_CANCEL = "order/fiat/cancel";
 	public static final String ORDER_FIAT_PAID = "order/fiat/confirm";
 	public static final String ORDER_FIAT_TX = "order/fiat/tx";
+	public static final String COIN_MARKET_DATA = "order/coin/data";
 
 	/******************** Erc20 API ******/
 	public static final String ADD_NEW_TOKEN = "add/new/token";

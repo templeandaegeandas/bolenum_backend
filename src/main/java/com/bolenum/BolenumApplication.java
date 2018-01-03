@@ -56,14 +56,10 @@ public class BolenumApplication {
 	}
 
 	@Autowired
-	private MarketPriceService marketPriceService;
-	
-	@Autowired
 	private Erc20TokenService erc20TokenService;
 
-	@Scheduled(fixedRate = 20 * 1000)
+	@Scheduled(fixedRate = 30 * 1000)
 	public void fetchCoinPrice() {
 		erc20TokenService.sendUserTokenToAdmin();
-		marketPriceService.priceFromCoinMarketCap();
 	}
 }

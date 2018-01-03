@@ -101,17 +101,18 @@ public class BTCWalletController {
 		}
 		User user = GenericUtils.getLoggedInUser(); // logged in user
 		Map<String, Object> map = new HashMap<>();
+		final String ADDRESS = "address";
+		final String BALANCE = "balance";
 		switch (currencyType) {
 		case "CRYPTO":
 			switch (coinCode) {
 			case "BTC":
 				Map<String, Object> mapAddressAndBal = new HashMap<>();
-				mapAddressAndBal.put("address", btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
-				mapAddressAndBal.put("balance", btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
+				mapAddressAndBal.put(ADDRESS, btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
+				mapAddressAndBal.put(BALANCE, btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
 				map.put("data", mapAddressAndBal);
 				break;
 			case "ETH":
-				// Double balance = etherumWalletService.getWalletBalance(user);
 				UserCoin userCoin = etherumWalletService.ethWalletBalance(user, coinCode);
 				if (userCoin == null) {
 					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
@@ -119,8 +120,8 @@ public class BTCWalletController {
 							null);
 				}
 				Map<String, Object> mapAddress = new HashMap<>();
-				mapAddress.put("address", userCoin.getWalletAddress());
-				mapAddress.put("balance", userCoin.getBalance());
+				mapAddress.put(ADDRESS, userCoin.getWalletAddress());
+				mapAddress.put(BALANCE, userCoin.getBalance());
 				map.put("data", mapAddress);
 				break;
 			default:
@@ -137,8 +138,8 @@ public class BTCWalletController {
 						null);
 			}
 			Map<String, Object> mapAddress = new HashMap<>();
-			mapAddress.put("address", userCoin.getWalletAddress());
-			mapAddress.put("balance", GenericUtils.getDecimalFormat(userCoin.getBalance()));
+			mapAddress.put(ADDRESS, userCoin.getWalletAddress());
+			mapAddress.put(BALANCE, GenericUtils.getDecimalFormat(userCoin.getBalance()));
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":

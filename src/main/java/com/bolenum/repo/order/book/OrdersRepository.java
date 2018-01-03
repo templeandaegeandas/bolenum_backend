@@ -105,4 +105,12 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Double totalUserBalanceInBook(@Param("user") User user, @Param("toCurrencyList") List<Currency> toCurrencyList,
 			@Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
 
+	@Query("select sum(o.volume) from Orders o where o.pair=:pair and o.createdOn > :endDate")
+	Double ordersIn24hVolume(@Param("pair") CurrencyPair pair, @Param("endDate") Date endDate);
+
+	@Query("select max(o.volume) from Orders o where o.pair=:pair and o.createdOn > :endDate")
+	Double ordersIn24hHigh(@Param("pair") CurrencyPair pair, @Param("endDate") Date endDate);
+
+	@Query("select min(o.volume) from Orders o where o.pair=:pair and o.createdOn > :endDate")
+	Double ordersIn24hLow(@Param("pair") CurrencyPair pair, @Param("endDate") Date endDate);
 }

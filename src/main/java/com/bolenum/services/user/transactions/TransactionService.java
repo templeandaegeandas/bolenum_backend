@@ -20,11 +20,8 @@ import com.bolenum.model.orders.book.Trade;
  */
 public interface TransactionService {
 
-//	public Future<Boolean> performEthTransaction(User fromUser, String toAddress, Double amount,
-			//TransactionStatus transactionStatus, Double fee, Long tradeId);
-	
-	Future<Boolean> performEthTransaction(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee, Long tradeId);
+	Future<Boolean> performEthTransaction(User fromUser, String tokenName, String toAddress, Double amount, Double fee,
+			Long tradeId);
 
 	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
 			TransactionStatus transactionStatus, Double fee, Long tradeId);
@@ -34,11 +31,11 @@ public interface TransactionService {
 	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
 			boolean isFee, Long tradeID) throws InterruptedException, ExecutionException;
 
-	public Page<Transaction> getListOfUserTransaction(User user, TransactionStatus withdraw, int pageNumber,
+	public Page<Transaction> getListOfUserTransaction(String currencyName, User user, TransactionStatus withdraw, int pageNumber,
 			int pageSize, String sortOrder, String sortBy);
 
 	Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee, Long tradeId);
+			Double fee, Long tradeId);
 
 	public Future<Boolean> processTransaction(Orders matchedOrder, Orders orders, double qtyTraded, User buyer,
 			User seller, double remainingVolume, double buyerTradeFee, double sellerTradeFee, Trade trade)
@@ -52,7 +49,5 @@ public interface TransactionService {
 	boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount, Double fee);
 
 	boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee, Long tradeId);
-
-	
+			Double fee, Long tradeId);
 }
