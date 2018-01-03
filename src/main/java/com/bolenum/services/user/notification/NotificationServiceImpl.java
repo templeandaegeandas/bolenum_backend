@@ -3,7 +3,8 @@
  */
 package com.bolenum.services.user.notification;
 
-import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -39,6 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Autowired
 	private LocaleService localeService;
+	
 
 	/**
 	 * to send the notification
@@ -77,7 +79,7 @@ public class NotificationServiceImpl implements NotificationService {
 		logger.debug("fetching notification of user: {}, page: {}, size: {}", receiver.getEmailId(), pageNumber,
 				pageSize);
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "createdOn");
-		return notificationRepositroy.findByBuyerAndIsDeleted(receiver, false, pageRequest);
+		return notificationRepositroy.findByReceiverAndIsDeleted(receiver, false, pageRequest);
 	}
 
 	/**
@@ -85,17 +87,30 @@ public class NotificationServiceImpl implements NotificationService {
 	 */
 	@Async
 	@Override
-	public Notification saveNotification(User buyer, User seller, String msg) {
-		List<User> buyers = new ArrayList<>();
-		buyers.add(buyer);
-		List<User> sellers = new ArrayList<>();
-		sellers.add(seller);
+	public Notification saveNotification(User receiver, User sender, String msg) {
+	
 		Notification notification = new Notification();
-		notification.setBuyer(buyers);
-		notification.setSeller(buyers);
+		notification.setSender(sender);
+		notification.setReceiver(receiver);
 		notification.setMessage(msg);
 		notification.setReadStatus(false);
 		notification.setDeleted(false);
 		return notificationRepositroy.save(notification);
+		
+	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 * 
+	 */
+	@Override
+	public List<Notification> getListOfNotification(User user) {
+		Date endDate = new Date();
+		Calendar c = Calendar.getInstance();
+		c.setTime(endDate);
+		c.add(Calendar.DATE, -1);
+		Date startDate = c.getTime();
+		List<Notification> listOfUserNotification=notificationRepositroy.findByBuyerOrSellerAndCreatedOnBetween(user,startDate,endDate,false);
+	    return listOfUserNotification;
 	}
 }
