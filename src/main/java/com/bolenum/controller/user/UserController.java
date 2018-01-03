@@ -522,13 +522,35 @@ public class UserController {
 				localService.getMessage("coin.market.data.failure"), Optional.empty());
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.GET)
-	public ResponseEntity<Object> getNotificationList() {
+	public ResponseEntity<Object> getNotificationList(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		List<Notification> listOfUserNotification = notificationService.getListOfNotification(user);
-		return ResponseHandler.response(HttpStatus.OK, true,
-				localService.getMessage("message.success"), listOfUserNotification);
+		Page<Notification> listOfUserNotification = notificationService.getListOfNotification(user,pageNumber,pageSize,sortOrder,sortBy);
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+				listOfUserNotification);
+
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * 
+	 * @return
+	 */
+	@Secured("ROLE_USER")
+	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.POST)
+	public ResponseEntity<Object> setActionOnNotificton(@RequestParam("id") Long id) {
+		Notification notification = notificationService.getRequestedNotification(id);
+		notification = notificationService.setActionOnNotifiction(notification);
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+				notification);
 
 	}
 

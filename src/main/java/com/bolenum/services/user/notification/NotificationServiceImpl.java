@@ -40,7 +40,6 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Autowired
 	private LocaleService localeService;
-	
 
 	/**
 	 * to send the notification
@@ -88,7 +87,7 @@ public class NotificationServiceImpl implements NotificationService {
 	@Async
 	@Override
 	public Notification saveNotification(User receiver, User sender, String msg) {
-	
+
 		Notification notification = new Notification();
 		notification.setSender(sender);
 		notification.setReceiver(receiver);
@@ -96,7 +95,7 @@ public class NotificationServiceImpl implements NotificationService {
 		notification.setReadStatus(false);
 		notification.setDeleted(false);
 		return notificationRepositroy.save(notification);
-		
+
 	}
 
 	/**
@@ -104,13 +103,41 @@ public class NotificationServiceImpl implements NotificationService {
 	 * 
 	 */
 	@Override
-	public List<Notification> getListOfNotification(User user) {
+	public Page<Notification> getListOfNotification(User user, int pageNumber, int pageSize, String sortOrder,
+			String sortBy) {
+
 		Date endDate = new Date();
 		Calendar c = Calendar.getInstance();
 		c.setTime(endDate);
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
-		List<Notification> listOfUserNotification=notificationRepositroy.findByBuyerOrSellerAndCreatedOnBetween(user,startDate,endDate,false);
-	    return listOfUserNotification;
+
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+
+		return notificationRepositroy.findByReceiverAndCreatedOnBetween(user, startDate, endDate, false, pageRequest);
+	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 */
+	@Override
+	public Notification getRequestedNotification(Long id) {
+		return notificationRepositroy.findOne(id);
+	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 */
+	@Override
+	public Notification setActionOnNotifiction(Notification notification) {
+		notification.setReadStatus(true);
+		return notification;
 	}
 }

@@ -3,8 +3,6 @@
  */
 package com.bolenum.services.user.notification;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 
 import com.bolenum.model.User;
@@ -23,6 +21,11 @@ public interface NotificationService {
 
 	boolean sendNotificationForDispute(User user, String message);
 
-	public List<Notification> getListOfNotification(User user);
+	public Page<Notification> getListOfNotification(User user, int pageNumber, int pageSize, String sortOrder,
+			String sortBy);
+
+	public Notification setActionOnNotifiction(Notification notification);
+
+	public Notification getRequestedNotification(Long id);
 
 }
