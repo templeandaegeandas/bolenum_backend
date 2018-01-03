@@ -310,11 +310,13 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 		logger.debug("Order Book balance: {} of user: {}", placeOrderVolume, user.getEmailId());
 
-		double lockedVolume = ordersService.findUserOrderLockedVolume(user, erc20Token.getCurrency(), erc20Token.getCurrency());
+		double lockedVolume = ordersService.findUserOrderLockedVolume(user, erc20Token.getCurrency(),
+				erc20Token.getCurrency());
 		logger.debug("Order locked volume :{} of user : {} ", lockedVolume, user.getEmailId());
 		double volume = placeOrderVolume + lockedVolume + withdrawAmount;
-		
-		logger.debug("addition of withdraw amount, place order,lock order vol and fee volume: {}", GenericUtils.getDecimalFormatString(volume));
+
+		logger.debug("addition of withdraw amount, place order,lock order vol and fee volume: {}",
+				GenericUtils.getDecimalFormatString(volume));
 
 		if (availableBalance >= volume) {
 			return true;
@@ -369,16 +371,14 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				}
 				break;
 			case "ETH":
-				boolean resultForEth = transactionService.withdrawETH(user, coinCode, toAddress, amount,
-						TransactionStatus.WITHDRAW, bolenumFee, null);
+				boolean resultForEth = transactionService.withdrawETH(user, coinCode, toAddress, amount, bolenumFee,
+						null);
 				if (resultForEth) {
-
 					return new AsyncResult<>(true);
 				}
 				break;
 			}
 			break;
-
 		case "ERC20TOKEN":
 			boolean result = transactionService.withdrawErc20Token(user, coinCode, toAddress, amount,
 					TransactionStatus.WITHDRAW, bolenumFee, null);
@@ -398,8 +398,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			transactionService.withdrawBTC(user, tokenName, toAddress, withdrawAmount, null);
 			return true;
 		} else if ("ETH".equals(tokenName)) {
-			transactionService.withdrawETH(user, tokenName, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, null,
-					null);
+			transactionService.withdrawETH(user, tokenName, toAddress, withdrawAmount, null, null);
 			return true;
 		}
 		return false;
@@ -417,8 +416,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 			return new AsyncResult<>(false);
 		} else {
-			return transactionService.performErc20Transaction(user, tokenName, toAddress, withdrawAmount,
-					TransactionStatus.WITHDRAW, 0.0, null);
+			return transactionService.performErc20Transaction(user, tokenName, toAddress, withdrawAmount, 0.0, null);
 		}
 	}
 
