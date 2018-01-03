@@ -406,11 +406,11 @@ public class UserController {
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
-	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("pageNumber") int pageNumber,
+	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("currencyName") String currencyName, @RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,
+		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(currencyName, user,
 				TransactionStatus.WITHDRAW, pageNumber, pageSize, sortOrder, sortBy);
 		return ResponseHandler.response(HttpStatus.OK, false,
 				localService.getMessage("transaction.list.withdraw.success"), listOfUserTransaction);
@@ -428,11 +428,11 @@ public class UserController {
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
-	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("pageNumber") int pageNumber,
+	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("currencyName") String currencyName, @RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(user,
+		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(currencyName, user,
 				TransactionStatus.DEPOSIT, pageNumber, pageSize, sortOrder, sortBy);
 		return ResponseHandler.response(HttpStatus.OK, false,
 				localService.getMessage("transaction.list.deposit.success"), listOfUserTransaction);
