@@ -867,8 +867,8 @@ public class TransactionServiceImpl implements TransactionService {
 	 * @created by Himanshu Kumar to withdraw ETH
 	 */
 	@Override
-	public boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double fee, Long tradeId) {
+	public boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount, Double fee,
+			Long tradeId) {
 		UserCoin senderUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, fromUser);
 		if (senderUserCoin != null) {
 			UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress);

@@ -371,16 +371,14 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 				}
 				break;
 			case "ETH":
-				boolean resultForEth = transactionService.withdrawETH(user, coinCode, toAddress, amount,
-						TransactionStatus.WITHDRAW, bolenumFee, null);
+				boolean resultForEth = transactionService.withdrawETH(user, coinCode, toAddress, amount, bolenumFee,
+						null);
 				if (resultForEth) {
-
 					return new AsyncResult<>(true);
 				}
 				break;
 			}
 			break;
-
 		case "ERC20TOKEN":
 			boolean result = transactionService.withdrawErc20Token(user, coinCode, toAddress, amount,
 					TransactionStatus.WITHDRAW, bolenumFee, null);
@@ -400,8 +398,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			transactionService.withdrawBTC(user, tokenName, toAddress, withdrawAmount, null);
 			return true;
 		} else if ("ETH".equals(tokenName)) {
-			transactionService.withdrawETH(user, tokenName, toAddress, withdrawAmount, TransactionStatus.WITHDRAW, null,
-					null);
+			transactionService.withdrawETH(user, tokenName, toAddress, withdrawAmount, null, null);
 			return true;
 		}
 		return false;
