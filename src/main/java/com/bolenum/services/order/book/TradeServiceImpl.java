@@ -19,14 +19,15 @@ import com.bolenum.repo.order.book.TradeRepository;
 
 @Service
 public class TradeServiceImpl implements TradeService {
-	
+
 	public static final Logger logger = LoggerFactory.getLogger(TradeServiceImpl.class);
 
 	@Autowired
 	private TradeRepository tradeRepository;
-	
+
 	@Override
-	public Page<Trade> getTradedOrdersLoggedIn(User user, int pageNumber, int pageSize, String sortOrder, String sortBy, String orderType, Long date) {
+	public Page<Trade> getTradedOrdersLoggedIn(User user, int pageNumber, int pageSize, String sortOrder, String sortBy,
+			String orderType, Long date) {
 		Direction sort;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;
@@ -53,12 +54,10 @@ public class TradeServiceImpl implements TradeService {
 				logger.info("start date: {}", startDate);
 				logger.info("end date: {}", endDate);
 				return tradeRepository.getByBuyerWithDate(user, startDate, endDate, pageRequest);
-			}
-			else {
+			} else {
 				return tradeRepository.findByBuyer(user, pageRequest);
 			}
-		}
-		else if (orderType.equals("sell")) {
+		} else if (orderType.equals("sell")) {
 			if (date != null) {
 				Date startDate = new Date(date);
 				Calendar cal = Calendar.getInstance();
@@ -77,13 +76,11 @@ public class TradeServiceImpl implements TradeService {
 				logger.info("start date: {}", startDate);
 				logger.info("end date: {}", endDate);
 				return tradeRepository.getBySellerWithDate(user, startDate, endDate, pageRequest);
-			}
-			else {
+			} else {
 				return tradeRepository.findBySeller(user, pageRequest);
 			}
-		}
-		else {
-			if (date != null) { 
+		} else {
+			if (date != null) {
 				Date startDate = new Date(date);
 				Calendar cal = Calendar.getInstance();
 				cal.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
@@ -101,13 +98,12 @@ public class TradeServiceImpl implements TradeService {
 				logger.info("start date: {}", startDate);
 				logger.info("end date: {}", endDate);
 				return tradeRepository.getByBuyerOrSellerWithDate(user, user, startDate, endDate, pageRequest);
-			}
-			else {
+			} else {
 				return tradeRepository.findByBuyerOrSeller(user, user, pageRequest);
 			}
 		}
 	}
-	
+
 	@Override
 	public Page<Trade> getTradedOrders(int pageNumber, int pageSize, String sortOrder, String sortBy) {
 		Direction sort;
@@ -118,5 +114,11 @@ public class TradeServiceImpl implements TradeService {
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		return tradeRepository.findAll(pageRequest);
+	}
+
+	@Override
+	public Page<Trade> getTradedOrdersLoggedIn(User user, int pageNumber, int pageSize) {
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "createdOn");
+		return tradeRepository.findByBuyerOrSeller(user, user, pageRequest);
 	}
 }
