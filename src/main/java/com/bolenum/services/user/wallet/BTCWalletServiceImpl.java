@@ -310,11 +310,13 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 		logger.debug("Order Book balance: {} of user: {}", placeOrderVolume, user.getEmailId());
 
-		double lockedVolume = ordersService.findUserOrderLockedVolume(user, erc20Token.getCurrency(), erc20Token.getCurrency());
+		double lockedVolume = ordersService.findUserOrderLockedVolume(user, erc20Token.getCurrency(),
+				erc20Token.getCurrency());
 		logger.debug("Order locked volume :{} of user : {} ", lockedVolume, user.getEmailId());
 		double volume = placeOrderVolume + lockedVolume + withdrawAmount;
-		
-		logger.debug("addition of withdraw amount, place order,lock order vol and fee volume: {}", GenericUtils.getDecimalFormatString(volume));
+
+		logger.debug("addition of withdraw amount, place order,lock order vol and fee volume: {}",
+				GenericUtils.getDecimalFormatString(volume));
 
 		if (availableBalance >= volume) {
 			return true;
@@ -417,8 +419,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 			return new AsyncResult<>(false);
 		} else {
-			return transactionService.performErc20Transaction(user, tokenName, toAddress, withdrawAmount,
-					TransactionStatus.WITHDRAW, 0.0, null);
+			return transactionService.performErc20Transaction(user, tokenName, toAddress, withdrawAmount, 0.0, null);
 		}
 	}
 
