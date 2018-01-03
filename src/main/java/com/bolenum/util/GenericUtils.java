@@ -23,6 +23,10 @@ public class GenericUtils {
 
 	private static Logger logger = LoggerFactory.getLogger(GenericUtils.class);
 
+	private GenericUtils() {
+
+	}
+
 	/**
 	 * to get the current logged in user from context
 	 * 
@@ -34,8 +38,6 @@ public class GenericUtils {
 	}
 
 	public static boolean isValidMail(String email) {
-		// EmailValidator ev = EmailValidator.getInstance();
-		// return ev.isValid(email);
 		String emailPattern = "^(.+)@(.+)$";
 		Pattern pattern = Pattern.compile(emailPattern);
 		Matcher matcher = pattern.matcher(email);
@@ -43,8 +45,8 @@ public class GenericUtils {
 	}
 
 	/**
-	 * @description 
-	 * @param 
+	 * @description
+	 * @param
 	 * @return amount in either
 	 */
 	public static Double convertWeiToEther(BigInteger amount) {
@@ -52,7 +54,7 @@ public class GenericUtils {
 		BigDecimal balance = new BigDecimal(amount);
 		BigDecimal conversionRate = new BigDecimal(new BigInteger("1000000000000000000"));
 		BigDecimal amountInEther = balance.divide(conversionRate);
-		logger.debug("amount in eth: {}", getDecimalFormat().format(amountInEther));
+		logger.debug("amount in eth: {}", getDecimalFormatString(amountInEther.doubleValue()));
 		return amountInEther.doubleValue();
 	}
 
@@ -64,24 +66,22 @@ public class GenericUtils {
 	 */
 
 	public static double getEstimetedFeeEthereum() {
-		DecimalFormat df = new DecimalFormat("0");
-		df.setMaximumFractionDigits(8);
 		Web3j web = EthereumServiceUtil.getWeb3jInstance();
-		BigInteger gasPrice = BigInteger.ZERO, gasLimit = new BigInteger("21000");
+		BigInteger gasPrice = BigInteger.ZERO;
+		BigInteger gasLimit = new BigInteger("21000");
 		BigInteger ptb = BigInteger.ZERO;
 		double estimedtedFee = 0.0;
 		try {
 			gasPrice = web.ethGasPrice().send().getGasPrice();
-			//gasPrice = gasPrice.add(gasPrice.multiply(new BigInteger("40")).divide(new BigInteger("100")));
 			ptb = gasPrice.multiply(gasLimit);
 			estimedtedFee = GenericUtils.convertWeiToEther(ptb);
-			logger.debug("estimedted Fee: {}", df.format(estimedtedFee));
+			logger.debug("estimedted Fee: {}", getDecimalFormatString(estimedtedFee));
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("eth fee estimation error: {}", e);
 		}
 		return estimedtedFee;
 	}
-	
+
 	public static DecimalFormat getDecimalFormat() {
 		DecimalFormat df = new DecimalFormat("0");
 		df.setMaximumFractionDigits(8);
@@ -101,11 +101,10 @@ public class GenericUtils {
 		String formate = df.format(amount);
 		return Double.parseDouble(formate);
 	}
-	
+
 	public static String getDecimalFormatString(Double amount) {
 		DecimalFormat df = new DecimalFormat("0");
 		df.setMaximumFractionDigits(8);
-		String formate = df.format(amount);
-		return formate;
+		return df.format(amount);
 	}
 }
