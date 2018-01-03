@@ -71,6 +71,8 @@ public class UrlConstant {
 	public static final String CURRENCY_NGN_PRICE_SAVE = "set/bln_ngn";
 	public static final String ADMIN_WITHDRAW = "withdraw";
 	public static final String ADMIN_DEPOSIT = "deposit";
+	public static final String USERS_ORDERS_IN_BOOK = "orders/book";
+	public static final String USERS_TRADE_HISTORY = "trade/history";
 	
 	/********************** TEMP API ***********************/
 	public static final String USER_WALLETS_BALANCE = "action/users/wallet/balance";
