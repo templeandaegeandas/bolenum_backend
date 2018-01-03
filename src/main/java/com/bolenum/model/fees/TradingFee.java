@@ -7,7 +7,7 @@ import javax.persistence.Id;
 
 /**
  * 
- * @Author himanshu
+ * @Author Himanshu Kumar
  * @Date 01-Nov-2017
  */
 @Entity
@@ -18,6 +18,7 @@ public class TradingFee {
 	private Long id;
 
 	private Double fee;
+	
 	private Double fiat;
 
 	/**
