@@ -62,7 +62,7 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 	@Override
 	public Future<Boolean> saveLastPrice(long pairId, Double price) {
 		CurrencyPair currencyPair = currencyPairService.findByPairId(pairId);
-		if(currencyPair.getLastPrice() == null || currencyPair.getLastPrice() > price) {
+		if(currencyPair.getLastPrice() == null || currencyPair.getLastPrice() == 0 || currencyPair.getLastPrice() > price) {
 			currencyPair.setLastPrice(price);
 			currencyPairService.saveCurrencyPair(currencyPair);
 			JSONObject jsonObject = new JSONObject();

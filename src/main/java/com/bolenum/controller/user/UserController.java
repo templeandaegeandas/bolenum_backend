@@ -1,6 +1,7 @@
 package com.bolenum.controller.user;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,14 +36,17 @@ import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.Countries;
+import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.States;
 import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.UserCoin;
+import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.common.coin.Erc20TokenService;
+import com.bolenum.services.order.book.MarketPriceService;
 import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.SubscribedUserService;
@@ -97,6 +101,12 @@ public class UserController {
 
 	@Autowired
 	private SubscribedUserService subscribedUserService;
+
+	@Autowired
+	private MarketPriceService marketPriceService;
+
+	@Autowired
+	private CurrencyPairService currencyPairService;
 
 	/**
 	 * 
@@ -474,6 +484,37 @@ public class UserController {
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 				localService.getMessage("user.subscribe.already.exist"), null);
+	}
+
+	/**
+	 * to get number of trading buy/sell performed by particular user
+	 * 
+	 * @return
+	 */
+
+	@RequestMapping(value = UrlConstant.COIN_MARKET_DATA, method = RequestMethod.GET)
+	public ResponseEntity<Object> getCoinMarketData(@RequestParam("pairId") long pairId) {
+		CurrencyPair pair = currencyPairService.findByPairId(pairId);
+		if (pair != null) {
+			try {
+				Double volume24h = marketPriceService.ordersIn24hVolume(pair);
+				Double high24h = marketPriceService.ordersIn24hHigh(pair);
+				long countTrade24h = marketPriceService.tradesIn24h(pair);
+				Double low24h = marketPriceService.ordersIn24hLow(pair);
+				Map<String, Object> map = new HashMap<>();
+				map.put("volume24h", volume24h);
+				map.put("high24h", high24h);
+				map.put("low24h", low24h);
+				map.put("countTrade24h", countTrade24h);
+				return ResponseHandler.response(HttpStatus.OK, false,
+						localService.getMessage("coin.market.data.success"), map);
+			} catch (ParseException e) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localService.getMessage("coin.market.data.failure"), Optional.empty());
+			}
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+				localService.getMessage("coin.market.data.failure"), Optional.empty());
 	}
 
 }

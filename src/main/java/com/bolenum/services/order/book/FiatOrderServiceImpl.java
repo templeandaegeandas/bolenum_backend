@@ -71,6 +71,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 	@Override
 	public Orders createOrders(Orders orders) {
+		orderAsyncService.saveLastPrice(orders.getPair().getPairId(), orders.getPrice());
 		return ordersRepository.save(orders);
 	}
 
