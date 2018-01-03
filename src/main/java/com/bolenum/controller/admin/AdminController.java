@@ -311,6 +311,14 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
 	}
 
+	/**
+	 * 
+	 * @param currencyType
+	 * @param withdrawBalanceForm
+	 * @param coinCode
+	 * @param bindingResult
+	 * @return
+	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.ADMIN_WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmount(@RequestParam(name = "currencyType") String currencyType,
@@ -360,6 +368,16 @@ public class AdminController {
 				Optional.empty());
 	}
 
+	
+	
+	
+	///////////////////////////
+	/**
+	 * 
+	 * @return
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
 	@RequestMapping(value = UrlConstant.USER_WALLETS_BALANCE, method = RequestMethod.GET)
 	public ResponseEntity<Object> getUserWalletBalance() throws InterruptedException, ExecutionException {
 
@@ -372,6 +390,10 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(""), Optional.empty());
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = UrlConstant.USER_CREATE_WALLETS, method = RequestMethod.GET)
 	public ResponseEntity<Object> createUserWallet() {
 		List<User> listOfUsers = adminService.getListOfUsers();
