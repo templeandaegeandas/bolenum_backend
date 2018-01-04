@@ -5,7 +5,6 @@ package com.bolenum.services.user.notification;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -86,7 +85,7 @@ public class NotificationServiceImpl implements NotificationService {
 	 */
 	@Async
 	@Override
-	public Notification saveNotification(User receiver, User sender, String msg) {
+	public Notification saveNotification(User sender, User receiver, String msg) {
 
 		Notification notification = new Notification();
 		notification.setSender(sender);
@@ -120,7 +119,6 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-
 		return notificationRepositroy.findByReceiverAndCreatedOnBetween(user, startDate, endDate, false, pageRequest);
 	}
 
