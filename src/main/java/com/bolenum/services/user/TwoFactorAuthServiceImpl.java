@@ -121,7 +121,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 
 	@Override
 	public boolean verify2faOtp(int otp) throws InvalidOtpException {
-		OTP existingOtp = otpRepository.findByOtp(otp);
+		OTP existingOtp = otpRepository.findByOtpNumber(otp);
 		if (existingOtp != null) {
 			User user = existingOtp.getUser();
 			if (!existingOtp.getIsDeleted() && existingOtp.getMobileNumber().equals(user.getMobileNumber())) {
