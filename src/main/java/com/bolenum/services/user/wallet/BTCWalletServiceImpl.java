@@ -398,7 +398,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			transactionService.withdrawBTC(user, tokenName, toAddress, withdrawAmount, null);
 			return true;
 		} else if ("ETH".equals(tokenName)) {
-			transactionService.withdrawETH(user, tokenName, toAddress, withdrawAmount, null, null);
+			transactionService.withdrawETH(user, tokenName, toAddress, withdrawAmount, 0.0, null);
 			return true;
 		}
 		return false;

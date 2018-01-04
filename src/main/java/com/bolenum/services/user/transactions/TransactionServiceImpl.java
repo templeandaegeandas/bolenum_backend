@@ -189,7 +189,7 @@ public class TransactionServiceImpl implements TransactionService {
 			String decrPwd = CryptoUtil.decrypt(adminUserCoin.getWalletPwd(), passwordKey);
 			Credentials credentials = WalletUtils.loadCredentials(decrPwd, walletFile);
 
-			EthSendTransaction ethSendTransaction = transferEth(credentials, adminUserCoin.getWalletAddress(), amount);
+			EthSendTransaction ethSendTransaction = transferEth(credentials, toAddress, amount);
 			String txHash = null;
 			if (ethSendTransaction != null && ethSendTransaction.getTransactionHash() != null) {
 				txHash = ethSendTransaction.getTransactionHash();
@@ -217,13 +217,9 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 
 				UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress);
-
-				User receiverUser = receiverUserCoin.getUser();
-
-				if (receiverUser != null) {
-					transaction.setToUser(receiverUser);
+				if (receiverUserCoin != null && receiverUserCoin.getUser() != null) {
+					transaction.setToUser(receiverUserCoin.getUser());
 				}
-
 				transaction.setTradeId(tradeId);
 
 				Transaction saved = transactionRepo.saveAndFlush(transaction);
