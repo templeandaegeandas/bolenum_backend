@@ -138,4 +138,10 @@ public class NotificationServiceImpl implements NotificationService {
 		notification.setReadStatus(true);
 		return notification;
 	}
+
+	@Override
+	public Long countUnSeenNotification(User user) {
+		return notificationRepositroy.countNotificationByReceiverAndReadStatus(user,false);
+		
+	}
 }

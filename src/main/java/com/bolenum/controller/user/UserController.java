@@ -553,5 +553,19 @@ public class UserController {
 				notification);
 
 	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	@Secured("ROLE_USER")
+	@RequestMapping(value = UrlConstant.COUNT_USER_NOTIFICATION, method = RequestMethod.GET)
+	public ResponseEntity<Object> countUserNotification() {
+		User user = GenericUtils.getLoggedInUser();
+		Long totalUnseenNotification=notificationService.countUnSeenNotification(user);
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+				totalUnseenNotification);
+
+	}
 
 }
