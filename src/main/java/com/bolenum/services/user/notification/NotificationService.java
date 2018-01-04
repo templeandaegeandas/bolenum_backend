@@ -21,4 +21,11 @@ public interface NotificationService {
 
 	boolean sendNotificationForDispute(User user, String message);
 
+	public Page<Notification> getListOfNotification(User user, int pageNumber, int pageSize, String sortOrder,
+			String sortBy);
+
+	public Notification setActionOnNotifiction(Notification notification);
+
+	public Notification getRequestedNotification(Long id);
+
 }

@@ -42,6 +42,7 @@ import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.UserCoin;
+import com.bolenum.model.notification.Notification;
 import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
@@ -51,6 +52,7 @@ import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.SubscribedUserService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
@@ -107,6 +109,9 @@ public class UserController {
 
 	@Autowired
 	private CurrencyPairService currencyPairService;
+
+	@Autowired
+	private NotificationService notificationService;
 
 	/**
 	 * 
@@ -515,6 +520,38 @@ public class UserController {
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 				localService.getMessage("coin.market.data.failure"), Optional.empty());
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	@Secured("ROLE_USER")
+	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.GET)
+	public ResponseEntity<Object> getNotificationList(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
+		User user = GenericUtils.getLoggedInUser();
+		Page<Notification> listOfUserNotification = notificationService.getListOfNotification(user,pageNumber,pageSize,sortOrder,sortBy);
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+				listOfUserNotification);
+
+	}
+
+	/**
+	 * 
+	 * @param id
+	 * 
+	 * @return
+	 */
+	@Secured("ROLE_USER")
+	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.POST)
+	public ResponseEntity<Object> setActionOnNotificton(@RequestParam("id") Long id) {
+		Notification notification = notificationService.getRequestedNotification(id);
+		notification = notificationService.setActionOnNotifiction(notification);
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+				notification);
+
 	}
 
 }

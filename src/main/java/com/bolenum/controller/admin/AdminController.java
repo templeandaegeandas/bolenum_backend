@@ -57,10 +57,12 @@ import io.swagger.annotations.Api;
  *
  * @Date 05-Sep-2017
  * @modified chandan kumar singh
+ * 
  */
 @RestController
 @RequestMapping(value = UrlConstant.BASE_ADMIN_URI_V1)
 @Api(value = "Admin Controller")
+
 public class AdminController {
 
 	@Autowired
@@ -189,6 +191,7 @@ public class AdminController {
 	/**
 	 * 
 	 * @param currencyId
+	 * 
 	 * @return
 	 */
 	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
@@ -196,6 +199,19 @@ public class AdminController {
 	public ResponseEntity<Object> getWithdrawlFees(@RequestParam("currencyId") long currencyId) {
 		WithdrawalFee fee = withdrawalFeeService.getWithdrawalFee(currencyId);
 		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"), fee);
+	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 * 
+	 * @return
+	 */
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getListOfWithdrawlFees() {
+		List<WithdrawalFee> listOfWithdrawalFees = withdrawalFeeService.getAllWithdrawalFee();
+		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"),
+				listOfWithdrawalFees);
 	}
 
 	/**
@@ -368,9 +384,6 @@ public class AdminController {
 				Optional.empty());
 	}
 
-	
-	
-	
 	///////////////////////////
 	/**
 	 * 
