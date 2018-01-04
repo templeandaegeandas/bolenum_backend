@@ -53,6 +53,7 @@ public class UrlConstant {
 	public static final String GET_STATE_BY_COUNTRY_ID = "states";
 	public static final String SUBSCRIBE_USER = "subscribe";
 	public static final String USER_NOTIFICATION = "notification";
+	public static final String COUNT_USER_NOTIFICATION = "count/notification";
 
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";
@@ -154,6 +155,7 @@ public class UrlConstant {
 	public static final String RAISED_DISPUTE_ORDER = "raised/dispute";
 	public static final String RAISED_DISPUTE_LIST = "raised/dispute/list";
 	public static final String ACTION_ON_RAISED_DISPUTE_ORDER = "action/raised/dispute";
+	
 	
 	
 
