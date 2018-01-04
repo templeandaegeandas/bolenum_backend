@@ -9,14 +9,14 @@ package com.bolenum.enums;
 public enum OrderStatus {
 	SUBMITTED("submitted"), CANCELLED("cancelled"), COMPLETED("completed"), LOCKED("locked");
 
-	private String orderStatus;
+	private String status;
 
 	private OrderStatus(String orderStatus) {
-		this.orderStatus = orderStatus;
+		this.status = orderStatus;
 	}
 
 	public String getOrderStatus() {
-		return orderStatus;
+		return status;
 	}
 
 }

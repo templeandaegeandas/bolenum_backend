@@ -26,8 +26,6 @@ public class CurrencyPairForm {
 	@NotNull
 	private Currency pairedCurrency;
 
-	private String pairName;
-
 	public Long getPairId() {
 		return pairId;
 	}
@@ -53,10 +51,11 @@ public class CurrencyPairForm {
 	}
 
 	public CurrencyPair copy(CurrencyPair currencyPair) {
-		List<Currency> toListCurrency = new ArrayList();
+		String pairName;
+		List<Currency> toListCurrency = new ArrayList<>();
 		toListCurrency.add(this.toCurrency);
 		currencyPair.setToCurrency(toListCurrency);
-		List<Currency> pairedListCurrency = new ArrayList();
+		List<Currency> pairedListCurrency = new ArrayList<>();
 		pairedListCurrency.add(this.pairedCurrency);
 		currencyPair.setPairedCurrency(pairedListCurrency);
 		if (CurrencyType.FIAT.equals(this.toCurrency.getCurrencyType())

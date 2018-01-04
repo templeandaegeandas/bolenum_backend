@@ -20,20 +20,17 @@ public class LoginForm {
 
 	@NotBlank(message = "Please enter password")
 	private String password;
-	
+
 	@NotBlank
 	private String role;
 
-	//@NotBlank(message = "Your ip address is not present")
+	// @NotBlank(message = "Your ip address is not present")
 	private String ipAddress;
-	
-	//@NotBlank(message = "browser name is invalid")
-	private String browserName;
-	
-	private String clientOsName;
 
-	public LoginForm() {
-	}
+	// @NotBlank(message = "browser name is invalid")
+	private String browserName;
+
+	private String clientOsName;
 
 	/**
 	 * @return the emailId
@@ -76,7 +73,7 @@ public class LoginForm {
 	/**
 	 * 
 	 * @param role
-	 * 		the role to set
+	 *            the role to set
 	 */
 	public void setRole(String role) {
 		this.role = role;
@@ -120,11 +117,10 @@ public class LoginForm {
 		return clientOsName;
 	}
 
-	
 	/**
 	 * 
 	 * @param clientOSName
-	 * 		Operating system to set
+	 *            Operating system to set
 	 */
 	public void setClientOsName(String clientOsName) {
 		this.clientOsName = clientOsName;

@@ -7,13 +7,13 @@ public enum MessageType {
 							"order_confirmation"), ORDER_CANCELLED("order_cancelled"), PAID_NOTIFICATION(
 									"paid_notification"), MATCHED_NOTIFICATION("matched_notification"), MARKET_UPDATE("market_update");
 
-	private String messageType;
+	private String msgType;
 
 	private MessageType(String messageType) {
-		this.messageType = messageType;
+		this.msgType = messageType;
 	}
 
 	public String getMessageType() {
-		return messageType;
+		return msgType;
 	}
 }

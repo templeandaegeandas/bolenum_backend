@@ -50,7 +50,8 @@ public class TradingFeeServiceImpl implements TradingFeeService {
 
 	@Override
 	public double calculateFee(double amount) {
-		double feePercent = 0.15, fee = 0.0;
+		double feePercent = 0.15;
+		double fee;
 		if (tradingFeeRepo.findOne(1L) != null) {
 			feePercent = tradingFeeRepo.findOne(1L).getFee();
 

@@ -61,7 +61,7 @@ public class BankDetailsController {
 	 * @return
 	 */
 	@Secured("ROLE_USER")
-	@RequestMapping(value = UrlConstant.ADD_USER_BANK_DETAILS, method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstant.USER_BANK_DETAILS, method = RequestMethod.POST)
 	public ResponseEntity<Object> addUserBankDetails(@Valid @RequestBody AddUserBankDetailsForm addUserBankDetailsForm,
 			BindingResult result) {
 
@@ -110,7 +110,7 @@ public class BankDetailsController {
 	 * @return
 	 */
 	@Secured("ROLE_USER")
-	@RequestMapping(value = UrlConstant.EDIT_USER_BANK_DETAILS, method = RequestMethod.PUT)
+	@RequestMapping(value = UrlConstant.USER_BANK_DETAILS, method = RequestMethod.PUT)
 	public ResponseEntity<Object> editUserBankDetails(
 			@Valid @RequestBody EditUserBankDetailsForm editUserBankDetailsForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -144,7 +144,7 @@ public class BankDetailsController {
 	 * @return
 	 */
 	@Secured("ROLE_USER")
-	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS, method = RequestMethod.GET)
+	@RequestMapping(value = UrlConstant.USER_BANK_DETAILS, method = RequestMethod.GET)
 	public ResponseEntity<Object> viewUserBankDetails() {
 		User user = GenericUtils.getLoggedInUser();
 		if (user.getRole().getName().equals("ROLE_USER")) {

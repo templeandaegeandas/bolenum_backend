@@ -22,7 +22,7 @@ public class OTP {
 	private Long id;
 	@NotBlank
 	private String mobileNumber;
-	private Integer otp;
+	private Integer otpNumber;
 	private Boolean isDeleted = false;
 	private Date createdDate = new Date();
 	@OneToOne
@@ -30,7 +30,7 @@ public class OTP {
 	
 	public OTP(String mobileNumber, Integer otp, User user) {
 		this.mobileNumber = mobileNumber;
-		this.otp = otp;
+		this.otpNumber = otp;
 		this.user = user;
 	}
 	
@@ -55,11 +55,11 @@ public class OTP {
 	}
 
 	public Integer getOtp() {
-		return otp;
+		return otpNumber;
 	}
 
 	public void setOtp(Integer otp) {
-		this.otp = otp;
+		this.otpNumber = otp;
 	}
 
 	public Boolean getIsDeleted() {
