@@ -43,7 +43,7 @@ public class MailServiceImpl implements MailService {
 		try {
 			message.setFrom(new InternetAddress(mailFrom, "Bolenum Exchange").toString());
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			logger.error("registrationMailSend exce: {}", e);
 		}
 		mailSender.send(message);
 	}
@@ -56,18 +56,13 @@ public class MailServiceImpl implements MailService {
 		message.setText(text);
 		try {
 			message.setFrom(new InternetAddress(mailFrom, "Bolenum Exchange").toString());
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		message.setTo(to);
-		try {
+			message.setTo(to);
 			mailSender.send(message);
 			logger.debug("mail sent succssfully to: {}", to);
-			return new AsyncResult<Boolean>(true);
-		} catch (MailException e) {
-			logger.error("mail seding failed to: {}", to);
-			e.printStackTrace();
+			return new AsyncResult<>(true);
+		} catch (UnsupportedEncodingException | MailException e) {
+			logger.error("mail seding failed to: {} {}", to, e);
 		}
-		return new AsyncResult<Boolean>(false);
+		return new AsyncResult<>(false);
 	}
 }

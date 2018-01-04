@@ -14,10 +14,9 @@ import com.twilio.exception.ApiException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 
-
 @Service
-public class SMSServiceImpl implements SMSService{
-	
+public class SMSServiceImpl implements SMSService {
+
 	@Value("${bolenum.twilio.account.SID}")
 	String twilioAccountSid;
 	@Value("${bolenum.twilio.auth.token}")
@@ -26,7 +25,7 @@ public class SMSServiceImpl implements SMSService{
 	String twilioMobileNumber;
 	@Value("${bolenum.2factor.otp.api.dev}")
 	String twoFactorUrl;
-	
+
 	public static final Logger logger = LoggerFactory.getLogger(SMSServiceImpl.class);
 
 	@Override
@@ -34,7 +33,7 @@ public class SMSServiceImpl implements SMSService{
 	public void sendMessage(String mobileNumber, String countryCode, String msg) {
 		Twilio.init(twilioAccountSid, twilioAuthToken);
 		try {
-			Message.creator(new PhoneNumber("+" + countryCode+ mobileNumber.toString()), // to
+			Message.creator(new PhoneNumber("+" + countryCode + mobileNumber), // to
 					new PhoneNumber(twilioMobileNumber), // from
 					msg).create();
 			logger.info("Message Sent successfully");
@@ -42,11 +41,11 @@ public class SMSServiceImpl implements SMSService{
 			logger.error(e.getMessage());
 		}
 	}
-	
+
 	@Override
 	public void sendOtp(int otp, String countryCode, String mobileNumber) {
 		RestTemplate restTemplate = new RestTemplate();
-		String url = twoFactorUrl + "+" +countryCode+mobileNumber + "/" + otp + "/bolenum otp";
+		String url = twoFactorUrl + "+" + countryCode + mobileNumber + "/" + otp + "/bolenum otp";
 		restTemplate.getForObject(url, HashMap.class);
 	}
 }

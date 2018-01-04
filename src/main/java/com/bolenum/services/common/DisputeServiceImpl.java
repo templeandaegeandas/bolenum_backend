@@ -51,13 +51,8 @@ public class DisputeServiceImpl implements DisputeService {
 
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
-	
+
 	public static final Logger logger = LoggerFactory.getLogger(DisputeServiceImpl.class);
-	
-
-	public DisputeServiceImpl() {
-
-	}
 
 	/**
 	 * 
@@ -88,11 +83,7 @@ public class DisputeServiceImpl implements DisputeService {
 	public Boolean checkExpiryToDispute(Orders orders) {
 		Date previous = orders.getCreatedOn();
 		Date now = new Date();
-		if (now.getTime() - previous.getTime() <= 15 * 60 * 1000) {
-			return false;
-
-		}
-		return true;
+		return (now.getTime() - previous.getTime() > 15 * 60 * 1000);
 	}
 
 	/**
@@ -141,10 +132,7 @@ public class DisputeServiceImpl implements DisputeService {
 	@Override
 	public Boolean isAlreadyDisputed(Orders orders, Long transactionId) {
 		DisputeOrder disputeOrder = disputeOrderRepo.findByOrdersOrTransactionId(orders, transactionId);
-		if (disputeOrder == null) {
-			return false;
-		}
-		return true;
+		return (disputeOrder != null);
 	}
 
 	/**

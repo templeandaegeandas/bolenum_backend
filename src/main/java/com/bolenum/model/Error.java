@@ -22,7 +22,7 @@ public class Error {
 	private Long id;
 	private String fromAddress;
 	private String toAddress;
-	private String error;
+	private String errorMsg;
 	private String currency;
 	private Double amount;
 	private Boolean canRetry;
@@ -36,7 +36,7 @@ public class Error {
 			Long tradeId) {
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
-		this.error = error;
+		this.errorMsg = error;
 		this.currency = currency;
 		this.amount = amount;
 		this.canRetry = canRetry;
@@ -72,11 +72,11 @@ public class Error {
 	}
 
 	public String getError() {
-		return error;
+		return errorMsg;
 	}
 
 	public void setError(String error) {
-		this.error = error;
+		this.errorMsg = error;
 	}
 
 	public String getCurrency() {

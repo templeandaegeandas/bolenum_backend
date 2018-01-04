@@ -42,9 +42,7 @@ public class UrlConstant {
 	public static final String FORGET_PASS_VERIFY = FORGET_PASS + "/verify";
 	public static final String UPDATE_USER_PROFILE = "update";
 	public static final String GET_LOGGEDIN_USER = "get/loggedin";
-	public static final String EDIT_USER_BANK_DETAILS = "bankdetails";
-	public static final String ADD_USER_BANK_DETAILS = "bankdetails";
-	public static final String VIEW_USER_BANK_DETAILS = "bankdetails";
+	public static final String USER_BANK_DETAILS = "bankdetails";
 	public static final String UPLOAD_PROFILE_IMAGE = "upload/image";
 	public static final String ADD_MOBILE_NUMBER = "add/mobile/number";
 	public static final String VERIFY_OTP = "verify/otp";
@@ -70,12 +68,10 @@ public class UrlConstant {
 	public static final String COUNT_BUYER_SELLER_DASHBOARD = "buyer/seller";
 	public static final String DISPLAY_LATEST_ORDER = "latest/order/list";
 	public static final String CURRENCY_NGN_PRICE_SAVE = "set/bln_ngn";
-	public static final String ADMIN_WITHDRAW = "withdraw";
-	public static final String ADMIN_DEPOSIT = "deposit";
 	public static final String WITHDRAWAL_FEES_LIST = "withdraw/fees/list";
 	public static final String USERS_ORDERS_IN_BOOK = "orders/book";
 	public static final String USERS_TRADE_HISTORY = "trade/history";
-	
+
 	/********************** TEMP API ***********************/
 	public static final String USER_WALLETS_BALANCE = "action/users/wallet/balance";
 	public static final String USER_CREATE_WALLETS = "action/users/wallet/create";
@@ -154,8 +150,5 @@ public class UrlConstant {
 	public static final String RAISED_DISPUTE_ORDER = "raised/dispute";
 	public static final String RAISED_DISPUTE_LIST = "raised/dispute/list";
 	public static final String ACTION_ON_RAISED_DISPUTE_ORDER = "action/raised/dispute";
-	
-	
-
 
 }

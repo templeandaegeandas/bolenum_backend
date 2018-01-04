@@ -33,14 +33,10 @@ public class AuthenticationServiceImpl implements AuthenticationTokenService {
 	public boolean isTokenExpired(AuthenticationToken verificationTokenToCheck) {
 
 		Date tokenCreatedTime = verificationTokenToCheck.getCreatedOn();
-		long HOUR = 3600 * 1000;
-		long expirationTime = tokenCreatedTime.getTime() + (2 * HOUR);
+		long hour = (long) 3600 * 1000;
+		long expirationTime = tokenCreatedTime.getTime() + (2 * hour);
 		long currentTime = new Date().getTime();
-		if (currentTime > expirationTime) {
-			return true; // token has expired
-		} else {
-			return false; // token has not expired
-		}
+		return currentTime > expirationTime;
 	}
 
 	/**

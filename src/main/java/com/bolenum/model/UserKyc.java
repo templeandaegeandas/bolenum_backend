@@ -26,21 +26,20 @@ public class UserKyc {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
 	@Enumerated(EnumType.STRING)
-	private DocumentType documentType ;
+	private DocumentType documentType;
 	private String document;
-	
+
 	@Enumerated(EnumType.STRING)
 	private DocumentStatus documentStatus = DocumentStatus.SUBMITTED;
 	private String rejectionMessage;
 	private Date uploadedDate = new Date();
 	private Date verifiedDate;
 	private Boolean isVerified = false;
-	
+
 	@ManyToOne
 	private User user;
-	
 
 	public User getUser() {
 		return user;
@@ -131,8 +130,6 @@ public class UserKyc {
 		if (getClass() != obj.getClass())
 			return false;
 		UserKyc other = (UserKyc) obj;
-		if (documentType != other.documentType)
-			return false;
-		return true;
+		return (documentType == other.documentType);
 	}
 }

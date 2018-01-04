@@ -16,7 +16,7 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public Role saveRole(Role role) {
-		logger.debug("save and flush role meth: "+role.getName());
+		logger.debug("save and flush role meth: " + role.getName());
 		return roleRepo.saveAndFlush(role);
 
 	}
@@ -44,7 +44,6 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public Role findOrCreate(Role role) {
-		logger.debug("find or create role: "+role.getName().trim());
 		Role newRole = roleRepo.findByNameIgnoreCase(role.getName().trim());
 		if (newRole == null) {
 			logger.debug("find or create role: got new role");
@@ -57,7 +56,6 @@ public class RoleServiceImpl implements RoleService {
 
 	@Override
 	public Role findByName(String name) {
-		logger.debug("find by name: "+name);
 		return roleRepo.findByNameIgnoreCase(name);
 	}
 
