@@ -712,7 +712,7 @@ public class OrdersServiceImpl implements OrdersService {
 		c.setTime(endDate);
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
-		return ordersRepository.findByCreatedOnBetween(startDate, endDate, page);
+		return ordersRepository.findByOrderStatusAndCreatedOnBetween(OrderStatus.SUBMITTED, startDate, endDate, page);
 	}
 
 	@Override

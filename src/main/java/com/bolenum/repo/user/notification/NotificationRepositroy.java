@@ -29,4 +29,6 @@ public interface NotificationRepositroy extends JpaRepository<Notification, Seri
 			@Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("readStatus") boolean readStatus,
 			Pageable pageRequest);
 
+	public Long countNotificationByReceiverAndReadStatus(User user, boolean b);
+
 }

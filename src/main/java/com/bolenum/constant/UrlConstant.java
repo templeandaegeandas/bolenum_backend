@@ -51,6 +51,7 @@ public class UrlConstant {
 	public static final String GET_STATE_BY_COUNTRY_ID = "states";
 	public static final String SUBSCRIBE_USER = "subscribe";
 	public static final String USER_NOTIFICATION = "notification";
+	public static final String COUNT_USER_NOTIFICATION = "count/notification";
 
 	/********************** ADMIN API ***********************/
 	public static final String LIST_USERS = "list/users";
