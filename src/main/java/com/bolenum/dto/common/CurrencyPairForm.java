@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
+
 import io.swagger.annotations.ApiModelProperty;
 
 /**
