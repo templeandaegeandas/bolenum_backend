@@ -30,5 +30,7 @@ public interface AdminService {
 	boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount, String toAddress);
 
 	List<User> getListOfUsers();
+	
+	Double findTotalDepositBalance(String tokenName);
 
 }
