@@ -44,6 +44,7 @@ import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.order.book.TradeService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.SubscribedUserService;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.GenericUtils;
@@ -100,6 +101,9 @@ public class AdminController {
 	@Autowired
 	private TradeService tradeService;
 
+	@Autowired
+	private NotificationService notificationService;
+
 	public static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
 	@RequestMapping()
@@ -140,8 +144,8 @@ public class AdminController {
 	}
 
 	/**
-	 * to add trading fees for transaction done by user and deducted fees will
-	 * be store in Admin wallet
+	 * to add trading fees for transaction done by user and deducted fees will be
+	 * store in Admin wallet
 	 * 
 	 * @param tradingFee
 	 * @return
@@ -214,8 +218,8 @@ public class AdminController {
 	}
 
 	/**
-	 * to count number of new buyers/sellers and active users and active orders
-	 * that will be shown on Admin dashboard
+	 * to count number of new buyers/sellers and active users and active orders that
+	 * will be shown on Admin dashboard
 	 * 
 	 * @return
 	 */
@@ -385,6 +389,13 @@ public class AdminController {
 				Optional.empty());
 	}
 
+	/**
+	 * 
+	 * @param userId
+	 * @param pageNumber
+	 * @param pageSize
+	 * @return
+	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.USERS_ORDERS_IN_BOOK, method = RequestMethod.GET)
 	public ResponseEntity<Object> getUserOrdersInBook(@RequestParam("userId") long userId,
@@ -400,6 +411,13 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(""), Optional.empty());
 	}
 
+	/**
+	 * 
+	 * @param userId
+	 * @param pageNumber
+	 * @param pageSize
+	 * @return
+	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.USERS_TRADE_HISTORY, method = RequestMethod.GET)
 	public ResponseEntity<Object> getUserTradeHistory(@RequestParam("userId") long userId,
@@ -412,4 +430,6 @@ public class AdminController {
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(""), Optional.empty());
 	}
+
+	
 }

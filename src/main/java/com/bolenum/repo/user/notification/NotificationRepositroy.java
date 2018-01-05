@@ -31,4 +31,6 @@ public interface NotificationRepositroy extends JpaRepository<Notification, Seri
 
 	public Long countNotificationByReceiverAndReadStatus(User user, boolean b);
 
+	public Page<Notification> findByCreatedOnBetween(Date startDate, Date endDate, Pageable pageRequest);
+
 }

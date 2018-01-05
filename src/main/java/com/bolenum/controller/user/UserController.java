@@ -526,7 +526,7 @@ public class UserController {
 	 * 
 	 * @return
 	 */
-	@Secured("ROLE_USER")
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.GET)
 	public ResponseEntity<Object> getNotificationList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -545,11 +545,10 @@ public class UserController {
 	 * 
 	 * @return
 	 */
-	@Secured("ROLE_USER")
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.PUT)
 	public ResponseEntity<Object> setActionOnNotificton(
 			@RequestParam("arrayOfNotification") Notification[] arrayOfNotification) {
-
 		for (int i=0;i<arrayOfNotification.length;i++) {
 			Notification notification = arrayOfNotification[i];
 			notification = notificationService.setActionOnNotifiction(notification);
@@ -559,11 +558,13 @@ public class UserController {
 				arrayOfNotification);
 	}
 
+	
 	/**
 	 * 
 	 * @return
+	 * 
 	 */
-	@Secured("ROLE_USER")
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	@RequestMapping(value = UrlConstant.COUNT_USER_NOTIFICATION, method = RequestMethod.GET)
 	public ResponseEntity<Object> countUserNotification() {
 		User user = GenericUtils.getLoggedInUser();

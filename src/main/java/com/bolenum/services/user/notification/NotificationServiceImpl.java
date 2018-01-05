@@ -102,7 +102,7 @@ public class NotificationServiceImpl implements NotificationService {
 	 * 
 	 */
 	@Override
-	public Page<Notification> getListOfNotification(User user, int pageNumber, int pageSize, String sortOrder,
+	public Page<Notification> getListOfNotification(User admin, int pageNumber, int pageSize, String sortOrder,
 			String sortBy) {
 
 		Date endDate = new Date();
@@ -119,7 +119,7 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-		return notificationRepositroy.findByReceiverAndCreatedOnBetween(user, startDate, endDate, false, pageRequest);
+		return notificationRepositroy.findByReceiverAndCreatedOnBetween(admin, startDate, endDate, false, pageRequest);
 	}
 
 	/**
@@ -144,4 +144,5 @@ public class NotificationServiceImpl implements NotificationService {
 		return notificationRepositroy.countNotificationByReceiverAndReadStatus(user, false);
 
 	}
+
 }
