@@ -29,21 +29,17 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 	 */
 	Transaction findByTxHash(String txHash);
 
-	Page<Transaction> findByFromUserAndTransactionStatusAndCurrencyName(User fromUser, TransactionStatus transactionStatus, String currencyName,
-			Pageable pageable);
+	Page<Transaction> findByFromUserAndTransactionStatusAndCurrencyName(User fromUser,
+			TransactionStatus transactionStatus, String currencyName, Pageable pageable);
 
 	@Query("select t from Transaction t where t.toUser=:toUser and t.currencyName=:currencyName and (t.transactionStatus='WITHDRAW' or t.transactionStatus='DEPOSIT')")
-	Page<Transaction> findByToUserAndCurrencyNameAndTransactionStatusOrTransactionStatus(@Param("toUser") User toUser, @Param("currencyName") String currencyName,
-			Pageable pageable);
-	
-//	@Query("select t from Transaction t where t.transactionStatus=:transactionStatus and t.transferStatus=:transferStatus order by t.createdOn limit :size")
-//	Transaction findByTransactionStatusAndTransferStatus(@Param("transactionStatus")TransactionStatus transactionStatus, @Param("transferStatus") TransferStatus transferStatus, @Param("size") int size);
-	
-	Transaction findFirstByTransactionStatusAndTransferStatusOrderByCreatedOnAsc(TransactionStatus transactionStatus, TransferStatus transferStatus);
-	
-	List<Transaction> findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatus(User toUser, String currencyName, TransactionStatus transactionStatus, TransferStatus transferStatus);
-	
-//	@Query("select t from Transaction t where t.txStatus=:txStatus order by createdOn asc limit 1")
-//	Transaction findByTxStatus(@Param("txStatus") String txStatus);
+	Page<Transaction> findByToUserAndCurrencyNameAndTransactionStatusOrTransactionStatus(@Param("toUser") User toUser,
+			@Param("currencyName") String currencyName, Pageable pageable);
+
+	Transaction findFirstByTransactionStatusAndTransferStatusOrderByCreatedOnAsc(TransactionStatus transactionStatus,
+			TransferStatus transferStatus);
+
+	List<Transaction> findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatus(User toUser, String currencyName,
+			TransactionStatus transactionStatus, TransferStatus transferStatus);
 
 }

@@ -26,6 +26,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.WithdrawBalanceForm;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.model.Currency;
 import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
@@ -36,6 +37,7 @@ import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.services.admin.AdminService;
+import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.admin.fees.TradingFeeService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.LocaleService;
@@ -96,6 +98,9 @@ public class AdminController {
 
 	@Autowired
 	private UserCoinRepository userCoinRepository;
+
+	@Autowired
+	private CurrencyService currencyService;
 
 	@Autowired
 	private TradeService tradeService;
@@ -279,30 +284,40 @@ public class AdminController {
 	@RequestMapping(value = UrlConstant.DEPOSIT, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWalletAddressAndBalance(@RequestParam(name = "currencyType") String currencyType,
 			@RequestParam(name = "code") String coinCode) {
+
 		logger.debug("currency Type: {}, code:{}", currencyType, coinCode);
 		if (coinCode == null || coinCode.isEmpty()) {
 			throw new IllegalArgumentException(localeService.getMessage("invalid.coin.code"));
 		}
+		Currency currency = currencyService.findByCurrencyAbbreviation(coinCode);
+		double tradeFees = tradeService.findTotalTradeFeeOfCurrency(currency);
 		User user = GenericUtils.getLoggedInUser(); // logged in user
 		Map<String, Object> map = new HashMap<>();
 		final String ADDRESS = "address";
 		final String BALANCE = "balance";
+		final String DEPOSIT = "deposit";
+		final String TRADEFEE = "tradeFee";
 		switch (currencyType) {
 		case "CRYPTO":
-
 			switch (coinCode) {
 			case "BTC":
 				Map<String, Object> mapAddressAndBal = new HashMap<>();
 				mapAddressAndBal.put(ADDRESS, btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
 				mapAddressAndBal.put(BALANCE, btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
+				mapAddressAndBal.put(DEPOSIT, 0);
+				mapAddressAndBal.put(TRADEFEE, tradeFees);
 				map.put("data", mapAddressAndBal);
 				break;
 			case "ETH":
 				UserCoin userCoin = etherumWalletService.ethWalletBalance(user, coinCode);
+				Double depoBal = adminService.findTotalDepositBalance(coinCode);
 				Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
+				balance = balance - depoBal;
 				Map<String, Object> mapAddress = new HashMap<>();
 				mapAddress.put(ADDRESS, userCoin.getWalletAddress());
 				mapAddress.put(BALANCE, balance);
+				mapAddress.put(DEPOSIT, depoBal);
+				mapAddress.put(TRADEFEE, tradeFees);
 				map.put("data", mapAddress);
 				break;
 			default:
@@ -313,10 +328,14 @@ public class AdminController {
 		case "ERC20TOKEN":
 			Erc20Token erc20Token = erc20TokenService.getByCoin(coinCode);
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("ETH", user);
+			Double depoBal = adminService.findTotalDepositBalance(coinCode);
 			Double balance = erc20TokenService.getErc20WalletBalance(user, erc20Token, "ETH");
+			balance = balance - depoBal;
 			Map<String, Object> mapAddress = new HashMap<>();
 			mapAddress.put(ADDRESS, userCoin.getWalletAddress());
-			mapAddress.put(BALANCE, GenericUtils.getDecimalFormat(balance));
+			mapAddress.put(BALANCE, GenericUtils.getDecimalFormatString(balance));
+			mapAddress.put(DEPOSIT, depoBal);
+			mapAddress.put(TRADEFEE, tradeFees);
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":
