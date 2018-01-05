@@ -68,6 +68,8 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 		UserCoin savedUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
 		if (savedUserCoin == null) {
 			try {
+				logger.debug("wallet file location: {}", ethWalletLocation);
+				logger.debug("wallet file: {}", file);
 				String password = UUID.randomUUID().toString().replaceAll("-", "");
 				fileName = WalletUtils.generateFullNewWalletFile(password, file);
 				logger.debug("wallet file name {} for: {}", fileName, tokenName);
