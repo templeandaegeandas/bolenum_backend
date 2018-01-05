@@ -546,7 +546,7 @@ public class UserController {
 	 * @return
 	 */
 	@Secured("ROLE_USER")
-	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.PUT)
 	public ResponseEntity<Object> setActionOnNotificton(
 			@RequestParam("arrayOfNotification") Notification[] arrayOfNotification) {
 
