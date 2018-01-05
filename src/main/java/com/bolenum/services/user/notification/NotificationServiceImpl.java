@@ -141,7 +141,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public Long countUnSeenNotification(User user) {
-		return notificationRepositroy.countNotificationByReceiverAndReadStatus(user,false);
-		
+		return notificationRepositroy.countNotificationByReceiverAndReadStatus(user, false);
+
 	}
 }

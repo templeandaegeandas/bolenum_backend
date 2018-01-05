@@ -411,9 +411,9 @@ public class UserController {
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
-	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("currencyName") String currencyName, @RequestParam("pageNumber") int pageNumber,
-			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
-			@RequestParam("sortBy") String sortBy) {
+	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("currencyName") String currencyName,
+			@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize,
+			@RequestParam("sortOrder") String sortOrder, @RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(currencyName, user,
 				TransactionStatus.WITHDRAW, pageNumber, pageSize, sortOrder, sortBy);
@@ -433,9 +433,9 @@ public class UserController {
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
-	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("currencyName") String currencyName, @RequestParam("pageNumber") int pageNumber,
-			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
-			@RequestParam("sortBy") String sortBy) {
+	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("currencyName") String currencyName,
+			@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize,
+			@RequestParam("sortOrder") String sortOrder, @RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(currencyName, user,
 				TransactionStatus.DEPOSIT, pageNumber, pageSize, sortOrder, sortBy);
@@ -532,7 +532,8 @@ public class UserController {
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		Page<Notification> listOfUserNotification = notificationService.getListOfNotification(user,pageNumber,pageSize,sortOrder,sortBy);
+		Page<Notification> listOfUserNotification = notificationService.getListOfNotification(user, pageNumber,
+				pageSize, sortOrder, sortBy);
 		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
 				listOfUserNotification);
 
@@ -546,14 +547,18 @@ public class UserController {
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.POST)
-	public ResponseEntity<Object> setActionOnNotificton(@RequestParam("id") Long id) {
-		Notification notification = notificationService.getRequestedNotification(id);
-		notification = notificationService.setActionOnNotifiction(notification);
-		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
-				notification);
+	public ResponseEntity<Object> setActionOnNotificton(
+			@RequestParam("arrayOfNotification") Notification[] arrayOfNotification) {
 
+		for (int i=0;i<arrayOfNotification.length;i++) {
+			Notification notification = arrayOfNotification[i];
+			notification = notificationService.setActionOnNotifiction(notification);
+			arrayOfNotification[i]=notification;
+		}
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+				arrayOfNotification);
 	}
-	
+
 	/**
 	 * 
 	 * @return
@@ -562,10 +567,9 @@ public class UserController {
 	@RequestMapping(value = UrlConstant.COUNT_USER_NOTIFICATION, method = RequestMethod.GET)
 	public ResponseEntity<Object> countUserNotification() {
 		User user = GenericUtils.getLoggedInUser();
-		Long totalUnseenNotification=notificationService.countUnSeenNotification(user);
+		Long totalUnseenNotification = notificationService.countUnSeenNotification(user);
 		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
 				totalUnseenNotification);
-
 	}
 
 }
