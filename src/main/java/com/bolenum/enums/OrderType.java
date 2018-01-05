@@ -9,13 +9,13 @@ package com.bolenum.enums;
 public enum OrderType {
 	BUY("buy"), SELL("sell");
 
-	private String orderType;
+	private String type;
 
 	private OrderType(String orderType) {
-		this.orderType = orderType;
+		this.type = orderType;
 	}
 
 	public String getOrderType() {
-		return orderType;
+		return type;
 	}
 }

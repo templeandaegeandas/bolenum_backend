@@ -2,7 +2,6 @@ package com.bolenum.services.common.coin;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
@@ -51,7 +50,6 @@ import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.enums.TransferStatus;
 import com.bolenum.model.Currency;
-import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
@@ -62,7 +60,6 @@ import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.common.LocaleService;
-import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.CryptoUtil;
 import com.bolenum.util.Erc20TokenWrapper;
@@ -105,9 +102,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private UserCoinRepository userCoinRepository;
-
-	@Autowired
-	private ErrorService errorService;
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;

@@ -19,8 +19,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,18 +26,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
@@ -60,26 +50,19 @@ import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.enums.TransferStatus;
-import com.bolenum.model.Currency;
 import com.bolenum.model.CurrencyPair;
-import com.bolenum.model.Error;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
 import com.bolenum.model.coin.UserCoin;
-import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.repo.user.transactions.TransactionRepo;
-import com.bolenum.services.admin.CurrencyService;
-import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrderAsyncService;
-import com.bolenum.services.user.ErrorService;
 import com.bolenum.services.user.UserService;
-import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.trade.TradeTransactionService;
 import com.bolenum.services.user.wallet.WalletService;
 import com.bolenum.util.CryptoUtil;
@@ -119,22 +102,10 @@ public class TransactionServiceImpl implements TransactionService {
 	TransactionRepo transactionRepo;
 
 	@Autowired
-	private NotificationService notificationService;
-
-	@Autowired
-	private ErrorService errorService;
-
-	@Autowired
 	private Erc20TokenService erc20TokenService;
 
 	@Autowired
-	private CurrencyService currencyService;
-
-	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
-
-	@Autowired
-	private WithdrawalFeeService withdrawalFeeService;
 
 	@Autowired
 	private UserService userService;
@@ -277,104 +248,6 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 	}
 
-	/**
-	 * to perform in app transaction for bitcoin
-	 * 
-	 * @param fromUser
-	 * @param toAddress
-	 * @param txAmount
-	 * @return true/false if transaction success return true else false
-	 */
-	@Override
-	@Async
-	@Deprecated
-	public Future<Boolean> performBtcTransaction(User fromUser, String toAddress, Double amount,
-			TransactionStatus transactionStatus, Double feeE, Long tradeId) {
-		logger.debug("performing btc tx : {} to address: {}, amount:{}", fromUser.getEmailId(), toAddress,
-				GenericUtils.getDecimalFormatString(amount));
-		Currency currency = currencyService.findByCurrencyAbbreviation("BTC");
-		WithdrawalFee fee = null;
-		double txFeePerKb = 0.001;
-		if (currency != null) {
-			fee = withdrawalFeeService.getWithdrawalFee(currency.getCurrencyId());
-		}
-		if (fee != null) {
-			txFeePerKb = fee.getFee();
-		}
-		logger.debug("perform btc trnsaction with fee/KB: {}", GenericUtils.getDecimalFormatString(txFeePerKb));
-		RestTemplate restTemplate = new RestTemplate();
-		String url = btcUrl + UrlConstant.CREATE_TX;
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		JSONObject request = new JSONObject();
-		try {
-			request.put("walletId", fromUser.getBtcWalletUuid());
-			request.put("transactionTradeAmount", String.valueOf(GenericUtils.getDecimalFormat().format(amount)));
-			request.put("receiverAddress", toAddress);
-			request.put("transactionFee", txFeePerKb);
-		} catch (JSONException e) {
-			logger.error("json parse error: {}", e);
-		}
-		HttpEntity<String> entity = new HttpEntity<>(request.toString(), headers);
-		try {
-			ResponseEntity<String> txRes = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-			if (txRes.getStatusCode() == HttpStatus.OK) {
-				JSONObject responseJson = new JSONObject(txRes.getBody());
-				logger.debug("json object of response: {}", responseJson);
-				JSONObject data = (JSONObject) responseJson.get("data");
-				String txHash = (String) data.get("transactionHash");
-				logger.debug("transaction hash: {}", txHash);
-				String txFee = String.valueOf(data.get("transactionFee"));
-				logger.debug("transaction fee: {}", GenericUtils.getDecimalFormatString(Double.valueOf(txFee)));
-				Transaction transaction = transactionRepo.findByTxHash(txHash);
-				if (transaction == null) {
-					transaction = new Transaction();
-					transaction.setTxFee((txFee != null) ? Double.parseDouble(txFee) : 0);
-					transaction.setTxHash(txHash);
-					transaction.setFromAddress(fromUser.getBtcWalletAddress());
-					transaction.setToAddress(toAddress);
-					transaction.setTxAmount(amount);
-					transaction.setTransactionType(TransactionType.OUTGOING);
-					transaction.setFromUser(fromUser);
-					transaction.setTransactionStatus(transactionStatus);
-					transaction.setCurrencyName("BTC");
-					if (feeE != null) {
-						transaction.setFee(feeE);
-					}
-					User receiverUser = userRepository.findByBtcWalletAddress(toAddress);
-					if (receiverUser != null) {
-						transaction.setToUser(receiverUser);
-						logger.debug("receiver user email id: {}", receiverUser.getEmailId());
-					}
-					transaction.setTradeId(tradeId);
-					Transaction saved = transactionRepo.saveAndFlush(transaction);
-					if (saved != null) {
-						simpMessagingTemplate.convertAndSend(
-								UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
-								com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
-						return new AsyncResult<>(true);
-					}
-				} else {
-					logger.debug(" transaction exist hash: {}", transaction.getTxHash());
-				}
-			}
-		} catch (JSONException e) {
-			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress,
-					e.getMessage() + ", ERROR: transaction completed but transaction object not saved in db", "BTC",
-					amount, false, tradeId);
-			errorService.saveError(error);
-			logger.debug("error saved: {}", error);
-			logger.error("btc transaction exception:  {}", e);
-		} catch (RestClientException e) {
-			Error error = new Error(fromUser.getBtcWalletAddress(), toAddress, e.getMessage(), "BTC", amount, false,
-					tradeId);
-			errorService.saveError(error);
-			logger.debug("error saved: {}", error);
-			logger.error("btc transaction exception:  {}", e);
-		}
-		return new AsyncResult<>(false);
-	}
-
 	@Override
 	@Async
 	public Future<Boolean> performErc20Transaction(User fromUser, String tokenName, String toAddress, Double amount,
@@ -432,128 +305,6 @@ public class TransactionServiceImpl implements TransactionService {
 				| BadPaddingException | IOException | CipherException | TransactionException | InterruptedException
 				| ExecutionException e) {
 			logger.error("{} transaction failed:  {}", tokenName, e);
-		}
-		return new AsyncResult<>(false);
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	@Async
-	@Deprecated
-	public Future<Boolean> performTransaction(String currencyAbr, double qtyTraded, User buyer, User seller,
-			boolean isFee, Long tradeId) {
-
-		String currencyType = currencyService.findByCurrencyAbbreviation(currencyAbr).getCurrencyType().toString();
-		String msg = "";
-		String msg1 = "";
-		logger.debug("perform transaction for admin fee: {}", isFee);
-		if (!isFee) {
-			msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
-					+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + currencyAbr
-					+ " have been processed successfully!";
-			msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "
-					+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + currencyAbr
-					+ " have been processed successfully!";
-		}
-		Future<Boolean> txStatus;
-		switch (currencyType) {
-		case "CRYPTO":
-			switch (currencyAbr) {
-			case "BTC":
-				logger.debug("BTC transaction started");
-				txStatus = performBtcTransaction(seller, buyer.getBtcWalletAddress(), qtyTraded, null, null, tradeId);
-				try {
-					boolean res = txStatus.get();
-					logger.debug("is BTC transaction successed: {}", res);
-					/**
-					 * if transaction for users, then return result with mail
-					 * notification to users
-					 */
-					if (res && !isFee) {
-						notificationService.sendNotification(seller, msg);
-						notificationService.saveNotification(buyer, seller, msg);
-						notificationService.sendNotification(buyer, msg1);
-						notificationService.saveNotification(buyer, seller, msg1);
-						logger.debug("Message : {}", msg);
-						logger.debug("Message : {}", msg1);
-						return new AsyncResult<>(res);
-					}
-					/**
-					 * if transaction for admin, then return result without mail
-					 * notification
-					 */
-					if (res && isFee) {
-						return new AsyncResult<>(res);
-					}
-				} catch (InterruptedException | ExecutionException e) {
-					logger.error("BTC transaction failed: {}", e);
-					return new AsyncResult<>(false);
-				}
-				break;
-			case "ETH":
-				logger.debug("ETH transaction started");
-				txStatus = performEthTransaction(seller, "ETH", buyer.getEthWalletaddress(), qtyTraded, null, tradeId);
-				try {
-					boolean res = txStatus.get();
-					logger.debug("is ETH transaction successed: {}", res);
-					/**
-					 * if transaction for users, then return result with mail
-					 * notification to users
-					 */
-					if (res && !isFee) {
-						notificationService.sendNotification(seller, msg);
-						notificationService.saveNotification(buyer, seller, msg);
-						notificationService.sendNotification(buyer, msg1);
-						notificationService.saveNotification(buyer, seller, msg1);
-						logger.debug("Message : {}", msg);
-						logger.debug("Message : {}", msg1);
-						return new AsyncResult<>(res);
-					}
-					/**
-					 * if transaction for admin, then return result without mail
-					 * notification
-					 */
-					if (res && isFee) {
-						return new AsyncResult<>(res);
-					}
-				} catch (InterruptedException | ExecutionException e) {
-					logger.error("ETH transaction failed: {}", e);
-					return new AsyncResult<>(false);
-				}
-			}
-			break;
-
-		case "ERC20TOKEN":
-			logger.debug("ERC20TOKEN transaction started");
-			boolean res = tradeTransactionService.performErc20Trade(seller, currencyAbr, buyer, qtyTraded, tradeId);
-
-			logger.debug("is ERC20TOKEN transaction successed: {}", res);
-			/**
-			 * if transaction for users, then return result with mail
-			 * notification to users
-			 */
-			if (res && !isFee) {
-				notificationService.sendNotification(seller, msg);
-				notificationService.saveNotification(buyer, seller, msg);
-				notificationService.sendNotification(buyer, msg1);
-				notificationService.saveNotification(buyer, seller, msg1);
-				logger.debug("Message : {}", msg);
-				logger.debug("Message : {}", msg1);
-				return new AsyncResult<>(res);
-			}
-			/**
-			 * if transaction for admin, then return result without mail
-			 * notification
-			 */
-			if (res && isFee) {
-				return new AsyncResult<>(res);
-			}
-
-			break;
-		default:
-			break;
 		}
 		return new AsyncResult<>(false);
 	}

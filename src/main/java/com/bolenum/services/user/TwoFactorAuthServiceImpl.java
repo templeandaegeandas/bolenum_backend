@@ -75,7 +75,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	@Override
 	public Map<String, String> qrCodeGeneration(User user) throws URISyntaxException, WriterException, IOException {
 		String key = getTwoFactorKey(user);
-		String filePath = qrCodeLocation + "/" + user.getUserId() + ".png";
+		String filePath = qrCodeLocation + File.separator + user.getUserId() + ".png";
 		String charset = "UTF-8"; // or "ISO-8859-1"
 		Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new EnumMap<>(EncodeHintType.class);
 		hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
@@ -95,9 +95,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		Integer totp = Integer.valueOf((value.equals("") ? "-1" : value));
 		boolean unused = isUnusedPassword(totp, windowSize.get());
 		boolean matches = gAuth.authorize(user.getGoogle2FaAuthKey(), totp);
-		if (unused && matches)
-			return true;
-		return false;
+		return (unused && matches);
 	}
 
 	@Override
@@ -123,7 +121,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 
 	@Override
 	public boolean verify2faOtp(int otp) throws InvalidOtpException {
-		OTP existingOtp = otpRepository.findByOtp(otp);
+		OTP existingOtp = otpRepository.findByOtpNumber(otp);
 		if (existingOtp != null) {
 			User user = existingOtp.getUser();
 			if (!existingOtp.getIsDeleted() && existingOtp.getMobileNumber().equals(user.getMobileNumber())) {

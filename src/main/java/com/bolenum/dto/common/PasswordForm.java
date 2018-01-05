@@ -26,7 +26,7 @@ public class PasswordForm {
 			@Pattern(regexp = "(?=\\S+$).+", message = "Password must contain no whitespace.") })
 	private String newPassword;
 	@NotNull
-	private String confirmPassword = "";
+	private String confirmPassword;
 
 	public String getOldPassword() {
 		return oldPassword;

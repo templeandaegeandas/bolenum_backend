@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 import javax.validation.Valid;
 
@@ -141,8 +140,8 @@ public class AdminController {
 	}
 
 	/**
-	 * to add trading fees for transaction done by user and deducted fees will be
-	 * store in Admin wallet
+	 * to add trading fees for transaction done by user and deducted fees will
+	 * be store in Admin wallet
 	 * 
 	 * @param tradingFee
 	 * @return
@@ -215,8 +214,8 @@ public class AdminController {
 	}
 
 	/**
-	 * to count number of new buyers/sellers and active users and active orders that
-	 * will be shown on Admin dashboard
+	 * to count number of new buyers/sellers and active users and active orders
+	 * that will be shown on Admin dashboard
 	 * 
 	 * @return
 	 */
@@ -286,22 +285,24 @@ public class AdminController {
 		}
 		User user = GenericUtils.getLoggedInUser(); // logged in user
 		Map<String, Object> map = new HashMap<>();
+		final String ADDRESS = "address";
+		final String BALANCE = "balance";
 		switch (currencyType) {
 		case "CRYPTO":
 
 			switch (coinCode) {
 			case "BTC":
 				Map<String, Object> mapAddressAndBal = new HashMap<>();
-				mapAddressAndBal.put("address", btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
-				mapAddressAndBal.put("balance", btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
+				mapAddressAndBal.put(ADDRESS, btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
+				mapAddressAndBal.put(BALANCE, btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
 				map.put("data", mapAddressAndBal);
 				break;
 			case "ETH":
 				UserCoin userCoin = etherumWalletService.ethWalletBalance(user, coinCode);
 				Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
 				Map<String, Object> mapAddress = new HashMap<>();
-				mapAddress.put("address", userCoin.getWalletAddress());
-				mapAddress.put("balance", balance);
+				mapAddress.put(ADDRESS, userCoin.getWalletAddress());
+				mapAddress.put(BALANCE, balance);
 				map.put("data", mapAddress);
 				break;
 			default:
@@ -314,8 +315,8 @@ public class AdminController {
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("ETH", user);
 			Double balance = erc20TokenService.getErc20WalletBalance(user, erc20Token, "ETH");
 			Map<String, Object> mapAddress = new HashMap<>();
-			mapAddress.put("address", userCoin.getWalletAddress());
-			mapAddress.put("balance", GenericUtils.getDecimalFormat(balance));
+			mapAddress.put(ADDRESS, userCoin.getWalletAddress());
+			mapAddress.put(BALANCE, GenericUtils.getDecimalFormat(balance));
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":
@@ -336,7 +337,7 @@ public class AdminController {
 	 * @return
 	 */
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(value = UrlConstant.ADMIN_WITHDRAW, method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
 	public ResponseEntity<Object> withdrawAmount(@RequestParam(name = "currencyType") String currencyType,
 			@Valid @RequestBody WithdrawBalanceForm withdrawBalanceForm, @RequestParam(name = "code") String coinCode,
 			BindingResult bindingResult) {
@@ -382,25 +383,6 @@ public class AdminController {
 		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("withdraw.coin.success"),
 				Optional.empty());
-	}
-
-	///////////////////////////
-	/**
-	 * 
-	 * @return
-	 * @throws InterruptedException
-	 * @throws ExecutionException
-	 */
-	@RequestMapping(value = UrlConstant.USER_WALLETS_BALANCE, method = RequestMethod.GET)
-	public ResponseEntity<Object> getUserWalletBalance() throws InterruptedException, ExecutionException {
-
-		List<User> listOfUsers = adminService.getListOfUsers();
-		if (listOfUsers != null) {
-			adminService.writeUserBalanceIntoFile(listOfUsers);
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.list"),
-					listOfUsers);
-		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(""), Optional.empty());
 	}
 
 	@Secured("ROLE_ADMIN")

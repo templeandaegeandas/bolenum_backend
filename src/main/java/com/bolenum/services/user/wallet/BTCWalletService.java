@@ -17,17 +17,9 @@ import com.bolenum.model.fees.WithdrawalFee;
  */
 public interface BTCWalletService {
 
-	String createHotWallet(String uuid);
-
 	String createBtcAccount(String uuid);
 
-	String getWalletBalance(String uuid);
-
-	String getWalletAddress(String walletUuid);
-
 	String getBtcAccountAddress(String walletUuid);
-
-	boolean validateAddresss(String btcWalletUuid, String toAddress);
 
 	boolean validateBtcAddresss(String btcWalletUuid, String toAddress);
 
