@@ -94,7 +94,7 @@ public class AdminServiceImpl implements AdminService {
 	}
 
 	@Override
-	public Double findTotalDepositBalance(String tokenName) {
-		return userCoinRepository.findTotalDepositBalance(tokenName);
+	public Double findTotalDepositBalanceOfUser(String tokenName) {
+		return userCoinRepository.findTotalDepositBalanceOfUser(tokenName);
 	}
 }

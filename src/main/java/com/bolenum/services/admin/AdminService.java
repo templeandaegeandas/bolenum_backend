@@ -31,6 +31,6 @@ public interface AdminService {
 
 	List<User> getListOfUsers();
 	
-	Double findTotalDepositBalance(String tokenName);
+	Double findTotalDepositBalanceOfUser(String tokenName);
 
 }

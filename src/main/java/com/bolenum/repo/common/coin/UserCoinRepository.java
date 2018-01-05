@@ -14,5 +14,5 @@ public interface UserCoinRepository extends JpaRepository<UserCoin, Long> {
 	UserCoin findByWalletAddress(String walletAddress);
 
 	@Query("SELECT SUM(uc.balance) FROM UserCoin uc WHERE uc.tokenName=:tokenName")
-	Double findTotalDepositBalance(@Param("tokenName") String tokenName);
+	Double findTotalDepositBalanceOfUser(@Param("tokenName") String tokenName);
 }
