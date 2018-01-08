@@ -276,6 +276,34 @@ public class OrdersDTO {
 		this.matchedOrder = matchedOrder;
 	}
 
+	/**
+	 * @return the marketCurrency
+	 */
+	public Currency getMarketCurrency() {
+		return marketCurrency;
+	}
+
+	/**
+	 * @param marketCurrency the marketCurrency to set
+	 */
+	public void setMarketCurrency(Currency marketCurrency) {
+		this.marketCurrency = marketCurrency;
+	}
+
+	/**
+	 * @return the pairedCurrency
+	 */
+	public Currency getPairedCurrency() {
+		return pairedCurrency;
+	}
+
+	/**
+	 * @param pairedCurrency the pairedCurrency to set
+	 */
+	public void setPairedCurrency(Currency pairedCurrency) {
+		this.pairedCurrency = pairedCurrency;
+	}
+
 	public Orders copy(Orders orders) {
 		orders.setId(this.id);
 		orders.setVolume(this.volume);
