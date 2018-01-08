@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.model.Currency;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.repo.order.book.TradeRepository;
 
@@ -39,7 +38,7 @@ public class MarketPriceServiceImpl implements MarketPriceService {
 	private final String DATE_FORMATE = "yyyy-MM-dd HH:mm:ss";
 
 	@Override
-	public long tradesIn24h(Currency marketCurrency, Currency pairedCurrency) throws ParseException {
+	public long tradesIn24h(long marketCurrencyId, long pairedCurrencyId) throws ParseException {
 		long countTrade24h = 0;
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMATE);
 		Instant now = Instant.now();
@@ -47,43 +46,43 @@ public class MarketPriceServiceImpl implements MarketPriceService {
 		Date dateBefore = Date.from(before);
 		String dateBeforeString = dateFormatter.format(dateBefore);
 		logger.debug("date before string: {}", dateFormatter.parse(dateBeforeString));
-		countTrade24h = tradeRepository.count24hTrade(marketCurrency, pairedCurrency,
+		countTrade24h = tradeRepository.count24hTrade(marketCurrencyId, pairedCurrencyId,
 				dateFormatter.parse(dateBeforeString));
 		return countTrade24h;
 	}
 
 	@Override
-	public Double ordersIn24hHigh(Currency marketCurrency, Currency pairedCurrency) throws ParseException {
+	public Double ordersIn24hHigh(long marketCurrencyId, long pairedCurrencyId) throws ParseException {
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMATE);
 		Instant now = Instant.now();
 		Instant before = now.minus(Duration.ofHours(24));
 		Date dateBefore = Date.from(before);
 		String dateBeforeString = dateFormatter.format(dateBefore);
-		Double high24h = ordersRepository.ordersIn24hHigh(marketCurrency, pairedCurrency,
+		Double high24h = ordersRepository.ordersIn24hHigh(marketCurrencyId, pairedCurrencyId,
 				dateFormatter.parse(dateBeforeString));
 		return high24h == null ? 0.0 : high24h;
 	}
 
 	@Override
-	public Double ordersIn24hLow(Currency marketCurrency, Currency pairedCurrency) throws ParseException {
+	public Double ordersIn24hLow(long marketCurrencyId, long pairedCurrencyId) throws ParseException {
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMATE);
 		Instant now = Instant.now();
 		Instant before = now.minus(Duration.ofHours(24));
 		Date dateBefore = Date.from(before);
 		String dateBeforeString = dateFormatter.format(dateBefore);
-		Double low24h = ordersRepository.ordersIn24hLow(marketCurrency, pairedCurrency,
+		Double low24h = ordersRepository.ordersIn24hLow(marketCurrencyId, pairedCurrencyId,
 				dateFormatter.parse(dateBeforeString));
 		return low24h == null ? 0.0 : low24h;
 	}
 
 	@Override
-	public Double ordersIn24hVolume(Currency marketCurrency, Currency pairedCurrency) throws ParseException {
+	public Double ordersIn24hVolume(long marketCurrencyId, long pairedCurrencyId) throws ParseException {
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMATE);
 		Instant now = Instant.now();
 		Instant before = now.minus(Duration.ofHours(24));
 		Date dateBefore = Date.from(before);
 		String dateBeforeString = dateFormatter.format(dateBefore);
-		Double volume24h = ordersRepository.ordersIn24hVolume(marketCurrency, pairedCurrency,
+		Double volume24h = ordersRepository.ordersIn24hVolume(marketCurrencyId, pairedCurrencyId,
 				dateFormatter.parse(dateBeforeString));
 		return volume24h == null ? 0.0 : volume24h;
 	}

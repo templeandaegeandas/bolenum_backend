@@ -34,7 +34,7 @@ public interface FiatOrderService {
 
 	public Future<Boolean> processTransactionFiatOrders(Orders order, String currencyAbr, String currencyType);
 
-	public Page<Orders> existingOrders(Orders order, int page, int size);
+	public Page<Orders> existingOrders(Orders order, int page, int size, long marketCurrencyId, long pairedCurrencyId);
 
 	Map<String, String> byersWalletAddressAndCurrencyAbbr(User user, Currency marketCurrency, Currency pairedCurrency);
 }

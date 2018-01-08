@@ -17,7 +17,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.bolenum.enums.CurrencyType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -57,7 +56,6 @@ public class Currency {
 
 	private boolean isDeleted = false;
 	
-	@JsonIgnore
 	@ManyToMany
 	private List<Currency> market;
 	

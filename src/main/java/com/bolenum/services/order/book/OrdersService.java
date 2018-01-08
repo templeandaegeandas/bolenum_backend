@@ -39,9 +39,9 @@ public interface OrdersService {
 
 	Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException;
 
-	Page<Orders> getBuyOrdersListByPair(Currency marketCurrency, Currency pairedCurrency);
+	Page<Orders> getBuyOrdersListByPair(long marketCurrencyId, long pairedCurrencyId);
 
-	Page<Orders> getSellOrdersListByPair(Currency marketCurrency, Currency pairedCurrency);
+	Page<Orders> getSellOrdersListByPair(long marketCurrencyId, long pairedCurrencyId);
 
 	Double getWorstBuy(List<Orders> buyOrderList);
 
