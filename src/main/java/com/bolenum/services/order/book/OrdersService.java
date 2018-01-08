@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.Currency;
-import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 
@@ -26,10 +25,11 @@ public interface OrdersService {
 
 	Boolean processLimitOrder(Orders orders) throws InterruptedException, ExecutionException;
 
-	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, CurrencyPair pair)
-			throws InterruptedException, ExecutionException;
+	Double processOrderList(List<Orders> ordersList, Double remainingVolume, Orders orders, Currency marketCurrency,
+			Currency pairedCurrency) throws InterruptedException, ExecutionException;
 
-	Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long pairId, Double price);
+	Long countOrderByOrderTypeWithGreaterAndLesThan(OrderType orderType, Long marketCurrencyId, Long pairedCurrencyId,
+			Double price);
 
 	Long countOrderByOrderType(OrderType orderType);
 
@@ -39,9 +39,9 @@ public interface OrdersService {
 
 	Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException;
 
-	Page<Orders> getBuyOrdersListByPair(Long pairId);
+	Page<Orders> getBuyOrdersListByPair(Currency marketCurrency, Currency pairedCurrency);
 
-	Page<Orders> getSellOrdersListByPair(Long pairId);
+	Page<Orders> getSellOrdersListByPair(Currency marketCurrency, Currency pairedCurrency);
 
 	Double getWorstBuy(List<Orders> buyOrderList);
 
@@ -51,11 +51,11 @@ public interface OrdersService {
 
 	Double getBestBuy(List<Orders> buyOrderList);
 
-	String checkOrderEligibility(User user, Orders order, Long pairId);
+	String checkOrderEligibility(User user, Orders order);
 
 	List<Orders> findOrdersListByUserAndOrderStatus(User user, OrderStatus orderStatus);
 
-	double totalUserBalanceInBook(User user, Currency toCurrency, Currency pairedCurrency);
+	double totalUserBalanceInBook(User user, Currency marketCurrency, Currency pairedCurrency);
 
 	Long countActiveOpenOrder();
 
@@ -75,6 +75,6 @@ public interface OrdersService {
 			User user, OrderStatus orderStatus);
 
 	boolean cancelOrder(long orderId);
-	
-	double findUserOrderLockedVolume(User user, Currency toCurrency, Currency pairedCurrency);
+
+	double findUserOrderLockedVolume(User user, Currency marketCurrency, Currency pairedCurrency);
 }

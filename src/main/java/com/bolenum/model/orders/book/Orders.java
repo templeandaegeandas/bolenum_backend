@@ -9,11 +9,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -48,7 +49,10 @@ public class Orders {
 	private boolean isDeleted;
 
 	@OneToOne
-	private CurrencyPair pair;
+	private Currency marketCurrency;
+	
+	@OneToOne
+	private Currency pairedCurrency;
 
 	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
@@ -148,12 +152,32 @@ public class Orders {
 		this.isDeleted = isDeleted;
 	}
 
-	public CurrencyPair getPair() {
-		return pair;
+	/**
+	 * @return the marketCurrency
+	 */
+	public Currency getMarketCurrency() {
+		return marketCurrency;
 	}
 
-	public void setPair(CurrencyPair pair) {
-		this.pair = pair;
+	/**
+	 * @param marketCurrency the marketCurrency to set
+	 */
+	public void setMarketCurrency(Currency marketCurrency) {
+		this.marketCurrency = marketCurrency;
+	}
+
+	/**
+	 * @return the pairedCurrency
+	 */
+	public Currency getPairedCurrency() {
+		return pairedCurrency;
+	}
+
+	/**
+	 * @param pairedCurrency the pairedCurrency to set
+	 */
+	public void setPairedCurrency(Currency pairedCurrency) {
+		this.pairedCurrency = pairedCurrency;
 	}
 
 	public OrderStatus getOrderStatus() {

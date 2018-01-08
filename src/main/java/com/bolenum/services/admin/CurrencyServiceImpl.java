@@ -2,7 +2,6 @@ package com.bolenum.services.admin;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.bolenum.dto.common.CurrencyForm;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Currency;
-import com.bolenum.model.CurrencyPair;
 import com.bolenum.repo.common.CurrencyRepo;
 
 /**
@@ -29,9 +27,6 @@ public class CurrencyServiceImpl implements CurrencyService {
 
 	@Autowired
 	private CurrencyRepo currencyRepo;
-
-	@Autowired
-	private CurrencyPairService currencyPairService;
 
 	@Override
 	public Currency findByCurrencyName(String currencyName) {
@@ -77,18 +72,6 @@ public class CurrencyServiceImpl implements CurrencyService {
 		return currencyRepo.findAll();
 	}
 
-	@Override
-	public List<Currency> getCurrencyListForMarket() {
-		List<CurrencyPair> allCurrencyPair = currencyPairService.findAllCurrencyPair();
-		List<Currency> allCurrencies = currencyRepo.findAll();
-		Iterator<CurrencyPair> iterator = allCurrencyPair.iterator();
-		List<Currency> listOfToCurrency = new ArrayList<>();
-		while (iterator.hasNext()) {
-			listOfToCurrency.add(iterator.next().getToCurrency().get(0));
-		}
-		allCurrencies.retainAll(listOfToCurrency);
-		return allCurrencies;
-	}
 
 	/**
 	 * 

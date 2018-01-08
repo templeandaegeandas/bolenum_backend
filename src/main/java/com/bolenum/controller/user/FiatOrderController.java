@@ -39,7 +39,6 @@ import com.bolenum.enums.OrderType;
 import com.bolenum.model.BankAccountDetails;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
-import com.bolenum.services.admin.CurrencyPairService;
 import com.bolenum.services.common.BankAccountDetailsService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.FiatOrderService;
@@ -81,9 +80,6 @@ public class FiatOrderController {
 	private NotificationService notificationService;
 
 	@Autowired
-	private CurrencyPairService currencyPairService;
-
-	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
 	private Logger logger = LoggerFactory.getLogger(FiatOrderController.class);
@@ -111,19 +107,18 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("bank.details.not.exist"), Optional.empty());
 		}
-		Page<Orders> page = fiatOrderService.existingOrders(orders, pairId, 0, 10);
+		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10);
 		if (page.getTotalElements() > 0) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.exist.fiat"),
 					page);
 		}
 		if (OrderType.SELL.equals(orders.getOrderType())) {
-			String balance = fiatOrderService.checkFiatOrderEligibility(user, orders, pairId);
+			String balance = fiatOrderService.checkFiatOrderEligibility(user, orders);
 			if (!balance.equals("proceed")) {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 						localeService.getMessage("order.insufficient.balance"), Optional.empty());
 			}
 		}
-		orders.setPair(currencyPairService.findCurrencypairByPairId(pairId));
 		orders.setUser(user);
 		orders = fiatOrderService.createOrders(orders);
 		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
@@ -166,7 +161,7 @@ public class FiatOrderController {
 					localeService.getMessage("bank.details.not.exist"), Optional.empty());
 		}
 
-		String balance = fiatOrderService.checkFiatOrderEligibility(user, orders, pairId);
+		String balance = fiatOrderService.checkFiatOrderEligibility(user, orders);
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"),
 					Optional.empty());
@@ -177,8 +172,8 @@ public class FiatOrderController {
 						localeService.getMessage("order.insufficient.balance"), Optional.empty());
 			}
 		}
-		boolean toType = CurrencyType.FIAT.equals(orders.getPair().getToCurrency().get(0).getCurrencyType());
-		boolean pairType = CurrencyType.FIAT.equals(orders.getPair().getPairedCurrency().get(0).getCurrencyType());
+		boolean toType = CurrencyType.FIAT.equals(orders.getMarketCurrency().getCurrencyType());
+		boolean pairType = CurrencyType.FIAT.equals(orders.getPairedCurrency().getCurrencyType());
 		if (!(toType || pairType)) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.not.fiat"),
 					Optional.empty());
@@ -190,7 +185,7 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.self.fail"),
 					Optional.empty());
 		}
-		Orders order = fiatOrderService.processFiatOrderList(matchedOrder, orders, orders.getPair());
+		Orders order = fiatOrderService.processFiatOrderList(matchedOrder, orders);
 		if (order.getId() != null) {
 			User bankDetailsUser = null;
 			Map<String, Object> map = new HashMap<>();
@@ -307,12 +302,12 @@ public class FiatOrderController {
 		logger.debug("existing order id: {}", exitingOrder.getId());
 		String currencyAbr;
 		String currencyType;
-		if (!(CurrencyType.FIAT.equals(exitingOrder.getPair().getToCurrency().get(0).getCurrencyType()))) {
-			currencyAbr = exitingOrder.getPair().getToCurrency().get(0).getCurrencyAbbreviation();
-			currencyType = exitingOrder.getPair().getToCurrency().get(0).getCurrencyType().toString();
+		if (!(CurrencyType.FIAT.equals(exitingOrder.getMarketCurrency().getCurrencyType()))) {
+			currencyAbr = exitingOrder.getMarketCurrency().getCurrencyAbbreviation();
+			currencyType = exitingOrder.getMarketCurrency().getCurrencyType().toString();
 		} else {
-			currencyAbr = exitingOrder.getPair().getPairedCurrency().get(0).getCurrencyAbbreviation();
-			currencyType = exitingOrder.getPair().getPairedCurrency().get(0).getCurrencyType().toString();
+			currencyAbr = exitingOrder.getPairedCurrency().getCurrencyAbbreviation();
+			currencyType = exitingOrder.getPairedCurrency().getCurrencyType().toString();
 		}
 		logger.debug("existing order currency Abr: {}", currencyAbr);
 		Future<Boolean> result = fiatOrderService.processTransactionFiatOrders(exitingOrder, currencyAbr, currencyType);
@@ -321,8 +316,8 @@ public class FiatOrderController {
 			logger.debug("result of order: {}", result);
 			if (result.get()) {
 				JSONObject jsonObject = new JSONObject();
-					jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
-					jsonObject.put("matchedOrderId", exitingOrder.getMatchedOrder().getId());
+				jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
+				jsonObject.put("matchedOrderId", exitingOrder.getMatchedOrder().getId());
 				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/"
 						+ exitingOrder.getMatchedOrder().getUser().getUserId(), jsonObject.toString());
 				return ResponseHandler.response(HttpStatus.OK, false,
@@ -357,8 +352,8 @@ public class FiatOrderController {
 					accountDetails = bankAccountDetailsService
 							.primaryBankAccountDetails(orders.getMatchedOrder().getUser());
 				}
-				Map<String, String> userAddress = fiatOrderService
-						.byersWalletAddressAndCurrencyAbbr(orders.getMatchedOrder().getUser(), orders.getPair());
+				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(
+						orders.getMatchedOrder().getUser(), orders.getMarketCurrency(), orders.getPairedCurrency());
 				map.put("accountDetails", response(accountDetails));
 				map.put("orderId", orders.getId());
 				map.put("createdDate", orders.getCreatedOn());
@@ -372,7 +367,8 @@ public class FiatOrderController {
 				map.put("isConfirmed", orders.isConfirm());
 			} else {
 				Map<String, String> userAddress = fiatOrderService.byersWalletAddressAndCurrencyAbbr(
-						orders.getMatchedOrder().getUser(), orders.getMatchedOrder().getPair());
+						orders.getMatchedOrder().getUser(), orders.getMatchedOrder().getMarketCurrency(),
+						orders.getMatchedOrder().getPairedCurrency());
 				BankAccountDetails accountDetails = bankAccountDetailsService
 						.primaryBankAccountDetails(orders.getUser());
 				map.put("accountDetails", response(accountDetails));
@@ -415,7 +411,7 @@ public class FiatOrderController {
 		orders.setVolume(volume);
 		orders.setPrice(price);
 		orders.setOrderType(orderType);
-		Page<Orders> page = fiatOrderService.existingOrders(orders, pairId, 0, 10);
+		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"), page);
 	}
 

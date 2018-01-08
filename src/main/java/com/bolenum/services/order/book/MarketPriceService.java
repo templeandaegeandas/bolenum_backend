@@ -5,7 +5,7 @@ package com.bolenum.services.order.book;
 
 import java.text.ParseException;
 
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 
 /**
  * @author chandan kumar singh
@@ -13,12 +13,12 @@ import com.bolenum.model.CurrencyPair;
  */
 public interface MarketPriceService {
 
-	long tradesIn24h(CurrencyPair pair) throws ParseException;
+	long tradesIn24h(Currency marketCurrency, Currency pairedCurrency) throws ParseException;
 
-	Double ordersIn24hHigh(CurrencyPair pair) throws ParseException;
+	Double ordersIn24hHigh(Currency marketCurrency, Currency pairedCurrency) throws ParseException;
 
-	Double ordersIn24hLow(CurrencyPair pair) throws ParseException;
+	Double ordersIn24hLow(Currency marketCurrency, Currency pairedCurrency) throws ParseException;
 
-	Double ordersIn24hVolume(CurrencyPair pair) throws ParseException;
-	
+	Double ordersIn24hVolume(Currency marketCurrency, Currency pairedCurrency) throws ParseException;
+
 }

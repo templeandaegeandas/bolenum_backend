@@ -63,6 +63,7 @@ public class UrlConstant {
 	public static final String CURRENCY_LIST_FOR_MARKET = "currency/list/market";
 	public static final String CURRENCY_PAIR = "currency/pair";
 	public static final String CURRENCY_PAIR_LIST = "currency-pair/list";
+	public static final String ALL_CURRENCY_PAIR_LIST = "currency/pair/list";
 	public static final String TRADING_FEES = "trade/fees";
 	public static final String WITHDRAWAL_FEES = "withdraw/fees";
 	public static final String PAIRED_CURRENCY = "paired/currency/list";

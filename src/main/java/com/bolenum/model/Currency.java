@@ -1,6 +1,7 @@
 package com.bolenum.model;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,12 +10,14 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.bolenum.enums.CurrencyType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -54,11 +57,11 @@ public class Currency {
 
 	private boolean isDeleted = false;
 	
-	private Double priceUSD;
-
-	private Double priceBTC;
+	@JsonIgnore
+	@ManyToMany
+	private List<Currency> market;
 	
-	private Double priceNGN;
+	private Double lastPrice;
 	
 	public Currency() {
 
@@ -133,42 +136,33 @@ public class Currency {
 	public void setCurrencyType(CurrencyType currencyType) {
 		this.currencyType = currencyType;
 	}
-	/**
-	 * @return the priceUSD
-	 */
-	public Double getPriceUSD() {
-		return priceUSD;
-	}
 
 	/**
-	 * @param priceUSD
-	 *            the priceUSD to set
+	 * @return the market
 	 */
-	public void setPriceUSD(Double priceUSD) {
-		this.priceUSD = priceUSD;
+	public List<Currency> getMarket() {
+		return market;
 	}
 
 	/**
-	 * @return the price_BTC
+	 * @param market the market to set
 	 */
-	public Double getPriceBTC() {
-		return priceBTC;
+	public void setMarket(List<Currency> market) {
+		this.market = market;
 	}
 
 	/**
-	 * @param price_BTC
-	 *            the price_BTC to set
+	 * @return the lastPrice
 	 */
-	public void setPriceBTC(Double priceBTC) {
-		this.priceBTC = priceBTC;
+	public Double getLastPrice() {
+		return lastPrice;
 	}
 
-	public Double getPriceNGN() {
-		return priceNGN;
-	}
-
-	public void setPriceNGN(Double priceNGN) {
-		this.priceNGN = priceNGN;
+	/**
+	 * @param lastPrice the lastPrice to set
+	 */
+	public void setLastPrice(Double lastPrice) {
+		this.lastPrice = lastPrice;
 	}
 
 }
