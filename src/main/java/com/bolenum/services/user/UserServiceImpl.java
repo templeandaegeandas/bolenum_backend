@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.bolenum.dto.common.EditUserForm;
 import com.bolenum.dto.common.PasswordForm;
 import com.bolenum.dto.common.UserSignupForm;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.TokenType;
 import com.bolenum.exceptions.InvalidOtpException;
 import com.bolenum.exceptions.InvalidPasswordException;
@@ -25,8 +26,10 @@ import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.OTP;
 import com.bolenum.model.User;
 import com.bolenum.model.UserKyc;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 import com.bolenum.repo.common.RoleRepo;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.OTPRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.common.KYCService;
@@ -74,6 +77,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private KYCService kycService;
+
+	@Autowired
+	private UserCoinRepository userCoinRepository;
 
 	@Value("${bolenum.profile.image.location}")
 	private String uploadedFileLocation;
@@ -124,6 +130,20 @@ public class UserServiceImpl implements UserService {
 		return userRepository.saveAndFlush(user);
 	}
 
+	@Override
+	public UserCoin saveUserCoin(String walletAddress, User user, String tokenName) {
+		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
+		if (userCoin == null) {
+			userCoin = new UserCoin();
+			userCoin.setWalletAddress(walletAddress);
+			userCoin.setTokenName(tokenName);
+			userCoin.setUser(user);
+			userCoin.setCurrencyType(CurrencyType.CRYPTO);
+			userCoin = userCoinRepository.save(userCoin);
+		}
+		return userCoin;
+	}
+
 	/**
 	 * 
 	 * to re register user if already details present in user table
@@ -152,7 +172,7 @@ public class UserServiceImpl implements UserService {
 	 * to change password
 	 */
 	@Override
-	public Boolean changePassword(User user, PasswordForm passwordForm) throws InvalidPasswordException {
+	public Boolean changePassword(User user, PasswordForm passwordForm) {
 		if (passwordEncoder.matches(passwordForm.getOldPassword(), user.getPassword())) {
 			user.setPassword(passwordEncoder.encode(passwordForm.getNewPassword()));
 			userRepository.save(user);
@@ -178,13 +198,6 @@ public class UserServiceImpl implements UserService {
 		}
 
 		user.setLastName(editUserForm.getLastName());
-
-		// if (editUserForm.getLastName() != null) {
-		// user.setLastName(editUserForm.getLastName());
-		// } else if (editUserForm.getLastName() == null && user.getLastName() == null)
-		// {
-		// user.setLastName(editUserForm.getLastName());
-		// }
 
 		if (editUserForm.getAddress() != null) {
 			user.setAddress(editUserForm.getAddress());
@@ -220,12 +233,12 @@ public class UserServiceImpl implements UserService {
 		User existinguser = userRepository.findByMobileNumber(mobileNumber);
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
-		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
 		logger.debug("Otp sent success: {}", code);
 		if (existinguser == null) {
-			smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
+			smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
 			OTP otp = new OTP(mobileNumber, code, user);
 			if (otpRepository.save(otp) != null) {
+				logger.debug("OTP saved");
 				user.setCountryCode(countryCode);
 				user.setMobileNumber(mobileNumber);
 				user.setIsMobileVerified(false);
@@ -237,9 +250,11 @@ public class UserServiceImpl implements UserService {
 			if (existinguser.getUserId().equals(user.getUserId()) && existinguser.getIsMobileVerified()) {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.verified.by.you"));
 			} else if (existinguser.getUserId().equals(user.getUserId()) && !existinguser.getIsMobileVerified()) {
-				smsServiceUtil.sendMessage(mobileNumber, countryCode, message);
+				logger.debug("user exist but mobile not verified");
+				smsServiceUtil.sendOtp(code, countryCode, mobileNumber);
 				OTP otp = new OTP(mobileNumber, code, user);
 				otpRepository.save(otp);
+				logger.debug("OTP saved");
 				return existinguser;
 			} else {
 				throw new PersistenceException(localService.getMessage("mobile.number.already.added"));
@@ -249,9 +264,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Boolean verifyOTP(Integer otp, User user) throws InvalidOtpException {
-		OTP existingOtp = otpRepository.findByOtp(otp);
+		OTP existingOtp = otpRepository.findByOtpNumber(otp);
 		if (existingOtp != null) {
-			if (existingOtp.getIsDeleted() == false && existingOtp.getMobileNumber().equals(user.getMobileNumber())) {
+			if (!existingOtp.getIsDeleted() && existingOtp.getMobileNumber().equals(user.getMobileNumber())) {
 				long timeDiffInSec = (new Date().getTime() - existingOtp.getCreatedDate().getTime()) / 1000;
 				if (timeDiffInSec <= 300) {
 					user.setIsMobileVerified(true);
@@ -278,9 +293,8 @@ public class UserServiceImpl implements UserService {
 		String mobileNumber = user.getMobileNumber();
 		Random r = new Random();
 		int code = (100000 + r.nextInt(900000));
-		String message = localService.getMessage("otp.for.mobile.verificaton.message") + "  " + code;
 		logger.debug("Otp sent success: {}", code);
-		smsServiceUtil.sendMessage(mobileNumber, user.getCountryCode(), message);
+		smsServiceUtil.sendOtp(code, user.getCountryCode(), mobileNumber);
 		OTP otp = new OTP(mobileNumber, code, user);
 		otpRepository.save(otp);
 	}

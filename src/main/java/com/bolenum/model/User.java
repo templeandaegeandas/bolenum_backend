@@ -1,6 +1,7 @@
 package com.bolenum.model;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,13 +10,18 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.bolenum.enums.TwoFactorAuthOption;
+import com.bolenum.model.coin.UserCoin;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -106,7 +112,12 @@ public class User {
 	private String google2FaAuthKey;
 	
 	private String btcWalletAddress;
-
+	
+	@OneToMany
+	@Fetch(FetchMode.JOIN)
+	@JsonManagedReference
+	private List<UserCoin> userCoin;
+	
 	public String getBtcWalletAddress() {
 		return btcWalletAddress;
 	}
@@ -432,4 +443,17 @@ public class User {
 		this.ethWalletJsonFileName = ethWalletJsonFileName;
 	}
 
+	/**
+	 * @return the userErc20Tokens
+	 */
+	public List<UserCoin> getUserCoin() {
+		return userCoin;
+	}
+
+	/**
+	 * @param userErc20Tokens the userErc20Tokens to set
+	 */
+	public void setUserCoin(List<UserCoin> userCoin) {
+		this.userCoin = userCoin;
+	}
 }

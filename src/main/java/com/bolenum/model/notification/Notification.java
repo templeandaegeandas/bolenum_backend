@@ -4,13 +4,12 @@
 package com.bolenum.model.notification;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -27,12 +26,15 @@ public class Notification {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	@ManyToMany
-	private List<User> seller;
-	@ManyToMany
-	private List<User> buyer;
+	
+	@ManyToOne
+	private User sender;
+	
+	@ManyToOne
+	private User receiver;
 	
 	private String message;
+	
 	private boolean readStatus;
 
 	@ApiModelProperty(hidden = true)
@@ -59,34 +61,21 @@ public class Notification {
 		this.id = id;
 	}
 
-	/**
-	 * @return the seller
-	 */
-	public List<User> getSeller() {
-		return seller;
+	
+	public User getSender() {
+		return sender;
 	}
 
-	/**
-	 * @param seller
-	 *            the seller to set
-	 */
-	public void setSeller(List<User> seller) {
-		this.seller = seller;
+	public void setSender(User sender) {
+		this.sender = sender;
 	}
 
-	/**
-	 * @return the buyer
-	 */
-	public List<User> getBuyer() {
-		return buyer;
+	public User getReceiver() {
+		return receiver;
 	}
 
-	/**
-	 * @param buyer
-	 *            the buyer to set
-	 */
-	public void setBuyer(List<User> buyer) {
-		this.buyer = buyer;
+	public void setReceiver(User receiver) {
+		this.receiver = receiver;
 	}
 
 	/**

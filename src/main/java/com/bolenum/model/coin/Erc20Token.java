@@ -1,4 +1,4 @@
-package com.bolenum.model;
+package com.bolenum.model.coin;
 
 import java.util.Date;
 
@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 import org.hibernate.validator.constraints.NotBlank;
+
+import com.bolenum.model.Currency;
 
 /**
  * 

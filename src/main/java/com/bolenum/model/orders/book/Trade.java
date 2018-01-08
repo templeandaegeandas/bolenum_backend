@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 import com.bolenum.enums.OrderStandard;
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.User;
 
 /**
@@ -32,8 +32,11 @@ public class Trade {
 	private User buyer;
 	@OneToOne
 	private User seller;
+	
 	@OneToOne
-	private CurrencyPair pair;
+	private Currency marketCurrency;
+	@OneToOne
+	private Currency pairedCurrency;
 	@Enumerated(EnumType.STRING)
 	private OrderStandard orderStandard;
 	private Date createdOn = new Date();
@@ -41,17 +44,40 @@ public class Trade {
 	private Double sellerTradeFee;
 	private Boolean isFeeDeductedBuyer;
 	private Boolean isFeeDeductedSeller;
-	
-	public Trade(Double price, Double volume, User buyer, User seller, CurrencyPair pair, OrderStandard orderStandard,
-			Double buyerTradeFee, Double sellerTradeFee) {
+	/**
+	 * buyer transaction status, true means from buyer side transaction has been
+	 * done
+	 */
+	private Boolean isTxBuyer;
+	/**
+	 * Seller transaction status, true means from Seller side transaction has
+	 * been done
+	 */
+	private Boolean isTxSeller;
+	/**
+	 * trade status, true means both buyer and seller has performed transaction
+	 */
+	private Boolean status;
+
+	@OneToOne
+	private Orders matchedOrder;
+
+	@OneToOne
+	private Orders requestingOrder;
+
+	public Trade(Double price, Double volume, User buyer, User seller, Currency marketCurrency, Currency pairedCurrency, OrderStandard orderStandard,
+			Double buyerTradeFee, Double sellerTradeFee, Orders matchedOrder, Orders requestingOrder) {
 		this.price = price;
 		this.volume = volume;
 		this.buyer = buyer;
 		this.seller = seller;
-		this.pair = pair;
+		this.marketCurrency = marketCurrency;
+		this.pairedCurrency = pairedCurrency;
 		this.orderStandard = orderStandard;
 		this.buyerTradeFee = buyerTradeFee;
 		this.sellerTradeFee = sellerTradeFee;
+		this.matchedOrder = matchedOrder;
+		this.requestingOrder = requestingOrder;
 	}
 
 	public Trade() {
@@ -98,12 +124,32 @@ public class Trade {
 		this.seller = seller;
 	}
 
-	public CurrencyPair getPair() {
-		return pair;
+	/**
+	 * @return the marketCurrency
+	 */
+	public Currency getMarketCurrency() {
+		return marketCurrency;
 	}
 
-	public void setPair(CurrencyPair pair) {
-		this.pair = pair;
+	/**
+	 * @param marketCurrency the marketCurrency to set
+	 */
+	public void setMarketCurrency(Currency marketCurrency) {
+		this.marketCurrency = marketCurrency;
+	}
+
+	/**
+	 * @return the pairedCurrency
+	 */
+	public Currency getPairedCurrency() {
+		return pairedCurrency;
+	}
+
+	/**
+	 * @param pairedCurrency the pairedCurrency to set
+	 */
+	public void setPairedCurrency(Currency pairedCurrency) {
+		this.pairedCurrency = pairedCurrency;
 	}
 
 	public OrderStandard getOrderStandard() {
@@ -130,7 +176,8 @@ public class Trade {
 	}
 
 	/**
-	 * @param buyerTradeFee the buyerTradeFee to set
+	 * @param buyerTradeFee
+	 *            the buyerTradeFee to set
 	 */
 	public void setBuyerTradeFee(Double buyerTradeFee) {
 		this.buyerTradeFee = buyerTradeFee;
@@ -144,7 +191,8 @@ public class Trade {
 	}
 
 	/**
-	 * @param sellerTradeFee the sellerTradeFee to set
+	 * @param sellerTradeFee
+	 *            the sellerTradeFee to set
 	 */
 	public void setSellerTradeFee(Double sellerTradeFee) {
 		this.sellerTradeFee = sellerTradeFee;
@@ -158,7 +206,8 @@ public class Trade {
 	}
 
 	/**
-	 * @param isFeeDeductedBuyer the isFeeDeductedBuyer to set
+	 * @param isFeeDeductedBuyer
+	 *            the isFeeDeductedBuyer to set
 	 */
 	public void setIsFeeDeductedBuyer(Boolean isFeeDeductedBuyer) {
 		this.isFeeDeductedBuyer = isFeeDeductedBuyer;
@@ -172,11 +221,84 @@ public class Trade {
 	}
 
 	/**
-	 * @param isFeeDeductedSeller the isFeeDeductedSeller to set
+	 * @param isFeeDeductedSeller
+	 *            the isFeeDeductedSeller to set
 	 */
 	public void setIsFeeDeductedSeller(Boolean isFeeDeductedSeller) {
 		this.isFeeDeductedSeller = isFeeDeductedSeller;
 	}
-	
-	
+
+	/**
+	 * @return the isTxBuyer
+	 */
+	public Boolean getIsTxBuyer() {
+		return isTxBuyer;
+	}
+
+	/**
+	 * @param isTxBuyer
+	 *            the isTxBuyer to set
+	 */
+	public void setIsTxBuyer(Boolean isTxBuyer) {
+		this.isTxBuyer = isTxBuyer;
+	}
+
+	/**
+	 * @return the isTxSeller
+	 */
+	public Boolean getIsTxSeller() {
+		return isTxSeller;
+	}
+
+	/**
+	 * @param isTxSeller
+	 *            the isTxSeller to set
+	 */
+	public void setIsTxSeller(Boolean isTxSeller) {
+		this.isTxSeller = isTxSeller;
+	}
+
+	/**
+	 * @return the status
+	 */
+	public Boolean getStatus() {
+		return status;
+	}
+
+	/**
+	 * @param status
+	 *            the status to set
+	 */
+	public void setStatus(Boolean status) {
+		this.status = status;
+	}
+
+	/**
+	 * @return the matchedOrder
+	 */
+	public Orders getMatchedOrder() {
+		return matchedOrder;
+	}
+
+	/**
+	 * @param matchedOrder the matchedOrder to set
+	 */
+	public void setMatchedOrder(Orders matchedOrder) {
+		this.matchedOrder = matchedOrder;
+	}
+
+	/**
+	 * @return the requestingOrder
+	 */
+	public Orders getRequestingOrder() {
+		return requestingOrder;
+	}
+
+	/**
+	 * @param requestingOrder the requestingOrder to set
+	 */
+	public void setRequestingOrder(Orders requestingOrder) {
+		this.requestingOrder = requestingOrder;
+	}
+
 }

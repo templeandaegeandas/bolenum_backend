@@ -1,5 +1,7 @@
 package com.bolenum.controller.common;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -7,12 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.AddUserBankDetailsForm;
 import com.bolenum.dto.common.EditUserBankDetailsForm;
@@ -27,7 +31,6 @@ import com.bolenum.util.ResponseHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.List;
 import io.swagger.annotations.Api;
 
 /**
@@ -57,7 +60,8 @@ public class BankDetailsController {
 	 * @param result
 	 * @return
 	 */
-	@RequestMapping(value = UrlConstant.ADD_USER_BANK_DETAILS, method = RequestMethod.POST)
+	@Secured("ROLE_USER")
+	@RequestMapping(value = UrlConstant.USER_BANK_DETAILS, method = RequestMethod.POST)
 	public ResponseEntity<Object> addUserBankDetails(@Valid @RequestBody AddUserBankDetailsForm addUserBankDetailsForm,
 			BindingResult result) {
 
@@ -105,7 +109,8 @@ public class BankDetailsController {
 	 * 
 	 * @return
 	 */
-	@RequestMapping(value = UrlConstant.EDIT_USER_BANK_DETAILS, method = RequestMethod.PUT)
+	@Secured("ROLE_USER")
+	@RequestMapping(value = UrlConstant.USER_BANK_DETAILS, method = RequestMethod.PUT)
 	public ResponseEntity<Object> editUserBankDetails(
 			@Valid @RequestBody EditUserBankDetailsForm editUserBankDetailsForm, BindingResult result) {
 		if (result.hasErrors()) {
@@ -138,8 +143,8 @@ public class BankDetailsController {
 	 * 
 	 * @return
 	 */
-
-	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS, method = RequestMethod.GET)
+	@Secured("ROLE_USER")
+	@RequestMapping(value = UrlConstant.USER_BANK_DETAILS, method = RequestMethod.GET)
 	public ResponseEntity<Object> viewUserBankDetails() {
 		User user = GenericUtils.getLoggedInUser();
 		if (user.getRole().getName().equals("ROLE_USER")) {
@@ -163,6 +168,7 @@ public class BankDetailsController {
 	 * @return
 	 * 
 	 */
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.VIEW_USER_BANK_DETAILS_BY_ADMIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> viewUserBankDetailsByAdmin(@RequestParam Long userId) {
 		User user = GenericUtils.getLoggedInUser();

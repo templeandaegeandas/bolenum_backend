@@ -4,11 +4,13 @@
 package com.bolenum.controller.common;
 
 import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +29,7 @@ import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.User;
 import com.bolenum.services.common.AuthService;
 import com.bolenum.services.common.LocaleService;
+import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.TwoFactorAuthService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.util.ErrorCollectionUtil;
@@ -39,10 +42,10 @@ import io.swagger.annotations.Api;
  * @author chandan kumar singh
  * @date 13-Sep-2017
  * 
- * Auth controller contains all functionality which requires authentication  like login, logout, 
- * and functionality used for reset password
+ *       Auth controller contains all functionality which requires
+ *       authentication like login, logout, and functionality used for reset
+ *       password
  */
-
 
 @RestController
 @Api(value = "Authentication Controller")
@@ -58,6 +61,9 @@ public class AuthController {
 
 	@Autowired
 	private LocaleService localeService;
+
+	@Autowired
+	private AuthenticationTokenService authenticationTokenService;
 
 	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -91,6 +97,7 @@ public class AuthController {
 					} catch (UsernameNotFoundException | InvalidPasswordException e) {
 						return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
 					}
+
 					if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.NONE)) {
 						return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("login.success"),
 								authService.loginResponse(token));
@@ -116,7 +123,7 @@ public class AuthController {
 	 * @param token
 	 * @return
 	 */
-	// @PreAuthorize("hasRole('USER')")
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.USER_LOOUT, method = RequestMethod.DELETE)
 	ResponseEntity<Object> logout(@RequestHeader("Authorization") String token) {
 		boolean response = authService.logOut(token);
@@ -139,16 +146,14 @@ public class AuthController {
 		email = email.trim();
 		email = email.replace(' ', '+');
 		boolean isValid = GenericUtils.isValidMail(email);
-		logger.debug("isValid = " + isValid);
+		logger.debug("isValid: {}", isValid);
 		if (isValid) {
 			User user = userService.findByEmail(email);
-			if (user != null && user.getIsEnabled() == true) {
+			if (user != null && user.getIsEnabled()) {
 				AuthenticationToken authenticationToken = authService.sendTokenToResetPassword(user);
 				logger.debug(authenticationToken.getToken());
-				if (authenticationToken != null) {
-					return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("mail.sent.success"),
-							email);
-				}
+				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("mail.sent.success"),
+						email);
 			}
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.email"), null);
@@ -170,18 +175,22 @@ public class AuthController {
 		if (token == null || token.isEmpty()) {
 			throw new IllegalArgumentException(localeService.getMessage("token.invalid"));
 		}
-
 		User verifiedUser = authService.verifyTokenForResetPassword(token);
-		
 		if (verifiedUser == null) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("token.invalid"),
 					null);
 		}
-		
+		AuthenticationToken authenticationToken = authenticationTokenService.findByToken(token);
+		boolean isExpired = authenticationTokenService.isTokenExpired(authenticationToken);
+		logger.debug("user mail verify token expired: {}", isExpired);
+		if (isExpired) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localeService.getMessage("token.expired"),
+					null);
+		}
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.CONFLICT, true,
 					localeService.getMessage("user.password.not.proper"), verifiedUser.getEmailId());
-		} else if (!result.hasErrors() && verifiedUser != null) {
+		} else if (!result.hasErrors()) {
 			authService.resetPassword(verifiedUser, resetPasswordForm);
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("user.password.change.success"), verifiedUser.getEmailId());

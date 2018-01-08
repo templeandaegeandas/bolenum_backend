@@ -3,6 +3,7 @@ package com.bolenum.controller.user;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
-import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.model.BankAccountDetails;
 import com.bolenum.model.User;
@@ -60,11 +62,14 @@ public class OrderController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
+
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
-	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
-		// can not place order on 0 prize
-		if (OrderStandard.LIMIT.equals(orders.getOrderStandard()) && orders.getPrice() <= 0) {
-			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.price.zero"),
+	public ResponseEntity<Object> createOrder(@RequestBody Orders orders) {
+		if (orders.getVolume() * orders.getPrice() < 0.0001) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.volume.zero"),
 					null);
 		}
 		User user = GenericUtils.getLoggedInUser();
@@ -73,13 +78,13 @@ public class OrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"),
 					null);
 		}
-		String balance = ordersService.checkOrderEligibility(user, orders, pairId);
-		logger.debug("balance: {}", balance);
+		String balance = ordersService.checkOrderEligibility(user, orders);
+		logger.debug("balance: {} of user: {}", balance, user.getEmailId());
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);
 		}
 		if (!balance.equals("proceed")) {
-			return ResponseHandler.response(HttpStatus.OK, false,
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("order.insufficient.balance"), null);
 		}
 		orders.setUser(user);
@@ -105,17 +110,20 @@ public class OrderController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("pairId") Long pairId) {
-		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);
+	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("marketCurrencyId") long marketCurrencyId,
+			@RequestParam("pairedCurrencyId") long pairedCurrencyId) {
+		Page<Orders> list = ordersService.getBuyOrdersListByPair(marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
 	@RequestMapping(value = UrlConstant.SELL_ORDER_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("pairId") Long pairId) {
-		Page<Orders> list = ordersService.getSellOrdersListByPair(pairId);
+	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("marketCurrencyId") long marketCurrencyId,
+			@RequestParam("pairedCurrencyId") long pairedCurrencyId) {
+		Page<Orders> list = ordersService.getSellOrdersListByPair(marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRADE_LIST_LOGGEDIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTradedOrdersLoggedInUser(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -135,15 +143,18 @@ public class OrderController {
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.MY_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getMyOrdereFromBook(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
 			@RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
-		Page<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(pageNumber, pageSize, sortOrder, sortBy, user, OrderStatus.SUBMITTED);
+		Page<Orders> list = ordersService.findOrdersListByUserAndOrderStatus(pageNumber, pageSize, sortOrder, sortBy,
+				user, OrderStatus.SUBMITTED);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
+	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrderDetails(@RequestParam("orderId") long orderId) {
 		User user = GenericUtils.getLoggedInUser();
@@ -159,10 +170,23 @@ public class OrderController {
 			bankAccountDetails = banks.get(0);
 		}
 		Orders orders = ordersService.getOrderDetails(orderId);
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("bankDetails", bankAccountDetails);
 		map.put("orderDetails", orders);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
 	}
 
+	@Secured("ROLE_USER")
+	@RequestMapping(value = UrlConstant.CANCEL_ORDER, method = RequestMethod.DELETE)
+	public ResponseEntity<Object> cancelOrders(@RequestParam("orderId") long orderId) {
+		boolean status = ordersService.cancelOrder(orderId);
+		if (status) {
+			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
+					com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"),
+					Optional.empty());
+		}
+		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"),
+				Optional.empty());
+	}
 }

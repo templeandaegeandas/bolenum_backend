@@ -3,7 +3,6 @@ package com.bolenum.config;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -24,21 +24,21 @@ import org.web3j.crypto.CipherException;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Countries;
 import com.bolenum.model.Currency;
-import com.bolenum.model.Erc20Token;
 import com.bolenum.model.Privilege;
 import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.TradingFee;
 import com.bolenum.model.fees.WithdrawalFee;
-import com.bolenum.services.admin.AdminService;
 import com.bolenum.services.admin.CurrencyService;
-import com.bolenum.services.admin.Erc20TokenService;
 import com.bolenum.services.admin.fees.TradingFeeService;
 import com.bolenum.services.admin.fees.WithdrawalFeeService;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.PrivilegeService;
 import com.bolenum.services.common.RoleService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.user.UserService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
@@ -101,12 +101,10 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private CurrencyService currencyService;
 
 	@Autowired
-	private AdminService adminService;
-
-	@Autowired
 	private EtherumWalletService etherumWalletService;
 
 	@Autowired
+	@Lazy
 	private BTCWalletService btcWalletService;
 
 	@Autowired
@@ -132,7 +130,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		try {
 			erc20TokenService.saveIncomingErc20Transaction(currencyAbbreviation);
 		} catch (IOException | CipherException e) {
-			e.printStackTrace();
+			logger.error("error saving incoming erc20 token txns: {}", e);
+
 		}
 
 		// create initial directories
@@ -141,7 +140,6 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		createDocumentsDirectories();
 		createGoogleAuthQrCodeDirectories();
 		saveInitialFee();
-
 	}
 
 	private void saveInitialFee() {
@@ -163,7 +161,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private void createDocumentsDirectories() {
 		Path profileImg = Paths.get(userDocumetsLocation);
 
-		if (!Files.exists(profileImg)) {
+		if (!profileImg.toFile().exists()) {
 			if (new File((userDocumetsLocation)).mkdirs()) {
 				logger.debug("Documents location created");
 			} else {
@@ -180,7 +178,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private void createGoogleAuthQrCodeDirectories() {
 		Path profileImg = Paths.get(googleQrCodeLocation);
 
-		if (!Files.exists(profileImg)) {
+		if (!profileImg.toFile().exists()) {
 			if (new File((googleQrCodeLocation)).mkdirs()) {
 				logger.debug("Documents location created");
 			} else {
@@ -199,7 +197,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	 */
 	private void createInitDirectories() {
 		Path ethWallet = Paths.get(ethWalletLocation);
-		if (!Files.exists(ethWallet)) {
+		if (!ethWallet.toFile().exists()) {
 			if (new File((ethWalletLocation)).mkdirs()) {
 				logger.debug("ethereum wallet location created");
 			} else {
@@ -214,7 +212,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private void createProfilePicDirectories() {
 		Path profileImg = Paths.get(userProfileImageLocation);
 
-		if (!Files.exists(profileImg)) {
+		if (!profileImg.toFile().exists()) {
 			if (new File((userProfileImageLocation)).mkdirs()) {
 				logger.debug("User Profile Image location created");
 			} else {
@@ -245,7 +243,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		privileges.add(edit);
 		privileges.add(get);
 		privileges.add(del);
-		privileges.forEach(Privilege -> privilegeService.findOrCreate(Privilege));
+		privileges.forEach(privilege -> privilegeService.findOrCreate(privilege));
 	}
 
 	/**
@@ -263,7 +261,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			form.setFirstName("bolenum");
 			form.setEmailId("admin@bolenum.com");
 			if (activeProfile.equals("prod")) {
-				form.setPassword(passwordEncoder.encode("m@n!@b0l3num!@#"));
+				form.setPassword(passwordEncoder.encode("M@n!@b0l3num!@#"));
 			} else if (activeProfile.equals("stag")) {
 				form.setPassword(passwordEncoder.encode("bolenum@oodles"));
 			} else {
@@ -271,19 +269,18 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			}
 			form.setRole(roleAdmin);
 			User user = userService.saveUser(form);
-			etherumWalletService.createWallet(user);
-			String uuid = adminService.createAdminHotWallet("adminWallet");
-			logger.debug("user mail verify wallet uuid: {}", uuid);
-			if (!uuid.isEmpty()) {
-				String walletAddress = btcWalletService.getWalletAddress(uuid);
-				user.setBtcWalletAddress(walletAddress);
-				user.setBtcWalletUuid(uuid);
-				user.setIsEnabled(true);
-				User savedUser = userService.saveUser(user);
-				logger.debug("savedUser as Admin: {}", savedUser.getEmailId());
-			} else {
-				logger.debug("admin exist");
-			}
+			etherumWalletService.createEthWallet(user, "ETH");
+			String address = btcWalletService.getBtcAccountAddress("");
+			UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
+			List<UserCoin> userCoins = new ArrayList<>();
+			userCoins.add(userCoin);
+			user.setUserCoin(userCoins);
+			user.setBtcWalletUuid("");
+			user.setIsEnabled(true);
+			User savedUser = userService.saveUser(user);
+			logger.debug("savedUser as Admin: {}", savedUser.getEmailId());
+		} else {
+			logger.debug("admin exist");
 		}
 	}
 
@@ -365,7 +362,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			Currency ngn = new Currency("NIGERIAN NAIRA", "NGN", CurrencyType.FIAT);
 			bitcoin = currencyService.saveCurrency(bitcoin);
 			ethereum = currencyService.saveCurrency(ethereum);
-			ngn = currencyService.saveCurrency(ngn);
+			currencyService.saveCurrency(ngn);
 			List<WithdrawalFee> wFee;
 			wFee = withdrawalFeeService.getAllWithdrawalFee();
 			if (wFee.isEmpty()) {

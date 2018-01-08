@@ -3,8 +3,8 @@
  */
 package com.bolenum.services.user.notification;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -77,7 +77,7 @@ public class NotificationServiceImpl implements NotificationService {
 		logger.debug("fetching notification of user: {}, page: {}, size: {}", receiver.getEmailId(), pageNumber,
 				pageSize);
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "createdOn");
-		return notificationRepositroy.findByBuyerAndIsDeleted(receiver, false, pageRequest);
+		return notificationRepositroy.findByReceiverAndIsDeleted(receiver, false, pageRequest);
 	}
 
 	/**
@@ -85,17 +85,63 @@ public class NotificationServiceImpl implements NotificationService {
 	 */
 	@Async
 	@Override
-	public Notification saveNotification(User buyer, User seller, String msg) {
-		List<User> buyers = new ArrayList<>();
-		buyers.add(buyer);
-		List<User> sellers = new ArrayList<>();
-		sellers.add(seller);
+	public Notification saveNotification(User sender, User receiver, String msg) {
+
 		Notification notification = new Notification();
-		notification.setBuyer(buyers);
-		notification.setSeller(buyers);
+		notification.setSender(sender);
+		notification.setReceiver(receiver);
 		notification.setMessage(msg);
 		notification.setReadStatus(false);
 		notification.setDeleted(false);
 		return notificationRepositroy.save(notification);
+
+	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 * 
+	 */
+	@Override
+	public Page<Notification> getListOfNotification(User user, int pageNumber, int pageSize, String sortOrder,
+			String sortBy) {
+
+		Date endDate = new Date();
+		Calendar c = Calendar.getInstance();
+		c.setTime(endDate);
+		c.add(Calendar.DATE, -1);
+		Date startDate = c.getTime();
+
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		return notificationRepositroy.findByReceiverAndCreatedOnBetween(user, startDate, endDate, false, pageRequest);
+	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 */
+	@Override
+	public Notification getRequestedNotification(Long id) {
+		return notificationRepositroy.findOne(id);
+	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 */
+	@Override
+	public Notification setActionOnNotifiction(Notification notification) {
+		notification.setReadStatus(true);
+		return notification;
+	}
+
+	@Override
+	public Long countUnSeenNotification(User user) {
+		return notificationRepositroy.countNotificationByReceiverAndReadStatus(user,false);
+		
 	}
 }

@@ -3,6 +3,8 @@ package com.bolenum.services.common;
 import java.io.IOException;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -50,9 +52,7 @@ public class DisputeServiceImpl implements DisputeService {
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
 
-	public DisputeServiceImpl() {
-
-	}
+	public static final Logger logger = LoggerFactory.getLogger(DisputeServiceImpl.class);
 
 	/**
 	 * 
@@ -61,66 +61,67 @@ public class DisputeServiceImpl implements DisputeService {
 	public DisputeOrder uploadProofDocument(MultipartFile file, DisputeOrder disputeOrder, User disputeRaiser)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 
+		logger.debug("inside uploadProofDocument ");
 		long sizeLimit = 1024 * 1024 * 10L;
 		DisputeOrder savedDispute = null;
 		if (file != null) {
+			logger.debug("inside uploadProofDocument file found");
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
 			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, disputeRaiser, null,
 					validExtentions, sizeLimit);
 			disputeOrder.setFirstDocumenForProofToDispute(updatedFileName);
 			savedDispute = disputeOrderRepo.saveAndFlush(disputeOrder);
 			return savedDispute;
-
-		} else {
-			return null;
 		}
-
+		return null;
 	}
 
 	/**
-	 * 
+	 * @created
 	 */
 	@Override
-	public Boolean checkExpiryToDispute(Long orderId) {
-		Orders order = ordersRepository.findOne(orderId);
-
-		Date previous = order.getCreatedOn();
+	public Boolean checkExpiryToDispute(Orders orders) {
+		Date previous = orders.getCreatedOn();
 		Date now = new Date();
-		if (now.getTime() - previous.getTime() <= 15 * 60 * 1000) {
-			return false;
-
-		}
-		return true;
+		return (now.getTime() - previous.getTime() > 15 * 60 * 1000);
 	}
 
 	/**
 	 * 
 	 */
 	@Override
-	public DisputeOrder raiseDispute(Long orderId, Long transactionId, String commentByDisputeRaiser,
+	public DisputeOrder raiseDisputeByBuyer(Orders order, Long transactionId, String commentByDisputeRaiser,
 			MultipartFile file)
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
-
-		Orders order = ordersRepository.findOne(orderId);
-
 		Orders matchedOrder = order.getMatchedOrder();
-
 		User disputeRaisedAgainst = matchedOrder.getUser();
-
-		if (order != null && OrderStatus.LOCKED.equals(order.getOrderStatus())
-				&& OrderType.BUY.equals(order.getOrderType())) {
-
+		if (OrderStatus.LOCKED.equals(order.getOrderStatus()) && OrderType.BUY.equals(order.getOrderType())) {
+			logger.debug("inside raiseDispute by buyer ");
 			User disputeRaiser = order.getUser();
 			DisputeOrder disputeOrder = new DisputeOrder();
+			disputeOrder.setOrders(order);
 			disputeOrder.setDisputeRaiser(disputeRaiser);
 			disputeOrder.setDisputeStatus(DisputeStatus.RAISED);
 			disputeOrder.setCommentByDisputeRaiser(commentByDisputeRaiser);
 			disputeOrder.setTransactionId(transactionId);
 			disputeOrder.setDisputeRaisedAgainst(disputeRaisedAgainst);
-			DisputeOrder response = uploadProofDocument(file, disputeOrder, disputeRaiser);
-			return response;
-			// return disputeOrderRepo.saveAndFlush(disputeOrder);
+			return uploadProofDocument(file, disputeOrder, disputeRaiser);
+		}
+		return null;
+	}
 
+	@Override
+	public DisputeOrder raiseDisputeBySeller(Orders order) {
+		Orders matchedOrder = order.getMatchedOrder();
+		User disputeRaisedAgainst = matchedOrder.getUser();
+		if (OrderStatus.LOCKED.equals(order.getOrderStatus()) && OrderType.BUY.equals(order.getOrderType())) {
+			User disputeRaiser = order.getUser();
+			DisputeOrder disputeOrder = new DisputeOrder();
+			disputeOrder.setOrders(order);
+			disputeOrder.setDisputeRaiser(disputeRaiser);
+			disputeOrder.setDisputeStatus(DisputeStatus.RAISED);
+			disputeOrder.setDisputeRaisedAgainst(disputeRaisedAgainst);
+			return disputeOrderRepo.save(disputeOrder);
 		}
 		return null;
 	}
@@ -129,32 +130,24 @@ public class DisputeServiceImpl implements DisputeService {
 	 * 
 	 */
 	@Override
-	public Boolean isAlreadyDisputed(Long orderId, Long transactionId) {
-		DisputeOrder disputeOrder = disputeOrderRepo.findByOrderIdOrTransactionId(orderId, transactionId);
-		if (disputeOrder == null) {
-			return true;
-		}
-		return false;
+	public Boolean isAlreadyDisputed(Orders orders, Long transactionId) {
+		DisputeOrder disputeOrder = disputeOrderRepo.findByOrdersOrTransactionId(orders, transactionId);
+		return (disputeOrder != null);
 	}
 
 	/**
 	 * 
 	 */
 	@Override
-	public Boolean checkEligibilityToDispute(Long orderId) {
-		Orders order = ordersRepository.findOne(orderId);
-		if (OrderType.BUY.equals(order.getOrderType())) {
-			return true;
-		}
-		return false;
+	public Orders checkEligibilityToDispute(Long orderId) {
+		return ordersRepository.findOne(orderId);
 	}
 
 	/**
 	 * 
 	 */
 	@Override
-	public Page<DisputeOrder> getListOfDisputeOrder(int pageNumber, int pageSize, String sortBy, String sortOrder,
-			DisputeStatus disputeStatus) {
+	public Page<DisputeOrder> getListOfDisputeOrder(int pageNumber, int pageSize, String sortBy, String sortOrder) {
 		Direction sort;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;
@@ -163,7 +156,7 @@ public class DisputeServiceImpl implements DisputeService {
 		}
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 
-		return disputeOrderRepo.findByDisputeStatus(disputeStatus, pageRequest);
+		return disputeOrderRepo.findAll(pageRequest);
 	}
 
 	/**
@@ -175,25 +168,27 @@ public class DisputeServiceImpl implements DisputeService {
 	}
 
 	/**
-	 * 
+	 * perform action on raised dispute by admin with respect to Dispute Status
 	 */
 	@Override
 	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentForDisputeRaiser,
 			String commentForDisputeRaisedAgainst, DisputeStatus disputeStatus) {
-
 		if (DisputeStatus.RAISED.equals(disputeOrder.getDisputeStatus())
 				&& disputeStatus.equals(DisputeStatus.INPROCESS)) {
 			disputeOrder.setDisputeStatus(disputeStatus);
 			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
 			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
+			return disputeOrderRepo.save(disputeOrder);
 
 		} else if (DisputeStatus.INPROCESS.equals(disputeOrder.getDisputeStatus())
 				&& disputeStatus.equals(DisputeStatus.COMPLETED)) {
 			disputeOrder.setDisputeStatus(disputeStatus);
 			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
 			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
+			return disputeOrderRepo.save(disputeOrder);
 		}
-		return disputeOrderRepo.save(disputeOrder);
+		return null;
+
 	}
 
 	/**
@@ -204,14 +199,14 @@ public class DisputeServiceImpl implements DisputeService {
 
 		String messageForDisputeRaiser = "hi , " + "  " + disputeRaiser.getFirstName() + '\n'
 				+ "your have requested to dispute your order against " + disputeRaisedAgainst.getFirstName()
-				+ ".your order id is" + disputeOrder.getOrderId() + "and your dispute is "
+				+ ".your order id is" + disputeOrder.getOrders().getId() + "and your dispute is "
 				+ disputeOrder.getDisputeStatus() + disputeOrder.getCommentForDisputeRaiser();
 
 		notificationService.sendNotificationForDispute(disputeRaiser, messageForDisputeRaiser);
 
 		String messageForDisputeRaisedAgainst = "hi , " + disputeRaisedAgainst.getFirstName() + '\n'
 				+ disputeRaiser.getFirstName() + "has raised dispute against you for order id "
-				+ disputeOrder.getOrderId() + disputeOrder.getCommentForDisputeRaisedAgainst();
+				+ disputeOrder.getOrders().getId() + disputeOrder.getCommentForDisputeRaisedAgainst();
 
 		notificationService.sendNotificationForDispute(disputeRaisedAgainst, messageForDisputeRaisedAgainst);
 

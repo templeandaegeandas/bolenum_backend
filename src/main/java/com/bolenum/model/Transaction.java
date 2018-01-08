@@ -17,9 +17,9 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.bolenum.enums.CurrencyName;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.enums.TransferStatus;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -48,31 +48,60 @@ public class Transaction {
 	private Double txFee;
 	private Double txAmount;
 	private String txDescription;
-	
+
 	@Enumerated(EnumType.STRING)
 	private TransactionType transactionType;
-	
+
 	@Enumerated(EnumType.STRING)
 	private TransactionStatus transactionStatus;
 	private Double gas;
 	private Double gasPrice;
-	
+
 	private String currencyName;
-	
+
 	@ManyToOne
 	private User fromUser;
-	
+
 	@ManyToOne
 	private User toUser;
+	/**
+	 * platform fee for withdrawal and deposit, if transactionStatus is
+	 * "TRANSFER", then admin has paid fee to user's ethereum transaction
+	 */
+	private Double fee;
+
+	/**
+	 * transaction current status with respect to number of confirmation in
+	 * blockchain
+	 */
+	private String txStatus;
+
+	private Integer noOfConfirmations;
+	/**
+	 * for trade Id, to get the details of trade
+	 */
+	private Long tradeId;
+
+	private boolean inAppTransaction = false;
+
+	/**
+	 * for checking transfer status(amount transfered to admin or not)
+	 */
+	@Enumerated(EnumType.STRING)
+	private TransferStatus transferStatus;
+	/**
+	 * for which currency admin has paid transfer fee
+	 */
+	private String transferFeeCurrency;
 
 	public Transaction() {
 
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, CurrencyName currencyType, TransactionType transactionType, Double gas,
-			Double gasPrice, User fromUser ,User toUser) {
-			
+			String txDescription, TransactionType transactionType, Double gas, Double gasPrice, User fromUser,
+			User toUser) {
+
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
 		this.toAddress = toAddress;
@@ -83,7 +112,7 @@ public class Transaction {
 		this.gas = gas;
 		this.gasPrice = gasPrice;
 		this.fromUser = fromUser;
-		this.toUser=toUser;
+		this.toUser = toUser;
 	}
 
 	/**
@@ -108,7 +137,7 @@ public class Transaction {
 	public Date getCreatedOn() {
 		return createdOn;
 	}
-	
+
 	public String getCurrencyName() {
 		return currencyName;
 	}
@@ -116,7 +145,6 @@ public class Transaction {
 	public void setCurrencyName(String currencyName) {
 		this.currencyName = currencyName;
 	}
-
 
 	/**
 	 * the createdOn to set
@@ -236,7 +264,7 @@ public class Transaction {
 	}
 
 	/**
-
+	 * 
 	 * @return the transactionType
 	 */
 	public TransactionType getTransactionType() {
@@ -281,7 +309,6 @@ public class Transaction {
 		this.gasPrice = gasPrice;
 	}
 
-
 	public User getFromUser() {
 		return fromUser;
 	}
@@ -305,4 +332,103 @@ public class Transaction {
 	public void setTransactionStatus(TransactionStatus transactionStatus) {
 		this.transactionStatus = transactionStatus;
 	}
+
+	public Double getFee() {
+		return fee;
+	}
+
+	public void setFee(Double fee) {
+		this.fee = fee;
+	}
+
+	/**
+	 * @return the txStatus
+	 */
+	public String getTxStatus() {
+		return txStatus;
+	}
+
+	/**
+	 * @param txStatus
+	 *            the txStatus to set
+	 */
+	public void setTxStatus(String txStatus) {
+		this.txStatus = txStatus;
+	}
+
+	/**
+	 * @return the noOfConfirmations
+	 */
+	public Integer getNoOfConfirmations() {
+		return noOfConfirmations;
+	}
+
+	/**
+	 * @param noOfConfirmations
+	 *            the noOfConfirmations to set
+	 */
+	public void setNoOfConfirmations(Integer noOfConfirmations) {
+		this.noOfConfirmations = noOfConfirmations;
+	}
+
+	/**
+	 * @return the tradeId
+	 */
+	public Long getTradeId() {
+		return tradeId;
+	}
+
+	/**
+	 * @param tradeId
+	 *            the tradeId to set
+	 */
+	public void setTradeId(Long tradeId) {
+		this.tradeId = tradeId;
+	}
+
+	/**
+	 * @return the inAppTransaction
+	 */
+	public boolean isInAppTransaction() {
+		return inAppTransaction;
+	}
+
+	/**
+	 * @param inAppTransaction
+	 *            the inAppTransaction to set
+	 */
+	public void setInAppTransaction(boolean inAppTransaction) {
+		this.inAppTransaction = inAppTransaction;
+	}
+
+	/**
+	 * @return the transferStatus
+	 */
+	public TransferStatus getTransferStatus() {
+		return transferStatus;
+	}
+
+	/**
+	 * @param transferStatus
+	 *            the transferStatus to set
+	 */
+	public void setTransferStatus(TransferStatus transferStatus) {
+		this.transferStatus = transferStatus;
+	}
+
+	/**
+	 * @return the transferFeeCurrency
+	 */
+	public String getTransferFeeCurrency() {
+		return transferFeeCurrency;
+	}
+
+	/**
+	 * @param transferFeeCurrency
+	 *            the transferFeeCurrency to set
+	 */
+	public void setTransferFeeCurrency(String transferFeeCurrency) {
+		this.transferFeeCurrency = transferFeeCurrency;
+	}
+
 }

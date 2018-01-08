@@ -1,4 +1,4 @@
-package com.bolenum.services.admin;
+package com.bolenum.services.common.coin;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -15,8 +15,9 @@ import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-import com.bolenum.model.Erc20Token;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 
 /**
  * 
@@ -56,21 +57,35 @@ public interface Erc20TokenService {
 	 * @param erc20Tokens
 	 */
 	void saveInitialErc20Token(List<Erc20Token> erc20Tokens);
-	
+
 	/**
 	 * 
 	 * @return Long
 	 */
 	Long countErc20Token();
-	
-	Double getErc20WalletBalance(User user, Erc20Token erc20Token);
-
-	TransactionReceipt transferErc20Token(User user, Erc20Token erc20Token, String toAddress, Double fund)
-			throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException, IOException, CipherException, TransactionException, InterruptedException, ExecutionException;
 
 	void saveIncomingErc20Transaction(String tokenName) throws IOException, CipherException;
 
 	Erc20Token getByCoin(String coin);
 
+	void createErc20Wallet(User user, String tokenName);
+
+	UserCoin erc20WalletBalance(User user, Erc20Token erc20Token);
+
+	void sendUserTokenToAdmin();
+
+	Double getErc20WalletBalance(User user, Erc20Token erc20Token, String tokenName);
+
+	Double getErc20WalletBalanceTemp(User user, Erc20Token erc20Token);
+
+	TransactionReceipt transferErc20Token(User user, Erc20Token erc20Token, String toAddress, Double fund,
+			String tokenName) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			IllegalBlockSizeException, BadPaddingException, IOException, CipherException, TransactionException,
+			InterruptedException, ExecutionException;
+
+	// void sendUserTokenToAdminTemp()
+	// throws IOException, InvalidKeyException, NoSuchAlgorithmException,
+	// NoSuchPaddingException,
+	// IllegalBlockSizeException, BadPaddingException, CipherException,
+	// InterruptedException, TransactionException, ExecutionException;
 }

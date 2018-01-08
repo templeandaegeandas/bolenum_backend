@@ -6,14 +6,17 @@ package com.bolenum.services.user.wallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.enums.OrderStandard;
-import com.bolenum.model.CurrencyPair;
-import com.bolenum.model.Erc20Token;
+import com.bolenum.model.Currency;
 import com.bolenum.model.User;
+import com.bolenum.model.coin.Erc20Token;
+import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.orders.book.Orders;
-import com.bolenum.services.admin.Erc20TokenService;
+import com.bolenum.services.common.coin.Erc20TokenService;
+import com.bolenum.util.GenericUtils;
 
 /**
  * @author chandan kumar singh
@@ -25,6 +28,7 @@ public class WalletServiceImpl implements WalletService {
 	private Logger logger = LoggerFactory.getLogger(WalletServiceImpl.class);
 
 	@Autowired
+	@Lazy
 	private BTCWalletService btcWalletService;
 
 	@Autowired
@@ -33,6 +37,16 @@ public class WalletServiceImpl implements WalletService {
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
+	/**
+	 * to get the balance of user wallet
+	 * 
+	 * @param currency
+	 *            Abbrivation (ETH, BTC, BLN)
+	 * @param currencyType,
+	 *            CRYPTO, ERC20TOKEN
+	 * @param user
+	 * @return balance of user wallet
+	 */
 	@Override
 	public String getBalance(String ticker, String currencyType, User user) {
 		logger.debug("get wallet balance ticker: {}", ticker);
@@ -41,26 +55,27 @@ public class WalletServiceImpl implements WalletService {
 		case "CRYPTO":
 			switch (ticker) {
 			case "BTC":
-				balance = btcWalletService.getWalletBalnce(user.getBtcWalletUuid());
+				balance = btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid());
 				break;
 			case "ETH":
-				balance = String.valueOf(etherumWalletService.getWalletBalance(user));
+				UserCoin userCoin=etherumWalletService.ethWalletBalance(user, ticker);
+				balance = String.valueOf(userCoin.getBalance());
 				break;
 			}
 			break;
 		case "ERC20TOKEN":
 			Erc20Token erc20Token = erc20TokenService.getByCoin(ticker);
-			balance = String.valueOf(erc20TokenService.getErc20WalletBalance(user, erc20Token));
+			balance = String.valueOf(erc20TokenService.erc20WalletBalance(user, erc20Token).getBalance());
 			break;
 		case "FIAT":
 			break;
 		}
-		logger.debug("get wallet balance: {}", balance);
+		logger.debug("get wallet balance: {} of User: {}", balance, user.getEmailId());
 		return balance;
 	}
 
 	@Override
-	public String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded) {
+	public String getPairedBalance(Orders orders, Currency marketCurrency, Currency pairedCurrency, double qtyTraded) {
 		String minBalance = null;
 		/**
 		 * if order type is BUY then for Market order, user should have total
@@ -68,23 +83,24 @@ public class WalletServiceImpl implements WalletService {
 		 * price), price limit given by user
 		 */
 		if (OrderStandard.LIMIT.equals(orders.getOrderStandard())) {
-			logger.debug("limit order buy on price: {} {} and quantity traded: {} {} ", orders.getPrice(),
-					currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation(), qtyTraded,
-					currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
+			logger.debug("limit order buy on price: {} {} and quantity trading: {} {} ",
+					GenericUtils.getDecimalFormatString(orders.getPrice()),
+					marketCurrency.getCurrencyAbbreviation(),
+					GenericUtils.getDecimalFormatString(qtyTraded),
+					pairedCurrency.getCurrencyAbbreviation());
 			minBalance = String.valueOf(qtyTraded * orders.getPrice());
 		} else {
 			/**
 			 * fetching the market BTC price of buying currency
 			 */
 
-			// MarketPrice marketPrice =
-			// marketPriceService.findByCurrency(currencyPair.getPairedCurrency().get(0));
 			/**
 			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
 			 * BTC, this will update according to order selling book
 			 */
-			double buyingCurrencyValue = currencyPair.getPairedCurrency().get(0).getPriceBTC();
-			logger.debug("order value : {}, buyingCurrencyValue: {}", qtyTraded, buyingCurrencyValue);
+			double buyingCurrencyValue = 0.0578560;
+			logger.debug("order value : {}, buyingCurrencyValue: {}", GenericUtils.getDecimalFormatString(qtyTraded),
+					GenericUtils.getDecimalFormatString(buyingCurrencyValue));
 			if (buyingCurrencyValue > 0) {
 				/**
 				 * user must have this balance to give market order, Example

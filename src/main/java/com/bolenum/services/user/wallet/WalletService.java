@@ -3,7 +3,7 @@
  */
 package com.bolenum.services.user.wallet;
 
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 
@@ -13,5 +13,6 @@ import com.bolenum.model.orders.book.Orders;
  */
 public interface WalletService {
 	public String getBalance(String ticker, String currencyType, User user);
-	public String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded);
+
+	public String getPairedBalance(Orders orders, Currency marketCurrency, Currency pairedCurrency, double qtyTraded);
 }

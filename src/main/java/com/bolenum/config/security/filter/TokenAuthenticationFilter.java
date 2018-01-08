@@ -47,6 +47,7 @@ public class TokenAuthenticationFilter extends GenericFilterBean {
 			}
 		}
 		chain.doFilter(request, response);
-	}
+		SecurityContextHolder.clearContext();
 
+	}
 }

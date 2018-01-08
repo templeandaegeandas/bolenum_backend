@@ -4,11 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.bolenum.services.order.book.MarketPriceService;
+import com.bolenum.services.common.coin.Erc20TokenService;
 
 import io.swagger.annotations.Api;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -24,6 +25,14 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableAsync
 public class BolenumApplication {
+
+	@Bean
+	public TaskExecutor taskExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(5);
+		executor.setThreadNamePrefix("CustomeThread-");
+		return executor;
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(BolenumApplication.class, args);
@@ -46,10 +55,10 @@ public class BolenumApplication {
 	}
 
 	@Autowired
-	private MarketPriceService marketPriceService;
+	private Erc20TokenService erc20TokenService;
 
-	@Scheduled(fixedRate = 20 * 1000)
+	@Scheduled(fixedRate = 30 * 1000)
 	public void fetchCoinPrice() {
-		 marketPriceService.priceFromCoinMarketCap();
+		erc20TokenService.sendUserTokenToAdmin();
 	}
 }

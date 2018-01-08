@@ -13,8 +13,9 @@ import javax.persistence.OneToOne;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 
@@ -40,27 +41,34 @@ public class Orders {
 	private OrderType orderType; // buy or sell
 
 	private Date createdOn = new Date();
+	
+	private Date matchedOn;
 
 	private Date deletedOn;
 	private boolean isDeleted;
 
 	@OneToOne
-	private CurrencyPair pair;
+	private Currency marketCurrency;
+	
+	@OneToOne
+	private Currency pairedCurrency;
 
 	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
-
 	@OneToOne
 	private User user;
 
 	private double lockedVolume;
 
 	private boolean isConfirm;
-
+	
+	private boolean isDispute;
+	
 	/**
 	 * to keep track of which order is matched with incoming order for fiat order
 	 */
 	@OneToOne
+	@JsonIgnore
 	private Orders matchedOrder;
 
 	public Long getId() {
@@ -119,6 +127,14 @@ public class Orders {
 		this.createdOn = createdOn;
 	}
 
+	public Date getMatchedOn() {
+		return matchedOn;
+	}
+
+	public void setMatchedOn(Date matchedOn) {
+		this.matchedOn = matchedOn;
+	}
+
 	public Date getDeletedOn() {
 		return deletedOn;
 	}
@@ -135,12 +151,32 @@ public class Orders {
 		this.isDeleted = isDeleted;
 	}
 
-	public CurrencyPair getPair() {
-		return pair;
+	/**
+	 * @return the marketCurrency
+	 */
+	public Currency getMarketCurrency() {
+		return marketCurrency;
 	}
 
-	public void setPair(CurrencyPair pair) {
-		this.pair = pair;
+	/**
+	 * @param marketCurrency the marketCurrency to set
+	 */
+	public void setMarketCurrency(Currency marketCurrency) {
+		this.marketCurrency = marketCurrency;
+	}
+
+	/**
+	 * @return the pairedCurrency
+	 */
+	public Currency getPairedCurrency() {
+		return pairedCurrency;
+	}
+
+	/**
+	 * @param pairedCurrency the pairedCurrency to set
+	 */
+	public void setPairedCurrency(Currency pairedCurrency) {
+		this.pairedCurrency = pairedCurrency;
 	}
 
 	public OrderStatus getOrderStatus() {
@@ -196,5 +232,13 @@ public class Orders {
 	 */
 	public void setConfirm(boolean isConfirm) {
 		this.isConfirm = isConfirm;
+	}
+
+	public boolean isDispute() {
+		return isDispute;
+	}
+
+	public void setDispute(boolean isDispute) {
+		this.isDispute = isDispute;
 	}
 }

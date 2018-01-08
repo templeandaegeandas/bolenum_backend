@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -36,7 +38,8 @@ public class DisputeOrder {
 	@ManyToOne
 	private User disputeRaisedAgainst;
 
-	private Long orderId;
+	@ManyToOne
+	private Orders orders;
 
 	private Long transactionId;
 
@@ -46,6 +49,7 @@ public class DisputeOrder {
 
 	private Date deletedOn;
 
+	@Enumerated(EnumType.STRING)
 	private DisputeStatus disputeStatus;
 
 	@Column(length = 1337)
@@ -93,12 +97,12 @@ public class DisputeOrder {
 		this.disputeRaisedAgainst = disputeRaisedAgainst;
 	}
 
-	public Long getOrderId() {
-		return orderId;
+	public Orders getOrders() {
+		return orders;
 	}
 
-	public void setOrderId(Long orderId) {
-		this.orderId = orderId;
+	public void setOrders(Orders orders) {
+		this.orders = orders;
 	}
 
 	public Long getTransactionId() {
@@ -196,5 +200,4 @@ public class DisputeOrder {
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
 	}
-
 }

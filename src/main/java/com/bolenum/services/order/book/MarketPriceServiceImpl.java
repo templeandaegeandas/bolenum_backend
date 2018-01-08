@@ -3,104 +3,87 @@
  */
 package com.bolenum.services.order.book;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Predicate;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 
 import javax.transaction.Transactional;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import com.bolenum.model.Currency;
-import com.bolenum.repo.common.CurrencyRepo;
+import com.bolenum.repo.order.book.OrdersRepository;
+import com.bolenum.repo.order.book.TradeRepository;
 
 /**
- * @author chandan kumar singh
- * @date 11-Oct-2017
+ * @author Vishal Kumar
+ * @date 02-Jan-2018
  */
 @Service
 @Transactional
 public class MarketPriceServiceImpl implements MarketPriceService {
+
 	private Logger logger = LoggerFactory.getLogger(MarketPriceServiceImpl.class);
-	/*
-	 * @Autowired private MarketPriceRepo marketPriceRepo;
-	 */
+
 	@Autowired
-	private CurrencyRepo currencyRepo;
-	private List<Currency> list;
+	private OrdersRepository ordersRepository;
 
-	/*
-	 * @Override public MarketPrice savePrice(MarketPrice marketPrice) { return
-	 * marketPriceRepo.saveAndFlush(marketPrice); }
-	 */
+	@Autowired
+	private TradeRepository tradeRepository;
 
-	private void loadCurrecy() {
-		list = currencyRepo.findAll();
+	private final String DATE_FORMATE = "yyyy-MM-dd HH:mm:ss";
+
+	@Override
+	public long tradesIn24h(long marketCurrencyId, long pairedCurrencyId) throws ParseException {
+		long countTrade24h = 0;
+		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMATE);
+		Instant now = Instant.now();
+		Instant before = now.minus(Duration.ofHours(24));
+		Date dateBefore = Date.from(before);
+		String dateBeforeString = dateFormatter.format(dateBefore);
+		logger.debug("date before string: {}", dateFormatter.parse(dateBeforeString));
+		countTrade24h = tradeRepository.count24hTrade(marketCurrencyId, pairedCurrencyId,
+				dateFormatter.parse(dateBeforeString));
+		return countTrade24h;
 	}
 
 	@Override
-	public void priceFromCoinMarketCap() {
-		loadCurrecy();
-		// logger.debug("every 20 sec :{}", new Date());
-		String url = "https://api.coinmarketcap.com/v1/ticker/?start=0&limit=800";
-		RestTemplate restTemplate = new RestTemplate();
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
-		String res = restTemplate.getForObject(builder.toUriString(), String.class);
-		String symbol = null, price_usd = null, price_btc = null;
-		try {
-			JSONArray array = new JSONArray(res);
-			for (int n = 0; n < array.length(); n++) {
-				JSONObject object = array.getJSONObject(n);
-				if (!object.isNull("symbol") && !object.get("symbol").equals(null)) {
-					symbol = (String) object.get("symbol");
-				}
-				if (!object.isNull("price_usd") && !object.get("price_usd").equals(null)) {
-					price_usd = (String) object.get("price_usd");
-				}
-				if (!object.isNull("price_btc") && !object.get("price_btc").equals(null)) {
-					price_btc = (String) object.get("price_btc");
-				}
-				Currency currency = searchSymbol(symbol);
-				if (symbol != null && currency != null && price_btc != null && price_usd != null) {
-					saveMarketPrice(currency, price_btc, price_usd);
-				}
-			}
-		} catch (JSONException e) {
-			logger.error("json parse error: {}", e.getMessage());
-			e.printStackTrace();
-		}
+	public Double ordersIn24hHigh(long marketCurrencyId, long pairedCurrencyId) throws ParseException {
+		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMATE);
+		Instant now = Instant.now();
+		Instant before = now.minus(Duration.ofHours(24));
+		Date dateBefore = Date.from(before);
+		String dateBeforeString = dateFormatter.format(dateBefore);
+		Double high24h = ordersRepository.ordersIn24hHigh(marketCurrencyId, pairedCurrencyId,
+				dateFormatter.parse(dateBeforeString));
+		return high24h == null ? 0.0 : high24h;
 	}
 
-	private Currency searchSymbol(String symbol) {
-		Predicate<Currency> predicate = c -> c.getCurrencyAbbreviation().equalsIgnoreCase(symbol);
-		Optional<Currency> currencies = list.stream().filter(predicate).findFirst();
-		if (currencies.isPresent()) {
-			return currencies.get();
-		}
-		return null;
+	@Override
+	public Double ordersIn24hLow(long marketCurrencyId, long pairedCurrencyId) throws ParseException {
+		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMATE);
+		Instant now = Instant.now();
+		Instant before = now.minus(Duration.ofHours(24));
+		Date dateBefore = Date.from(before);
+		String dateBeforeString = dateFormatter.format(dateBefore);
+		Double low24h = ordersRepository.ordersIn24hLow(marketCurrencyId, pairedCurrencyId,
+				dateFormatter.parse(dateBeforeString));
+		return low24h == null ? 0.0 : low24h;
 	}
 
-	private void saveMarketPrice(Currency currency, String priceBtc, String priceUsd) {
-		currency.setPriceBTC(Double.valueOf(priceBtc));
-		currency.setPriceUSD(Double.valueOf(priceUsd));
-		currencyRepo.save(currency);
+	@Override
+	public Double ordersIn24hVolume(long marketCurrencyId, long pairedCurrencyId) throws ParseException {
+		SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMATE);
+		Instant now = Instant.now();
+		Instant before = now.minus(Duration.ofHours(24));
+		Date dateBefore = Date.from(before);
+		String dateBeforeString = dateFormatter.format(dateBefore);
+		Double volume24h = ordersRepository.ordersIn24hVolume(marketCurrencyId, pairedCurrencyId,
+				dateFormatter.parse(dateBeforeString));
+		return volume24h == null ? 0.0 : volume24h;
 	}
-
-	/*
-	 * @Override public MarketPrice findByCurrency(Currency currency) { return
-	 * marketPriceRepo.findByCurrency(currency); }
-	 * 
-	 * @Override public MarketPrice findByCurrencyId(String
-	 * currencyAbbreviation) { return
-	 * marketPriceRepo.findByCurrencyCurrencyAbbreviation(currencyAbbreviation);
-	 * }
-	 */
 }

@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.enums.TokenType;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.repo.common.AuthenticationTokenRepo;
 
@@ -32,29 +33,24 @@ public class AuthenticationServiceImpl implements AuthenticationTokenService {
 	public boolean isTokenExpired(AuthenticationToken verificationTokenToCheck) {
 
 		Date tokenCreatedTime = verificationTokenToCheck.getCreatedOn();
-		long HOUR = 3600 * 1000;
-		long expirationTime = tokenCreatedTime.getTime() + (2 * HOUR);
+		long hour = (long) 3600 * 1000;
+		long expirationTime = tokenCreatedTime.getTime() + (2 * hour);
 		long currentTime = new Date().getTime();
-		if (currentTime > expirationTime) {
-			return true; // token has expired
-		} else {
-			return false; // token has not expired
-		}
+		return currentTime > expirationTime;
 	}
 
 	/**
-	 *  to count number of user who logged in within 7 days
+	 * to count number of user who logged in within 7 days
 	 */
 	@Override
 	public Long countActiveUsers() {
-		
-		Date endDate=new Date();
-		Calendar c=Calendar.getInstance();
+		Date endDate = new Date();
+		Calendar c = Calendar.getInstance();
 		c.setTime(endDate);
-		c.add(Calendar.DATE,-7);
-		Date startDate=c.getTime();
-		startDate=(Date)startDate;
-		return authenticationTokenRepo.countAuthenticationTokenByCreatedOnBetween(startDate, endDate);
-		
+		c.add(Calendar.DATE, -7);
+		Date startDate = c.getTime();
+		return authenticationTokenRepo.countAuthenticationTokenByTokentypeAndCreatedOnBetween(TokenType.AUTHENTICATION,
+				startDate, endDate);
+
 	}
 }

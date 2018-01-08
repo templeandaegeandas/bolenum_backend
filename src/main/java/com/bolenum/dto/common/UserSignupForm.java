@@ -51,7 +51,7 @@ public class UserSignupForm {
 	private String password;
 
 	@NotNull
-	public String repassword = "";
+	public String repassword;
 
 	private String address;
 
@@ -274,14 +274,12 @@ public class UserSignupForm {
 
 	@AssertTrue(message = "password did not match")
 	private boolean isValid() {
-		boolean check = this.password.equals(this.repassword);
-		return check;
+		return this.password.equals(this.repassword);
 	}
 
 	@AssertTrue(message = "enter valid email")
 	private boolean isMailValid() {
-		boolean check = GenericUtils.isValidMail(this.emailId);
-		return check;
+		return GenericUtils.isValidMail(this.emailId);
 	}
 
 	public User copy(User user) {

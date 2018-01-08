@@ -21,23 +21,14 @@ public class ResponseHandler {
 	private ResponseHandler() {
 	}
 
-	private static Map<String, Object> map = new HashMap<String, Object>();
-
 	public static ResponseEntity<Object> response(HttpStatus httpStatus, Boolean isError, String message,
 			Object responseObject) {
-		try {
-			map.put("timestamp", new Date().getTime());
-			map.put("status", httpStatus.value());
-			map.put("isError", isError);
-			map.put("message", message);
-			map.put("data", responseObject);
-			return new ResponseEntity<Object>(map, httpStatus);
-		} catch (Exception e) {
-			map.clear();
-			map.put("timestamp", new Date().getTime());
-			map.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-			map.put("message", e.getMessage());
-			return new ResponseEntity<Object>(map, httpStatus);
-		}
+		Map<String, Object> map = new HashMap();
+		map.put("timestamp", new Date().getTime());
+		map.put("status", httpStatus.value());
+		map.put("isError", isError);
+		map.put("message", message);
+		map.put("data", responseObject);
+		return new ResponseEntity(map, httpStatus);
 	}
 }

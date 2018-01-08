@@ -61,31 +61,24 @@ public class FileUploadServiceImpl implements FileUploadService {
 		} else {
 			updatedFileName = documentType + "_" + user.getUserId() + "." + extension;
 		}
-		InputStream inputStream = multipartFile.getInputStream();
 		byte[] buf = new byte[1024];
 		File file = new File(storageLocation + updatedFileName);
-		FileOutputStream fileOutputStream = new FileOutputStream(file);
-		int numRead = 0;
-		while ((numRead = inputStream.read(buf)) >= 0) {
-			fileOutputStream.write(buf, 0, numRead);
+		try (InputStream inputStream = multipartFile.getInputStream();
+				FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+			int numRead = 0;
+			while ((numRead = inputStream.read(buf)) >= 0) {
+				fileOutputStream.write(buf, 0, numRead);
+			}
 		}
-		inputStream.close();
-		fileOutputStream.close();
-		logger.debug("user uploaded file name: {}", String.valueOf(file));
 		// using PosixFilePermission to set file permissions 777
-		Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+		Set<PosixFilePermission> perms = new HashSet<>();
 		// add owners permission
 		perms.add(PosixFilePermission.OWNER_READ);
 		perms.add(PosixFilePermission.OWNER_WRITE);
-		// perms.add(PosixFilePermission.OWNER_EXECUTE);
-		// add group permissions
 		perms.add(PosixFilePermission.GROUP_READ);
 		perms.add(PosixFilePermission.GROUP_WRITE);
-		// perms.add(PosixFilePermission.GROUP_EXECUTE);
 		// add others permissions
 		perms.add(PosixFilePermission.OTHERS_READ);
-		// perms.add(PosixFilePermission.OTHERS_WRITE);
-		// perms.add(PosixFilePermission.OTHERS_EXECUTE);
 
 		Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
 		return updatedFileName;
@@ -108,27 +101,24 @@ public class FileUploadServiceImpl implements FileUploadService {
 				throw new PersistenceException(localeService.getMessage("valid.image.extention.error"));
 			}
 			byte[] decodedImg = Base64.getDecoder().decode(encodedImg.getBytes(StandardCharsets.UTF_8));
-			InputStream in = new ByteArrayInputStream(decodedImg);
-			String updatedFileName = user.getFirstName() + "_" + user.getUserId() + "." + extension;
-			BufferedImage imageFromConvert = ImageIO.read(in);
-			File file = new File(storageLocation + updatedFileName);
-			ImageIO.write(imageFromConvert, extension, file);
-			logger.debug("user uploaded file name: {}", String.valueOf(file));
+			String updatedFileName;
+			File file;
+			try (InputStream in = new ByteArrayInputStream(decodedImg)) {
+				updatedFileName = user.getFirstName() + "_" + user.getUserId() + "." + extension;
+				BufferedImage imageFromConvert = ImageIO.read(in);
+				file = new File(storageLocation + updatedFileName);
+				ImageIO.write(imageFromConvert, extension, file);
+			}
 			// using PosixFilePermission to set file permissions 777
-			Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+			Set<PosixFilePermission> perms = new HashSet<>();
 			// add owners permission
 			perms.add(PosixFilePermission.OWNER_READ);
 			perms.add(PosixFilePermission.OWNER_WRITE);
-			// perms.add(PosixFilePermission.OWNER_EXECUTE);
 			// add group permissions
 			perms.add(PosixFilePermission.GROUP_READ);
 			perms.add(PosixFilePermission.GROUP_WRITE);
-			// perms.add(PosixFilePermission.GROUP_EXECUTE);
 			// add others permissions
 			perms.add(PosixFilePermission.OTHERS_READ);
-			// perms.add(PosixFilePermission.OTHERS_WRITE);
-			// perms.add(PosixFilePermission.OTHERS_EXECUTE);
-
 			Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
 			logger.info("profile pic uploaded success");
 			return updatedFileName;

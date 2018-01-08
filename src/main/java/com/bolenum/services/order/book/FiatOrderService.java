@@ -11,7 +11,6 @@ import org.springframework.data.domain.Page;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.Currency;
-import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 
@@ -23,9 +22,9 @@ public interface FiatOrderService {
 
 	public Orders createOrders(Orders orders);
 
-	public String checkFiatOrderEligibility(User user, Orders orders, long pairId);
+	public String checkFiatOrderEligibility(User user, Orders orders);
 
-	public Orders processFiatOrderList(Orders matchedOrder, Orders orders, CurrencyPair pair);
+	public Orders processFiatOrderList(Orders matchedOrder, Orders orders);
 
 	double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType, Currency currency);
 
@@ -33,9 +32,9 @@ public interface FiatOrderService {
 
 	public boolean buyerPaidConfirmtion(Orders order);
 
-	public Future<Boolean> processTransactionFiatOrders(Orders order, String currencyAbr);
+	public Future<Boolean> processTransactionFiatOrders(Orders order, String currencyAbr, String currencyType);
 
-	public Page<Orders> existingOrders(Orders order, long pairId, int page, int size);
+	public Page<Orders> existingOrders(Orders order, int page, int size, long marketCurrencyId, long pairedCurrencyId);
 
-	Map<String, String> byersWalletAddressAndCurrencyAbbr(User user, CurrencyPair pair);
+	Map<String, String> byersWalletAddressAndCurrencyAbbr(User user, Currency marketCurrency, Currency pairedCurrency);
 }
