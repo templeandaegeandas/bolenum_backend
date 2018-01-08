@@ -302,6 +302,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			String toAddress) {
 		Double availableBalance;
+		Double adminMaintainBal = 2.0;
 		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
 		if (userCoin == null) {
 			return false;
@@ -312,18 +313,32 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if ("BTC".equals(tokenName)) {
 			String balance = getBtcAccountBalance(user.getBtcWalletUuid());
 			availableBalance = Double.valueOf(balance);
+			logger.debug("Available balance: {} {}", availableBalance, tokenName);
 		} else {
-			availableBalance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
-		}
-		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
+			Double tranferFees = transactionService.totalTrasferFeePaidByAdmin(tokenName);
+			if (tranferFees == null) {
+				tranferFees = 0.0;
+			}
+			Double usersDepositBalance = userCoinRepository.findTotalDepositBalanceOfUser(tokenName);
+			if (usersDepositBalance == null) {
+				usersDepositBalance = 0.0;
+			}
 
-		double volume = GenericUtils.getDecimalFormat(withdrawAmount);
-		logger.debug("addition of withdraw amount, place order, fee and network fee volume: {}", volume);
-		if (availableBalance >= volume) {
+			availableBalance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
+			if (availableBalance == null) {
+				availableBalance = 0.0;
+			}
+			availableBalance = availableBalance - (usersDepositBalance + tranferFees + adminMaintainBal);
+			logger.debug(
+					"Admin Available balance:{} Maintain Bal volume:{} , usersDepositBalance: {} and transfer fee: {} ",
+					availableBalance, adminMaintainBal, usersDepositBalance, tranferFees);
+		}
+
+		if (availableBalance >= withdrawAmount) {
 			return true;
 		} else {
-			throw new InsufficientBalanceException(
-					MessageFormat.format(localeService.getMessage("insufficient.balance"), withdrawAmount, 0.0));
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("admin.insufficient.balance"), withdrawAmount, adminMaintainBal));
 		}
 	}
 

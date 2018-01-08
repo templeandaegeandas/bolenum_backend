@@ -310,7 +310,7 @@ public class AdminController {
 				mapAddressAndBal.put(ADDRESS, btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
 				mapAddressAndBal.put(BALANCE, btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
 				mapAddressAndBal.put(DEPOSIT, 0);
-				mapAddressAndBal.put(TRADEFEE, tradeFees);
+				mapAddressAndBal.put(TRADEFEE, GenericUtils.getDecimalFormatString(tradeFees));
 				mapAddressAndBal.put(TRANSFERFEE, 0);
 				map.put("data", mapAddressAndBal);
 				break;
@@ -331,10 +331,10 @@ public class AdminController {
 				balance = balance - (usersDepositBalance + tranferFees);
 				Map<String, Object> mapAddress = new HashMap<>();
 				mapAddress.put(ADDRESS, userCoin.getWalletAddress());
-				mapAddress.put(BALANCE, balance);
-				mapAddress.put(DEPOSIT, usersDepositBalance);
-				mapAddress.put(TRADEFEE, tradeFees);
-				mapAddress.put(TRANSFERFEE, tranferFees);
+				mapAddress.put(BALANCE, GenericUtils.getDecimalFormatString(balance));
+				mapAddress.put(DEPOSIT, GenericUtils.getDecimalFormatString(usersDepositBalance));
+				mapAddress.put(TRADEFEE, GenericUtils.getDecimalFormatString(tradeFees));
+				mapAddress.put(TRANSFERFEE, GenericUtils.getDecimalFormatString(tranferFees));
 				map.put("data", mapAddress);
 				break;
 			default:
@@ -351,8 +351,8 @@ public class AdminController {
 			Map<String, Object> mapAddress = new HashMap<>();
 			mapAddress.put(ADDRESS, userCoin.getWalletAddress());
 			mapAddress.put(BALANCE, GenericUtils.getDecimalFormatString(balance));
-			mapAddress.put(DEPOSIT, depoBal);
-			mapAddress.put(TRADEFEE, tradeFees);
+			mapAddress.put(DEPOSIT, GenericUtils.getDecimalFormatString(depoBal));
+			mapAddress.put(TRADEFEE, GenericUtils.getDecimalFormatString(tradeFees));
 			mapAddress.put(TRANSFERFEE, 0);
 			map.put("data", mapAddress);
 			break;
