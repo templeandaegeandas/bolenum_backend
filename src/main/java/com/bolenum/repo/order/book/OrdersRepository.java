@@ -66,14 +66,14 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED'")
 	Long countOrderByOrderType(@Param("orderType") OrderType orderType);
 
-	@Query("select o from Orders o where o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price desc")
-	Page<Orders> findBuyOrderList(@Param("marketCurrency") Currency marketCurrency,
-			@Param("pairedCurrency") Currency pairedCurrency, @Param("orderType") OrderType orderType,
+	@Query("select o from Orders o where o.marketCurrency.currencyId=:marketCurrencyId and o.pairedCurrency.currencyId=:pairedCurrencyId and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price desc")
+	Page<Orders> findBuyOrderList(@Param("marketCurrencyId") long marketCurrencyId,
+			@Param("pairedCurrencyId") long pairedCurrencyId, @Param("orderType") OrderType orderType,
 			@Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 
-	@Query("select o from Orders o where o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price asc")
-	Page<Orders> findSellOrderList(@Param("marketCurrency") Currency marketCurrency,
-			@Param("pairedCurrency") Currency pairedCurrency, @Param("orderType") OrderType orderType,
+	@Query("select o from Orders o where o.marketCurrency.currencyId=:marketCurrencyId and o.pairedCurrency.currencyId=:pairedCurrencyId and o.orderType = :orderType and o.orderStatus = :orderStatus order by o.price asc")
+	Page<Orders> findSellOrderList(@Param("marketCurrencyId") long marketCurrencyId,
+			@Param("pairedCurrencyId") long pairedCurrencyId, @Param("orderType") OrderType orderType,
 			@Param("orderStatus") OrderStatus orderStatus, Pageable pageable);
 
 	List<Orders> findByUserAndOrderStatus(User user, OrderStatus orderStatus);
@@ -104,8 +104,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Page<Orders> findByOrderStatusAndCreatedOnBetween(@Param("orderStatus") OrderStatus orderStatus,
 			@Param("startDate") Date startDate, @Param("endDate") Date endDate, Pageable page);
 
-	Page<Orders> findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrency(
-			Double price, OrderType orderType, OrderStatus orderStatus, Currency marketCurrency, Currency pairedCurrency,
+	Page<Orders> findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndMarketCurrencyCurrencyIdAndPairedCurrencyCurrencyId(
+			Double price, OrderType orderType, OrderStatus orderStatus, long marketCurrencyId, long pairedCurrencyId,
 			Pageable page);
 
 	Page<Orders> findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndMarketCurrencyCurrencyIdAndPairedCurrencyCurrencyId(
@@ -119,15 +119,15 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	// @Param("toCurrencyList") List<Currency> toCurrencyList,
 	// @Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
 
-	@Query("select sum(o.volume) from Orders o where o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency and o.createdOn > :endDate")
-	Double ordersIn24hVolume(@Param("marketCurrency") Currency marketCurrency,
-			@Param("pairedCurrency") Currency pairedCurrency, @Param("endDate") Date endDate);
+	@Query("select sum(o.volume) from Orders o where o.marketCurrency.currencyId=:marketCurrencyId and o.pairedCurrency.currencyId=:pairedCurrencyId and o.createdOn > :endDate")
+	Double ordersIn24hVolume(@Param("marketCurrencyId") long marketCurrencyId,
+			@Param("pairedCurrencyId") long pairedCurrencyId, @Param("endDate") Date endDate);
 
-	@Query("select max(o.volume) from Orders o where o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency and o.createdOn > :endDate")
-	Double ordersIn24hHigh(@Param("marketCurrency") Currency marketCurrency,
-			@Param("pairedCurrency") Currency pairedCurrency, @Param("endDate") Date endDate);
+	@Query("select max(o.volume) from Orders o where o.marketCurrency.currencyId=:marketCurrencyId and o.pairedCurrency.currencyId=:pairedCurrencyId and o.createdOn > :endDate")
+	Double ordersIn24hHigh(@Param("marketCurrencyId") long marketCurrencyId,
+			@Param("pairedCurrencyId") long pairedCurrencyId, @Param("endDate") Date endDate);
 
-	@Query("select min(o.volume) from Orders o where o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency and o.createdOn > :endDate")
-	Double ordersIn24hLow(@Param("marketCurrency") Currency marketCurrency,
-			@Param("pairedCurrency") Currency pairedCurrency, @Param("endDate") Date endDate);
+	@Query("select min(o.volume) from Orders o where o.marketCurrency.currencyId=:marketCurrencyId and o.pairedCurrency.currencyId=:pairedCurrencyId and o.createdOn > :endDate")
+	Double ordersIn24hLow(@Param("marketCurrencyId") long marketCurrencyId,
+			@Param("pairedCurrencyId") long pairedCurrencyId, @Param("endDate") Date endDate);
 }

@@ -33,11 +33,9 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 
 	Page<Trade> findBySeller(User seller, Pageable pageable);
 
-	@Query("select count(t) from Trade t where t.marketCurrency=:marketCurrency and t.pairedCurrency=:pairedCurrency and t.createdOn > :endDate")
-	long count24hTrade(@Param("marketCurrency") Currency marketCurrency,
-			@Param("pairedCurrency") Currency pairedCurrency, @Param("endDate") Date endDate);
-
+	@Query("select count(t) from Trade t where t.marketCurrency.currencyId=:marketCurrencyId and t.pairedCurrency.currencyId=:pairedCurrencyId and t.createdOn > :endDate")
+	long count24hTrade(@Param("marketCurrencyId") long marketCurrencyId,
+			@Param("pairedCurrencyId") long pairedCurrencyId, @Param("endDate") Date endDate);
 
 	List<Trade> findByPairedCurrency(Currency currency);
-
 }

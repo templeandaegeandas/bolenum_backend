@@ -89,13 +89,12 @@ public class FiatOrderController {
 	 * existing order then only it will be saved. Otherwise existing order list will
 	 * be returned
 	 * 
-	 * @param Order,
-	 * @param pairid
+	 * @param Order
 	 * @return list of order/ created order id
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.POST)
-	public ResponseEntity<Object> createFiateOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
+	public ResponseEntity<Object> createFiateOrder(@RequestBody Orders orders) {
 		User user = GenericUtils.getLoggedInUser();
 		boolean kycVerified = userService.isKycVerified(user);
 		if (!kycVerified) {
@@ -107,7 +106,7 @@ public class FiatOrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("bank.details.not.exist"), Optional.empty());
 		}
-		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10);
+		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10, orders.getMarketCurrency().getCurrencyId(), orders.getPairedCurrency().getCurrencyId());
 		if (page.getTotalElements() > 0) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.exist.fiat"),
 					page);
@@ -131,8 +130,7 @@ public class FiatOrderController {
 
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.PUT)
-	public ResponseEntity<Object> initializeOrder(@RequestParam("pairId") long pairId,
-			@RequestParam("orderId") long matchedOrderId, @Valid @RequestBody OrdersDTO ordersDTO,
+	public ResponseEntity<Object> initializeOrder(@RequestParam("orderId") long matchedOrderId, @Valid @RequestBody OrdersDTO ordersDTO,
 			BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(bindingResult),
@@ -405,13 +403,12 @@ public class FiatOrderController {
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getOrdersList(@RequestParam("volume") double volume,
-			@RequestParam("price") double price, @RequestParam("orderType") OrderType orderType,
-			@RequestParam("pairId") long pairId) {
+			@RequestParam("price") double price, @RequestParam("orderType") OrderType orderType, @RequestParam("marketCurrencyId") long marketCurrencyId, @RequestParam("pairedCurrencyId") long pairedCurrencyId) {
 		Orders orders = new Orders();
 		orders.setVolume(volume);
 		orders.setPrice(price);
 		orders.setOrderType(orderType);
-		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10);
+		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10, marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"), page);
 	}
 

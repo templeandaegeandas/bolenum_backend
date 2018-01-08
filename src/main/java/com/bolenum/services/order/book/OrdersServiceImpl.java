@@ -525,15 +525,15 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public Page<Orders> getBuyOrdersListByPair(Currency marketCurrency, Currency pairedCurrency) {
+	public Page<Orders> getBuyOrdersListByPair(long marketCurrencyId, long pairedCurrencyId) {
 		PageRequest pageRequest = new PageRequest(0, Integer.MAX_VALUE, Direction.DESC, "price");
-		return ordersRepository.findBuyOrderList(marketCurrency, pairedCurrency, OrderType.BUY, OrderStatus.SUBMITTED, pageRequest);
+		return ordersRepository.findBuyOrderList(marketCurrencyId, pairedCurrencyId, OrderType.BUY, OrderStatus.SUBMITTED, pageRequest);
 	}
 
 	@Override
-	public Page<Orders> getSellOrdersListByPair(Currency marketCurrency, Currency pairedCurrency) {
+	public Page<Orders> getSellOrdersListByPair(long marketCurrencyId, long pairedCurrencyId) {
 		PageRequest pageRequest = new PageRequest(0, Integer.MAX_VALUE, Direction.DESC, "price");
-		return ordersRepository.findSellOrderList(marketCurrency, pairedCurrency, OrderType.SELL, OrderStatus.SUBMITTED, pageRequest);
+		return ordersRepository.findSellOrderList(marketCurrencyId, pairedCurrencyId, OrderType.SELL, OrderStatus.SUBMITTED, pageRequest);
 	}
 
 	/**

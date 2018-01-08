@@ -36,7 +36,6 @@ import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.Countries;
-import com.bolenum.model.Currency;
 import com.bolenum.model.States;
 import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.Transaction;
@@ -494,8 +493,8 @@ public class UserController {
 	 */
 
 	@RequestMapping(value = UrlConstant.COIN_MARKET_DATA, method = RequestMethod.GET)
-	public ResponseEntity<Object> getCoinMarketData(@RequestParam("marketCurrency") Currency marketCurrency,
-			@RequestParam("pairedCurrency") Currency pairedCurrency) {
+	public ResponseEntity<Object> getCoinMarketData(@RequestParam("marketCurrencyId") long marketCurrency,
+			@RequestParam("pairedCurrencyId") long pairedCurrency) {
 		try {
 			Double volume24h = marketPriceService.ordersIn24hVolume(marketCurrency, pairedCurrency);
 			Double high24h = marketPriceService.ordersIn24hHigh(marketCurrency, pairedCurrency);

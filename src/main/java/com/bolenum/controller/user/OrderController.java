@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.model.BankAccountDetails;
-import com.bolenum.model.Currency;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
@@ -68,7 +67,7 @@ public class OrderController {
 
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
-	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
+	public ResponseEntity<Object> createOrder(@RequestBody Orders orders) {
 		if (orders.getVolume() * orders.getPrice() < 0.0001) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.volume.zero"),
 					null);
@@ -111,16 +110,16 @@ public class OrderController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("marketCurrency") Currency marketCurrency,
-			@RequestParam("pairedCurrency") Currency pairedCurrency) {
-		Page<Orders> list = ordersService.getBuyOrdersListByPair(marketCurrency, pairedCurrency);
+	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("marketCurrencyId") long marketCurrencyId,
+			@RequestParam("pairedCurrencyId") long pairedCurrencyId) {
+		Page<Orders> list = ordersService.getBuyOrdersListByPair(marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
 	@RequestMapping(value = UrlConstant.SELL_ORDER_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("marketCurrency") Currency marketCurrency,
-			@RequestParam("pairedCurrency") Currency pairedCurrency) {
-		Page<Orders> list = ordersService.getSellOrdersListByPair(marketCurrency, pairedCurrency);
+	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("marketCurrencyId") long marketCurrencyId,
+			@RequestParam("pairedCurrencyId") long pairedCurrencyId) {
+		Page<Orders> list = ordersService.getSellOrdersListByPair(marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
