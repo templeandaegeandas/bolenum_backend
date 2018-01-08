@@ -41,4 +41,6 @@ public interface TransactionService {
 	boolean withdrawBTC(User fromUser, String tokenName, String toAddress, Double amount, Double fee);
 
 	boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount, Double fee, Long tradeId);
+
+	Double totalTrasferFeePaidByAdmin(String currencyName);
 }

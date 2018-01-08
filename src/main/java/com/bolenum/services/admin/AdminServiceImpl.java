@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
 import com.bolenum.repo.common.coin.Erc20TokenRepository;
+import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.user.wallet.BTCWalletService;
 
@@ -31,13 +31,13 @@ public class AdminServiceImpl implements AdminService {
 	private UserRepository userRepository;
 
 	@Autowired
+	private UserCoinRepository userCoinRepository;
+
+	@Autowired
 	private BTCWalletService btcWalletService;
 
 	@Autowired
 	private Erc20TokenRepository erc20TokenRepository;
-
-	@Value("${bitcoin.service.url}")
-	private String btcUrl;
 
 	/**
 	 * 
@@ -91,5 +91,10 @@ public class AdminServiceImpl implements AdminService {
 	public List<User> getListOfUsers() {
 
 		return userRepository.findByIsEnabled(true);
+	}
+
+	@Override
+	public Double findTotalDepositBalanceOfUser(String tokenName) {
+		return userCoinRepository.findTotalDepositBalanceOfUser(tokenName);
 	}
 }

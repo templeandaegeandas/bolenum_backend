@@ -748,4 +748,9 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		return false;
 	}
+
+	@Override
+	public Double totalTrasferFeePaidByAdmin(String currencyName) {
+		return transactionRepo.totalTrasferFeePaidByAdmin(currencyName);
+	}
 }
