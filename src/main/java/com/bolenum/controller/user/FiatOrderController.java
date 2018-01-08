@@ -408,7 +408,7 @@ public class FiatOrderController {
 		orders.setVolume(volume);
 		orders.setPrice(price);
 		orders.setOrderType(orderType);
-		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, 10, marketCurrencyId, pairedCurrencyId);
+		Page<Orders> page = fiatOrderService.existingOrders(orders, 0, Integer.MAX_VALUE, marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.create.success"), page);
 	}
 
