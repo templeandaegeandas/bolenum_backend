@@ -348,7 +348,16 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (toAddress.equals(user.getEthWalletaddress())) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
 		}
+		Double usersDepositBalance = userCoinRepository.findTotalDepositBalanceOfUser(tokenName);
+		if (usersDepositBalance == null) {
+			usersDepositBalance = 0.0;
+		}
 		Double adminWalletBalance = erc20TokenService.getErc20WalletBalance(user, erc20Token, tokenName);
+
+		if (adminWalletBalance == null) {
+			adminWalletBalance = 0.0;
+		}
+		adminWalletBalance = adminWalletBalance - usersDepositBalance;
 		if (adminWalletBalance < withdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.invalid.available.balance"));
 		}

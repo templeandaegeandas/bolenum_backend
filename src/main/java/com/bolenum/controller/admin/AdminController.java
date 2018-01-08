@@ -346,7 +346,13 @@ public class AdminController {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(coinCode);
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("ETH", user);
 			Double depoBal = adminService.findTotalDepositBalanceOfUser(coinCode);
+			if (depoBal == null) {
+				depoBal = 0.0;
+			}
 			Double balance = erc20TokenService.getErc20WalletBalance(user, erc20Token, "ETH");
+			if (balance == null) {
+				balance = 0.0;
+			}
 			balance = balance - depoBal;
 			Map<String, Object> mapAddress = new HashMap<>();
 			mapAddress.put(ADDRESS, userCoin.getWalletAddress());
