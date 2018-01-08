@@ -1,6 +1,7 @@
 package com.bolenum.repo.order.book;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,4 +36,8 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 	@Query("select count(t) from Trade t where t.marketCurrency=:marketCurrency and t.pairedCurrency=:pairedCurrency and t.createdOn > :endDate")
 	long count24hTrade(@Param("marketCurrency") Currency marketCurrency,
 			@Param("pairedCurrency") Currency pairedCurrency, @Param("endDate") Date endDate);
+
+
+	List<Trade> findByPairedCurrency(Currency currency);
+
 }

@@ -65,7 +65,8 @@ public class Transaction {
 	@ManyToOne
 	private User toUser;
 	/**
-	 * platform fee for withdrawal and deposit
+	 * platform fee for withdrawal and deposit, if transactionStatus is
+	 * "TRANSFER", then admin has paid fee to user's ethereum transaction
 	 */
 	private Double fee;
 
@@ -80,22 +81,26 @@ public class Transaction {
 	 * for trade Id, to get the details of trade
 	 */
 	private Long tradeId;
-	
+
 	private boolean inAppTransaction = false;
-	
+
 	/**
 	 * for checking transfer status(amount transfered to admin or not)
 	 */
 	@Enumerated(EnumType.STRING)
 	private TransferStatus transferStatus;
+	/**
+	 * for which currency admin has paid transfer fee
+	 */
+	private String transferFeeCurrency;
 
 	public Transaction() {
 
 	}
 
 	public Transaction(String txHash, String fromAddress, String toAddress, Double txFee, Double txAmmount,
-			String txDescription, TransactionType transactionType, Double gas,
-			Double gasPrice, User fromUser, User toUser) {
+			String txDescription, TransactionType transactionType, Double gas, Double gasPrice, User fromUser,
+			User toUser) {
 
 		this.txHash = txHash;
 		this.fromAddress = fromAddress;
@@ -374,7 +379,8 @@ public class Transaction {
 	}
 
 	/**
-	 * @param tradeId the tradeId to set
+	 * @param tradeId
+	 *            the tradeId to set
 	 */
 	public void setTradeId(Long tradeId) {
 		this.tradeId = tradeId;
@@ -388,7 +394,8 @@ public class Transaction {
 	}
 
 	/**
-	 * @param inAppTransaction the inAppTransaction to set
+	 * @param inAppTransaction
+	 *            the inAppTransaction to set
 	 */
 	public void setInAppTransaction(boolean inAppTransaction) {
 		this.inAppTransaction = inAppTransaction;
@@ -402,10 +409,26 @@ public class Transaction {
 	}
 
 	/**
-	 * @param transferStatus the transferStatus to set
+	 * @param transferStatus
+	 *            the transferStatus to set
 	 */
 	public void setTransferStatus(TransferStatus transferStatus) {
 		this.transferStatus = transferStatus;
 	}
-	
+
+	/**
+	 * @return the transferFeeCurrency
+	 */
+	public String getTransferFeeCurrency() {
+		return transferFeeCurrency;
+	}
+
+	/**
+	 * @param transferFeeCurrency
+	 *            the transferFeeCurrency to set
+	 */
+	public void setTransferFeeCurrency(String transferFeeCurrency) {
+		this.transferFeeCurrency = transferFeeCurrency;
+	}
+
 }
