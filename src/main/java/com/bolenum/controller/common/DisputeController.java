@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -52,6 +53,9 @@ public class DisputeController {
 	@Autowired
 	private OrderAsyncService orderAsyncService;
 
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
+
 	/**
 	 * 
 	 * @param orderId
@@ -92,6 +96,15 @@ public class DisputeController {
 					file);
 			if (response != null) {
 				orderAsyncService.saveOrder(orders);
+				User buyer = orders.getUser();
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + buyer.getUserId(),
+						com.bolenum.enums.MessageType.DISPUTE_NOTIFICATION);
+
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ADMIN + "/" + buyer.getUserId(),
+						com.bolenum.enums.MessageType.DISPUTE_NOTIFICATION);
+
 				logger.debug("response of raised dispute ={}", response.getCreatedOn());
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
@@ -135,6 +148,15 @@ public class DisputeController {
 			DisputeOrder response = disputeService.raiseDisputeBySeller(orders);
 			if (response != null) {
 				orderAsyncService.saveOrder(orders);
+				User seller = orders.getUser();
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + seller.getUserId(),
+						com.bolenum.enums.MessageType.DISPUTE_NOTIFICATION);
+
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ADMIN + "/" + seller.getUserId(),
+						com.bolenum.enums.MessageType.DISPUTE_NOTIFICATION);
+
 				logger.debug("response of raised dispute ={}", response.getCreatedOn());
 				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
 						response);
@@ -219,6 +241,7 @@ public class DisputeController {
 			User disputeRaiser = response.getDisputeRaiser();
 			User disputeRaisedAgainst = response.getDisputeRaisedAgainst();
 			disputeService.sendDisputeNotification(response, disputeRaiser, disputeRaisedAgainst);
+
 			return ResponseHandler.response(HttpStatus.OK, false,
 					localeService.getMessage("dispute.order.action.success"), response);
 		} else {
