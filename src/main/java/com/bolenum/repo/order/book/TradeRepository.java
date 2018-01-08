@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.bolenum.model.Currency;
-import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Trade;
 
@@ -34,9 +33,11 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 
 	Page<Trade> findBySeller(User seller, Pageable pageable);
 
-	@Query("select count(t) from Trade t where t.pair=:pair and t.createdOn > :endDate")
-	long count24hTrade(@Param("pair") CurrencyPair pair, @Param("endDate") Date endDate);
+	@Query("select count(t) from Trade t where t.marketCurrency=:marketCurrency and t.pairedCurrency=:pairedCurrency and t.createdOn > :endDate")
+	long count24hTrade(@Param("marketCurrency") Currency marketCurrency,
+			@Param("pairedCurrency") Currency pairedCurrency, @Param("endDate") Date endDate);
 
-	List<Trade> findByPairPairedCurrency(Currency currency);
+
+	List<Trade> findByPairedCurrency(Currency currency);
 
 }

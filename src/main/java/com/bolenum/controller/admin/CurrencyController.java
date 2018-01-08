@@ -166,7 +166,7 @@ public class CurrencyController {
 	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_MARKET, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyListForMarket() {
-		List<Currency> currencyList = currencyService.getCurrencyListForMarket();
+		List<Currency> currencyList = currencyService.getCurrencyList();
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
 				currencyList);
 	}
@@ -193,7 +193,6 @@ public class CurrencyController {
 	@RequestMapping(value = UrlConstant.CURRENCY_NGN_PRICE_SAVE, method = RequestMethod.PUT)
 	public ResponseEntity<Object> saveBLNNGNPrice(@RequestParam("priceNGN") double priceNGN ) {
 		Currency currency = currencyService.findByCurrencyAbbreviation("BLN");
-		currency.setPriceNGN(priceNGN);
 		Currency savedCurrency = currencyService.saveCurrency(currency);
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.price.saved"), savedCurrency);
 	}

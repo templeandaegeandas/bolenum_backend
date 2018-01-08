@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.controller.user.FiatOrderController;
 import com.bolenum.enums.MessageType;
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.repo.order.book.TradeRepository;
-import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.services.admin.CurrencyService;
 
 @Service
 public class OrderAsyncServicesImpl implements OrderAsyncService {
@@ -34,7 +34,7 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 	private TradeRepository tradeRepository;
 	
 	@Autowired
-	private CurrencyPairService currencyPairService;
+	private CurrencyService currencyService;
 	
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
@@ -60,18 +60,17 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 	}
 	
 	@Override
-	public Future<Boolean> saveLastPrice(long pairId, Double price) {
-		CurrencyPair currencyPair = currencyPairService.findByPairId(pairId);
-		if(currencyPair.getLastPrice() == null || currencyPair.getLastPrice() == 0 || currencyPair.getLastPrice() > price) {
-			currencyPair.setLastPrice(price);
-			currencyPairService.saveCurrencyPair(currencyPair);
+	public Future<Boolean> saveLastPrice(Currency marketCurrency, Currency pairedCurrency, Double price) {
+		if(pairedCurrency.getLastPrice() == null || pairedCurrency.getLastPrice() == 0 || pairedCurrency.getLastPrice() > price) {
+			pairedCurrency.setLastPrice(price);
+			currencyService.saveCurrency(pairedCurrency);
 			JSONObject jsonObject = new JSONObject();
 			try {
 				jsonObject.put("MARKET_UPDATE", MessageType.MARKET_UPDATE);
-				jsonObject.put("pairId", pairId);
+				jsonObject.put("pairedCurrencyId", pairedCurrency.getCurrencyId());
 				jsonObject.put("price", price);
-				jsonObject.put("toCurrency", currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
-				jsonObject.put("pairedCurrency", currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
+				jsonObject.put("marketCurrency", marketCurrency.getCurrencyAbbreviation());
+				jsonObject.put("pairedCurrency", pairedCurrency.getCurrencyAbbreviation());
 			} catch (JSONException e) {
 				logger.error("Error in sending websocket message: {}", e);
 			}

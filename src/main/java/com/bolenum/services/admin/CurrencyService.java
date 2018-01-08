@@ -24,8 +24,6 @@ public interface CurrencyService {
 
 	List<Currency> getCurrencyListByName(String tokenName);
 
-	List<Currency> getCurrencyListForMarket();
-
 	public long countCourencies();
 
 	Currency findByCurrencyAbbreviation(String currencyAbbreviation);

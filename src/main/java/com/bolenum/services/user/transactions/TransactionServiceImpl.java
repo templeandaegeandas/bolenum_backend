@@ -50,7 +50,7 @@ import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
 import com.bolenum.enums.TransferStatus;
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
@@ -351,13 +351,14 @@ public class TransactionServiceImpl implements TransactionService {
 		logger.debug("thread: {} waked up after for 10 Secs ", Thread.currentThread().getName());
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
-		CurrencyPair currencyPair = matchedOrder.getPair();
-
-		String toCurrAbrrivaiton = currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
-		String pairCurrAbrrivaiton = currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
-		String toCurrencyType = currencyPair.getPairedCurrency().get(0).getCurrencyType().toString();
-		String pairCurrencyType = currencyPair.getToCurrency().get(0).getCurrencyType().toString();
-		String qtr = walletService.getPairedBalance(matchedOrder, currencyPair, qtyTraded);
+//		CurrencyPair currencyPair = matchedOrder.getPair();
+		Currency marketCurrency = matchedOrder.getMarketCurrency();
+		Currency pairedCurrency = matchedOrder.getPairedCurrency();
+		String toCurrAbrrivaiton = pairedCurrency.getCurrencyAbbreviation();//currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		String pairCurrAbrrivaiton = marketCurrency.getCurrencyAbbreviation();//currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+		String toCurrencyType = pairedCurrency.getCurrencyType().toString();//currencyPair.getPairedCurrency().get(0).getCurrencyType().toString();
+		String pairCurrencyType = marketCurrency.getCurrencyType().toString();//currencyPair.getToCurrency().get(0).getCurrencyType().toString();
+		String qtr = walletService.getPairedBalance(matchedOrder, marketCurrency, pairedCurrency, qtyTraded);
 		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormatString(Double.valueOf(qtr)),
 				pairCurrAbrrivaiton);
 

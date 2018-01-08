@@ -3,6 +3,7 @@ package com.bolenum.services.order.book;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import com.bolenum.model.Currency;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 
@@ -16,6 +17,6 @@ public interface OrderAsyncService {
 
 	Trade saveTrade(Trade trade);
 
-	Future<Boolean> saveLastPrice(long pairId, Double price);
+	Future<Boolean> saveLastPrice(Currency marketCurrency, Currency pairedCurrency, Double price);
 
 }

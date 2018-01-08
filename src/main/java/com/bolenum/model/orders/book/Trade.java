@@ -9,9 +9,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 import com.bolenum.enums.OrderStandard;
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.User;
 
 /**
@@ -32,8 +33,11 @@ public class Trade {
 	private User buyer;
 	@OneToOne
 	private User seller;
+	
 	@OneToOne
-	private CurrencyPair pair;
+	private Currency marketCurrency;
+	@OneToOne
+	private Currency pairedCurrency;
 	@Enumerated(EnumType.STRING)
 	private OrderStandard orderStandard;
 	private Date createdOn = new Date();
@@ -62,13 +66,14 @@ public class Trade {
 	@OneToOne
 	private Orders requestingOrder;
 
-	public Trade(Double price, Double volume, User buyer, User seller, CurrencyPair pair, OrderStandard orderStandard,
+	public Trade(Double price, Double volume, User buyer, User seller, Currency marketCurrency, Currency pairedCurrency, OrderStandard orderStandard,
 			Double buyerTradeFee, Double sellerTradeFee, Orders matchedOrder, Orders requestingOrder) {
 		this.price = price;
 		this.volume = volume;
 		this.buyer = buyer;
 		this.seller = seller;
-		this.pair = pair;
+		this.marketCurrency = marketCurrency;
+		this.pairedCurrency = pairedCurrency;
 		this.orderStandard = orderStandard;
 		this.buyerTradeFee = buyerTradeFee;
 		this.sellerTradeFee = sellerTradeFee;
@@ -120,12 +125,32 @@ public class Trade {
 		this.seller = seller;
 	}
 
-	public CurrencyPair getPair() {
-		return pair;
+	/**
+	 * @return the marketCurrency
+	 */
+	public Currency getMarketCurrency() {
+		return marketCurrency;
 	}
 
-	public void setPair(CurrencyPair pair) {
-		this.pair = pair;
+	/**
+	 * @param marketCurrency the marketCurrency to set
+	 */
+	public void setMarketCurrency(Currency marketCurrency) {
+		this.marketCurrency = marketCurrency;
+	}
+
+	/**
+	 * @return the pairedCurrency
+	 */
+	public Currency getPairedCurrency() {
+		return pairedCurrency;
+	}
+
+	/**
+	 * @param pairedCurrency the pairedCurrency to set
+	 */
+	public void setPairedCurrency(Currency pairedCurrency) {
+		this.pairedCurrency = pairedCurrency;
 	}
 
 	public OrderStandard getOrderStandard() {
