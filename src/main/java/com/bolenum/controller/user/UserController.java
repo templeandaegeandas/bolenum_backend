@@ -514,10 +514,11 @@ public class UserController {
 	}
 
 	/**
+	 * @created by Himanshu Kumar
 	 * 
 	 * @return
 	 */
-	@Secured("ROLE_USER")
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.GET)
 	public ResponseEntity<Object> getNotificationList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -531,32 +532,39 @@ public class UserController {
 	}
 
 	/**
+	 * @created by Himanshu Kumar
 	 * 
 	 * @param id
 	 * 
 	 * @return
 	 */
-	@Secured("ROLE_USER")
-	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.POST)
-	public ResponseEntity<Object> setActionOnNotificton(@RequestParam("id") Long id) {
-		Notification notification = notificationService.getRequestedNotification(id);
-		notification = notificationService.setActionOnNotifiction(notification);
-		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"), notification);
-
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
+	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.PUT)
+	public ResponseEntity<Object> setActionOnNotificton(
+			@RequestParam("arrayOfNotification") Notification[] arrayOfNotification) {
+		for (int i=0;i<arrayOfNotification.length;i++) {
+			Notification notification = arrayOfNotification[i];
+			notification = notificationService.setActionOnNotifiction(notification);
+			arrayOfNotification[i]=notification;
+		}
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+				arrayOfNotification);
 	}
 
+	
 	/**
+	 * @created by Himanshu Kumar
 	 * 
 	 * @return
+	 * 
 	 */
-	@Secured("ROLE_USER")
+	@Secured({"ROLE_USER","ROLE_ADMIN"})
 	@RequestMapping(value = UrlConstant.COUNT_USER_NOTIFICATION, method = RequestMethod.GET)
 	public ResponseEntity<Object> countUserNotification() {
 		User user = GenericUtils.getLoggedInUser();
 		Long totalUnseenNotification = notificationService.countUnSeenNotification(user);
 		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
 				totalUnseenNotification);
-
 	}
 
 }

@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.Length;
+
 import io.swagger.annotations.ApiModelProperty;
 
 /**

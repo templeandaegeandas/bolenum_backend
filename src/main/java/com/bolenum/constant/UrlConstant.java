@@ -73,6 +73,7 @@ public class UrlConstant {
 	public static final String WITHDRAWAL_FEES_LIST = "withdraw/fees/list";
 	public static final String USERS_ORDERS_IN_BOOK = "orders/book";
 	public static final String USERS_TRADE_HISTORY = "trade/history";
+	public static final String USERS_NOTIFICATION = "notifications";
 
 	/********************** TEMP API ***********************/
 	public static final String USER_WALLETS_BALANCE = "action/users/wallet/balance";
@@ -152,5 +153,6 @@ public class UrlConstant {
 	public static final String RAISED_DISPUTE_ORDER = "raised/dispute";
 	public static final String RAISED_DISPUTE_LIST = "raised/dispute/list";
 	public static final String ACTION_ON_RAISED_DISPUTE_ORDER = "action/raised/dispute";
+	
 
 }
