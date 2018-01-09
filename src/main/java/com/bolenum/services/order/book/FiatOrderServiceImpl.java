@@ -82,6 +82,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 		Currency currency = null;
 		Currency marketCurrency = orders.getMarketCurrency();
+		System.out.println(orders.getMarketCurrency());
 		if (!(CurrencyType.FIAT.equals(marketCurrency.getCurrencyType()))) {
 			currency = marketCurrency;
 		}

@@ -41,17 +41,9 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Double getBestBuy(@Param("marketCurrency") Currency marketCurrency,
 			@Param("pairedCurrency") Currency pairedCurrency);
 
-//	@Query("select max(o.price) from Orders o where o.orderType = 'SELL' and o.orderStatus = 'SUBMITTED' and o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency")
-//	Double getWrostBuy(@Param("marketCurrency") Currency marketCurrency,
-//			@Param("pairedCurrency") Currency pairedCurrency);
-
 	@Query("select max(o.price) from Orders o where o.orderType = 'BUY' and o.orderStatus = 'SUBMITTED' and o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency")
 	Double getBestSell(@Param("marketCurrency") Currency marketCurrency,
 			@Param("pairedCurrency") Currency pairedCurrency);
-
-//	@Query("select min(o.price) from Orders o where o.orderType = 'BUY' and o.orderStatus = 'SUBMITTED' and o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency")
-//	Double getWrostSell(@Param("marketCurrency") long marketCurrency,
-//			@Param("pairedCurrency") long pairedCurrency);
 
 	@Query("select count(o) from Orders o where o.orderType = :orderType and o.orderStatus = 'SUBMITTED' and o.marketCurrency.currencyId=:marketCurrency and o.pairedCurrency.currencyId=:pairedCurrency and o.price >= :price")
 	Long countOrderByOrderTypeAndPriceGreaterThan(@Param("orderType") OrderType orderType,
@@ -92,7 +84,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	List<Orders> findByUserAndOrderStatusAndOrderTypeAndPairedCurrency(User user, OrderStatus orderStatus,
 			OrderType orderType, Currency pairedCurrency);
 
-	Long countOrdersByCreatedOnBetween(Date startDate, Date endDate);
+	Long countOrdersByCreatedOnBetweenAndOrderStatus(Date startDate, Date endDate, OrderStatus orderStatus);
 
 	Long countOrderByOrderTypeAndCreatedOnBetween(OrderType orderType, Date startDate, Date endDate);
 
@@ -111,13 +103,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	Page<Orders> findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndMarketCurrencyCurrencyIdAndPairedCurrencyCurrencyId(
 			Double price, OrderType orderType, OrderStatus orderStatus, long marketCurrencyId, long pairedCurrencyId,
 			Pageable page);
-
-	// @Query("select SUM(o.price) from Orders o where o.orderType = 'SELL' and
-	// o.user = :user and (o.pair.toCurrency = :toCurrencyList or
-	// o.pair.pairedCurrency = :pairedCurrencyList)")
-	// Double totalUserBalanceInBook(@Param("user") User user,
-	// @Param("toCurrencyList") List<Currency> toCurrencyList,
-	// @Param("pairedCurrencyList") List<Currency> pairedCurrencyList);
 
 	@Query("select sum(o.volume) from Orders o where o.marketCurrency.currencyId=:marketCurrencyId and o.pairedCurrency.currencyId=:pairedCurrencyId and o.createdOn > :endDate")
 	Double ordersIn24hVolume(@Param("marketCurrencyId") long marketCurrencyId,
