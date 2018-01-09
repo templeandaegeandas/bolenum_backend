@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
@@ -647,7 +648,11 @@ public class OrdersServiceImpl implements OrdersService {
 	@Override
 	public double totalUserBalanceInBook(User user, Currency marketCurrency, Currency pairedCurrency) {
 		List<Orders> toOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndMarketCurrency(user,
-				OrderStatus.SUBMITTED, OrderType.SELL, marketCurrency);
+				OrderStatus.SUBMITTED, OrderType.BUY, marketCurrency);
+		if(CurrencyType.ERC20TOKEN.equals(marketCurrency.getCurrencyType())) {
+			toOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndMarketCurrency(user,
+					OrderStatus.SUBMITTED, OrderType.SELL, marketCurrency);
+		}
 		List<Orders> fromOrders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairedCurrency(user,
 				OrderStatus.SUBMITTED, OrderType.SELL, pairedCurrency);
 		double total = 0.0;
