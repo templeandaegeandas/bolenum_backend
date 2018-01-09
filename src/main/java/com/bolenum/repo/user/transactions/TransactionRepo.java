@@ -41,8 +41,10 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 
 	List<Transaction> findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatus(User toUser, String currencyName,
 			TransactionStatus transactionStatus, TransferStatus transferStatus);
-	
+
 	@Query("select sum(t.fee) from Transaction t where t.transactionStatus='TRANSFER' and t.currencyName =:currencyName")
 	Double totalTrasferFeePaidByAdmin(@Param("currencyName") String currencyName);
+
+	Page<Transaction> findByTransactionStatus(TransactionStatus transactionStatus, Pageable pageable);
 
 }

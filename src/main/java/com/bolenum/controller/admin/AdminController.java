@@ -28,6 +28,7 @@ import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.Currency;
 import com.bolenum.model.SubscribedUser;
+import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
 import com.bolenum.model.coin.UserCoin;
@@ -470,5 +471,23 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(""), Optional.empty());
 	}
 
-	
+	/**
+	 * 
+	 * @param userId
+	 * @param pageNumber
+	 * @param pageSize
+	 * @return
+	 */
+	@Secured("ROLE_ADMIN")
+	@RequestMapping(value = UrlConstant.TRANSFER_LIST, method = RequestMethod.GET)
+	public ResponseEntity<Object> getTransferHistory(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
+
+		Page<Transaction> transactions = transactionService.getListOfTransferTransaction(pageNumber, pageSize,
+				sortOrder, sortBy);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.trades.list"),
+				transactions);
+	}
+
 }
