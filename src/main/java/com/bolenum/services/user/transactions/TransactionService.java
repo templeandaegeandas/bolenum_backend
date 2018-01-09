@@ -43,4 +43,7 @@ public interface TransactionService {
 	boolean withdrawETH(User fromUser, String tokenName, String toAddress, Double amount, Double fee, Long tradeId);
 
 	Double totalTrasferFeePaidByAdmin(String currencyName);
+
+	public Page<Transaction> getListOfTransferTransaction(int pageNumber, int pageSize,
+			String sortOrder, String sortBy);
 }

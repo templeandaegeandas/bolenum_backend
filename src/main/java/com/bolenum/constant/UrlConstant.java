@@ -14,12 +14,12 @@ public class UrlConstant {
 	/**
 	 * BTC URL
 	 */
-	public static final String HOT_WALLET = "hotwallet/create";
-	public static final String WALLET_ADDR = "hotwallet/primaryaddress";
-	public static final String WALLET_BAL = "hotwallet/balance";
-	public static final String CREATE_TX = "hotwallet/transaction";
-	public static final String ADMIN_HOT_WALLET = "hotwallet/create/adminwallet";
-	public static final String WALLET_ADDRESS = "hotwallet/address";
+	// public static final String HOT_WALLET = "hotwallet/create";
+	// public static final String WALLET_ADDR = "hotwallet/primaryaddress";
+	// public static final String WALLET_BAL = "hotwallet/balance";
+	// public static final String CREATE_TX = "hotwallet/transaction";
+	// public static final String ADMIN_HOT_WALLET = "hotwallet/create/adminwallet";
+	// public static final String WALLET_ADDRESS = "hotwallet/address";
 	public static final String HASH_CONFIRMATION = "transaction/hash/confirmation";
 	public static final String CREATE_ACCOUNT = "create/account";
 	/**
@@ -74,6 +74,7 @@ public class UrlConstant {
 	public static final String USERS_ORDERS_IN_BOOK = "orders/book";
 	public static final String USERS_TRADE_HISTORY = "trade/history";
 	public static final String USERS_NOTIFICATION = "notifications";
+	public static final String TRANSFER_LIST = "list/transfer";
 
 	/********************** TEMP API ***********************/
 	public static final String USER_WALLETS_BALANCE = "action/users/wallet/balance";
@@ -153,6 +154,5 @@ public class UrlConstant {
 	public static final String RAISED_DISPUTE_ORDER = "raised/dispute";
 	public static final String RAISED_DISPUTE_LIST = "raised/dispute/list";
 	public static final String ACTION_ON_RAISED_DISPUTE_ORDER = "action/raised/dispute";
-	
 
 }
