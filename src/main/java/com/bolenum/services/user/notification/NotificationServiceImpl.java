@@ -134,9 +134,9 @@ public class NotificationServiceImpl implements NotificationService {
 	 * @Created by Himanshu Kumar
 	 */
 	@Override
-	public Notification setActionOnNotifiction(Notification notification) {
-		notification.setReadStatus(true);
-		return notification;
+	public void setActionOnNotifiction(Long id) {
+		Notification notifictaion=notificationRepositroy.findOne(id);
+		notifictaion.setReadStatus(true);
 	}
 
 	@Override
