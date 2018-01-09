@@ -30,5 +30,7 @@ public interface NotificationService {
 
 	public Long countUnSeenNotification(User user);
 
+	public void changeNotificationsStatus(Long[] arrayOfNotification);
+
 	
 }
