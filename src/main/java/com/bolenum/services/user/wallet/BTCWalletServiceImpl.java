@@ -149,12 +149,10 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	public boolean validateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			WithdrawalFee withdrawalFee, String toAddress) {
 		Double bolenumFee = 0.0;
-		Double lockVolume = 0.0;
 		Double minWithdrawAmount = 0.0;
 		Double availableBalance;
 		if (withdrawalFee != null) {
 			bolenumFee = withdrawalFee.getFee();
-			lockVolume = withdrawalFee.getLockVolume();
 			minWithdrawAmount = withdrawalFee.getMinWithDrawAmount();
 		}
 
@@ -180,9 +178,6 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		availableBalance = userErc20Token.getBalance();
 		logger.debug("Available balance: {}", availableBalance);
 
-		availableBalance = availableBalance - lockVolume;
-		logger.debug("Available balance after lock volume deduction: {} ", availableBalance);
-
 		double placeOrderVolume = ordersService.totalUserBalanceInBook(user, erc20Token.getCurrency(),
 				erc20Token.getCurrency());
 
@@ -200,7 +195,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return true;
 		} else {
 			throw new InsufficientBalanceException(MessageFormat.format(
-					localeService.getMessage("insufficient.balance"), withdrawAmount, lockVolume, placeOrderVolume));
+					localeService.getMessage("insufficient.balance"), withdrawAmount, placeOrderVolume));
 		}
 	}
 
