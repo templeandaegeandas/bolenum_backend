@@ -351,13 +351,13 @@ public class TransactionServiceImpl implements TransactionService {
 		logger.debug("thread: {} waked up after for 10 Secs ", Thread.currentThread().getName());
 		logger.debug("buyer: {} and seller: {} for order: {}", buyer.getEmailId(), seller.getEmailId(),
 				matchedOrder.getId());
-//		CurrencyPair currencyPair = matchedOrder.getPair();
+		// CurrencyPair currencyPair = matchedOrder.getPair();
 		Currency marketCurrency = matchedOrder.getMarketCurrency();
 		Currency pairedCurrency = matchedOrder.getPairedCurrency();
-		String toCurrAbrrivaiton = pairedCurrency.getCurrencyAbbreviation();//currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
-		String pairCurrAbrrivaiton = marketCurrency.getCurrencyAbbreviation();//currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
-		String toCurrencyType = pairedCurrency.getCurrencyType().toString();//currencyPair.getPairedCurrency().get(0).getCurrencyType().toString();
-		String pairCurrencyType = marketCurrency.getCurrencyType().toString();//currencyPair.getToCurrency().get(0).getCurrencyType().toString();
+		String toCurrAbrrivaiton = pairedCurrency.getCurrencyAbbreviation();// currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation();
+		String pairCurrAbrrivaiton = marketCurrency.getCurrencyAbbreviation();// currencyPair.getToCurrency().get(0).getCurrencyAbbreviation();
+		String toCurrencyType = pairedCurrency.getCurrencyType().toString();// currencyPair.getPairedCurrency().get(0).getCurrencyType().toString();
+		String pairCurrencyType = marketCurrency.getCurrencyType().toString();// currencyPair.getToCurrency().get(0).getCurrencyType().toString();
 		String qtr = walletService.getPairedBalance(matchedOrder, marketCurrency, pairedCurrency, qtyTraded);
 		logger.debug("paired currency volume: {} {}", GenericUtils.getDecimalFormatString(Double.valueOf(qtr)),
 				pairCurrAbrrivaiton);
@@ -366,8 +366,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("actual quantity buyer: {}, will get: {} {}", buyer.getFirstName(),
 					GenericUtils.getDecimalFormatString(qtyTraded), toCurrAbrrivaiton);
 			/**
-			 * Seller performing transaction; to send ETH to buyer in case of
-			 * ETH/BTC pair
+			 * Seller performing transaction; to send ETH to buyer in case of ETH/BTC pair
 			 */
 			boolean res = tradeTransactionService.performTradeTransaction(toCurrAbrrivaiton, toCurrencyType, qtyTraded,
 					buyer, seller, trade.getId());
@@ -413,8 +412,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
 					pairCurrAbrrivaiton);
 			/**
-			 * Buyer performing transaction; to send BTC to Seller in case of
-			 * ETH/BTC pair
+			 * Buyer performing transaction; to send BTC to Seller in case of ETH/BTC pair
 			 */
 			boolean buyerRes = tradeTransactionService.performTradeTransaction(pairCurrAbrrivaiton, pairCurrencyType,
 					sellerQty, seller, buyer, trade.getId());
@@ -752,5 +750,18 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	public Double totalTrasferFeePaidByAdmin(String currencyName) {
 		return transactionRepo.totalTrasferFeePaidByAdmin(currencyName);
+	}
+
+	@Override
+	public Page<Transaction> getListOfTransferTransaction(int pageNumber, int pageSize, String sortOrder,
+			String sortBy) {
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		return transactionRepo.findByTransactionStatus(TransactionStatus.TRANSFER, pageRequest);
 	}
 }
