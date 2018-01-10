@@ -1,6 +1,7 @@
 package com.bolenum.services.order.book;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 import org.json.JSONException;
@@ -71,33 +72,33 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 					pairedCurrency.setPriceBTC(price);
 				}
 				jsonObject.put("priceBTC", price);
-				jsonObject.put("priceETH", null);
-				jsonObject.put("priceBLN", null);
+				jsonObject.put("priceETH", 0);
+				jsonObject.put("priceBLN", 0);
 			} else if ("ETH".equals(marketCurrency.getCurrencyAbbreviation())
 					&& "BLN".equals(pairedCurrency.getCurrencyAbbreviation())) {
 				if (pairedCurrency.getPriceETH() == null || pairedCurrency.getPriceETH() == 0
 						|| pairedCurrency.getPriceETH() > price) {
 					pairedCurrency.setPriceETH(price);
 				}
-				jsonObject.put("priceBTC", null);
+				jsonObject.put("priceBTC", 0);
 				jsonObject.put("priceETH", price);
-				jsonObject.put("priceBLN", null);
-			} else if ("ETH".equals(marketCurrency.getCurrencyAbbreviation())
+				jsonObject.put("priceBLN", 0);
+			} else if ("BTC".equals(marketCurrency.getCurrencyAbbreviation())
 					&& "BLN".equals(pairedCurrency.getCurrencyAbbreviation())) {
 				if (pairedCurrency.getPriceBTC() == null || pairedCurrency.getPriceBTC() == 0
 						|| pairedCurrency.getPriceBTC() > price) {
 					pairedCurrency.setPriceBTC(price);
 				}
 				jsonObject.put("priceBTC", price);
-				jsonObject.put("priceETH", null);
-				jsonObject.put("priceBLN", null);
+				jsonObject.put("priceETH", 0);
+				jsonObject.put("priceBLN", 0);
 			} else {
 				if (pairedCurrency.getPriceBLN() == null || pairedCurrency.getPriceBLN() == 0
 						|| pairedCurrency.getPriceBLN() > price) {
 					pairedCurrency.setPriceBLN(price);
 				}
-				jsonObject.put("priceBTC", null);
-				jsonObject.put("priceETH", null);
+				jsonObject.put("priceBTC", 0);
+				jsonObject.put("priceETH", 0);
 				jsonObject.put("priceBLN", price);
 			}
 		} catch (JSONException e) {
