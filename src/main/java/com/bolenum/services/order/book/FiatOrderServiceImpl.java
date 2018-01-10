@@ -64,6 +64,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 	@Autowired
 	private TradeTransactionService tradeTransactionService;
 
+	private static final String TRADESUMMARY = "trade.summary";
+
 	@Override
 	public Orders createOrders(Orders orders) {
 		if (OrderType.SELL.equals(orders.getOrderType())) {
@@ -82,7 +84,6 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 		Currency currency = null;
 		Currency marketCurrency = orders.getMarketCurrency();
-		System.out.println(orders.getMarketCurrency());
 		if (!(CurrencyType.FIAT.equals(marketCurrency.getCurrencyType()))) {
 			currency = marketCurrency;
 		}
@@ -91,17 +92,20 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		if (!(CurrencyType.FIAT.equals(pairedCurrency.getCurrencyType()))) {
 			currency = pairedCurrency;
 		}
-		String tickter = null, minOrderVol = null, currencyType = null;
+		String tickter = "";
+		String minOrderVol = "0";
+		String currencyType = "";
 		/**
 		 * if order type is SELL then only checking, user have selling volume
 		 */
 		if (OrderType.SELL.equals(orders.getOrderType())) {
 			minOrderVol = String.valueOf(orders.getVolume());
-		} else {
-			minOrderVol = "0";
 		}
-		tickter = currency.getCurrencyAbbreviation();
-		currencyType = currency.getCurrencyType().toString();
+		if (currency != null) {
+			tickter = currency.getCurrencyAbbreviation();
+			currencyType = currency.getCurrencyType().toString();
+		}
+
 		double userPlacedOrderVolume = getPlacedOrderVolumeOfCurrency(user, OrderStatus.SUBMITTED, OrderType.SELL,
 				currency);
 		logger.debug("user placed order volume: {} and order volume: {}", userPlacedOrderVolume, minOrderVol);
@@ -109,21 +113,17 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		logger.debug("minimum order volume required to buy/sell: {}", minBalance);
 		// getting the user current wallet balance
 		String balance = walletService.getBalance(tickter, currencyType, user);
-		balance = balance.replace("BTC", "");
-		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
-			// user must have balance then user is eligible for placing order
-			if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
-				balance = "proceed";
-			}
+		// user must have balance then user is eligible for placing order
+		if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
+			balance = "proceed";
 		}
 		return balance;
 	}
 
 	@Override
 	public Orders processFiatOrderList(Orders matchedOrder, Orders orders) {
-		// fetching order type BUY or SELL
-		// OrderType orderType = orders.getOrderType();
-		User buyer = null, seller = null;
+		User buyer = null;
+		User seller = null;
 
 		Double qtyTraded;
 
@@ -189,9 +189,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			logger.debug("orders saving finished and matched order saving started");
 			orderAsyncService.saveOrder(matchedOrder);
 			logger.debug("matched order saving finished");
-			notificationService.sendNotification(seller, msg1);
+			notificationService.sendNotification(seller, msg1, TRADESUMMARY);
 			notificationService.saveNotification(seller, buyer, msg1);
-			notificationService.sendNotification(buyer, msg);
+			notificationService.sendNotification(buyer, msg, TRADESUMMARY);
 			notificationService.saveNotification(buyer, seller, msg);
 			return orders;
 		}
@@ -265,7 +265,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ exitingOrder.getUser().getFirstName() + " has paid you the amount:"
 						+ exitingOrder.getLockedVolume() * exitingOrder.getPrice()
 						+ " Please confirm amount by login into bolenumexchage.";
-				notificationService.sendNotification(seller, msg);
+				notificationService.sendNotification(seller, msg, TRADESUMMARY);
 				notificationService.saveNotification(seller, buyer, msg);
 				exitingOrder.setConfirm(true);
 				matched.setMatchedOn(new Date());
@@ -275,18 +275,17 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				try {
 					jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
 					jsonObject.put("matchedOrderId", matched.getId());
+					simpMessagingTemplate.convertAndSend(
+							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
+							jsonObject.toString());
+					logger.debug("WebSocket message: {} #{}", MessageType.ORDER_CONFIRMATION, matched.getId());
+					return true;
 				} catch (JSONException e) {
-					e.printStackTrace();
+					logger.error("json parsing exception: {}", e);
 				}
-				simpMessagingTemplate.convertAndSend(
-						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
-						jsonObject.toString());
-				logger.debug("WebSocket message: {}", MessageType.ORDER_CONFIRMATION + "#" + matched.getId());
-				return true;
 			} else {
 				logger.error("order is of SELL type");
 			}
-
 		}
 		return false;
 	}
@@ -339,14 +338,13 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			pageable = new PageRequest(page, size, Direction.ASC, "price");
 			return ordersRepository
 					.findByPriceLessThanEqualAndOrderTypeAndOrderStatusAndMarketCurrencyCurrencyIdAndPairedCurrencyCurrencyId(
-							order.getPrice(), orderType, OrderStatus.SUBMITTED,
-							marketCurrencyId, pairedCurrencyId,
+							order.getPrice(), orderType, OrderStatus.SUBMITTED, marketCurrencyId, pairedCurrencyId,
 							pageable);
 		}
 		return ordersRepository
 				.findByPriceGreaterThanEqualAndOrderTypeAndOrderStatusAndMarketCurrencyCurrencyIdAndPairedCurrencyCurrencyId(
-						order.getPrice(), orderType, OrderStatus.SUBMITTED, marketCurrencyId,
-						pairedCurrencyId, pageable);
+						order.getPrice(), orderType, OrderStatus.SUBMITTED, marketCurrencyId, pairedCurrencyId,
+						pageable);
 	}
 
 	@Override

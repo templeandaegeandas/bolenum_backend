@@ -15,11 +15,9 @@ import com.bolenum.model.notification.Notification;
 public interface NotificationService {
 	public Notification saveNotification(User buyer, User seller, String msg);
 
-	public boolean sendNotification(User user, String message);
+	public boolean sendNotification(User user, String message, String subject);
 
 	public Page<Notification> getNotification(User receiver, int pageNumber, int pageSize);
-
-	boolean sendNotificationForDispute(User user, String message);
 
 	public Page<Notification> getListOfNotification(User user, int pageNumber, int pageSize, String sortOrder,
 			String sortBy);
@@ -29,6 +27,4 @@ public interface NotificationService {
 	public Notification getRequestedNotification(Long id);
 
 	public Long countUnSeenNotification(User user);
-
-	
 }
