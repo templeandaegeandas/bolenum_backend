@@ -552,7 +552,7 @@ public class UserController {
 	/**
 	 * @created by Himanshu Kumar
 	 * 
-	 * @returnotification
+	 * @return notification
 	 * 
 	 */
 	@Secured({"ROLE_USER","ROLE_ADMIN"})
