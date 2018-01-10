@@ -119,6 +119,7 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+	
 		return notificationRepositroy.findByReceiverAndCreatedOnBetween(admin, startDate, endDate, false, pageRequest);
 	}
 
