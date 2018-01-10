@@ -121,7 +121,7 @@ public class TradeServiceImpl implements TradeService {
 
 	@Override
 	public Double findTotalTradeFeeOfCurrency(Currency currency) {
-		List<Trade> trades = tradeRepository.findByPairedCurrency(currency);
+		List<Trade> trades = tradeRepository.findByMarketCurrency(currency);
 		Double fee = 0.0;
 		for (Trade trade : trades) {
 			fee = trade.getSellerTradeFee() + trade.getBuyerTradeFee();
