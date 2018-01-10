@@ -29,7 +29,7 @@ public interface NotificationRepositroy extends JpaRepository<Notification, Seri
 
 	public Page<Notification> findByReceiverAndIsDeleted(User Receiver, boolean isDeleted, Pageable pagable);
 
-	@Query("select n from Notification n where n.receiver = :user and (n.readStatus = :readStatus) or (n.createdOn <= :endDate and n.createdOn >= :startDate)")
+	@Query("select n from Notification n where (n.receiver = :user and n.createdOn <= :endDate and n.createdOn >= :startDate) or (n.receiver = :user and n.readStatus = :readStatus)")
 	public Page<Notification> findByReceiverAndCreatedOnBetween(@Param("user") User user,
 			@Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("readStatus") boolean readStatus,
 			Pageable pageRequest);
