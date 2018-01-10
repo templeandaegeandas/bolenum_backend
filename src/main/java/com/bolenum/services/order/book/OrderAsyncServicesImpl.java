@@ -24,7 +24,7 @@ import com.bolenum.services.admin.CurrencyService;
 
 @Service
 public class OrderAsyncServicesImpl implements OrderAsyncService {
-	
+
 	private Logger logger = LoggerFactory.getLogger(FiatOrderController.class);
 
 	@Autowired
@@ -32,10 +32,10 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 
 	@Autowired
 	private TradeRepository tradeRepository;
-	
+
 	@Autowired
 	private CurrencyService currencyService;
-	
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
@@ -58,24 +58,55 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 	public Trade saveTrade(Trade trade) {
 		return tradeRepository.save(trade);
 	}
-	
+
 	@Override
 	public Future<Boolean> saveLastPrice(Currency marketCurrency, Currency pairedCurrency, Double price) {
-		if(pairedCurrency.getLastPrice() == null || pairedCurrency.getLastPrice() == 0 || pairedCurrency.getLastPrice() > price) {
-			pairedCurrency.setLastPrice(price);
-			currencyService.saveCurrency(pairedCurrency);
-			JSONObject jsonObject = new JSONObject();
-			try {
-				jsonObject.put("MARKET_UPDATE", MessageType.MARKET_UPDATE);
-				jsonObject.put("pairedCurrencyId", pairedCurrency.getCurrencyId());
-				jsonObject.put("price", price);
-				jsonObject.put("marketCurrency", marketCurrency.getCurrencyAbbreviation());
-				jsonObject.put("pairedCurrency", pairedCurrency.getCurrencyAbbreviation());
-			} catch (JSONException e) {
-				logger.error("Error in sending websocket message: {}", e);
+		JSONObject jsonObject = new JSONObject();
+		try {
+			jsonObject.put("MARKET_UPDATE", MessageType.MARKET_UPDATE);
+			jsonObject.put("pairedCurrency", pairedCurrency.getCurrencyAbbreviation());
+			if ("ETH".equals(pairedCurrency.getCurrencyAbbreviation())) {
+				if (pairedCurrency.getPriceBTC() == null || pairedCurrency.getPriceBTC() == 0
+						|| pairedCurrency.getPriceBTC() > price) {
+					pairedCurrency.setPriceBTC(price);
+				}
+				jsonObject.put("priceBTC", price);
+				jsonObject.put("priceETH", null);
+				jsonObject.put("priceBLN", null);
+			} else if ("ETH".equals(marketCurrency.getCurrencyAbbreviation())
+					&& "BLN".equals(pairedCurrency.getCurrencyAbbreviation())) {
+				if (pairedCurrency.getPriceETH() == null || pairedCurrency.getPriceETH() == 0
+						|| pairedCurrency.getPriceETH() > price) {
+					pairedCurrency.setPriceETH(price);
+				}
+				jsonObject.put("priceBTC", null);
+				jsonObject.put("priceETH", price);
+				jsonObject.put("priceBLN", null);
+			} else if ("ETH".equals(marketCurrency.getCurrencyAbbreviation())
+					&& "BLN".equals(pairedCurrency.getCurrencyAbbreviation())) {
+				if (pairedCurrency.getPriceBTC() == null || pairedCurrency.getPriceBTC() == 0
+						|| pairedCurrency.getPriceBTC() > price) {
+					pairedCurrency.setPriceBTC(price);
+				}
+				jsonObject.put("priceBTC", price);
+				jsonObject.put("priceETH", null);
+				jsonObject.put("priceBLN", null);
+			} else {
+				if (pairedCurrency.getPriceBLN() == null || pairedCurrency.getPriceBLN() == 0
+						|| pairedCurrency.getPriceBLN() > price) {
+					pairedCurrency.setPriceBLN(price);
+				}
+				jsonObject.put("priceBTC", null);
+				jsonObject.put("priceETH", null);
+				jsonObject.put("priceBLN", price);
 			}
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_MARKET, jsonObject.toString());
+		} catch (JSONException e) {
+			logger.error("Error in sending websocket message: {}", e);
 		}
+		currencyService.saveCurrency(pairedCurrency);
+
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_MARKET,
+				jsonObject.toString());
 		return new AsyncResult<>(true);
 	}
 }
