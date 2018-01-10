@@ -542,10 +542,8 @@ public class UserController {
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.PUT)
 	public ResponseEntity<Object> setActionOnNotificton(
 			@RequestParam("arrayOfNotification") Long[] arrayOfNotification) {
-		for (int i=0;i<arrayOfNotification.length;i++) {
-			Long id = arrayOfNotification[i];
-			notificationService.setActionOnNotifiction(id);
-		}
+		notificationService.changeNotificationsStatus(arrayOfNotification);
+		
 		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
 				arrayOfNotification);
 	}
@@ -554,7 +552,7 @@ public class UserController {
 	/**
 	 * @created by Himanshu Kumar
 	 * 
-	 * @returnotification
+	 * @return notification
 	 * 
 	 */
 	@Secured({"ROLE_USER","ROLE_ADMIN"})

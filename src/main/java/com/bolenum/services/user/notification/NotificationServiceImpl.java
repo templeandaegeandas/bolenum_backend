@@ -111,6 +111,7 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+	
 		return notificationRepositroy.findByReceiverAndCreatedOnBetween(admin, startDate, endDate, false, pageRequest);
 	}
 
@@ -129,12 +130,22 @@ public class NotificationServiceImpl implements NotificationService {
 	public void setActionOnNotifiction(Long id) {
 		Notification notifictaion = notificationRepositroy.findOne(id);
 		notifictaion.setReadStatus(true);
+		notificationRepositroy.save(notifictaion);
 	}
 
 	@Override
 	public Long countUnSeenNotification(User user) {
 		return notificationRepositroy.countNotificationByReceiverAndReadStatus(user, false);
 
+	}
+
+	@Override
+	public void changeNotificationsStatus(Long[] arrayOfNotification) {
+		for (int i=0;i<arrayOfNotification.length;i++) {
+			Long id = arrayOfNotification[i];
+			setActionOnNotifiction(id);
+		
+		}		
 	}
 
 }

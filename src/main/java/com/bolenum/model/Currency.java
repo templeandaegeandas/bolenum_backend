@@ -59,7 +59,11 @@ public class Currency {
 	@ManyToMany
 	private List<Currency> market;
 	
-	private Double lastPrice;
+	private Double priceBLN;
+	
+	private Double priceBTC;
+	
+	private Double priceETH;
 	
 	public Currency() {
 
@@ -150,17 +154,44 @@ public class Currency {
 	}
 
 	/**
-	 * @return the lastPrice
+	 * @return the priceBLN
 	 */
-	public Double getLastPrice() {
-		return lastPrice;
+	public Double getPriceBLN() {
+		return priceBLN;
 	}
 
 	/**
-	 * @param lastPrice the lastPrice to set
+	 * @param priceBLN the priceBLN to set
 	 */
-	public void setLastPrice(Double lastPrice) {
-		this.lastPrice = lastPrice;
+	public void setPriceBLN(Double priceBLN) {
+		this.priceBLN = priceBLN;
 	}
 
+	/**
+	 * @return the priceBTC
+	 */
+	public Double getPriceBTC() {
+		return priceBTC;
+	}
+
+	/**
+	 * @param priceBTC the priceBTC to set
+	 */
+	public void setPriceBTC(Double priceBTC) {
+		this.priceBTC = priceBTC;
+	}
+
+	/**
+	 * @return the priceETH
+	 */
+	public Double getPriceETH() {
+		return priceETH;
+	}
+
+	/**
+	 * @param priceETH the priceETH to set
+	 */
+	public void setPriceETH(Double priceETH) {
+		this.priceETH = priceETH;
+	}
 }

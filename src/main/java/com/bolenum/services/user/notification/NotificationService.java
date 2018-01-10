@@ -27,4 +27,7 @@ public interface NotificationService {
 	public Notification getRequestedNotification(Long id);
 
 	public Long countUnSeenNotification(User user);
+
+	public void changeNotificationsStatus(Long[] arrayOfNotification);
+  
 }

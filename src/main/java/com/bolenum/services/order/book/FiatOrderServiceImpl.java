@@ -274,6 +274,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				JSONObject jsonObject = new JSONObject();
 				try {
 					jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
+					jsonObject.put("CONFIRM_NOTIFICATION", "CONFIRM_NOTIFICATION");
 					jsonObject.put("matchedOrderId", matched.getId());
 					simpMessagingTemplate.convertAndSend(
 							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
