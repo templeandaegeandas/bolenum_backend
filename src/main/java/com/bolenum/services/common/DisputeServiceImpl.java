@@ -202,13 +202,13 @@ public class DisputeServiceImpl implements DisputeService {
 				+ ".your order id is" + disputeOrder.getOrders().getId() + "and your dispute is "
 				+ disputeOrder.getDisputeStatus() + disputeOrder.getCommentForDisputeRaiser();
 
-		notificationService.sendNotificationForDispute(disputeRaiser, messageForDisputeRaiser);
+		notificationService.sendNotification(disputeRaiser, messageForDisputeRaiser, "dispute.summary");
 
 		String messageForDisputeRaisedAgainst = "hi , " + disputeRaisedAgainst.getFirstName() + '\n'
 				+ disputeRaiser.getFirstName() + "has raised dispute against you for order id "
 				+ disputeOrder.getOrders().getId() + disputeOrder.getCommentForDisputeRaisedAgainst();
 
-		notificationService.sendNotificationForDispute(disputeRaisedAgainst, messageForDisputeRaisedAgainst);
+		notificationService.sendNotification(disputeRaisedAgainst, messageForDisputeRaisedAgainst, "dispute.summary");
 
 		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getReason());
 

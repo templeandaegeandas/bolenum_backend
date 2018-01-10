@@ -5,6 +5,7 @@ package com.bolenum.services.user.notification;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -44,24 +45,15 @@ public class NotificationServiceImpl implements NotificationService {
 	 * to send the notification
 	 */
 	@Override
-	public boolean sendNotification(User user, String message) {
-		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage("trade.summary"),
-				message);
-		if (status.isDone()) {
-			logger.debug("notification send to : {}", user.getEmailId());
-		}
-		return false;
-	}
-
-	/**
-	 * to send dispute notification with respect to buyer/seller
-	 */
-	@Override
-	public boolean sendNotificationForDispute(User user, String message) {
-		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage("dispute.summary"),
-				message);
-		if (status.isDone()) {
-			logger.debug("notification send to : {}", user.getEmailId());
+	public boolean sendNotification(User user, String message, String subject) {
+		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage(subject), message);
+		try {
+			if (status.get()) {
+				logger.debug("notification send to : {}", user.getEmailId());
+				return true;
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			logger.error("notification sending failed to :{} due to error: {}", user.getEmailId(), e);
 		}
 		return false;
 	}
@@ -136,7 +128,7 @@ public class NotificationServiceImpl implements NotificationService {
 	 */
 	@Override
 	public void setActionOnNotifiction(Long id) {
-		Notification notifictaion=notificationRepositroy.findOne(id);
+		Notification notifictaion = notificationRepositroy.findOne(id);
 		notifictaion.setReadStatus(true);
 		notificationRepositroy.save(notifictaion);
 	}

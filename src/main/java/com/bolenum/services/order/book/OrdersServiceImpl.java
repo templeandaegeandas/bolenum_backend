@@ -107,12 +107,9 @@ public class OrdersServiceImpl implements OrdersService {
 				GenericUtils.getDecimalFormatString(minBalance));
 		// getting the user current wallet balance
 		String balance = walletService.getBalance(tickter, currencyType, user);
-		balance = balance.replace("BTC", "");
-		if (!balance.equals("Synchronizing") || !balance.equals("null")) {
-			// user must have balance then user is eligible for placing order
-			if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
-				balance = "proceed";
-			}
+		// user must have balance then user is eligible for placing order
+		if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
+			balance = "proceed";
 		}
 		return balance;
 	}
@@ -215,7 +212,6 @@ public class OrdersServiceImpl implements OrdersService {
 	public Boolean processMarketOrder(Orders orders) throws InterruptedException, ExecutionException {
 		Boolean processed = false;
 		OrderType orderType = orders.getOrderType();
-		// CurrencyPair pair = orders.getPair();
 		Currency marketCurrency = orders.getMarketCurrency();
 		Currency pairedCurrency = orders.getPairedCurrency();
 		logger.debug("Process Market Order, Order type is: {}", orderType);
@@ -233,7 +229,7 @@ public class OrdersServiceImpl implements OrdersService {
 			/*
 			 * if (isUsersSelfOrder(orders, sellOrderList)) { return processed; }
 			 */
-			while (sellOrderList.size() > 0 && remainingVolume > 0) {
+			while (!sellOrderList.isEmpty() && remainingVolume > 0) {
 				logger.debug("inner buy while loop for buyers remaining Volume: {}",
 						GenericUtils.getDecimalFormat(remainingVolume));
 				remainingVolume = processOrderList(sellOrderList, remainingVolume, orders, marketCurrency,
@@ -264,7 +260,7 @@ public class OrdersServiceImpl implements OrdersService {
 			 * if (isUsersSelfOrder(orders, buyOrderList)) { return processed; }
 			 */
 			logger.debug("buyOrderList.size(): {}", buyOrderList.size());
-			while (buyOrderList.size() > 0 && remainingVolume > 0) {
+			while (!buyOrderList.isEmpty() && remainingVolume > 0) {
 				logger.debug("inner sell while loop for sellers remaining Volume: {}",
 						GenericUtils.getDecimalFormat(remainingVolume));
 				remainingVolume = processOrderList(buyOrderList, remainingVolume, orders, marketCurrency,
@@ -312,7 +308,6 @@ public class OrdersServiceImpl implements OrdersService {
 		logger.debug("Order type is: {}", orderType);
 		Double remainingVolume = orders.getTotalVolume();
 		Double price = orders.getPrice();
-		// CurrencyPair pair = orders.getPair();
 		Currency marketCurrency = orders.getMarketCurrency();
 		Currency pairedCurrency = orders.getPairedCurrency();
 		logger.debug("Order type is equal with buy: {}", orderType.equals(OrderType.BUY));

@@ -37,5 +37,5 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 	long count24hTrade(@Param("marketCurrencyId") long marketCurrencyId,
 			@Param("pairedCurrencyId") long pairedCurrencyId, @Param("endDate") Date endDate);
 
-	List<Trade> findByPairedCurrency(Currency currency);
+	List<Trade> findByMarketCurrency(Currency currency);
 }
