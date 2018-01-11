@@ -124,8 +124,8 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Value("${admin.email}")
 	private String adminEmail;
-	
-	private static final  String STATUS = "CONFIRMED";
+
+	private static final String STATUS = "CONFIRMED";
 
 	@Autowired
 	private TradeTransactionService tradeTransactionService;
@@ -529,7 +529,7 @@ public class TransactionServiceImpl implements TransactionService {
 	public void fetchTransactionConfirmation(Page<Transaction> page) {
 		Web3j web3j = EthereumServiceUtil.getWeb3jInstance();
 		List<Transaction> list = new ArrayList<>();
-		
+
 		page.forEach(transaction -> {
 			try {
 				if (!"BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
@@ -758,7 +758,8 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	public Double totalTrasferFeePaidByAdmin(String currencyName) {
-		return transactionRepo.totalTrasferFeePaidByAdmin(currencyName);
+		Double balance = transactionRepo.totalTrasferFeePaidByAdmin(currencyName);
+		return balance == null ? 0.0 : balance;
 	}
 
 	@Override

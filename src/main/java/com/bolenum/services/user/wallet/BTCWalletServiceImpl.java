@@ -83,6 +83,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	@Value("${admin.email}")
 	private String adminEmail;
+
+	private static final String WITHDRAW_OWN_WALLET = "withdraw.own.wallet";
 	@Autowired
 	private TradeTransactionService tradeTransactionService;
 
@@ -113,7 +115,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return false;
 		}
 		if (toAddress.equals(userCoin.getWalletAddress())) {
-			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+			throw new InsufficientBalanceException(localeService.getMessage(WITHDRAW_OWN_WALLET));
 		}
 
 		if (withdrawAmount < minWithdrawAmount) {
@@ -160,8 +162,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.balance.more.than.fee"));
 		}
 		/**
-		 * network fee required for sending to the receiver address and admin
-		 * address, so networkFee = networkFee * 2;
+		 * network fee required for sending to the receiver address and admin address,
+		 * so networkFee = networkFee * 2;
 		 * 
 		 */
 		Erc20Token erc20Token = erc20TokenService.getByCoin(tokenName);
@@ -170,7 +172,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return false;
 		}
 		if (toAddress.equals(userErc20Token.getWalletAddress())) {
-			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+			throw new InsufficientBalanceException(localeService.getMessage(WITHDRAW_OWN_WALLET));
 		}
 		if (minWithdrawAmount != null && withdrawAmount < minWithdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("min.withdraw.balance"));
@@ -194,8 +196,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (availableBalance >= volume) {
 			return true;
 		} else {
-			throw new InsufficientBalanceException(MessageFormat.format(
-					localeService.getMessage("insufficient.balance"), withdrawAmount, placeOrderVolume));
+			throw new InsufficientBalanceException(MessageFormat
+					.format(localeService.getMessage("insufficient.balance"), withdrawAmount, placeOrderVolume));
 		}
 	}
 
@@ -250,6 +252,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 					return new AsyncResult<>(true);
 				}
 				break;
+			default:
+				return new AsyncResult<>(false);
 			}
 			break;
 		case "ERC20TOKEN":
@@ -303,7 +307,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			return false;
 		}
 		if (toAddress.equals(userCoin.getWalletAddress())) {
-			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+			throw new InsufficientBalanceException(localeService.getMessage(WITHDRAW_OWN_WALLET));
 		}
 		if ("BTC".equals(tokenName)) {
 			String balance = getBtcAccountBalance(user.getBtcWalletUuid());
@@ -311,18 +315,12 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			logger.debug("Available balance: {} {}", availableBalance, tokenName);
 		} else {
 			Double tranferFees = transactionService.totalTrasferFeePaidByAdmin(tokenName);
-			if (tranferFees == null) {
-				tranferFees = 0.0;
-			}
 			Double usersDepositBalance = userCoinRepository.findTotalDepositBalanceOfUser(tokenName);
 			if (usersDepositBalance == null) {
 				usersDepositBalance = 0.0;
 			}
 
 			availableBalance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
-			if (availableBalance == null) {
-				availableBalance = 0.0;
-			}
 			availableBalance = availableBalance - (usersDepositBalance + tranferFees + adminMaintainBal);
 			logger.debug(
 					"Admin Available balance:{} Maintain Bal volume:{} , usersDepositBalance: {} and transfer fee: {} ",
@@ -341,7 +339,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			String toAddress, Erc20Token erc20Token) {
 		if (toAddress.equals(user.getEthWalletaddress())) {
-			throw new InsufficientBalanceException(localeService.getMessage("withdraw.own.wallet"));
+			throw new InsufficientBalanceException(localeService.getMessage(WITHDRAW_OWN_WALLET));
 		}
 		Double usersDepositBalance = userCoinRepository.findTotalDepositBalanceOfUser(tokenName);
 		if (usersDepositBalance == null) {
