@@ -4,13 +4,13 @@ public enum TokenType {
 	REGISTRATION("registration"), AUTHENTICATION("authentication"), FORGOT_PASSWORD("forget_password"), EMAIL_UPDATE(
 			"email_update");
 
-	private String tokenType;
+	private String type;
 
 	private TokenType(String tokenType) {
-		this.tokenType = tokenType;
+		this.type = tokenType;
 	}
 
 	public String getTokenType() {
-		return tokenType;
+		return type;
 	}
 }

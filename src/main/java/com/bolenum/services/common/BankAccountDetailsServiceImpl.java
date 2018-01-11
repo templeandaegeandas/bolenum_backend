@@ -85,8 +85,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 	 */
 	@Override
 	public List<BankAccountDetails> findByUser(User user) {
-		List<BankAccountDetails> listOfBankAccountDetails = bankAccountDetailsRepo.findByUser(user);
-		return listOfBankAccountDetails;
+		return bankAccountDetailsRepo.findByUser(user);
 	}
 
 	/**
@@ -116,10 +115,7 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 	@Override
 	public boolean isBankAccountAdded(User user) {
 		List<BankAccountDetails> bankAccountDetails = bankAccountDetailsRepo.findByUser(user);
-		if (bankAccountDetails.size() > 0) {
-			return true;
-		}
-		return false;
+		return !bankAccountDetails.isEmpty();
 	}
 
 }

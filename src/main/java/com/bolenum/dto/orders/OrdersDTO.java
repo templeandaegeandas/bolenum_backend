@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 
@@ -42,8 +42,12 @@ public class OrdersDTO {
 	private Date deletedOn;
 	private boolean isDeleted;
 
+	
 	@OneToOne
-	private CurrencyPair pair;
+	private Currency marketCurrency;
+	
+	@OneToOne
+	private Currency pairedCurrency;
 
 	@Enumerated(EnumType.STRING)
 	private OrderStatus orderStatus = OrderStatus.SUBMITTED;
@@ -197,22 +201,7 @@ public class OrdersDTO {
 		this.isDeleted = isDeleted;
 	}
 
-	/**
-	 * @return the pair
-	 */
-	public CurrencyPair getPair() {
-		return pair;
-	}
-
-	/**
-	 * @param pair
-	 *            the pair to set
-	 */
-	public void setPair(CurrencyPair pair) {
-		this.pair = pair;
-	}
-
-	/**
+		/**
 	 * @return the orderStatus
 	 */
 	public OrderStatus getOrderStatus() {
@@ -287,6 +276,34 @@ public class OrdersDTO {
 		this.matchedOrder = matchedOrder;
 	}
 
+	/**
+	 * @return the marketCurrency
+	 */
+	public Currency getMarketCurrency() {
+		return marketCurrency;
+	}
+
+	/**
+	 * @param marketCurrency the marketCurrency to set
+	 */
+	public void setMarketCurrency(Currency marketCurrency) {
+		this.marketCurrency = marketCurrency;
+	}
+
+	/**
+	 * @return the pairedCurrency
+	 */
+	public Currency getPairedCurrency() {
+		return pairedCurrency;
+	}
+
+	/**
+	 * @param pairedCurrency the pairedCurrency to set
+	 */
+	public void setPairedCurrency(Currency pairedCurrency) {
+		this.pairedCurrency = pairedCurrency;
+	}
+
 	public Orders copy(Orders orders) {
 		orders.setId(this.id);
 		orders.setVolume(this.volume);
@@ -294,7 +311,8 @@ public class OrdersDTO {
 		orders.setPrice(this.price);
 		orders.setOrderStandard(this.orderStandard);
 		orders.setOrderType(this.orderType);
-		orders.setPair(this.pair);
+		orders.setMarketCurrency(marketCurrency);
+		orders.setPairedCurrency(pairedCurrency);
 		orders.setOrderStatus(this.orderStatus);
 		orders.setUser(this.user);
 		orders.setLockedVolume(this.lockedVolume);

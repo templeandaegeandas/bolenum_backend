@@ -4,16 +4,18 @@
 package com.bolenum.model.notification;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.bolenum.enums.NotificationType;
 import com.bolenum.model.User;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -27,13 +29,21 @@ public class Notification {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	@ManyToMany
-	private List<User> seller;
-	@ManyToMany
-	private List<User> buyer;
+	
+	@ManyToOne
+	private User sender;
+	
+	@ManyToOne
+	private User receiver;
 	
 	private String message;
+	
 	private boolean readStatus;
+	
+	@Enumerated(EnumType.STRING)
+	private NotificationType notificationType;
+	
+	private Long notificationRelationId;
 
 	@ApiModelProperty(hidden = true)
 	@CreationTimestamp
@@ -59,34 +69,21 @@ public class Notification {
 		this.id = id;
 	}
 
-	/**
-	 * @return the seller
-	 */
-	public List<User> getSeller() {
-		return seller;
+	
+	public User getSender() {
+		return sender;
 	}
 
-	/**
-	 * @param seller
-	 *            the seller to set
-	 */
-	public void setSeller(List<User> seller) {
-		this.seller = seller;
+	public void setSender(User sender) {
+		this.sender = sender;
 	}
 
-	/**
-	 * @return the buyer
-	 */
-	public List<User> getBuyer() {
-		return buyer;
+	public User getReceiver() {
+		return receiver;
 	}
 
-	/**
-	 * @param buyer
-	 *            the buyer to set
-	 */
-	public void setBuyer(List<User> buyer) {
-		this.buyer = buyer;
+	public void setReceiver(User receiver) {
+		this.receiver = receiver;
 	}
 
 	/**
@@ -117,6 +114,34 @@ public class Notification {
 	 */
 	public void setReadStatus(boolean readStatus) {
 		this.readStatus = readStatus;
+	}
+
+	/**
+	 * @return the notificationType
+	 */
+	public NotificationType getNotificationType() {
+		return notificationType;
+	}
+
+	/**
+	 * @param notificationType the notificationType to set
+	 */
+	public void setNotificationType(NotificationType notificationType) {
+		this.notificationType = notificationType;
+	}
+
+	/**
+	 * @return the notificationRelationId
+	 */
+	public Long getNotificationRelationId() {
+		return notificationRelationId;
+	}
+
+	/**
+	 * @param notificationRelationId the notificationRelationId to set
+	 */
+	public void setNotificationRelationId(Long notificationRelationId) {
+		this.notificationRelationId = notificationRelationId;
 	}
 
 	/**

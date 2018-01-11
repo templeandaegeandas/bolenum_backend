@@ -1,6 +1,7 @@
 package com.bolenum.model;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +10,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -44,7 +46,7 @@ public class Currency {
 
 	@ApiModelProperty(hidden = true)
 	@UpdateTimestamp
-	private Date UpdatedOn;
+	private Date updatedOn;
 	
 	@Enumerated(EnumType.STRING)
 	private CurrencyType currencyType;
@@ -54,11 +56,14 @@ public class Currency {
 
 	private boolean isDeleted = false;
 	
-	private Double priceUSD;
-
+	@ManyToMany
+	private List<Currency> market;
+	
+	private Double priceBLN;
+	
 	private Double priceBTC;
 	
-	private Double priceNGN;
+	private Double priceETH;
 	
 	public Currency() {
 
@@ -103,11 +108,11 @@ public class Currency {
 	}
 
 	public Date getUpdatedOn() {
-		return UpdatedOn;
+		return updatedOn;
 	}
 
 	public void setUpdatedOn(Date updatedOn) {
-		UpdatedOn = updatedOn;
+		this.updatedOn = updatedOn;
 	}
 
 	public Date getDeletedOn() {
@@ -133,42 +138,60 @@ public class Currency {
 	public void setCurrencyType(CurrencyType currencyType) {
 		this.currencyType = currencyType;
 	}
+
 	/**
-	 * @return the priceUSD
+	 * @return the market
 	 */
-	public Double getPriceUSD() {
-		return priceUSD;
+	public List<Currency> getMarket() {
+		return market;
 	}
 
 	/**
-	 * @param priceUSD
-	 *            the priceUSD to set
+	 * @param market the market to set
 	 */
-	public void setPriceUSD(Double priceUSD) {
-		this.priceUSD = priceUSD;
+	public void setMarket(List<Currency> market) {
+		this.market = market;
 	}
 
 	/**
-	 * @return the price_BTC
+	 * @return the priceBLN
+	 */
+	public Double getPriceBLN() {
+		return priceBLN;
+	}
+
+	/**
+	 * @param priceBLN the priceBLN to set
+	 */
+	public void setPriceBLN(Double priceBLN) {
+		this.priceBLN = priceBLN;
+	}
+
+	/**
+	 * @return the priceBTC
 	 */
 	public Double getPriceBTC() {
 		return priceBTC;
 	}
 
 	/**
-	 * @param price_BTC
-	 *            the price_BTC to set
+	 * @param priceBTC the priceBTC to set
 	 */
-	public void setPriceBTC(Double price_BTC) {
-		this.priceBTC = price_BTC;
+	public void setPriceBTC(Double priceBTC) {
+		this.priceBTC = priceBTC;
 	}
 
-	public Double getPriceNGN() {
-		return priceNGN;
+	/**
+	 * @return the priceETH
+	 */
+	public Double getPriceETH() {
+		return priceETH;
 	}
 
-	public void setPriceNGN(Double priceNGN) {
-		this.priceNGN = priceNGN;
+	/**
+	 * @param priceETH the priceETH to set
+	 */
+	public void setPriceETH(Double priceETH) {
+		this.priceETH = priceETH;
 	}
-
 }

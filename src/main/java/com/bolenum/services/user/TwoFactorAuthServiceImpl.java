@@ -52,7 +52,7 @@ import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 @Service
 public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 
-	private final long KEY_VALIDATION_INTERVAL_MS = TimeUnit.SECONDS.toMillis(30);
+	private static final long KEY_VALIDATION_INTERVAL_MS = TimeUnit.SECONDS.toMillis(30);
 	int lastUsedPassword = -1; // last successfully used password
 	long lastVerifiedTime = 0; // time of last success
 	final GoogleAuthenticator gAuth = new GoogleAuthenticator();
@@ -75,7 +75,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	@Override
 	public Map<String, String> qrCodeGeneration(User user) throws URISyntaxException, WriterException, IOException {
 		String key = getTwoFactorKey(user);
-		String filePath = qrCodeLocation + "/" + user.getUserId() + ".png";
+		String filePath = qrCodeLocation + File.separator + user.getUserId() + ".png";
 		String charset = "UTF-8"; // or "ISO-8859-1"
 		Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new EnumMap<>(EncodeHintType.class);
 		hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
@@ -95,9 +95,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		Integer totp = Integer.valueOf((value.equals("") ? "-1" : value));
 		boolean unused = isUnusedPassword(totp, windowSize.get());
 		boolean matches = gAuth.authorize(user.getGoogle2FaAuthKey(), totp);
-		if (unused && matches)
-			return true;
-		return false;
+		return (unused && matches);
 	}
 
 	@Override
@@ -123,7 +121,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 
 	@Override
 	public boolean verify2faOtp(int otp) throws InvalidOtpException {
-		OTP existingOtp = otpRepository.findByOtp(otp);
+		OTP existingOtp = otpRepository.findByOtpNumber(otp);
 		if (existingOtp != null) {
 			User user = existingOtp.getUser();
 			if (!existingOtp.getIsDeleted() && existingOtp.getMobileNumber().equals(user.getMobileNumber())) {
@@ -210,7 +208,6 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	 * @throws WriterException
 	 * @throws IOException
 	 */
-	@SuppressWarnings("deprecation")
 	private static String createQRCode(String qrCodeData, String filePath, String charset,
 			@SuppressWarnings("rawtypes") Map hintMap, int qrCodeheight, int qrCodewidth)
 			throws WriterException, IOException {
@@ -218,7 +215,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		BitMatrix matrix = new MultiFormatWriter().encode(new String(qrCodeData.getBytes(charset), charset),
 				BarcodeFormat.QR_CODE, qrCodewidth, qrCodeheight, hintMap);
 		File file = new File(filePath);
-		MatrixToImageWriter.writeToFile(matrix, filePath.substring(filePath.lastIndexOf('.') + 1), file);
+		MatrixToImageWriter.writeToPath(matrix, filePath.substring(filePath.lastIndexOf('.') + 1), file.toPath());
 		Encoder encoder = Base64.getEncoder();
 		String base64Image = encoder.encodeToString(Files.readAllBytes(file.toPath()));
 		// using PosixFilePermission to set file permissions 777

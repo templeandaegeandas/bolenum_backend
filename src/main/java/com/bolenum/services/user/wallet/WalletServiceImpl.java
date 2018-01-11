@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.enums.OrderStandard;
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
 import com.bolenum.model.coin.UserCoin;
@@ -50,7 +50,7 @@ public class WalletServiceImpl implements WalletService {
 	@Override
 	public String getBalance(String ticker, String currencyType, User user) {
 		logger.debug("get wallet balance ticker: {}", ticker);
-		String balance = null;
+		String balance = "0";
 		switch (currencyType) {
 		case "CRYPTO":
 			switch (ticker) {
@@ -58,9 +58,10 @@ public class WalletServiceImpl implements WalletService {
 				balance = btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid());
 				break;
 			case "ETH":
-				UserCoin userCoin=etherumWalletService.ethWalletBalance(user, ticker);
+				UserCoin userCoin = etherumWalletService.ethWalletBalance(user, ticker);
 				balance = String.valueOf(userCoin.getBalance());
 				break;
+			default:
 			}
 			break;
 		case "ERC20TOKEN":
@@ -69,25 +70,25 @@ public class WalletServiceImpl implements WalletService {
 			break;
 		case "FIAT":
 			break;
+		default:
+
 		}
 		logger.debug("get wallet balance: {} of User: {}", balance, user.getEmailId());
 		return balance;
 	}
 
 	@Override
-	public String getPairedBalance(Orders orders, CurrencyPair currencyPair, double qtyTraded) {
-		String minBalance = null;
+	public String getPairedBalance(Orders orders, Currency marketCurrency, Currency pairedCurrency, double qtyTraded) {
+		String minBalance = "0.0";
 		/**
-		 * if order type is BUY then for Market order, user should have total
-		 * market price, for Limit order user should have volume (volume *
-		 * price), price limit given by user
+		 * if order type is BUY then for Market order, user should have total market
+		 * price, for Limit order user should have volume (volume * price), price limit
+		 * given by user
 		 */
 		if (OrderStandard.LIMIT.equals(orders.getOrderStandard())) {
 			logger.debug("limit order buy on price: {} {} and quantity trading: {} {} ",
-					GenericUtils.getDecimalFormatString(orders.getPrice()),
-					currencyPair.getToCurrency().get(0).getCurrencyAbbreviation(),
-					GenericUtils.getDecimalFormatString(qtyTraded),
-					currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
+					GenericUtils.getDecimalFormatString(orders.getPrice()), marketCurrency.getCurrencyAbbreviation(),
+					GenericUtils.getDecimalFormatString(qtyTraded), pairedCurrency.getCurrencyAbbreviation());
 			minBalance = String.valueOf(qtyTraded * orders.getPrice());
 		} else {
 			/**
@@ -95,18 +96,17 @@ public class WalletServiceImpl implements WalletService {
 			 */
 
 			/**
-			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560
-			 * BTC, this will update according to order selling book
+			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560 BTC, this will
+			 * update according to order selling book
 			 */
-			double buyingCurrencyValue = currencyPair.getPairedCurrency().get(0).getPriceBTC();
+			double buyingCurrencyValue = 0.0578560;
 			logger.debug("order value : {}, buyingCurrencyValue: {}", GenericUtils.getDecimalFormatString(qtyTraded),
 					GenericUtils.getDecimalFormatString(buyingCurrencyValue));
 			if (buyingCurrencyValue > 0) {
 				/**
-				 * user must have this balance to give market order, Example
-				 * user want to BUY 3 BTC on market price, at this moment 1 ETH
-				 * = 0.0578560 BTC then for 3 BTC (3/0.0578560) BTC, then user
-				 * must have 51.852876106 ETH to buy 3 BTC
+				 * user must have this balance to give market order, Example user want to BUY 3
+				 * BTC on market price, at this moment 1 ETH = 0.0578560 BTC then for 3 BTC
+				 * (3/0.0578560) BTC, then user must have 51.852876106 ETH to buy 3 BTC
 				 */
 				minBalance = String.valueOf(qtyTraded / buyingCurrencyValue);
 			}

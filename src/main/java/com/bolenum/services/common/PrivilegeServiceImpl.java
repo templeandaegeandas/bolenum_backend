@@ -50,8 +50,6 @@ public class PrivilegeServiceImpl implements PrivilegeService {
 	@Override
 	public Privilege findOrCreate(Privilege privilege) {
 		Privilege p = findByName(privilege.getName().trim());
-		logger.debug("privalege name in find or create: " + privilege.getName().trim());
-		logger.debug("find by name result: " + p);
 		if (p == null) {
 			logger.debug("privalege p is null ");
 			return savePrivilege(privilege);
@@ -64,12 +62,10 @@ public class PrivilegeServiceImpl implements PrivilegeService {
 		return privilegeRepo.findByNameIgnoreCase(name);
 	}
 
-	
 	@Override
 	public Set<Privilege> findAllPrevileges() {
-		List<Privilege> listOfPrivilege=privilegeRepo.findAll();
-		Set<Privilege> setOfPrivileges = new HashSet<Privilege>(listOfPrivilege);
-		return setOfPrivileges;
+		List<Privilege> listOfPrivilege = privilegeRepo.findAll();
+		return new HashSet<>(listOfPrivilege);
 	}
 
 }

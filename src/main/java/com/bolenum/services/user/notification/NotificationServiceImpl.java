@@ -3,8 +3,9 @@
  */
 package com.bolenum.services.user.notification;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.enums.NotificationType;
 import com.bolenum.model.User;
 import com.bolenum.model.notification.Notification;
 import com.bolenum.repo.user.notification.NotificationRepositroy;
@@ -44,24 +46,15 @@ public class NotificationServiceImpl implements NotificationService {
 	 * to send the notification
 	 */
 	@Override
-	public boolean sendNotification(User user, String message) {
-		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage("trade.summary"),
-				message);
-		if (status.isDone()) {
-			logger.debug("notification send to : {}", user.getEmailId());
-		}
-		return false;
-	}
-
-	/**
-	 * to send dispute notification with respect to buyer/seller
-	 */
-	@Override
-	public boolean sendNotificationForDispute(User user, String message) {
-		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage("dispute.summary"),
-				message);
-		if (status.isDone()) {
-			logger.debug("notification send to : {}", user.getEmailId());
+	public boolean sendNotification(User user, String message, String subject) {
+		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage(subject), message);
+		try {
+			if (status.get()) {
+				logger.debug("notification send to : {}", user.getEmailId());
+				return true;
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			logger.error("notification sending failed to :{} due to error: {}", user.getEmailId(), e);
 		}
 		return false;
 	}
@@ -77,7 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
 		logger.debug("fetching notification of user: {}, page: {}, size: {}", receiver.getEmailId(), pageNumber,
 				pageSize);
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, Direction.DESC, "createdOn");
-		return notificationRepositroy.findByBuyerAndIsDeleted(receiver, false, pageRequest);
+		return notificationRepositroy.findByReceiverAndIsDeleted(receiver, false, pageRequest);
 	}
 
 	/**
@@ -85,17 +78,77 @@ public class NotificationServiceImpl implements NotificationService {
 	 */
 	@Async
 	@Override
-	public Notification saveNotification(User buyer, User seller, String msg) {
-		List<User> buyers = new ArrayList<>();
-		buyers.add(buyer);
-		List<User> sellers = new ArrayList<>();
-		sellers.add(seller);
+	public Notification saveNotification(User sender, User receiver, String msg, Long notificationRelationId,
+			NotificationType notificationType) {
 		Notification notification = new Notification();
-		notification.setBuyer(buyers);
-		notification.setSeller(buyers);
+		notification.setSender(sender);
+		notification.setReceiver(receiver);
 		notification.setMessage(msg);
+		notification.setNotificationType(notificationType);
+		notification.setNotificationRelationId(notificationRelationId);
 		notification.setReadStatus(false);
 		notification.setDeleted(false);
 		return notificationRepositroy.save(notification);
+
 	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 * 
+	 */
+	@Override
+	public Page<Notification> getListOfNotification(User admin, int pageNumber, int pageSize, String sortOrder,
+			String sortBy) {
+
+		Date endDate = new Date();
+		Calendar c = Calendar.getInstance();
+		c.setTime(endDate);
+		c.add(Calendar.DATE, -1);
+		Date startDate = c.getTime();
+
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+
+		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+
+		return notificationRepositroy.findByReceiverAndCreatedOnBetween(admin, startDate, endDate, false, pageRequest);
+	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 */
+	@Override
+	public Notification getRequestedNotification(Long id) {
+		return notificationRepositroy.findOne(id);
+	}
+
+	/**
+	 * @Created by Himanshu Kumar
+	 */
+	@Override
+	public void setActionOnNotifiction(Long id) {
+		Notification notifictaion = notificationRepositroy.findOne(id);
+		notifictaion.setReadStatus(true);
+		notificationRepositroy.save(notifictaion);
+	}
+
+	@Override
+	public Long countUnSeenNotification(User user) {
+		return notificationRepositroy.countNotificationByReceiverAndReadStatus(user, false);
+
+	}
+
+	@Override
+	public void changeNotificationsStatus(Long[] arrayOfNotification) {
+		for (int i = 0; i < arrayOfNotification.length; i++) {
+			Long id = arrayOfNotification[i];
+			setActionOnNotifiction(id);
+
+		}
+	}
+
 }

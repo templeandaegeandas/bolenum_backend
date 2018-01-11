@@ -51,13 +51,8 @@ public class DisputeServiceImpl implements DisputeService {
 
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
-	
+
 	public static final Logger logger = LoggerFactory.getLogger(DisputeServiceImpl.class);
-	
-
-	public DisputeServiceImpl() {
-
-	}
 
 	/**
 	 * 
@@ -88,11 +83,7 @@ public class DisputeServiceImpl implements DisputeService {
 	public Boolean checkExpiryToDispute(Orders orders) {
 		Date previous = orders.getCreatedOn();
 		Date now = new Date();
-		if (now.getTime() - previous.getTime() <= 15 * 60 * 1000) {
-			return false;
-
-		}
-		return true;
+		return (now.getTime() - previous.getTime() > 15 * 60 * 1000);
 	}
 
 	/**
@@ -141,10 +132,7 @@ public class DisputeServiceImpl implements DisputeService {
 	@Override
 	public Boolean isAlreadyDisputed(Orders orders, Long transactionId) {
 		DisputeOrder disputeOrder = disputeOrderRepo.findByOrdersOrTransactionId(orders, transactionId);
-		if (disputeOrder == null) {
-			return false;
-		}
-		return true;
+		return (disputeOrder != null);
 	}
 
 	/**
@@ -185,21 +173,10 @@ public class DisputeServiceImpl implements DisputeService {
 	@Override
 	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentForDisputeRaiser,
 			String commentForDisputeRaisedAgainst, DisputeStatus disputeStatus) {
-		if (DisputeStatus.RAISED.equals(disputeOrder.getDisputeStatus())
-				&& disputeStatus.equals(DisputeStatus.INPROCESS)) {
-			disputeOrder.setDisputeStatus(disputeStatus);
-			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
-			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
-			return disputeOrderRepo.save(disputeOrder);
-
-		} else if (DisputeStatus.INPROCESS.equals(disputeOrder.getDisputeStatus())
-				&& disputeStatus.equals(DisputeStatus.COMPLETED)) {
-			disputeOrder.setDisputeStatus(disputeStatus);
-			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
-			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
-			return disputeOrderRepo.save(disputeOrder);
-		}
-		return null;
+		disputeOrder.setDisputeStatus(disputeStatus);
+		disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
+		disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
+		return disputeOrderRepo.save(disputeOrder);
 
 	}
 
@@ -214,15 +191,15 @@ public class DisputeServiceImpl implements DisputeService {
 				+ ".your order id is" + disputeOrder.getOrders().getId() + "and your dispute is "
 				+ disputeOrder.getDisputeStatus() + disputeOrder.getCommentForDisputeRaiser();
 
-		notificationService.sendNotificationForDispute(disputeRaiser, messageForDisputeRaiser);
+		notificationService.sendNotification(disputeRaiser, messageForDisputeRaiser, "dispute.summary");
 
 		String messageForDisputeRaisedAgainst = "hi , " + disputeRaisedAgainst.getFirstName() + '\n'
 				+ disputeRaiser.getFirstName() + "has raised dispute against you for order id "
 				+ disputeOrder.getOrders().getId() + disputeOrder.getCommentForDisputeRaisedAgainst();
 
-		notificationService.sendNotificationForDispute(disputeRaisedAgainst, messageForDisputeRaisedAgainst);
+		notificationService.sendNotification(disputeRaisedAgainst, messageForDisputeRaisedAgainst, "dispute.summary");
 
-		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getReason());
+		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getReason(), null, null);
 
 	}
 

@@ -48,12 +48,9 @@ import com.bolenum.util.GenericUtils;
  */
 @Service
 public class EtherumWalletServiceImpl implements EtherumWalletService {
-	
+
 	@Value("${bolenum.ethwallet.location}")
 	private String ethWalletLocation;
-
-	// @Autowired
-	// private UserService userService;
 
 	@Autowired
 	private UserCoinRepository userCoinRepository;
@@ -63,57 +60,6 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 
 	private static final Logger logger = LoggerFactory.getLogger(EtherumWalletServiceImpl.class);
 
-	// @Override
-	// @Async
-	// public void createWallet(User user) {
-	// File file = new File(ethWalletLocation);
-	// String fileName;
-	// try {
-	// String password = UUID.randomUUID().toString().replaceAll("-", "");
-	// fileName = WalletUtils.generateFullNewWalletFile(password, file);
-	// logger.debug("wallet file name: {}", fileName);
-	// String passwordKey = CryptoUtil.getSecretKey();
-	// logger.debug("wallet file passwordKey: {}", passwordKey);
-	// String encPwd = CryptoUtil.encrypt(password, passwordKey);
-	// logger.debug("wallet file encPwd: {}", encPwd);
-	// File jsonFile = new File(file + "/" + fileName);
-	// logger.debug("wallet file jsonFile: {}", jsonFile);
-	// Credentials credentials = WalletUtils.loadCredentials(password,
-	// jsonFile);
-	// logger.debug("wallet address: {}", credentials.getAddress());
-	// user.setEthWalletaddress(credentials.getAddress());
-	// user.setEthWalletPwdKey(passwordKey);
-	// user.setEthWalletPwd(encPwd);
-	// user.setEthWalletJsonFileName(fileName);
-	// User savedUser = userService.saveUser(user);
-	// if (savedUser != null) {
-	// logger.debug("eth wallet info saved of user: {}",
-	// savedUser.getFullName());
-	// } else {
-	// logger.error("eth wallet info not saved of user");
-	// }
-	//
-	// } catch (InvalidKeyException e) {
-	// logger.error("InvalidKeyException: {}", e.getMessage());
-	// } catch (NoSuchPaddingException e) {
-	// logger.error("NoSuchPaddingException: {}", e.getMessage());
-	// } catch (IllegalBlockSizeException e) {
-	// logger.error("IllegalBlockSizeException: {}", e.getMessage());
-	// } catch (BadPaddingException e) {
-	// logger.error("BadPaddingException: {}", e.getMessage());
-	// } catch (NoSuchAlgorithmException e) {
-	// logger.error("NoSuchAlgorithmException: {}", e.getMessage());
-	// } catch (NoSuchProviderException e) {
-	// logger.error("NoSuchProviderException: {}", e.getMessage());
-	// } catch (InvalidAlgorithmParameterException e) {
-	// logger.error("InvalidAlgorithmParameterException: {}", e.getMessage());
-	// } catch (CipherException e) {
-	// logger.error("CipherException: {}", e.getMessage());
-	// } catch (IOException e) {
-	// logger.error("IOException: {}", e.getMessage());
-	// }
-	// }
-
 	@Override
 	@Async
 	public void createEthWallet(User user, String tokenName) {
@@ -122,6 +68,8 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 		UserCoin savedUserCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
 		if (savedUserCoin == null) {
 			try {
+				logger.debug("wallet file location: {}", ethWalletLocation);
+				logger.debug("wallet file: {}", file);
 				String password = UUID.randomUUID().toString().replaceAll("-", "");
 				fileName = WalletUtils.generateFullNewWalletFile(password, file);
 				logger.debug("wallet file name {} for: {}", fileName, tokenName);

@@ -23,4 +23,5 @@ public interface CurrencyRepo extends JpaRepository<Currency, Long> {
 
 	List<Currency> findByCurrencyTypeNotIn(CurrencyType type);
 
+	List<Currency> findByMarketIsNotNull();
 }

@@ -15,16 +15,16 @@ import org.springframework.stereotype.Service;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.controller.user.FiatOrderController;
 import com.bolenum.enums.MessageType;
-import com.bolenum.model.CurrencyPair;
+import com.bolenum.model.Currency;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.repo.order.book.TradeRepository;
-import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.services.admin.CurrencyService;
 
 @Service
 public class OrderAsyncServicesImpl implements OrderAsyncService {
-	
+
 	private Logger logger = LoggerFactory.getLogger(FiatOrderController.class);
 
 	@Autowired
@@ -32,12 +32,16 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 
 	@Autowired
 	private TradeRepository tradeRepository;
-	
+
 	@Autowired
-	private CurrencyPairService currencyPairService;
-	
+	private CurrencyService currencyService;
+
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
+
+	private static final String PRICE_BTC = "priceBTC";
+	private static final String PRICE_ETH = "priceETH";
+	private static final String PRICE_BLN = "priceBLN";
 
 	@Override
 	public List<Orders> saveOrder(List<Orders> ordersList) {
@@ -58,25 +62,46 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 	public Trade saveTrade(Trade trade) {
 		return tradeRepository.save(trade);
 	}
-	
+
 	@Override
-	public Future<Boolean> saveLastPrice(long pairId, Double price) {
-		CurrencyPair currencyPair = currencyPairService.findByPairId(pairId);
-		if(currencyPair.getLastPrice() == null || currencyPair.getLastPrice() == 0 || currencyPair.getLastPrice() > price) {
-			currencyPair.setLastPrice(price);
-			currencyPairService.saveCurrencyPair(currencyPair);
-			JSONObject jsonObject = new JSONObject();
-			try {
-				jsonObject.put("MARKET_UPDATE", MessageType.MARKET_UPDATE);
-				jsonObject.put("pairId", pairId);
-				jsonObject.put("price", price);
-				jsonObject.put("toCurrency", currencyPair.getToCurrency().get(0).getCurrencyAbbreviation());
-				jsonObject.put("pairedCurrency", currencyPair.getPairedCurrency().get(0).getCurrencyAbbreviation());
-			} catch (JSONException e) {
-				logger.error("Error in sending websocket message: {}", e);
+	public Future<Boolean> saveLastPrice(Currency marketCurrency, Currency pairedCurrency, Double price) {
+		JSONObject jsonObject = new JSONObject();
+		try {
+			jsonObject.put("MARKET_UPDATE", MessageType.MARKET_UPDATE);
+			jsonObject.put("pairedCurrency", pairedCurrency.getCurrencyAbbreviation());
+			if ("BTC".equals(marketCurrency.getCurrencyAbbreviation())) {
+				if (pairedCurrency.getPriceBTC() == null || pairedCurrency.getPriceBTC() == 0
+						|| pairedCurrency.getPriceBTC() > price) {
+					pairedCurrency.setPriceBTC(price);
+				}
+				jsonObject.put(PRICE_BTC, price);
+				jsonObject.put(PRICE_ETH, 0);
+				jsonObject.put(PRICE_BLN, 0);
+			} else if ("ETH".equals(marketCurrency.getCurrencyAbbreviation())
+					&& "BLN".equals(pairedCurrency.getCurrencyAbbreviation())) {
+				if (pairedCurrency.getPriceETH() == null || pairedCurrency.getPriceETH() == 0
+						|| pairedCurrency.getPriceETH() > price) {
+					pairedCurrency.setPriceETH(price);
+				}
+				jsonObject.put(PRICE_BTC, 0);
+				jsonObject.put(PRICE_ETH, price);
+				jsonObject.put(PRICE_BLN, 0);
+			} else {
+				if (pairedCurrency.getPriceBLN() == null || pairedCurrency.getPriceBLN() == 0
+						|| pairedCurrency.getPriceBLN() > price) {
+					pairedCurrency.setPriceBLN(price);
+				}
+				jsonObject.put(PRICE_BTC, 0);
+				jsonObject.put(PRICE_ETH, 0);
+				jsonObject.put(PRICE_BLN, price);
 			}
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_MARKET, jsonObject.toString());
+		} catch (JSONException e) {
+			logger.error("Error in sending websocket message: {}", e);
 		}
+		currencyService.saveCurrency(pairedCurrency);
+
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_MARKET,
+				jsonObject.toString());
 		return new AsyncResult<>(true);
 	}
 }

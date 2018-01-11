@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.enums.DocumentStatus;
 import com.bolenum.enums.DocumentType;
+import com.bolenum.enums.NotificationType;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;
@@ -24,6 +25,7 @@ import com.bolenum.model.UserKyc;
 import com.bolenum.repo.common.KYCRepo;
 import com.bolenum.repo.user.UserRepository;
 import com.bolenum.services.user.FileUploadService;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.util.MailService;
 import com.bolenum.util.SMSService;
 
@@ -58,6 +60,9 @@ public class KYCServiceImpl implements KYCService {
 	@Autowired
 	private KYCService kycService;
 
+	@Autowired
+	private NotificationService notificationService;
+
 	@Value("${bolenum.document.location}")
 	private String uploadedFileLocation;
 
@@ -69,32 +74,35 @@ public class KYCServiceImpl implements KYCService {
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		long sizeLimit = 1024 * 1024 * 10L;
 		User user = userRepository.findOne(userId);
+		User admin =userRepository.findByEmailId("admin@bolenum.com");
 		/*
-		 * if (user.getMobileNumber() == null || !user.getIsMobileVerified()) {
-		 * throw new MobileNotVerifiedException(localeService.getMessage(
+		 * if (user.getMobileNumber() == null || !user.getIsMobileVerified()) { throw
+		 * new MobileNotVerifiedException(localeService.getMessage(
 		 * "mobile.number.not.verified")); }
 		 */
+		
 		UserKyc savedKyc = null;
-		if (file != null) {
+		if (file != null) { //1
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
-			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, documentType, validExtentions,
-					sizeLimit);
-
+			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, documentType,
+					validExtentions, sizeLimit);
+			
 			List<UserKyc> listOfUserKyc = kycService.getListOfKycByUser(user);
-
-			if (listOfUserKyc == null || listOfUserKyc.isEmpty()) {
+			
+			if (listOfUserKyc.isEmpty()) { //2
 				UserKyc kyc = new UserKyc();
 				kyc.setDocument(updatedFileName);
 				kyc.setDocumentType(documentType);
 				listOfUserKyc.add(kyc);
 				kyc.setUser(user);
 				savedKyc = kycRepo.save(kyc);
-			} else if (!listOfUserKyc.isEmpty() && listOfUserKyc.size() <= 2) {
+				
+			} else if (listOfUserKyc.size() <= 2) { //2
 				boolean added = false;
 				Iterator<UserKyc> iterator = listOfUserKyc.iterator();
-				while (iterator.hasNext()) {
+				while (iterator.hasNext()) { //3
 					UserKyc userKyc = iterator.next();
-					if (documentType.equals(userKyc.getDocumentType())) {
+					if (documentType.equals(userKyc.getDocumentType())) { //4
 						userKyc.setDocument(updatedFileName);
 						userKyc.setDocumentType(documentType);
 						userKyc.setIsVerified(false);
@@ -106,7 +114,7 @@ public class KYCServiceImpl implements KYCService {
 
 					}
 				}
-				if (!added) {
+				if (!added) { //3
 					UserKyc kyc = new UserKyc();
 					kyc.setDocument(updatedFileName);
 					kyc.setDocumentType(documentType);
@@ -115,11 +123,8 @@ public class KYCServiceImpl implements KYCService {
 					savedKyc = kycRepo.save(kyc);
 				}
 			}
-		} else
-
-		{
-			return null;
 		}
+		notificationService.saveNotification(user,admin, "KYC uploaded by user",savedKyc.getId(), NotificationType.KYC_NOTIFICATION);
 		return savedKyc;
 	}
 
@@ -133,15 +138,25 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setIsVerified(true);
 		userKyc.setDocumentStatus(DocumentStatus.APPROVED);
 		userKyc.setRejectionMessage(null);
-		User user=userKyc.getUser();
+		User user = userKyc.getUser();
+		User admin = userRepository.findByEmailId("admin@bolenum.com");
+
 		if (DocumentType.NATIONAL_ID.equals(userKyc.getDocumentType())) {
-			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.approve.user.kyc.nationalId"));
+			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
+					localeService.getMessage("email.text.approve.user.kyc.nationalId"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
 					localeService.getMessage("email.text.approve.user.kyc.nationalId"));
+
+			notificationService.saveNotification(admin, user, "Your KYC as NATIONAL_ID has been approved", kycId, NotificationType.KYC_NOTIFICATION);
+
 		} else {
-			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.approve.user.kyc.addressproof"));
+			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
+					localeService.getMessage("email.text.approve.user.kyc.addressproof"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
 					localeService.getMessage("email.text.approve.user.kyc.addressproof"));
+
+			notificationService.saveNotification(admin, user, "Your KYC as RESIDENCE_PROOF has been approved", kycId, NotificationType.KYC_NOTIFICATION);
+
 		}
 		return kycRepo.save(userKyc);
 	}
@@ -158,19 +173,28 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
 		User user = userKyc.getUser();
+		User admin = userRepository.findByEmailId("admin@bolenum.com");
 		if (DocumentType.NATIONAL_ID.equals(userKyc.getDocumentType())) {
-			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
+			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
+					localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
 					localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
+
+			notificationService.saveNotification(admin, user, "Your KYC as NATIONAL_ID has been disapproved", kycId, NotificationType.KYC_NOTIFICATION);
 		} else {
-			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(), localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
+			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
+					localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
 					localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
+
+			notificationService.saveNotification(admin, user, "Your KYC as as RESIDENCE_PROOF has been disapproved", kycId, NotificationType.KYC_NOTIFICATION);
 		}
 		return kycRepo.save(userKyc);
 	}
 
-
+	/**
+	 * 
+	 */
 	@Override
 	public UserKyc getUserKycById(Long kycId) {
 		return kycRepo.findOne(kycId);
@@ -207,8 +231,5 @@ public class KYCServiceImpl implements KYCService {
 	public List<UserKyc> getListOfKycByUser(User user) {
 		return kycRepo.findByUser(user);
 	}
-
-	
-
 
 }

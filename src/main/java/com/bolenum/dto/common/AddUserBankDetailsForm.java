@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
 import com.bolenum.model.BankAccountDetails;
+
 import io.swagger.annotations.ApiModelProperty;
 
 public class AddUserBankDetailsForm {

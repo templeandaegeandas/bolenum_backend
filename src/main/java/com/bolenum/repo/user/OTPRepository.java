@@ -6,5 +6,5 @@ import com.bolenum.model.OTP;
 
 public interface OTPRepository extends JpaRepository<OTP, Long> {
 
-	OTP findByOtp(Integer otp);
+	OTP findByOtpNumber(Integer otp);
 }

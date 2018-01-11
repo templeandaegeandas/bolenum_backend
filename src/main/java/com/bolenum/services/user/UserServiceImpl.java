@@ -264,7 +264,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Boolean verifyOTP(Integer otp, User user) throws InvalidOtpException {
-		OTP existingOtp = otpRepository.findByOtp(otp);
+		OTP existingOtp = otpRepository.findByOtpNumber(otp);
 		if (existingOtp != null) {
 			if (!existingOtp.getIsDeleted() && existingOtp.getMobileNumber().equals(user.getMobileNumber())) {
 				long timeDiffInSec = (new Date().getTime() - existingOtp.getCreatedDate().getTime()) / 1000;

@@ -36,13 +36,12 @@ import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.PersistenceException;
 import com.bolenum.model.AuthenticationToken;
 import com.bolenum.model.Countries;
-import com.bolenum.model.CurrencyPair;
 import com.bolenum.model.States;
 import com.bolenum.model.SubscribedUser;
 import com.bolenum.model.Transaction;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.UserCoin;
-import com.bolenum.services.admin.CurrencyPairService;
+import com.bolenum.model.notification.Notification;
 import com.bolenum.services.common.CountryAndStateService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.common.coin.Erc20TokenService;
@@ -51,6 +50,7 @@ import com.bolenum.services.order.book.OrdersService;
 import com.bolenum.services.user.AuthenticationTokenService;
 import com.bolenum.services.user.SubscribedUserService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.BTCWalletService;
 import com.bolenum.services.user.wallet.EtherumWalletService;
@@ -106,7 +106,9 @@ public class UserController {
 	private MarketPriceService marketPriceService;
 
 	@Autowired
-	private CurrencyPairService currencyPairService;
+	private NotificationService notificationService;
+
+	private static final String MESSAGE_SUCCESS = "message.success";
 
 	/**
 	 * 
@@ -192,15 +194,11 @@ public class UserController {
 			User savedUser = userService.saveUser(user);
 			logger.debug("user mail verify savedUser: {}", savedUser);
 			if (savedUser != null) {
-				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
-			} else {
-				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-						localService.getMessage("message.error"), null);
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(MESSAGE_SUCCESS), null);
 			}
-		} else {
-			return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-					localService.getMessage("message.error"), null);
 		}
+		return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+				localService.getMessage("message.error"), null);
 	}
 
 	/**
@@ -272,7 +270,7 @@ public class UserController {
 	@RequestMapping(value = UrlConstant.GET_LOGGEDIN_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getLoggedinUser() {
 		User user = GenericUtils.getLoggedInUser();
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), user);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(MESSAGE_SUCCESS), user);
 	}
 
 	/**
@@ -406,9 +404,9 @@ public class UserController {
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
-	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("currencyName") String currencyName, @RequestParam("pageNumber") int pageNumber,
-			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
-			@RequestParam("sortBy") String sortBy) {
+	public ResponseEntity<Object> getWithdrawTransactionList(@RequestParam("currencyName") String currencyName,
+			@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize,
+			@RequestParam("sortOrder") String sortOrder, @RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(currencyName, user,
 				TransactionStatus.WITHDRAW, pageNumber, pageSize, sortOrder, sortBy);
@@ -428,9 +426,9 @@ public class UserController {
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
-	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("currencyName") String currencyName, @RequestParam("pageNumber") int pageNumber,
-			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
-			@RequestParam("sortBy") String sortBy) {
+	public ResponseEntity<Object> getDepositTransactionList(@RequestParam("currencyName") String currencyName,
+			@RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize,
+			@RequestParam("sortOrder") String sortOrder, @RequestParam("sortBy") String sortBy) {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Transaction> listOfUserTransaction = transactionService.getListOfUserTransaction(currencyName, user,
 				TransactionStatus.DEPOSIT, pageNumber, pageSize, sortOrder, sortBy);
@@ -493,28 +491,74 @@ public class UserController {
 	 */
 
 	@RequestMapping(value = UrlConstant.COIN_MARKET_DATA, method = RequestMethod.GET)
-	public ResponseEntity<Object> getCoinMarketData(@RequestParam("pairId") long pairId) {
-		CurrencyPair pair = currencyPairService.findByPairId(pairId);
-		if (pair != null) {
-			try {
-				Double volume24h = marketPriceService.ordersIn24hVolume(pair);
-				Double high24h = marketPriceService.ordersIn24hHigh(pair);
-				long countTrade24h = marketPriceService.tradesIn24h(pair);
-				Double low24h = marketPriceService.ordersIn24hLow(pair);
-				Map<String, Object> map = new HashMap<>();
-				map.put("volume24h", volume24h);
-				map.put("high24h", high24h);
-				map.put("low24h", low24h);
-				map.put("countTrade24h", countTrade24h);
-				return ResponseHandler.response(HttpStatus.OK, false,
-						localService.getMessage("coin.market.data.success"), map);
-			} catch (ParseException e) {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-						localService.getMessage("coin.market.data.failure"), Optional.empty());
-			}
+	public ResponseEntity<Object> getCoinMarketData(@RequestParam("marketCurrencyId") long marketCurrency,
+			@RequestParam("pairedCurrencyId") long pairedCurrency) {
+		try {
+			Double volume24h = marketPriceService.ordersIn24hVolume(marketCurrency, pairedCurrency);
+			Double high24h = marketPriceService.ordersIn24hHigh(marketCurrency, pairedCurrency);
+			long countTrade24h = marketPriceService.tradesIn24h(marketCurrency, pairedCurrency);
+			Double low24h = marketPriceService.ordersIn24hLow(marketCurrency, pairedCurrency);
+			Map<String, Object> map = new HashMap<>();
+			map.put("volume24h", volume24h);
+			map.put("high24h", high24h);
+			map.put("low24h", low24h);
+			map.put("countTrade24h", countTrade24h);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("coin.market.data.success"),
+					map);
+		} catch (ParseException e) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localService.getMessage("coin.market.data.failure"), Optional.empty());
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-				localService.getMessage("coin.market.data.failure"), Optional.empty());
+	}
+
+	/**
+	 * @created by Himanshu Kumar
+	 * 
+	 * @return
+	 */
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.GET)
+	public ResponseEntity<Object> getNotificationList(@RequestParam("pageNumber") int pageNumber,
+			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
+			@RequestParam("sortBy") String sortBy) {
+		User user = GenericUtils.getLoggedInUser();
+		Page<Notification> listOfUserNotification = notificationService.getListOfNotification(user, pageNumber,
+				pageSize, sortOrder, sortBy);
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage(MESSAGE_SUCCESS),
+				listOfUserNotification);
+
+	}
+
+	/**
+	 * @created by Himanshu Kumar
+	 * 
+	 * @param id
+	 * 
+	 * @return
+	 */
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.PUT)
+	public ResponseEntity<Object> setActionOnNotificton(
+			@RequestParam("arrayOfNotification") Long[] arrayOfNotification) {
+		notificationService.changeNotificationsStatus(arrayOfNotification);
+
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage(MESSAGE_SUCCESS),
+				arrayOfNotification);
+	}
+
+	/**
+	 * @created by Himanshu Kumar
+	 * 
+	 * @return notification
+	 * 
+	 */
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+	@RequestMapping(value = UrlConstant.COUNT_USER_NOTIFICATION, method = RequestMethod.GET)
+	public ResponseEntity<Object> countUserNotification() {
+		User user = GenericUtils.getLoggedInUser();
+		Long totalUnseenNotification = notificationService.countUnSeenNotification(user);
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage(MESSAGE_SUCCESS),
+				totalUnseenNotification);
 	}
 
 }

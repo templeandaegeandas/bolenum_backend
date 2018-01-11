@@ -67,7 +67,7 @@ public class OrderController {
 
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
-	public ResponseEntity<Object> createOrder(@RequestParam("pairId") long pairId, @RequestBody Orders orders) {
+	public ResponseEntity<Object> createOrder(@RequestBody Orders orders) {
 		if (orders.getVolume() * orders.getPrice() < 0.0001) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.volume.zero"),
 					null);
@@ -78,7 +78,7 @@ public class OrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.verify.kyc"),
 					null);
 		}
-		String balance = ordersService.checkOrderEligibility(user, orders, pairId);
+		String balance = ordersService.checkOrderEligibility(user, orders);
 		logger.debug("balance: {} of user: {}", balance, user.getEmailId());
 		if (balance.equals("Synchronizing")) {
 			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.system.sync"), null);
@@ -110,14 +110,16 @@ public class OrderController {
 	 * @return
 	 */
 	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("pairId") Long pairId) {
-		Page<Orders> list = ordersService.getBuyOrdersListByPair(pairId);
+	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("marketCurrencyId") long marketCurrencyId,
+			@RequestParam("pairedCurrencyId") long pairedCurrencyId) {
+		Page<Orders> list = ordersService.getBuyOrdersListByPair(marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 
 	@RequestMapping(value = UrlConstant.SELL_ORDER_LIST, method = RequestMethod.GET)
-	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("pairId") Long pairId) {
-		Page<Orders> list = ordersService.getSellOrdersListByPair(pairId);
+	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("marketCurrencyId") long marketCurrencyId,
+			@RequestParam("pairedCurrencyId") long pairedCurrencyId) {
+		Page<Orders> list = ordersService.getSellOrdersListByPair(marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
 

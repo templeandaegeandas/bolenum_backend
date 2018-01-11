@@ -11,13 +11,7 @@ import com.bolenum.model.coin.UserCoin;
  * @date 26-Sep-2017
  */
 public interface EtherumWalletService {
-
-	// @Async
-	// public void createWallet(User user);
-	//
-
 	public String cleintVersion();
-	// public Double getWalletBalance(User user);
 
 	void createEthWallet(User user, String tokenName);
 

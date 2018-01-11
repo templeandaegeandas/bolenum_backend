@@ -37,6 +37,8 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
+	private static final String TRADESUMMARY = "trade.summary";
+
 	/**
 	 * this will perform trade transaction for buyer to seller
 	 */
@@ -58,14 +60,13 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 				txStatus = performBtcTrade(seller, buyer, qtyTraded, tradeId);
 				logger.debug("is BTC trade successed: {}", txStatus);
 				/**
-				 * if trade for users, then return result with mail notification
-				 * to users
+				 * if trade for users, then return result with mail notification to users
 				 */
 				if (txStatus) {
-					notificationService.sendNotification(seller, msg);
-					notificationService.saveNotification(buyer, seller, msg);
-					notificationService.sendNotification(buyer, msg1);
-					notificationService.saveNotification(buyer, seller, msg1);
+					notificationService.sendNotification(seller, msg, TRADESUMMARY);
+					notificationService.saveNotification(buyer, seller, msg, null, null);
+					notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+					notificationService.saveNotification(buyer, seller, msg1, null, null);
 					return true;
 				}
 			} else if ("ETH".equalsIgnoreCase(currencyAbr)) {
@@ -73,14 +74,13 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 				txStatus = performEthTrade(seller, currencyAbr, buyer, qtyTraded, tradeId);
 				logger.debug("is ETH transaction successed: {}", txStatus);
 				/**
-				 * if transaction for users, then return result with mail
-				 * notification to users
+				 * if transaction for users, then return result with mail notification to users
 				 */
 				if (txStatus) {
-					notificationService.sendNotification(seller, msg);
-					notificationService.saveNotification(buyer, seller, msg);
-					notificationService.sendNotification(buyer, msg1);
-					notificationService.saveNotification(buyer, seller, msg1);
+					notificationService.sendNotification(seller, msg, TRADESUMMARY);
+					notificationService.saveNotification(buyer, seller, msg, null, null);
+					notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+					notificationService.saveNotification(buyer, seller, msg1, null, null);
 					logger.debug("Message : {} , Message1: {}", msg, msg1);
 					return true;
 				}
@@ -91,14 +91,13 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 			txStatus = performErc20Trade(seller, currencyAbr, buyer, qtyTraded, tradeId);
 			logger.debug("is ERC20TOKEN trade successed: {}", txStatus);
 			/**
-			 * if transaction for users, then return result with mail
-			 * notification to users
+			 * if transaction for users, then return result with mail notification to users
 			 */
 			if (txStatus) {
-				notificationService.sendNotification(seller, msg);
-				notificationService.saveNotification(buyer, seller, msg);
-				notificationService.sendNotification(buyer, msg1);
-				notificationService.saveNotification(buyer, seller, msg1);
+				notificationService.sendNotification(seller, msg, TRADESUMMARY);
+				notificationService.saveNotification(buyer, seller, msg, null, null);
+				notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+				notificationService.saveNotification(buyer, seller, msg1, null, null);
 				logger.debug("Message : {}", msg);
 				logger.debug("Message : {}", msg1);
 				return txStatus;
@@ -207,7 +206,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	public Boolean performBtcTrade(User fromUser, User toUser, double qtyTraded, Long tradeId) {
 		try {
 			BtcdClient client = ResourceUtils.getBtcdProvider();
-			logger.debug("tx fee: {}",client.estimateFee(2));
+			logger.debug("tx fee: {}", client.estimateFee(2));
 			String fromAccount = fromUser.getUserId().toString();
 			String toAccount = toUser.getUserId().toString();
 			if (fromUser.getBtcWalletUuid().isEmpty()) {

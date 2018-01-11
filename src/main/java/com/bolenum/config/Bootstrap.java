@@ -3,7 +3,6 @@ package com.bolenum.config;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -131,7 +130,8 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		try {
 			erc20TokenService.saveIncomingErc20Transaction(currencyAbbreviation);
 		} catch (IOException | CipherException e) {
-			e.printStackTrace();
+			logger.error("error saving incoming erc20 token txns: {}", e);
+
 		}
 
 		// create initial directories
@@ -161,7 +161,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private void createDocumentsDirectories() {
 		Path profileImg = Paths.get(userDocumetsLocation);
 
-		if (!Files.exists(profileImg)) {
+		if (!profileImg.toFile().exists()) {
 			if (new File((userDocumetsLocation)).mkdirs()) {
 				logger.debug("Documents location created");
 			} else {
@@ -178,7 +178,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private void createGoogleAuthQrCodeDirectories() {
 		Path profileImg = Paths.get(googleQrCodeLocation);
 
-		if (!Files.exists(profileImg)) {
+		if (!profileImg.toFile().exists()) {
 			if (new File((googleQrCodeLocation)).mkdirs()) {
 				logger.debug("Documents location created");
 			} else {
@@ -197,7 +197,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	 */
 	private void createInitDirectories() {
 		Path ethWallet = Paths.get(ethWalletLocation);
-		if (!Files.exists(ethWallet)) {
+		if (!ethWallet.toFile().exists()) {
 			if (new File((ethWalletLocation)).mkdirs()) {
 				logger.debug("ethereum wallet location created");
 			} else {
@@ -212,7 +212,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	private void createProfilePicDirectories() {
 		Path profileImg = Paths.get(userProfileImageLocation);
 
-		if (!Files.exists(profileImg)) {
+		if (!profileImg.toFile().exists()) {
 			if (new File((userProfileImageLocation)).mkdirs()) {
 				logger.debug("User Profile Image location created");
 			} else {
@@ -243,7 +243,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		privileges.add(edit);
 		privileges.add(get);
 		privileges.add(del);
-		privileges.forEach(Privilege -> privilegeService.findOrCreate(Privilege));
+		privileges.forEach(privilege -> privilegeService.findOrCreate(privilege));
 	}
 
 	/**
@@ -362,7 +362,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			Currency ngn = new Currency("NIGERIAN NAIRA", "NGN", CurrencyType.FIAT);
 			bitcoin = currencyService.saveCurrency(bitcoin);
 			ethereum = currencyService.saveCurrency(ethereum);
-			ngn = currencyService.saveCurrency(ngn);
+			currencyService.saveCurrency(ngn);
 			List<WithdrawalFee> wFee;
 			wFee = withdrawalFeeService.getAllWithdrawalFee();
 			if (wFee.isEmpty()) {
