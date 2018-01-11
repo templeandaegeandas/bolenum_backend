@@ -173,21 +173,10 @@ public class DisputeServiceImpl implements DisputeService {
 	@Override
 	public DisputeOrder performActionOnRaisedDispute(DisputeOrder disputeOrder, String commentForDisputeRaiser,
 			String commentForDisputeRaisedAgainst, DisputeStatus disputeStatus) {
-		if (DisputeStatus.RAISED.equals(disputeOrder.getDisputeStatus())
-				&& disputeStatus.equals(DisputeStatus.INPROCESS)) {
-			disputeOrder.setDisputeStatus(disputeStatus);
-			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
-			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
-			return disputeOrderRepo.save(disputeOrder);
-
-		} else if (DisputeStatus.INPROCESS.equals(disputeOrder.getDisputeStatus())
-				&& disputeStatus.equals(DisputeStatus.COMPLETED)) {
-			disputeOrder.setDisputeStatus(disputeStatus);
-			disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
-			disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
-			return disputeOrderRepo.save(disputeOrder);
-		}
-		return null;
+		disputeOrder.setDisputeStatus(disputeStatus);
+		disputeOrder.setCommentForDisputeRaiser(commentForDisputeRaiser);
+		disputeOrder.setCommentForDisputeRaisedAgainst(commentForDisputeRaisedAgainst);
+		return disputeOrderRepo.save(disputeOrder);
 
 	}
 

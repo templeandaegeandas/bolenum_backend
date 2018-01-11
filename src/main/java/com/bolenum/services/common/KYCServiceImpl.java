@@ -74,32 +74,35 @@ public class KYCServiceImpl implements KYCService {
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		long sizeLimit = 1024 * 1024 * 10L;
 		User user = userRepository.findOne(userId);
+		User admin =userRepository.findByEmailId("admin@bolenum.com");
 		/*
 		 * if (user.getMobileNumber() == null || !user.getIsMobileVerified()) { throw
 		 * new MobileNotVerifiedException(localeService.getMessage(
 		 * "mobile.number.not.verified")); }
 		 */
+		
 		UserKyc savedKyc = null;
-		if (file != null) {
+		if (file != null) { //1
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
 			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, documentType,
 					validExtentions, sizeLimit);
-
+			
 			List<UserKyc> listOfUserKyc = kycService.getListOfKycByUser(user);
-
-			if (listOfUserKyc == null || listOfUserKyc.isEmpty()) {
+			
+			if (listOfUserKyc.isEmpty()) { //2
 				UserKyc kyc = new UserKyc();
 				kyc.setDocument(updatedFileName);
 				kyc.setDocumentType(documentType);
 				listOfUserKyc.add(kyc);
 				kyc.setUser(user);
 				savedKyc = kycRepo.save(kyc);
-			} else if (!listOfUserKyc.isEmpty() && listOfUserKyc.size() <= 2) {
+				
+			} else if (listOfUserKyc.size() <= 2) { //2
 				boolean added = false;
 				Iterator<UserKyc> iterator = listOfUserKyc.iterator();
-				while (iterator.hasNext()) {
+				while (iterator.hasNext()) { //3
 					UserKyc userKyc = iterator.next();
-					if (documentType.equals(userKyc.getDocumentType())) {
+					if (documentType.equals(userKyc.getDocumentType())) { //4
 						userKyc.setDocument(updatedFileName);
 						userKyc.setDocumentType(documentType);
 						userKyc.setIsVerified(false);
@@ -111,7 +114,7 @@ public class KYCServiceImpl implements KYCService {
 
 					}
 				}
-				if (!added) {
+				if (!added) { //3
 					UserKyc kyc = new UserKyc();
 					kyc.setDocument(updatedFileName);
 					kyc.setDocumentType(documentType);
@@ -120,11 +123,8 @@ public class KYCServiceImpl implements KYCService {
 					savedKyc = kycRepo.save(kyc);
 				}
 			}
-		} else
-
-		{
-			return null;
 		}
+		notificationService.saveNotification(user,admin, "KYC uploaded by user",savedKyc.getId(), NotificationType.KYC_NOTIFICATION);
 		return savedKyc;
 	}
 
@@ -146,15 +146,17 @@ public class KYCServiceImpl implements KYCService {
 					localeService.getMessage("email.text.approve.user.kyc.nationalId"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
 					localeService.getMessage("email.text.approve.user.kyc.nationalId"));
+
 			notificationService.saveNotification(admin, user, "Your KYC as NATIONAL_ID has been approved", kycId, NotificationType.KYC_NOTIFICATION);
-			
+
 		} else {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
 					localeService.getMessage("email.text.approve.user.kyc.addressproof"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
 					localeService.getMessage("email.text.approve.user.kyc.addressproof"));
+
 			notificationService.saveNotification(admin, user, "Your KYC as RESIDENCE_PROOF has been approved", kycId, NotificationType.KYC_NOTIFICATION);
-			
+
 		}
 		return kycRepo.save(userKyc);
 	}
@@ -177,15 +179,15 @@ public class KYCServiceImpl implements KYCService {
 					localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
 					localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
+
 			notificationService.saveNotification(admin, user, "Your KYC as NATIONAL_ID has been disapproved", kycId, NotificationType.KYC_NOTIFICATION);
-			
 		} else {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
 					localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
 			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
 					localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
+
 			notificationService.saveNotification(admin, user, "Your KYC as as RESIDENCE_PROOF has been disapproved", kycId, NotificationType.KYC_NOTIFICATION);
-			
 		}
 		return kycRepo.save(userKyc);
 	}

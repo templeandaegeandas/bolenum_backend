@@ -50,20 +50,11 @@ public interface KYCService {
 
 	/**
 	 * 
-	 * @param pageNumber
-	 * @param pageSize
-	 * @return Page<User>
-	 */
-	// Page<User> getSubmitedKycList(int pageNumber, int pageSize, String sortBy,
-	// String sortOrder, String searchData);
-
-	/**
-	 * 
 	 * @param kycId
 	 * @return UserKyc
 	 */
 	UserKyc getUserKycById(Long kycId);
-	
+
 	/**
 	 * 
 	 * @param documentType
@@ -89,7 +80,5 @@ public interface KYCService {
 	 * @return
 	 */
 	List<UserKyc> getListOfKycByUser(User user);
-	
-	//public Page<User> getListOfUser(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 }
