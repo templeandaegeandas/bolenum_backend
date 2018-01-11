@@ -74,19 +74,21 @@ public class KYCServiceImpl implements KYCService {
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 		long sizeLimit = 1024 * 1024 * 10L;
 		User user = userRepository.findOne(userId);
+		User admin =userRepository.findByEmailId("admin@bolenum.com");
 		/*
 		 * if (user.getMobileNumber() == null || !user.getIsMobileVerified()) { throw
 		 * new MobileNotVerifiedException(localeService.getMessage(
 		 * "mobile.number.not.verified")); }
 		 */
+		
 		UserKyc savedKyc = null;
 		if (file != null) { //1
 			String[] validExtentions = { "jpg", "jpeg", "png", "pdf" };
 			String updatedFileName = fileUploadService.uploadFile(file, uploadedFileLocation, user, documentType,
 					validExtentions, sizeLimit);
-
+			
 			List<UserKyc> listOfUserKyc = kycService.getListOfKycByUser(user);
-
+			
 			if (listOfUserKyc.isEmpty()) { //2
 				UserKyc kyc = new UserKyc();
 				kyc.setDocument(updatedFileName);
@@ -94,6 +96,7 @@ public class KYCServiceImpl implements KYCService {
 				listOfUserKyc.add(kyc);
 				kyc.setUser(user);
 				savedKyc = kycRepo.save(kyc);
+				
 			} else if (listOfUserKyc.size() <= 2) { //2
 				boolean added = false;
 				Iterator<UserKyc> iterator = listOfUserKyc.iterator();
@@ -121,6 +124,7 @@ public class KYCServiceImpl implements KYCService {
 				}
 			}
 		}
+		notificationService.saveNotification(user,admin, "KYC uploaded by user",savedKyc.getId(), NotificationType.KYC_NOTIFICATION);
 		return savedKyc;
 	}
 

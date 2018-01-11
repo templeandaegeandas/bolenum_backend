@@ -30,9 +30,18 @@ public class SubscribedUserServiceImpl implements SubscribedUserService {
 		return subscribedUserRepo.save(subscribedUser);
 	}
 
+	/**
+	 *  @modified by Himanshu Kumar
+	 */
 	@Override
 	public Page<SubscribedUser> getSubscribedUserList(int pageNumber, int pageSize, String sortBy, String sortOrder) {
-		Pageable page = new PageRequest(pageNumber, pageSize, Direction.DESC, sortBy);
+		Direction sort;
+		if (sortOrder.equals("desc")) {
+			sort = Direction.DESC;
+		} else {
+			sort = Direction.ASC;
+		}
+		Pageable page = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		return subscribedUserRepo.findAll(page);
 	}
 }
