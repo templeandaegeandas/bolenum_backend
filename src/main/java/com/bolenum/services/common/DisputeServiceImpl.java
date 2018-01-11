@@ -210,7 +210,7 @@ public class DisputeServiceImpl implements DisputeService {
 
 		notificationService.sendNotification(disputeRaisedAgainst, messageForDisputeRaisedAgainst, "dispute.summary");
 
-		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getReason());
+		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getReason(), null, null);
 
 	}
 

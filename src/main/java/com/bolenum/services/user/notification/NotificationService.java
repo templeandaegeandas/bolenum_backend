@@ -5,6 +5,7 @@ package com.bolenum.services.user.notification;
 
 import org.springframework.data.domain.Page;
 
+import com.bolenum.enums.NotificationType;
 import com.bolenum.model.User;
 import com.bolenum.model.notification.Notification;
 
@@ -13,7 +14,7 @@ import com.bolenum.model.notification.Notification;
  * @date 31-Oct-2017
  */
 public interface NotificationService {
-	public Notification saveNotification(User buyer, User seller, String msg);
+	public Notification saveNotification(User buyer, User seller, String msg, Long notificationRelationId, NotificationType notificationType);
 
 	public boolean sendNotification(User user, String message, String subject);
 

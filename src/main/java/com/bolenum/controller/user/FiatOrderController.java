@@ -35,6 +35,7 @@ import com.bolenum.dto.common.AddUserBankDetailsForm;
 import com.bolenum.dto.orders.OrdersDTO;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.MessageType;
+import com.bolenum.enums.NotificationType;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.BankAccountDetails;
 import com.bolenum.model.User;
@@ -198,7 +199,7 @@ public class FiatOrderController {
 					+ " Account Number: " + accountDetails.getAccountNumber()
 					+ " Please login to bolenum exchange to confirm your payment.";
 			notificationService.sendNotification(matchedOrder.getUser(), msg, "trade.summary");
-			notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg);
+			notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg, matchedOrderId, NotificationType.MATCHED_NOTIFICATION);
 			map.put(ORDERID, order.getId());
 			try {
 				JSONObject jsonObject = new JSONObject();

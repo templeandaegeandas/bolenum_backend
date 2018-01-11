@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.bolenum.enums.NotificationType;
 import com.bolenum.model.User;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -36,6 +37,10 @@ public class Notification {
 	private String message;
 	
 	private boolean readStatus;
+	
+	private NotificationType notificationType;
+	
+	private Long notificationRelationId;
 
 	@ApiModelProperty(hidden = true)
 	@CreationTimestamp
@@ -106,6 +111,34 @@ public class Notification {
 	 */
 	public void setReadStatus(boolean readStatus) {
 		this.readStatus = readStatus;
+	}
+
+	/**
+	 * @return the notificationType
+	 */
+	public NotificationType getNotificationType() {
+		return notificationType;
+	}
+
+	/**
+	 * @param notificationType the notificationType to set
+	 */
+	public void setNotificationType(NotificationType notificationType) {
+		this.notificationType = notificationType;
+	}
+
+	/**
+	 * @return the notificationRelationId
+	 */
+	public Long getNotificationRelationId() {
+		return notificationRelationId;
+	}
+
+	/**
+	 * @param notificationRelationId the notificationRelationId to set
+	 */
+	public void setNotificationRelationId(Long notificationRelationId) {
+		this.notificationRelationId = notificationRelationId;
 	}
 
 	/**

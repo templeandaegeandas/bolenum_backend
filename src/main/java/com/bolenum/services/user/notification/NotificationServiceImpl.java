@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.enums.NotificationType;
 import com.bolenum.model.User;
 import com.bolenum.model.notification.Notification;
 import com.bolenum.repo.user.notification.NotificationRepositroy;
@@ -77,12 +78,14 @@ public class NotificationServiceImpl implements NotificationService {
 	 */
 	@Async
 	@Override
-	public Notification saveNotification(User sender, User receiver, String msg) {
-
+	public Notification saveNotification(User sender, User receiver, String msg, Long notificationRelationId,
+			NotificationType notificationType) {
 		Notification notification = new Notification();
 		notification.setSender(sender);
 		notification.setReceiver(receiver);
 		notification.setMessage(msg);
+		notification.setNotificationType(notificationType);
+		notification.setNotificationRelationId(notificationRelationId);
 		notification.setReadStatus(false);
 		notification.setDeleted(false);
 		return notificationRepositroy.save(notification);
@@ -111,7 +114,7 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 
 		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-	
+
 		return notificationRepositroy.findByReceiverAndCreatedOnBetween(admin, startDate, endDate, false, pageRequest);
 	}
 
@@ -141,11 +144,11 @@ public class NotificationServiceImpl implements NotificationService {
 
 	@Override
 	public void changeNotificationsStatus(Long[] arrayOfNotification) {
-		for (int i=0;i<arrayOfNotification.length;i++) {
+		for (int i = 0; i < arrayOfNotification.length; i++) {
 			Long id = arrayOfNotification[i];
 			setActionOnNotifiction(id);
-		
-		}		
+
+		}
 	}
 
 }
