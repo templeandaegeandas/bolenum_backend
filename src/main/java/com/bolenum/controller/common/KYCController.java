@@ -171,8 +171,7 @@ public class KYCController {
 	public ResponseEntity<Object> getListOfKycOfParticularUser() {
 		User user = GenericUtils.getLoggedInUser();
 		List<UserKyc> listOfUser = kycService.getListOfKycByUser(user);
-		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("submitted.kyc.list"),
-				listOfUser);
+		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"), listOfUser);
 	}
 
 	/**
@@ -187,8 +186,7 @@ public class KYCController {
 		User user = userService.findByUserId(userId);
 		List<UserKyc> listOfUser = kycService.getListOfKycByUser(user);
 
-		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("submitted.kyc.list"),
-				listOfUser);
+		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"), listOfUser);
 	}
 
 }
