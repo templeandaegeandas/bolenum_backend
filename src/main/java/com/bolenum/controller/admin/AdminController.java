@@ -112,10 +112,7 @@ public class AdminController {
 
 	public static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
-	@RequestMapping()
-	public ResponseEntity<Object> index() {
-		return null;
-	}
+	private static final String MESSAGE_SUCCESS = "message.success";
 
 	/**
 	 * to get list of all the users enrolled in system
@@ -207,7 +204,7 @@ public class AdminController {
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.GET)
 	public ResponseEntity<Object> getWithdrawlFees(@RequestParam("currencyId") long currencyId) {
 		WithdrawalFee fee = withdrawalFeeService.getWithdrawalFee(currencyId);
-		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"), fee);
+		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage(MESSAGE_SUCCESS), fee);
 	}
 
 	/**
@@ -219,7 +216,7 @@ public class AdminController {
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getListOfWithdrawlFees() {
 		List<WithdrawalFee> listOfWithdrawalFees = withdrawalFeeService.getAllWithdrawalFee();
-		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"),
+		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage(MESSAGE_SUCCESS),
 				listOfWithdrawalFees);
 	}
 
@@ -315,7 +312,7 @@ public class AdminController {
 				Double tranferFees = transactionService.totalTrasferFeePaidByAdmin(coinCode);
 				Double usersDepositBalance = adminService.findTotalDepositBalanceOfUser(coinCode);
 				Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
-				balance = balance - (usersDepositBalance + tranferFees);
+				balance = balance - usersDepositBalance;
 				Map<String, Object> mapAddress = new HashMap<>();
 				mapAddress.put(ADDRESS, userCoin.getWalletAddress());
 				mapAddress.put(BALANCE, GenericUtils.getDecimalFormatString(balance));
@@ -329,13 +326,8 @@ public class AdminController {
 			Erc20Token erc20Token = erc20TokenService.getByCoin(coinCode);
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser("ETH", user);
 			Double depoBal = adminService.findTotalDepositBalanceOfUser(coinCode);
-			if (depoBal == null) {
-				depoBal = 0.0;
-			}
+			
 			Double balance = erc20TokenService.getErc20WalletBalance(user, erc20Token, "ETH");
-			if (balance == null) {
-				balance = 0.0;
-			}
 			balance = balance - depoBal;
 			Map<String, Object> mapAddress = new HashMap<>();
 			mapAddress.put(ADDRESS, userCoin.getWalletAddress());
@@ -346,12 +338,12 @@ public class AdminController {
 			map.put("data", mapAddress);
 			break;
 		case "FIAT":
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), null);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage(MESSAGE_SUCCESS), null);
 		default:
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("invalid.coin.code"),
 					null);
 		}
-		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage(MESSAGE_SUCCESS), map);
 
 	}
 
