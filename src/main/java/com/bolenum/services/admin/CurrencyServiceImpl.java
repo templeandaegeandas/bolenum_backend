@@ -21,9 +21,8 @@ import com.bolenum.repo.common.CurrencyRepo;
  */
 @Service
 public class CurrencyServiceImpl implements CurrencyService {
-	
-	public static final Logger logger = LoggerFactory.getLogger(CurrencyServiceImpl.class);
 
+	public static final Logger logger = LoggerFactory.getLogger(CurrencyServiceImpl.class);
 
 	@Autowired
 	private CurrencyRepo currencyRepo;
@@ -67,11 +66,11 @@ public class CurrencyServiceImpl implements CurrencyService {
 	public List<Currency> getCurrencyList() {
 		return currencyRepo.findByCurrencyTypeNotIn(CurrencyType.FIAT);
 	}
+
 	@Override
 	public List<Currency> getCurrencyListForAdmin() {
 		return currencyRepo.findAll();
 	}
-
 
 	/**
 	 * 
@@ -97,4 +96,20 @@ public class CurrencyServiceImpl implements CurrencyService {
 		return list;
 	}
 
+	@Override
+	public Currency createPair(Currency marketCurrency, Currency pairedCurrency) {
+		if (marketCurrency.getMarket().contains(pairedCurrency)
+				|| pairedCurrency.getMarket().contains(marketCurrency)) {
+			return null;
+		}
+		List<Currency> newPairList = new ArrayList<>();
+		newPairList.add(pairedCurrency);
+		marketCurrency.setMarket(newPairList);
+		return currencyRepo.save(marketCurrency);
+	}
+	
+	@Override
+	public List<Currency> getCurrencyListWithPair() {
+		return currencyRepo.findByMarketIsNotNull();
+	}
 }

@@ -29,4 +29,8 @@ public interface CurrencyService {
 	Currency findByCurrencyAbbreviation(String currencyAbbreviation);
 
 	List<Currency> getCurrencyListForAdmin();
+
+	Currency createPair(Currency marketCurrency, Currency pairedCurrency);
+
+	List<Currency> getCurrencyListWithPair();
 }
