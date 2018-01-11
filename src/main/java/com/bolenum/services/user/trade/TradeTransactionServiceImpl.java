@@ -64,9 +64,9 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 				 */
 				if (txStatus) {
 					notificationService.sendNotification(seller, msg, TRADESUMMARY);
-					notificationService.saveNotification(buyer, seller, msg);
+					notificationService.saveNotification(buyer, seller, msg, null, null);
 					notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
-					notificationService.saveNotification(buyer, seller, msg1);
+					notificationService.saveNotification(buyer, seller, msg1, null, null);
 					return true;
 				}
 			} else if ("ETH".equalsIgnoreCase(currencyAbr)) {
@@ -78,9 +78,9 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 				 */
 				if (txStatus) {
 					notificationService.sendNotification(seller, msg, TRADESUMMARY);
-					notificationService.saveNotification(buyer, seller, msg);
+					notificationService.saveNotification(buyer, seller, msg, null, null);
 					notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
-					notificationService.saveNotification(buyer, seller, msg1);
+					notificationService.saveNotification(buyer, seller, msg1, null, null);
 					logger.debug("Message : {} , Message1: {}", msg, msg1);
 					return true;
 				}
@@ -95,9 +95,9 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 			 */
 			if (txStatus) {
 				notificationService.sendNotification(seller, msg, TRADESUMMARY);
-				notificationService.saveNotification(buyer, seller, msg);
+				notificationService.saveNotification(buyer, seller, msg, null, null);
 				notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
-				notificationService.saveNotification(buyer, seller, msg1);
+				notificationService.saveNotification(buyer, seller, msg1, null, null);
 				logger.debug("Message : {}", msg);
 				logger.debug("Message : {}", msg1);
 				return txStatus;

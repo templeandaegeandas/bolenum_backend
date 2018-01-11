@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.MessageType;
+import com.bolenum.enums.NotificationType;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.model.Currency;
@@ -190,9 +191,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			orderAsyncService.saveOrder(matchedOrder);
 			logger.debug("matched order saving finished");
 			notificationService.sendNotification(seller, msg1, TRADESUMMARY);
-			notificationService.saveNotification(seller, buyer, msg1);
+			notificationService.saveNotification(seller, buyer, msg1, null, null);
 			notificationService.sendNotification(buyer, msg, TRADESUMMARY);
-			notificationService.saveNotification(buyer, seller, msg);
+			notificationService.saveNotification(buyer, seller, msg, null, null);
 			return orders;
 		}
 		return orders;
@@ -266,7 +267,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ exitingOrder.getLockedVolume() * exitingOrder.getPrice()
 						+ " Please confirm amount by login into bolenumexchage.";
 				notificationService.sendNotification(seller, msg, TRADESUMMARY);
-				notificationService.saveNotification(seller, buyer, msg);
+				notificationService.saveNotification(buyer, seller, msg, matched.getId(), NotificationType.PAID_NOTIFICATION);
 				exitingOrder.setConfirm(true);
 				matched.setMatchedOn(new Date());
 				ordersRepository.save(exitingOrder);
@@ -274,7 +275,6 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				JSONObject jsonObject = new JSONObject();
 				try {
 					jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
-					jsonObject.put("CONFIRM_NOTIFICATION", "CONFIRM_NOTIFICATION");
 					jsonObject.put("matchedOrderId", matched.getId());
 					simpMessagingTemplate.convertAndSend(
 							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
@@ -321,6 +321,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 							sellerOrder.getMarketCurrency(), sellerOrder.getPairedCurrency(),
 							sellerOrder.getOrderStandard(), 0.0, 0.0, null, null);
 					orderAsyncService.saveTrade(trade);
+//					notificationService.sendNotification(seller, msg, TRADESUMMARY);
+//					notificationService.saveNotification(seller, buyer, msg, matched.getId(), NotificationType.PAID_NOTIFICATION);
 				}
 			} catch (Exception e) {
 				return new AsyncResult<>(true);

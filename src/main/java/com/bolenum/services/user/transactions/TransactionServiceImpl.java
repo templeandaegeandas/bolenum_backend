@@ -598,7 +598,9 @@ public class TransactionServiceImpl implements TransactionService {
 			UserCoin receiverUserCoin = userCoinRepository.findByWalletAddress(toAddress);
 			if (receiverUserCoin != null) {
 				receiverUserCoin.setBalance(receiverUserCoin.getBalance() + (amount - fee));
+				senderUserCoin.setBalance(senderUserCoin.getBalance() - amount);
 				userCoinRepository.save(receiverUserCoin);
+				userCoinRepository.save(senderUserCoin);
 				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName,
 						(amount - fee), fee);
 			}
@@ -630,6 +632,8 @@ public class TransactionServiceImpl implements TransactionService {
 			if (receiverUserCoin != null) {
 				receiverUserCoin.setBalance(receiverUserCoin.getBalance() + (amount - fee));
 				userCoinRepository.save(receiverUserCoin);
+				senderUserCoin.setBalance(senderUserCoin.getBalance() - amount);
+				userCoinRepository.save(senderUserCoin);
 				return saveInAppTransaction(fromUser, senderUserCoin, receiverUserCoin, toAddress, tokenName,
 						(amount - fee), fee);
 			}
