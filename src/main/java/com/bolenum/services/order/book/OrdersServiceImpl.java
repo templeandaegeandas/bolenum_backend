@@ -244,7 +244,7 @@ public class OrdersServiceImpl implements OrdersService {
 					orders.setOrderStatus(OrderStatus.COMPLETED);
 				}
 				ordersList.add(orders);
-				logger.debug("qty remaining so added in book: {}", remainingVolume);
+				logger.debug("qty remaining so added in order book: {}", remainingVolume);
 			}
 			processed = true;
 		} else {
@@ -275,7 +275,7 @@ public class OrdersServiceImpl implements OrdersService {
 					orders.setOrderStatus(OrderStatus.COMPLETED);
 				}
 				ordersList.add(orders);
-				logger.debug("qty remaining so added in book: {}", remainingVolume);
+				logger.debug("remaining qty: {} added in book", remainingVolume);
 			}
 			processed = true;
 		}
