@@ -108,6 +108,8 @@ public class UserController {
 	@Autowired
 	private NotificationService notificationService;
 
+	private static final String MESSAGE_SUCCESS = "message.success";
+
 	/**
 	 * 
 	 * @param signupForm
@@ -192,15 +194,11 @@ public class UserController {
 			User savedUser = userService.saveUser(user);
 			logger.debug("user mail verify savedUser: {}", savedUser);
 			if (savedUser != null) {
-				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), null);
-			} else {
-				return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-						localService.getMessage("message.error"), null);
+				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(MESSAGE_SUCCESS), null);
 			}
-		} else {
-			return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
-					localService.getMessage("message.error"), null);
 		}
+		return ResponseHandler.response(HttpStatus.INTERNAL_SERVER_ERROR, true,
+				localService.getMessage("message.error"), null);
 	}
 
 	/**
@@ -272,7 +270,7 @@ public class UserController {
 	@RequestMapping(value = UrlConstant.GET_LOGGEDIN_USER, method = RequestMethod.GET)
 	public ResponseEntity<Object> getLoggedinUser() {
 		User user = GenericUtils.getLoggedInUser();
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), user);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(MESSAGE_SUCCESS), user);
 	}
 
 	/**
@@ -518,7 +516,7 @@ public class UserController {
 	 * 
 	 * @return
 	 */
-	@Secured({"ROLE_USER","ROLE_ADMIN"})
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.GET)
 	public ResponseEntity<Object> getNotificationList(@RequestParam("pageNumber") int pageNumber,
 			@RequestParam("pageSize") int pageSize, @RequestParam("sortOrder") String sortOrder,
@@ -526,7 +524,7 @@ public class UserController {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Notification> listOfUserNotification = notificationService.getListOfNotification(user, pageNumber,
 				pageSize, sortOrder, sortBy);
-		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage(MESSAGE_SUCCESS),
 				listOfUserNotification);
 
 	}
@@ -538,29 +536,28 @@ public class UserController {
 	 * 
 	 * @return
 	 */
-	@Secured({"ROLE_USER","ROLE_ADMIN"})
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.PUT)
 	public ResponseEntity<Object> setActionOnNotificton(
 			@RequestParam("arrayOfNotification") Long[] arrayOfNotification) {
 		notificationService.changeNotificationsStatus(arrayOfNotification);
-		
-		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage(MESSAGE_SUCCESS),
 				arrayOfNotification);
 	}
 
-	
 	/**
 	 * @created by Himanshu Kumar
 	 * 
 	 * @return notification
 	 * 
 	 */
-	@Secured({"ROLE_USER","ROLE_ADMIN"})
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.COUNT_USER_NOTIFICATION, method = RequestMethod.GET)
 	public ResponseEntity<Object> countUserNotification() {
 		User user = GenericUtils.getLoggedInUser();
 		Long totalUnseenNotification = notificationService.countUnSeenNotification(user);
-		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage("message.success"),
+		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage(MESSAGE_SUCCESS),
 				totalUnseenNotification);
 	}
 

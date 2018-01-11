@@ -19,10 +19,9 @@ public class ErrorCollectionUtil {
 	}
 
 	public static Map<String, Object> getErrorMap(BindingResult bindingResult) {
-		Map<String, Object> errors = new LinkedHashMap<String, Object>();
-		bindingResult.getFieldErrors().forEach(fieldError -> {
-			errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-		});
+		Map<String, Object> errors = new LinkedHashMap<>();
+		bindingResult.getFieldErrors()
+				.forEach(fieldError -> errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
 		return errors;
 	}
 

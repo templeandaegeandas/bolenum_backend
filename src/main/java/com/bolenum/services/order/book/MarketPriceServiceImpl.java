@@ -35,7 +35,7 @@ public class MarketPriceServiceImpl implements MarketPriceService {
 	@Autowired
 	private TradeRepository tradeRepository;
 
-	private final String DATE_FORMATE = "yyyy-MM-dd HH:mm:ss";
+	private static final String DATE_FORMATE = "yyyy-MM-dd HH:mm:ss";
 
 	@Override
 	public long tradesIn24h(long marketCurrencyId, long pairedCurrencyId) throws ParseException {
