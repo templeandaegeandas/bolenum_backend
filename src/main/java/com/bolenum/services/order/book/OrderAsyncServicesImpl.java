@@ -1,7 +1,6 @@
 package com.bolenum.services.order.book;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Future;
 
 import org.json.JSONException;
@@ -40,6 +39,10 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
+	private static final String PRICE_BTC = "priceBTC";
+	private static final String PRICE_ETH = "priceETH";
+	private static final String PRICE_BLN = "priceBLN";
+
 	@Override
 	public List<Orders> saveOrder(List<Orders> ordersList) {
 		return ordersRepository.save(ordersList);
@@ -66,40 +69,31 @@ public class OrderAsyncServicesImpl implements OrderAsyncService {
 		try {
 			jsonObject.put("MARKET_UPDATE", MessageType.MARKET_UPDATE);
 			jsonObject.put("pairedCurrency", pairedCurrency.getCurrencyAbbreviation());
-			if ("ETH".equals(pairedCurrency.getCurrencyAbbreviation())) {
+			if ("BTC".equals(marketCurrency.getCurrencyAbbreviation())) {
 				if (pairedCurrency.getPriceBTC() == null || pairedCurrency.getPriceBTC() == 0
 						|| pairedCurrency.getPriceBTC() > price) {
 					pairedCurrency.setPriceBTC(price);
 				}
-				jsonObject.put("priceBTC", price);
-				jsonObject.put("priceETH", 0);
-				jsonObject.put("priceBLN", 0);
+				jsonObject.put(PRICE_BTC, price);
+				jsonObject.put(PRICE_ETH, 0);
+				jsonObject.put(PRICE_BLN, 0);
 			} else if ("ETH".equals(marketCurrency.getCurrencyAbbreviation())
 					&& "BLN".equals(pairedCurrency.getCurrencyAbbreviation())) {
 				if (pairedCurrency.getPriceETH() == null || pairedCurrency.getPriceETH() == 0
 						|| pairedCurrency.getPriceETH() > price) {
 					pairedCurrency.setPriceETH(price);
 				}
-				jsonObject.put("priceBTC", 0);
-				jsonObject.put("priceETH", price);
-				jsonObject.put("priceBLN", 0);
-			} else if ("BTC".equals(marketCurrency.getCurrencyAbbreviation())
-					&& "BLN".equals(pairedCurrency.getCurrencyAbbreviation())) {
-				if (pairedCurrency.getPriceBTC() == null || pairedCurrency.getPriceBTC() == 0
-						|| pairedCurrency.getPriceBTC() > price) {
-					pairedCurrency.setPriceBTC(price);
-				}
-				jsonObject.put("priceBTC", price);
-				jsonObject.put("priceETH", 0);
-				jsonObject.put("priceBLN", 0);
+				jsonObject.put(PRICE_BTC, 0);
+				jsonObject.put(PRICE_ETH, price);
+				jsonObject.put(PRICE_BLN, 0);
 			} else {
 				if (pairedCurrency.getPriceBLN() == null || pairedCurrency.getPriceBLN() == 0
 						|| pairedCurrency.getPriceBLN() > price) {
 					pairedCurrency.setPriceBLN(price);
 				}
-				jsonObject.put("priceBTC", 0);
-				jsonObject.put("priceETH", 0);
-				jsonObject.put("priceBLN", price);
+				jsonObject.put(PRICE_BTC, 0);
+				jsonObject.put(PRICE_ETH, 0);
+				jsonObject.put(PRICE_BLN, price);
 			}
 		} catch (JSONException e) {
 			logger.error("Error in sending websocket message: {}", e);
