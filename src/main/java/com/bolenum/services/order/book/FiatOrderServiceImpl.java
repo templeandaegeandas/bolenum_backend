@@ -267,7 +267,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ exitingOrder.getLockedVolume() * exitingOrder.getPrice()
 						+ " Please confirm amount by login into bolenumexchage.";
 				notificationService.sendNotification(seller, msg, TRADESUMMARY);
-				notificationService.saveNotification(seller, buyer, msg, matched.getId(), NotificationType.PAID_NOTIFICATION);
+				notificationService.saveNotification(buyer, seller, msg, matched.getId(), NotificationType.PAID_NOTIFICATION);
 				exitingOrder.setConfirm(true);
 				matched.setMatchedOn(new Date());
 				ordersRepository.save(exitingOrder);
