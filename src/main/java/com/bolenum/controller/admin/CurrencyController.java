@@ -50,6 +50,8 @@ public class CurrencyController {
 	@Autowired
 	private CurrencyService currencyService;
 
+	private final static String CURRENCY_LIST_SUCCESS = "currency.list.success";
+
 	/**
 	 * 
 	 * @param currencyForm
@@ -139,19 +141,19 @@ public class CurrencyController {
 	 * @param searchData
 	 * @return
 	 */
-	@Secured({"ROLE_USER","ROLE_ADMIN"})
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_TRADING, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyList() {
 		List<Currency> currencyList = currencyService.getCurrencyList();
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(CURRENCY_LIST_SUCCESS),
 				currencyList);
 	}
-	
+
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_ADMIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyListForAdmin() {
 		List<Currency> currencyList = currencyService.getCurrencyListForAdmin();
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(CURRENCY_LIST_SUCCESS),
 				currencyList);
 	}
 
@@ -167,7 +169,7 @@ public class CurrencyController {
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_MARKET, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyListForMarket() {
 		List<Currency> currencyList = currencyService.getCurrencyList();
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.list.success"),
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(CURRENCY_LIST_SUCCESS),
 				currencyList);
 	}
 
@@ -188,12 +190,13 @@ public class CurrencyController {
 					null);
 		}
 	}
-	
+
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_NGN_PRICE_SAVE, method = RequestMethod.PUT)
-	public ResponseEntity<Object> saveBLNNGNPrice(@RequestParam("priceNGN") double priceNGN ) {
+	public ResponseEntity<Object> saveBLNNGNPrice(@RequestParam("priceNGN") double priceNGN) {
 		Currency currency = currencyService.findByCurrencyAbbreviation("BLN");
 		Currency savedCurrency = currencyService.saveCurrency(currency);
-		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.price.saved"), savedCurrency);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("currency.price.saved"),
+				savedCurrency);
 	}
 }

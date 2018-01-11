@@ -67,6 +67,8 @@ public class AuthController {
 
 	public static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
+	private static final String LOGIN_SUCCESS = "login.success";
+
 	/**
 	 * 
 	 * @param loginForm
@@ -79,41 +81,41 @@ public class AuthController {
 		if (bindingResult.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(bindingResult),
 					null);
+		}
+		logger.debug("login email id: {}", loginForm.getEmailId());
+		User user = userService.findByEmail(loginForm.getEmailId());
+		if (user == null) {
+			return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true, localeService.getMessage("user.not.found"),
+					null);
+		} else if (!user.getIsEnabled()) {
+			return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
+					localeService.getMessage("user.mail.verify.error"), null);
 		} else {
-			logger.debug("login email id: {}", loginForm.getEmailId());
-			User user = userService.findByEmail(loginForm.getEmailId());
-			if (user == null) {
-				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
-						localeService.getMessage("user.not.found"), null);
-			} else if (!user.getIsEnabled()) {
-				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
-						localeService.getMessage("user.mail.verify.error"), null);
-			} else {
-				AuthenticationToken token;
-				if (user.getRole().getName().equals(loginForm.getRole())) {
-					try {
-						token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
-								loginForm.getBrowserName(), loginForm.getClientOsName());
-					} catch (UsernameNotFoundException | InvalidPasswordException e) {
-						return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
-					}
-
-					if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.NONE)) {
-						return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("login.success"),
-								authService.loginResponse(token));
-					} else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
-						twoFactorAuthService.sendOtpForTwoFactorAuth(user);
-						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
-								localeService.getMessage("login.success"), user.getTwoFactorAuthOption());
-					} else {
-						return ResponseHandler.response(HttpStatus.ACCEPTED, false,
-								localeService.getMessage("login.success"), user.getTwoFactorAuthOption());
-					}
-				} else {
-					return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
-							localeService.getMessage("user.not.authorized.error"), null);
+			AuthenticationToken token;
+			if (user.getRole().getName().equals(loginForm.getRole())) {
+				try {
+					token = authService.login(loginForm.getPassword(), user, loginForm.getIpAddress(),
+							loginForm.getBrowserName(), loginForm.getClientOsName());
+				} catch (UsernameNotFoundException | InvalidPasswordException e) {
+					return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, e.getMessage(), null);
 				}
+
+				if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.NONE)) {
+					return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage(LOGIN_SUCCESS),
+							authService.loginResponse(token));
+				} else if (user.getTwoFactorAuthOption().equals(TwoFactorAuthOption.MOBILE)) {
+					twoFactorAuthService.sendOtpForTwoFactorAuth(user);
+					return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage(LOGIN_SUCCESS),
+							user.getTwoFactorAuthOption());
+				} else {
+					return ResponseHandler.response(HttpStatus.ACCEPTED, false, localeService.getMessage(LOGIN_SUCCESS),
+							user.getTwoFactorAuthOption());
+				}
+			} else {
+				return ResponseHandler.response(HttpStatus.UNAUTHORIZED, true,
+						localeService.getMessage("user.not.authorized.error"), null);
 			}
+
 		}
 	}
 

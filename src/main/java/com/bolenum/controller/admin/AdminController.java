@@ -291,9 +291,6 @@ public class AdminController {
 			@RequestParam(name = "code") String coinCode) {
 
 		logger.debug("currency Type: {}, code:{}", currencyType, coinCode);
-		if (coinCode == null || coinCode.isEmpty()) {
-			throw new IllegalArgumentException(localeService.getMessage("invalid.coin.code"));
-		}
 		Currency currency = currencyService.findByCurrencyAbbreviation(coinCode);
 		double tradeFees = tradeService.findTotalTradeFeeOfCurrency(currency);
 		User user = GenericUtils.getLoggedInUser(); // logged in user
@@ -305,8 +302,7 @@ public class AdminController {
 		final String TRANSFERFEE = "transferFee";
 		switch (currencyType) {
 		case "CRYPTO":
-			switch (coinCode) {
-			case "BTC":
+			if ("BTC".equalsIgnoreCase(coinCode)) {
 				Map<String, Object> mapAddressAndBal = new HashMap<>();
 				mapAddressAndBal.put(ADDRESS, btcWalletService.getBtcAccountAddress(user.getBtcWalletUuid()));
 				mapAddressAndBal.put(BALANCE, btcWalletService.getBtcAccountBalance(user.getBtcWalletUuid()));
@@ -314,21 +310,11 @@ public class AdminController {
 				mapAddressAndBal.put(TRADEFEE, GenericUtils.getDecimalFormatString(tradeFees));
 				mapAddressAndBal.put(TRANSFERFEE, 0);
 				map.put("data", mapAddressAndBal);
-				break;
-			case "ETH":
+			} else if ("ETH".equalsIgnoreCase(coinCode)) {
 				UserCoin userCoin = etherumWalletService.ethWalletBalance(user, coinCode);
 				Double tranferFees = transactionService.totalTrasferFeePaidByAdmin(coinCode);
-				if (tranferFees == null) {
-					tranferFees = 0.0;
-				}
 				Double usersDepositBalance = adminService.findTotalDepositBalanceOfUser(coinCode);
-				if (usersDepositBalance == null) {
-					usersDepositBalance = 0.0;
-				}
 				Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
-				if (balance == null) {
-					balance = 0.0;
-				}
 				balance = balance - (usersDepositBalance + tranferFees);
 				Map<String, Object> mapAddress = new HashMap<>();
 				mapAddress.put(ADDRESS, userCoin.getWalletAddress());
@@ -337,10 +323,6 @@ public class AdminController {
 				mapAddress.put(TRADEFEE, GenericUtils.getDecimalFormatString(tradeFees));
 				mapAddress.put(TRANSFERFEE, GenericUtils.getDecimalFormatString(tranferFees));
 				map.put("data", mapAddress);
-				break;
-			default:
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-						localeService.getMessage("invalid.coin.code"), null);
 			}
 			break;
 		case "ERC20TOKEN":
@@ -370,6 +352,7 @@ public class AdminController {
 					null);
 		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
+
 	}
 
 	/**
@@ -388,9 +371,6 @@ public class AdminController {
 		if (bindingResult.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("withdraw.invalid.amount"), Optional.empty());
-		}
-		if (coinCode == null || coinCode.isEmpty()) {
-			throw new IllegalArgumentException(localeService.getMessage("invalid.coin.code"));
 		}
 		User user = GenericUtils.getLoggedInUser(); // logged in user
 		/**
