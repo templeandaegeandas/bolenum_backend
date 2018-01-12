@@ -348,15 +348,14 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setToAddress(transaction._to.getValue());
 			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
 			tx.setTransactionType(TransactionType.INCOMING);
-			logger.debug("receiver user : {}", toUser);
-			logger.debug("receiver user id: {}", toUser.getUserId());
+			logger.debug("receiver user: {} and ID: {}", toUser.getEmailId(), toUser.getUserId());
 			tx.setToUser(toUser);
 			if (erc20Token != null) {
 				tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			}
 			tx.setCurrencyName(tokenName);
 			tx.setTransferStatus(TransferStatus.INITIATED);
-			if (toUser.getUserId() == 1) {
+			if (adminEmail.equalsIgnoreCase(toUser.getEmailId())) {
 				tx.setTransferStatus(TransferStatus.COMPLETED);
 			}
 			Transaction saved = transactionRepo.save(tx);
