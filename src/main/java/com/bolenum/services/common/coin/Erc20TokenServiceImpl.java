@@ -471,7 +471,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
 				transaction = new Transaction();
-				transaction.setTxHash(ethSendTransaction.getTransactionHash());
+				transaction.setTxHash(txHash);
 				transaction.setFromAddress(userCoin.getWalletAddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);

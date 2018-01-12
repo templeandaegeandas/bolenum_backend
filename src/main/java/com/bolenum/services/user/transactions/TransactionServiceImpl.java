@@ -176,7 +176,7 @@ public class TransactionServiceImpl implements TransactionService {
 			if (transaction == null) {
 				logger.debug("saving transaction for user: {}, hash: {}", fromUser.getEmailId(), txHash);
 				transaction = new Transaction();
-				transaction.setTxHash(transaction.getTxHash());
+				transaction.setTxHash(txHash);
 				transaction.setFromAddress(fromUserCoin.getWalletAddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
