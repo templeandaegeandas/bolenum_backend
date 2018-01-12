@@ -199,7 +199,8 @@ public class FiatOrderController {
 					+ " Account Number: " + accountDetails.getAccountNumber()
 					+ " Please login to bolenum exchange to confirm your payment.";
 			notificationService.sendNotification(matchedOrder.getUser(), msg, "trade.summary");
-			notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg, matchedOrderId, NotificationType.MATCHED_NOTIFICATION);
+			notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg, matchedOrderId,
+					NotificationType.MATCHED_NOTIFICATION);
 			map.put(ORDERID, order.getId());
 			try {
 				JSONObject jsonObject = new JSONObject();
@@ -219,7 +220,6 @@ public class FiatOrderController {
 		AddUserBankDetailsForm form = new AddUserBankDetailsForm();
 		form.setAccountHolderName(bank.getAccountHolderName());
 		form.setAccountNumber(bank.getAccountNumber());
-		form.setIfscCode(bank.getIfscCode());
 		form.setBankName(bank.getBankName());
 		return form;
 	}
@@ -376,8 +376,7 @@ public class FiatOrderController {
 					map.put("isMatchedConfirm", orders.getMatchedOrder().isConfirm());
 				}
 			}
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"),
-					map);
+			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
 		}
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, false, localeService.getMessage("order.create.success"),
 				Optional.empty());

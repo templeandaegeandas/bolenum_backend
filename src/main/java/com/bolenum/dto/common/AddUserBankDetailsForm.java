@@ -2,8 +2,6 @@ package com.bolenum.dto.common;
 
 import java.util.Date;
 
-import javax.validation.constraints.Pattern;
-
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -21,15 +19,11 @@ public class AddUserBankDetailsForm {
 	private String accountHolderName;
 
 	@NotBlank
-	//@Pattern(regexp = "([A-Za-z0-9]+)", message = "Account number must be valid")
+	// @Pattern(regexp = "([A-Za-z0-9]+)", message = "Account number must be valid")
 	private String accountNumber;
 
 	@NotBlank
 	private String bankName;
-
-	@NotBlank
-	@Pattern(regexp = "([A-Za-z0-9]+)", message = "IFSCCode must be valid")
-	private String ifscCode;
 
 	private String address;
 	private String city;
@@ -72,14 +66,6 @@ public class AddUserBankDetailsForm {
 
 	public void setBankName(String bankName) {
 		this.bankName = bankName;
-	}
-
-	public String getIfscCode() {
-		return ifscCode;
-	}
-
-	public void setIfscCode(String ifscCode) {
-		this.ifscCode = ifscCode;
 	}
 
 	public String getAddress() {
@@ -155,7 +141,7 @@ public class AddUserBankDetailsForm {
 	}
 
 	public BankAccountDetails copy(BankAccountDetails bankAccountDetails) {
-		
+
 		bankAccountDetails.setAccountHolderName(this.accountHolderName);
 		bankAccountDetails.setAccountNumber(this.accountNumber);
 		bankAccountDetails.setAddress(this.address);
@@ -164,7 +150,6 @@ public class AddUserBankDetailsForm {
 		bankAccountDetails.setCity(this.city);
 		bankAccountDetails.setContactNumber(this.contactNumber);
 		bankAccountDetails.setDistrict(this.district);
-		bankAccountDetails.setIfscCode(this.ifscCode);
 		return bankAccountDetails;
 	}
 }
