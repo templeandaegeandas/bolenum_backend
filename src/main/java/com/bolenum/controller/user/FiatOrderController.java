@@ -13,8 +13,6 @@ import java.util.concurrent.Future;
 
 import javax.validation.Valid;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,16 +200,9 @@ public class FiatOrderController {
 			notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg, matchedOrderId,
 					NotificationType.MATCHED_NOTIFICATION);
 			map.put(ORDERID, order.getId());
-			try {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("MATCHED_NOTIFICATION", MessageType.MATCHED_NOTIFICATION);
-				jsonObject.put("matchedOrderId", matchedOrder.getId());
-				simpMessagingTemplate.convertAndSend(
-						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matchedOrder.getUser().getUserId(),
-						jsonObject.toString());
-			} catch (JSONException e) {
-				logger.error("json parsing exception: {}", e);
-			}
+			simpMessagingTemplate.convertAndSend(
+					UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matchedOrder.getUser().getUserId(),
+					MessageType.MATCHED_NOTIFICATION);
 		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"), map);
 	}
@@ -257,6 +248,11 @@ public class FiatOrderController {
 					Optional.empty());
 		}
 		if (exitingOrder.getMatchedOrder() != null && exitingOrder.getMatchedOrder().getUser() != null) {
+			if (exitingOrder.getMatchedOrder().isConfirm()) {
+				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+						localeService.getMessage("Balance already paid to you. So you can't perform this action!"),
+						Optional.empty());
+			}
 			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/"
 					+ exitingOrder.getMatchedOrder().getUser().getUserId(), MessageType.ORDER_CANCELLED);
 		}
@@ -307,15 +303,12 @@ public class FiatOrderController {
 		try {
 			logger.debug("result of order: {}", result);
 			if (result.get()) {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
-				jsonObject.put("matchedOrderId", exitingOrder.getMatchedOrder().getId());
 				simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/"
-						+ exitingOrder.getMatchedOrder().getUser().getUserId(), jsonObject.toString());
+						+ exitingOrder.getMatchedOrder().getUser().getUserId(), MessageType.PAID_NOTIFICATION);
 				return ResponseHandler.response(HttpStatus.OK, false,
 						localeService.getMessage("order.transaction.success"), Optional.empty());
 			}
-		} catch (InterruptedException | ExecutionException | JSONException e) {
+		} catch (InterruptedException | ExecutionException e) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(INVALIDORDER),
 					Optional.empty());
 		}

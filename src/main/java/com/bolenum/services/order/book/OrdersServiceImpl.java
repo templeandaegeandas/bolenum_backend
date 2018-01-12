@@ -221,6 +221,7 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, marketCurrency, pairedCurrency);
+			orders.setPrice(getBestBuy(sellOrderList));
 			/**
 			 * checking user self order, return false if self order else proceed. Feature
 			 * has been paused on Dec 12 2017
@@ -251,6 +252,7 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, marketCurrency, pairedCurrency);
+			orders.setPrice(getBestSell(buyOrderList));
 			/**
 			 * checking user self order, return false if self order else proceed. checking
 			 * user self order, return false if self order else proceed. Feature has been
@@ -716,14 +718,14 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public boolean cancelOrder(long orderId) {
-		Orders order = ordersRepository.findOne(orderId);
-		if (order != null) {
-			order.setOrderStatus(OrderStatus.CANCELLED);
-			ordersRepository.save(order);
-			return true;
-		}
-		return false;
+	public void cancelOrder(Orders order) {
+		order.setOrderStatus(OrderStatus.CANCELLED);
+		ordersRepository.save(order);
+	}
+
+	@Override
+	public Orders findByOrderId(long orderId) {
+		return ordersRepository.findOne(orderId);
 	}
 
 	@Override
