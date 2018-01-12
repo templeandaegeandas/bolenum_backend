@@ -404,19 +404,22 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			Double estimattedFee = getEstimetedFeeErc20Token();
 			Boolean result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), estimattedFee,
 					TransactionStatus.TRANSFER, estimattedFee, transaction.getCurrencyName());
-			transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.PENDING));
-			transactionRepo.save(transactions);
 			if (result) {
+				transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.PENDING));
+				transactionRepo.save(transactions);
 				Double balance = getErc20WalletBalance(transaction.getToUser(), erc20Token,
 						transaction.getCurrencyName());
 				logger.debug("wallet balance is: {}", balance);
-				userCoin.setBalance(userCoin.getBalance() + totalBalance);
-				userCoinRepository.save(userCoin);
-				logger.debug("saved!");
-				transferErc20Token(userCoin.getUser(), erc20Token, adminCoin.getWalletAddress(), balance,
+				
+				TransactionReceipt receipt = transferErc20Token(userCoin.getUser(), erc20Token, adminCoin.getWalletAddress(), balance,
 						transaction.getCurrencyName());
-				transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.COMPLETED));
-				transactionRepo.save(transactions);
+				if(receipt != null && receipt.getTransactionHash() != null) {
+					userCoin.setBalance(userCoin.getBalance() + balance);
+					userCoinRepository.save(userCoin);
+					logger.debug("saved!");
+					transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.COMPLETED));
+					transactionRepo.save(transactions);
+				}
 			}
 		}
 		if ("ETH".equals(transaction.getCurrencyName())) {
@@ -429,7 +432,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 						TransactionStatus.TRANSFER, estFee, transaction.getCurrencyName());
 				if (res) {
 					transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.COMPLETED));
-					userCoin.setBalance(userCoin.getBalance() + totalBalance);
+					userCoin.setBalance(userCoin.getBalance() + balance);
 					userCoinRepository.save(userCoin);
 					transactionRepo.save(transactions);
 				}
