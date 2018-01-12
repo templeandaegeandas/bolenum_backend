@@ -718,14 +718,14 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public boolean cancelOrder(long orderId) {
-		Orders order = ordersRepository.findOne(orderId);
-		if (order != null) {
-			order.setOrderStatus(OrderStatus.CANCELLED);
-			ordersRepository.save(order);
-			return true;
-		}
-		return false;
+	public void cancelOrder(Orders order) {
+		order.setOrderStatus(OrderStatus.CANCELLED);
+		ordersRepository.save(order);
+	}
+
+	@Override
+	public Orders findByOrderId(long orderId) {
+		return ordersRepository.findOne(orderId);
 	}
 
 	@Override
