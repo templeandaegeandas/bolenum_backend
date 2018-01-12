@@ -221,6 +221,7 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, marketCurrency, pairedCurrency);
+			orders.setPrice(getBestBuy(sellOrderList));
 			/**
 			 * checking user self order, return false if self order else proceed. Feature
 			 * has been paused on Dec 12 2017
@@ -251,6 +252,7 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, marketCurrency, pairedCurrency);
+			orders.setPrice(getBestSell(buyOrderList));
 			/**
 			 * checking user self order, return false if self order else proceed. checking
 			 * user self order, return false if self order else proceed. Feature has been

@@ -99,7 +99,7 @@ public class WalletServiceImpl implements WalletService {
 			 * 1 UNIT buying currency price in BTC Example 1 ETH = 0.0578560 BTC, this will
 			 * update according to order selling book
 			 */
-			double buyingCurrencyValue = 0.0578560;
+			double buyingCurrencyValue = pairedCurrency.getPriceBTC();
 			logger.debug("order value : {}, buyingCurrencyValue: {}", GenericUtils.getDecimalFormatString(qtyTraded),
 					GenericUtils.getDecimalFormatString(buyingCurrencyValue));
 			if (buyingCurrencyValue > 0) {
