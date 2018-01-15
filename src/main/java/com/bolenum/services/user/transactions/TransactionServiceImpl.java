@@ -176,7 +176,7 @@ public class TransactionServiceImpl implements TransactionService {
 			if (transaction == null) {
 				logger.debug("saving transaction for user: {}, hash: {}", fromUser.getEmailId(), txHash);
 				transaction = new Transaction();
-				transaction.setTxHash(transaction.getTxHash());
+				transaction.setTxHash(txHash);
 				transaction.setFromAddress(fromUserCoin.getWalletAddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);
@@ -569,6 +569,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 				try {
 					BtcdClient btcdClient = ResourceUtils.getBtcdProvider();
+					logger.debug("transaction hash for fetching confirmation: {}", transaction.getTxHash());
 					com.neemre.btcdcli4j.core.domain.Transaction transaction1 = btcdClient
 							.getTransaction(transaction.getTxHash());
 					if (transaction1.getConfirmations() >= 6) {

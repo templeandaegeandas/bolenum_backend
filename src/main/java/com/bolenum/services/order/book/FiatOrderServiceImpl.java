@@ -11,8 +11,6 @@ import java.util.concurrent.Future;
 
 import javax.transaction.Transactional;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -267,23 +265,17 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ exitingOrder.getLockedVolume() * exitingOrder.getPrice()
 						+ " Please confirm amount by login into bolenumexchage.";
 				notificationService.sendNotification(seller, msg, TRADESUMMARY);
-				notificationService.saveNotification(buyer, seller, msg, matched.getId(), NotificationType.PAID_NOTIFICATION);
+				notificationService.saveNotification(buyer, seller, msg, matched.getId(),
+						NotificationType.PAID_NOTIFICATION);
 				exitingOrder.setConfirm(true);
 				matched.setMatchedOn(new Date());
 				ordersRepository.save(exitingOrder);
 				ordersRepository.save(matched);
-				JSONObject jsonObject = new JSONObject();
-				try {
-					jsonObject.put("PAID_NOTIFICATION", MessageType.PAID_NOTIFICATION);
-					jsonObject.put("matchedOrderId", matched.getId());
-					simpMessagingTemplate.convertAndSend(
-							UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
-							jsonObject.toString());
-					logger.debug("WebSocket message: {} #{}", MessageType.ORDER_CONFIRMATION, matched.getId());
-					return true;
-				} catch (JSONException e) {
-					logger.error("json parsing exception: {}", e);
-				}
+				simpMessagingTemplate.convertAndSend(
+						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + matched.getUser().getUserId(),
+						MessageType.PAID_NOTIFICATION);
+				logger.debug("WebSocket message: {} #{}", MessageType.ORDER_CONFIRMATION, matched.getId());
+				return true;
 			} else {
 				logger.error("order is of SELL type");
 			}
@@ -321,8 +313,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 							sellerOrder.getMarketCurrency(), sellerOrder.getPairedCurrency(),
 							sellerOrder.getOrderStandard(), 0.0, 0.0, null, null);
 					orderAsyncService.saveTrade(trade);
-//					notificationService.sendNotification(seller, msg, TRADESUMMARY);
-//					notificationService.saveNotification(seller, buyer, msg, matched.getId(), NotificationType.PAID_NOTIFICATION);
+					// notificationService.sendNotification(seller, msg, TRADESUMMARY);
+					// notificationService.saveNotification(seller, buyer, msg, matched.getId(),
+					// NotificationType.PAID_NOTIFICATION);
 				}
 			} catch (Exception e) {
 				return new AsyncResult<>(true);

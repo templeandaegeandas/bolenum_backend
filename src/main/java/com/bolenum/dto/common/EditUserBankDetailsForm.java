@@ -23,11 +23,8 @@ public class EditUserBankDetailsForm {
 
 	@Pattern(regexp = "([A-Za-z0-9]+)", message = "Account number must be valid")
 	private String accountNumber;
-	
-	private String bankName;
 
-	@Pattern(regexp = "([A-Za-z0-9]+)", message = "IFSCCode must be valid")
-	private String ifscCode;
+	private String bankName;
 
 	private String address;
 	private String city;
@@ -69,14 +66,6 @@ public class EditUserBankDetailsForm {
 
 	public void setBankName(String bankName) {
 		this.bankName = bankName;
-	}
-
-	public String getIfscCode() {
-		return ifscCode;
-	}
-
-	public void setIfscCode(String ifscCode) {
-		this.ifscCode = ifscCode;
 	}
 
 	public String getAddress() {

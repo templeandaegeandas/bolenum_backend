@@ -31,9 +31,6 @@ public class BankAccountDetails {
 	@NotBlank
 	private String bankName;
 
-	@NotBlank
-	private String ifscCode;
-
 	private String address;
 	private String city;
 	private String district;
@@ -43,9 +40,9 @@ public class BankAccountDetails {
 	private Boolean isDeleted = false;
 	private Date onCreated;
 	private Date onUpdated;
-	
+
 	private Boolean isPrimary = false;
-	
+
 	@ManyToOne
 	private User user;
 
@@ -87,14 +84,6 @@ public class BankAccountDetails {
 
 	public void setBankName(String bankName) {
 		this.bankName = bankName;
-	}
-
-	public String getIfscCode() {
-		return ifscCode;
-	}
-
-	public void setIfscCode(String ifscCode) {
-		this.ifscCode = ifscCode;
 	}
 
 	public String getAddress() {

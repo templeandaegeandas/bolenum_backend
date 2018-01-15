@@ -74,7 +74,9 @@ public interface OrdersService {
 	Page<Orders> findOrdersListByUserAndOrderStatus(int pageNumber, int pageSize, String sortOrder, String sortBy,
 			User user, OrderStatus orderStatus);
 
-	boolean cancelOrder(long orderId);
-
 	double findUserOrderLockedVolume(User user, Currency marketCurrency, Currency pairedCurrency);
+
+	Orders findByOrderId(long orderId);
+
+	void cancelOrder(Orders order);
 }
