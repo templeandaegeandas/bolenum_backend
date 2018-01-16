@@ -14,7 +14,7 @@ import com.bolenum.model.notification.Notification;
  * @date 31-Oct-2017
  */
 public interface NotificationService {
-	public Notification saveNotification(User buyer, User seller, String msg, Long notificationRelationId, NotificationType notificationType);
+	public Notification saveNotification(User sender, User receiver, String msg, Long notificationRelationId, NotificationType notificationType);
 
 	public boolean sendNotification(User user, String message, String subject);
 
