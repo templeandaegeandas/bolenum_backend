@@ -1,3 +1,11 @@
+/*@Description Of Class
+ * 
+ * Erc20TokenController class is responsible for below listed task: 
+ * 
+ *    Add new token
+ *    Get all tokens
+ *    Get token by token Id
+ */
 package com.bolenum.controller.admin;
 
 import org.slf4j.Logger;
@@ -37,6 +45,12 @@ public class Erc20TokenController {
 	@Autowired
 	private LocaleService localeService;
 
+	
+	/**@Description:use to add new token
+	 * @param erc20Token
+	 * @return savedToken
+	 */
+	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.ADD_NEW_TOKEN, method = RequestMethod.POST)
 	public ResponseEntity<Object> addNewToken(@RequestBody Erc20Token erc20Token) {
@@ -49,6 +63,13 @@ public class Erc20TokenController {
 					localeService.getMessage("erc20.new.token.notsaved"), savedToken);
 		}
 	}
+	/**@Description:use to get all tokens
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortOrder
+	 * @return erc20TokenList
+	 */
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.GET_TOKEN_LIST, method = RequestMethod.GET)
@@ -58,7 +79,10 @@ public class Erc20TokenController {
 		Page<Erc20Token> erc20TokenList = erc20TokenService.listAllErc20Token(pageNumber, pageSize, sortBy, sortOrder);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("erc20.token.list"), erc20TokenList);
 	}
-
+	/**@Description:use to get token by token Id
+	 * @param id
+	 * @return erc20Token
+	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.GET_TOKEN_BY_ID, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTokenByTokenId(@RequestParam("id") Long id) {

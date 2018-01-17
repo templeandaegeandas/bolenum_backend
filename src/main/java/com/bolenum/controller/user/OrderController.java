@@ -1,3 +1,17 @@
+/*@Description Of Class
+ * 
+ * OrderController class is responsible for below listed task: 
+ * 
+ *    Create Order
+ *    Get traded orders
+ *    Get Buy order list with pair
+ *    Get sell order list with pair
+ *    Get traded orders of logged in user
+ *    Get order from user Book
+ *    Get order details of user
+ *    Cancel orders
+ */
+
 package com.bolenum.controller.user;
 
 import java.util.HashMap;
@@ -64,7 +78,17 @@ public class OrderController {
 
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
-
+	
+	
+	
+	
+	
+	/**@Description: use to create Order
+	 * 
+	 * @param orders
+	 * 
+	 * @return  order.processed.success OR order.volume.zero OR order.verify.kyc OR order.system.sync OR order.insufficient.balance
+	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER, method = RequestMethod.POST)
 	public ResponseEntity<Object> createOrder(@RequestBody Orders orders) {
@@ -104,10 +128,11 @@ public class OrderController {
 		}
 	}
 
-	/**
+	/**@Description use to get Buy order list with pair
 	 * 
-	 * @param pairId
-	 * @return
+	 * @param marketCurrencyId
+	 * @param pairedCurrencyId
+	 * @return order list
 	 */
 	@RequestMapping(value = UrlConstant.BUY_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBuyOrderListWithPair(@RequestParam("marketCurrencyId") long marketCurrencyId,
@@ -115,13 +140,30 @@ public class OrderController {
 		Page<Orders> list = ordersService.getBuyOrdersListByPair(marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
-
+	
+	/**@Description use to get sell order list with pair
+	 * 
+	 * @param marketCurrencyId
+	 * @param pairedCurrencyId
+	 * @return order list
+	 */
 	@RequestMapping(value = UrlConstant.SELL_ORDER_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getSellOrderListWithPair(@RequestParam("marketCurrencyId") long marketCurrencyId,
 			@RequestParam("pairedCurrencyId") long pairedCurrencyId) {
 		Page<Orders> list = ordersService.getSellOrdersListByPair(marketCurrencyId, pairedCurrencyId);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
+	
+	/**@Description use to get traded orders of logged in user
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortOrder
+	 * @param sortBy
+	 * @param orderType
+	 * @param date
+	 * @return trade list
+	 */
 
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRADE_LIST_LOGGEDIN, method = RequestMethod.GET)
@@ -134,6 +176,17 @@ public class OrderController {
 				orderType, date);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
+	
+	
+	/**@Description use to get traded orders 
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortOrder
+	 * @param sortBy
+	 *
+	 * @return trade list
+	 */
 
 	@RequestMapping(value = UrlConstant.TRADE_LIST_ALL, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTradedOrders(@RequestParam("pageNumber") int pageNumber,
@@ -142,6 +195,18 @@ public class OrderController {
 		Page<Trade> list = tradeService.getTradedOrders(pageNumber, pageSize, sortOrder, sortBy);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("trade.list"), list);
 	}
+	
+	
+
+	/**@Description use to get order from user Book
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @param sortOrder
+	 * @param sortBy
+	 *
+	 * @return order list
+	 */
 
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.MY_ORDER_LIST, method = RequestMethod.GET)
@@ -153,6 +218,15 @@ public class OrderController {
 				user, OrderStatus.SUBMITTED);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.list"), list);
 	}
+	
+	
+
+	/**@Description use to get order details
+	 * 
+	 * @param orderId
+	 * 
+	 * @return bankAccountDetails,orderDetails
+	 */
 
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_BY_ID, method = RequestMethod.GET)
@@ -175,6 +249,13 @@ public class OrderController {
 		map.put("orderDetails", orders);
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("message.success"), map);
 	}
+	
+	/**@Description use to cancel orders
+	 * 
+	 * @param orderId
+	 * 
+	 * @return order cancel OR order.cancel.error
+	 */
 
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CANCEL_ORDER, method = RequestMethod.DELETE)

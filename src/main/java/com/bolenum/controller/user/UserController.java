@@ -1,3 +1,24 @@
+/*@Description Of Class
+ * 
+ * UserControler class is responsible for below listed task: 
+ * 
+ *    Register user details in database.
+ *    Verifies user e-mail.
+ *    Change user password.
+ *    Update user profile & upload images.
+ *    Use to upload user KYC document.
+ *    Find out current logged in user.
+ *    Add mobile number at the time of providing profile information by user.
+ *    Verification of OTP.
+ *    Get list of all countries/states with respect to specific country.
+ *    Used to get list of transaction done by a particular user.
+ *    Get number of trading buy/sell performed by user.
+ *    Use to get coin market data.
+ *    Get notifications of user.
+ *    Send news latter to the user.
+ *    Change notification status on notification list of user.
+ *    Get total count of user's notification.
+ */
 package com.bolenum.controller.user;
 
 import java.io.IOException;
@@ -57,6 +78,7 @@ import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
+import com.jayway.jsonpath.Option;
 
 import io.swagger.annotations.Api;
 
@@ -109,47 +131,47 @@ public class UserController {
 	private NotificationService notificationService;
 
 	private static final String MESSAGE_SUCCESS = "message.success";
-
-	/**
+	
+	
+	/**@Description: RegisterUser method is use to register the new user.(SignUp process).
+	 *               Checks the existing email-id of new user.
 	 * 
 	 * @param signupForm
-	 * @param result
-	 * @return
+	 * 
+	 * @return  registration successfully OR email already exist.
 	 */
+	
 	@RequestMapping(value = UrlConstant.REGISTER_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> registerUser(@Valid @RequestBody UserSignupForm signupForm, BindingResult result) {
 		if (result.hasErrors()) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ErrorCollectionUtil.getError(result),
 					ErrorCollectionUtil.getErrorMap(result));
-		} else {
-			User isUserExist = userService.findByEmail(signupForm.getEmailId());
-			if (isUserExist == null) {
-				User newUser = signupForm.copy(new User());
-				userService.registerUser(newUser);
-				return ResponseHandler.response(HttpStatus.OK, false,
-						localService.getMessage("user.registarion.success"), newUser.getEmailId());
-			} else if (isUserExist.getIsEnabled()) {
-				return ResponseHandler.response(HttpStatus.CONFLICT, false,
-						localService.getMessage("email.already.exist"), isUserExist.getEmailId());
-			} else {
-				userService.reRegister(signupForm);
-				return ResponseHandler.response(HttpStatus.OK, false,
-						localService.getMessage("user.registarion.success"), signupForm.getEmailId());
-			}
 		}
+		User isUserExist = userService.findByEmail(signupForm.getEmailId());
+		if (isUserExist == null) {
+			User newUser = signupForm.copy(new User());
+			userService.registerUser(newUser);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("user.registarion.success"),
+					newUser.getEmailId());
+		} else if (isUserExist.getIsEnabled()) {
+			return ResponseHandler.response(HttpStatus.CONFLICT, false, localService.getMessage("email.already.exist"),
+					isUserExist.getEmailId());
+		} else {
+			userService.reRegister(signupForm);
+			return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("user.registarion.success"),
+					signupForm.getEmailId());
+		}
+
 	}
 
 	/**
 	 * 
-	 * for mail verify at the time of sign up user as well as re register
+	 * @Description : Verifies mail at the time of user sign up  as well as when user re-register
 	 * 
 	 * @param token
 	 * 
-	 * @return
-	 * 
-	 * 
-	 * @modified by Himanshu Kumar added expiry condition in reset password
-	 * 
+	 * @return token invalid OR token expired OR Mail verified.
+	 
 	 */
 	@RequestMapping(value = UrlConstant.USER_MAIL_VERIFY, method = RequestMethod.GET)
 	public ResponseEntity<Object> userMailVerify(@RequestParam("token") String token) {
@@ -202,11 +224,11 @@ public class UserController {
 	}
 
 	/**
-	 * for change password
+	 * @Description: For user password change.
 	 * 
 	 * @param passwordForm
-	 * @param result
-	 * @return
+	 * 
+	 * @return password changed OR password change failure.
 	 */
 
 	@Secured("ROLE_USER")
@@ -235,11 +257,11 @@ public class UserController {
 	}
 
 	/**
-	 * used to update user profile
+	 * @Description : Use to update user profile(SignUp details).
 	 * 
-	 * @param editUserForm
-	 * @param result
-	 * @return
+	 * @param editd User Form
+	 * 
+	 * @return profile updated successfully OR user profile updated failure
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.UPDATE_USER_PROFILE, method = RequestMethod.PUT)
@@ -262,9 +284,9 @@ public class UserController {
 	}
 
 	/**
-	 * used to find out current logged in user
+	 * @Description : Use to find out current logged in user
 	 * 
-	 * @return
+	 * @return: current logged in user
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GET_LOGGEDIN_USER, method = RequestMethod.GET)
@@ -273,15 +295,12 @@ public class UserController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(MESSAGE_SUCCESS), user);
 	}
 
-	/**
+	/**@Descripton: Use to add mobile number at the time of providing profile information by user.
 	 * 
-	 * used to add mobile number at the time of providing profile information by
-	 * user
-	 * 
-	 * @param mobileNumber
+     * @param mobileNumber
 	 * @param countryCode
-	 * @return
 	 * @throws PersistenceException
+	 * @return OTP
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ADD_MOBILE_NUMBER, method = RequestMethod.PUT)
@@ -298,13 +317,14 @@ public class UserController {
 		}
 	}
 
-	/**
-	 * used for verification of OTP
+	/**@Description : use for verification of OTP
 	 * 
-	 * @param otp
-	 * @return
+	 * @param OTP
+	 * 
 	 * @throws PersistenceException
 	 * @throws InvalidOtpException
+	 * @return OTP verified OR OTP not verified
+	 * 
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.VERIFY_OTP, method = RequestMethod.PUT)
@@ -324,13 +344,11 @@ public class UserController {
 				Optional.empty());
 	}
 
-	/**
+	/**@Description : use to resend OTP
 	 * 
-	 * used to authenticate user via OTP
-	 * 
-	 * @return
 	 * @throws PersistenceException
 	 * @throws InvalidOtpException
+	 * @return OTP
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.RESEND_OTP, method = RequestMethod.POST)
@@ -340,14 +358,14 @@ public class UserController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("otp.resend"), null);
 	}
 
-	/**
-	 * to upload user profile image
+	/**@Description : Use to upload user KYC document
+	 * 
 	 * 
 	 * @param file
-	 * @return
 	 * @throws IOException
 	 * @throws PersistenceException
 	 * @throws MaxSizeExceedException
+	 * @return image uploaded OR image uploaded failed
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.UPLOAD_PROFILE_IMAGE, method = RequestMethod.POST)
@@ -364,10 +382,10 @@ public class UserController {
 		}
 	}
 
-	/**
-	 * to get list of countries
+	/**@Description : Use to get list of countries.
 	 * 
-	 * @return
+	 * 
+	 * @return: Countries list
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GET_COUNTRIES_LIST, method = RequestMethod.GET)
@@ -376,12 +394,10 @@ public class UserController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("all.countries.list"), list);
 	}
 
-	/**
+	/**@Description : Use to get list of states with respect to specific country.
 	 * 
-	 * to get list of states with respect to specific country
-	 * 
-	 * @param countryId
-	 * @return
+	 * @param: countryId
+	 * @return: states list by country id
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GET_STATE_BY_COUNTRY_ID, method = RequestMethod.GET)
@@ -391,16 +407,13 @@ public class UserController {
 				list);
 	}
 
-	/**
-	 * 
-	 * used to get list of transaction done by a particular user, user can only see
-	 * his own transactions at the time of deposited to his wallet
-	 * 
+	/**@Description : use to get list of Withdraw transaction done by a particular user, user can only see
+	 *                his own transactions at the time of deposited to his wallet
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortOrder
 	 * @param sortBy
-	 * @return
+	 * @return List withdraw Transaction of user.
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_WITHDRAW, method = RequestMethod.GET)
@@ -414,15 +427,13 @@ public class UserController {
 				localService.getMessage("transaction.list.withdraw.success"), listOfUserTransaction);
 	}
 
-	/**
-	 * used to get list of transaction done by a particular user, user can only see
-	 * his own transactions at the time of deposited to his wallet
-	 * 
+	/**@Description : use to get list of deposit transaction done by a particular user, user can only see
+	 *                his own transactions at the time of deposited to his wallet.
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortOrder
 	 * @param sortBy
-	 * @return
+	 * @return List deposit Transaction of user.
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TRANSACTION_LIST_OF_USER_DEPOSIT, method = RequestMethod.GET)
@@ -436,10 +447,10 @@ public class UserController {
 				localService.getMessage("transaction.list.deposit.success"), listOfUserTransaction);
 	}
 
-	/**
-	 * to get number of trading buy/sell performed by particular user
+	/**@description : Use to get number of trading buy/sell performed by particular user.
 	 * 
-	 * @return
+	 * 
+	 * @return totalNumberOfBuy OR totalNumberOfSell OR totalNumberOfTrading
 	 */
 
 	@Secured("ROLE_USER")
@@ -457,37 +468,32 @@ public class UserController {
 				tradingNumber);
 	}
 
-	/**
-	 * 
+	/**@description : Use to send news latter to the user.
+	 *  
+	 *  
 	 * @param email
-	 * @return
+	 * @return invalid email OR news latter sent.
 	 */
 	@RequestMapping(value = UrlConstant.SUBSCRIBE_USER, method = RequestMethod.POST)
 	public ResponseEntity<Object> sendNewsLetter(@RequestParam("email") String email) {
 
 		if (!GenericUtils.isValidMail(email)) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-					localService.getMessage("user.email.not.valid"), null);
+					localService.getMessage("user.email.not.valid"), Optional.empty());
 		}
 		SubscribedUser subscribedUser = subscribedUserService.validateSubscribedUser(email);
 		if (subscribedUser == null) {
-			SubscribedUser response = subscribedUserService.saveSubscribedUser(email);
-			if (response != null) {
-				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("user.subscribe.success"),
-						response);
-			} else {
-				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-						localService.getMessage("user.subscribe.failure"), null);
-			}
+			 subscribedUserService.saveSubscribedUser(email);
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
-				localService.getMessage("user.subscribe.already.exist"), null);
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("user.subscribe.success"),
+				Optional.empty());
 	}
 
-	/**
-	 * to get number of trading buy/sell performed by particular user
+	/**@Description : Use to get coin market data.
 	 * 
-	 * @return
+	 * @param  : marketCurrencyId  
+	 * @param  : pairedCurrencyId
+	 * @return : coin market data OR volume24h,high24h,low24h,countTrade24h
 	 */
 
 	@RequestMapping(value = UrlConstant.COIN_MARKET_DATA, method = RequestMethod.GET)
@@ -511,10 +517,13 @@ public class UserController {
 		}
 	}
 
-	/**
-	 * @created by Himanshu Kumar
-	 * 
-	 * @return
+	/** @Description: Get notification list of user
+	 *
+	 * @param: pageNumber
+	 * @param: pageSize
+	 * @param: sortOrder
+	 * @param: sortBy
+	 * @return list Of user notifications.
 	 */
 	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.GET)
@@ -529,12 +538,14 @@ public class UserController {
 
 	}
 
-	/**
+	/**@Description: Use to change notification status to read.
+	 *               
+	 * 
 	 * @created by Himanshu Kumar
 	 * 
-	 * @param id
+	 * @param arrayOfNotification
 	 * 
-	 * @return
+	 * @return  Notification list
 	 */
 	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.USER_NOTIFICATION, method = RequestMethod.PUT)
@@ -546,10 +557,11 @@ public class UserController {
 				arrayOfNotification);
 	}
 
-	/**
+	/**@Description: get total count of user's notification.
+	 * 
 	 * @created by Himanshu Kumar
 	 * 
-	 * @return notification
+	 * @return Unseen notifications.
 	 * 
 	 */
 	@Secured({ "ROLE_USER", "ROLE_ADMIN" })

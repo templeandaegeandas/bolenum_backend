@@ -1,3 +1,22 @@
+/*@Description Of Class
+ * 
+ * AdminController class is responsible for below listed task: 
+ *   
+ *   Get list of all the users enrolled in system.
+ *   To get user by ID.
+ *   Add trading fees for transaction done by user and deducted fees will be store in Admin wallet.
+ *	 Get the fee details of system
+ *   Use to save Withdrawal Fees
+ *   Use to get Withdrawal Fees list
+ *   Use to count number of new buyers/sellers and active users and active orders that will be shown on admin dashboard
+ *   Use to get latest order list
+ *   Use to get List Of Subscribed Users
+ *   Use to get Wallet Address And Balance
+ *   Use to get withdraw Amount
+ *   use to get user orders in book
+ *   use to get user trade history
+ *   use to get Transfer History
+ */
 package com.bolenum.controller.admin;
 
 import java.util.HashMap;
@@ -114,15 +133,15 @@ public class AdminController {
 
 	private static final String MESSAGE_SUCCESS = "message.success";
 
-	/**
-	 * to get list of all the users enrolled in system
+	/**@Description:To get list of all the users enrolled in system
+	 * 
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortBy
 	 * @param sortOrder
 	 * @param searchData
-	 * @return
+	 * @return userList
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.LIST_USERS, method = RequestMethod.GET)
@@ -134,10 +153,10 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.list"), userList);
 	}
 
-	/**
+	/**@Description: To get user by ID.
 	 * 
 	 * @param userId
-	 * @return
+	 * @return user
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.GET_USER_BY_ID, method = RequestMethod.GET)
@@ -146,12 +165,12 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.user.get.by.id"), user);
 	}
 
-	/**
-	 * to add trading fees for transaction done by user and deducted fees will be
+	/**@Description: 
+	 * To add trading fees for transaction done by user and deducted fees will be
 	 * store in Admin wallet
 	 * 
 	 * @param tradingFee
-	 * @return
+	 * @return savedTradingFee
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.POST)
@@ -165,10 +184,10 @@ public class AdminController {
 				Optional.empty());
 	}
 
-	/**
-	 * to get the fee details of system
+	
+	 /** @Description Use to get the fee details of system
 	 *
-	 * @return transaction fee
+	 *   @return transaction fee
 	 */
 	@RequestMapping(value = UrlConstant.TRADING_FEES, method = RequestMethod.GET)
 	public ResponseEntity<Object> getTradingFees() {
@@ -177,10 +196,10 @@ public class AdminController {
 				localeService.getMessage("admin.transaction.fees.found.success"), fee);
 	}
 
-	/**
+	/**@Description Use to save Withdrawal Fees
 	 * 
 	 * @param withdrawalFee
-	 * @return
+	 * @return success message
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.POST)
@@ -194,11 +213,11 @@ public class AdminController {
 				Optional.empty());
 	}
 
-	/**
+	/**@Description Use to get Withdrawal Fees
 	 * 
 	 * @param currencyId
 	 * 
-	 * @return
+	 * @return Withdrawal Fees
 	 */
 	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES, method = RequestMethod.GET)
@@ -207,10 +226,10 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage(MESSAGE_SUCCESS), fee);
 	}
 
-	/**
+	/**@Description Use to get Withdrawal Fees list
 	 * @Created by Himanshu Kumar
 	 * 
-	 * @return
+	 * @return ListOfWithdrawlFees
 	 */
 	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.WITHDRAWAL_FEES_LIST, method = RequestMethod.GET)
@@ -220,11 +239,11 @@ public class AdminController {
 				listOfWithdrawalFees);
 	}
 
-	/**
-	 * to count number of new buyers/sellers and active users and active orders that
-	 * will be shown on Admin dashboard
+	/**@Description Use to count number of new buyers/sellers and active users and active orders that
+	 *              will be shown on Admin dashboard
 	 * 
-	 * @return
+	 * 
+	 * @return TotalOfBuyerAndSeller
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.COUNT_BUYER_SELLER_DASHBOARD, method = RequestMethod.GET)
@@ -243,13 +262,13 @@ public class AdminController {
 				localeService.getMessage("admin.count.user.dashboard.success"), countOfusers);
 	}
 
-	/**
+	/**@Description Use to get latest order list.
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortBy
 	 * @param sortOrder
-	 * @return
+	 * @return listOfLatestOrders
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.DISPLAY_LATEST_ORDER, method = RequestMethod.GET)
@@ -262,13 +281,13 @@ public class AdminController {
 				localeService.getMessage("admin.latest.orders.list.success"), listOfLatestOrders);
 	}
 
-	/**
+	/**@Description Use to get List Of Subscribed Users
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortBy
 	 * @param sortOrder
-	 * @return
+	 * @return getListOfSubscribedUser
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.SUBSCRIBE_USER, method = RequestMethod.GET)
@@ -281,6 +300,14 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("admin.subscribed.user.list"),
 				listOfSubscribedUser);
 	}
+	
+	/**@Description Use to get Wallet Address And Balance
+	 * 
+	 * @param currencyType
+	 * @param code
+	 * 
+	 * @return mapAddress
+	 */
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.DEPOSIT, method = RequestMethod.GET)
@@ -347,13 +374,13 @@ public class AdminController {
 
 	}
 
-	/**
+	/**@Description Use to get withdraw Amount
 	 * 
 	 * @param currencyType
 	 * @param withdrawBalanceForm
 	 * @param coinCode
 	 * @param bindingResult
-	 * @return
+	 * @return validWithdrawAmount
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.WITHDRAW, method = RequestMethod.POST)
@@ -401,12 +428,12 @@ public class AdminController {
 				Optional.empty());
 	}
 
-	/**
+	/**@Description use to get user orders in book
 	 * 
 	 * @param userId
 	 * @param pageNumber
 	 * @param pageSize
-	 * @return
+	 * @return listOfOrders
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.USERS_ORDERS_IN_BOOK, method = RequestMethod.GET)
@@ -423,12 +450,12 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(""), Optional.empty());
 	}
 
-	/**
+	/**@Description use to get user trade history
 	 * 
 	 * @param userId
 	 * @param pageNumber
 	 * @param pageSize
-	 * @return
+	 * @return listOfTrades
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.USERS_TRADE_HISTORY, method = RequestMethod.GET)
@@ -443,12 +470,12 @@ public class AdminController {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(""), Optional.empty());
 	}
 
-	/**
+	/**@Description use to get Transfer History
 	 * 
 	 * @param userId
 	 * @param pageNumber
 	 * @param pageSize
-	 * @return
+	 * @return transactions
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.TRANSFER_LIST, method = RequestMethod.GET)
