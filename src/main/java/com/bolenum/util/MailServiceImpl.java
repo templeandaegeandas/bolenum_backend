@@ -1,9 +1,14 @@
 package com.bolenum.util;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Future;
 
+import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -28,6 +35,9 @@ public class MailServiceImpl implements MailService {
 	@Autowired
 	private MailSender mailSender;
 
+	@Autowired
+	private JavaMailSender emailSender;
+
 	@Value("${bolenum.url}")
 	private String serverUrl;
 
@@ -36,16 +46,29 @@ public class MailServiceImpl implements MailService {
 
 	@Override
 	public void registrationMailSend(String to, String token) {
-		SimpleMailMessage message = new SimpleMailMessage();
-		message.setSubject("Verification link for registration");
-		message.setText("Please verify by clicking on link " + serverUrl + "/#/login?token=" + token);
-		message.setTo(to);
+
+		// SimpleMailMessage message = new SimpleMailMessage();
+		
+		MimeMessage message = emailSender.createMimeMessage();
 		try {
-			message.setFrom(new InternetAddress(mailFrom, "Bolenum Exchange").toString());
+			
+			MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+					StandardCharsets.UTF_8.name());
+			Map<String, Object> model = new HashMap<String, Object>();
+			model.put("url", serverUrl + "/#/login?token=" + token);
+			model.put("to", to);
+			helper.setTo(to);
+			String html = ThymeleafUtil.getProcessedHtml("emailTemplate", model);
+			helper.setText(html, true);
+			helper.setSubject("Verification link for registration");
+			helper.setFrom(new InternetAddress(mailFrom, "Bolenum Exchange").toString());
+			emailSender.send(message);
 		} catch (UnsupportedEncodingException e) {
 			logger.error("registrationMailSend exce: {}", e);
+		} catch (MessagingException e) {
+			e.printStackTrace();
 		}
-		mailSender.send(message);
+		
 	}
 
 	@Override
