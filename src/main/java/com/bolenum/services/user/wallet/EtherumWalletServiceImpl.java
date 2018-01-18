@@ -11,8 +11,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -84,9 +82,6 @@ public class EtherumWalletServiceImpl implements EtherumWalletService {
 				UserCoin userCoin = new UserCoin(credentials.getAddress(), 0.0, tokenName, fileName, encPwd,
 						passwordKey, CurrencyType.CRYPTO, user);
 				userCoin = userCoinRepository.save(userCoin);
-				List<UserCoin> userCoins = new ArrayList<>();
-				userCoins.add(userCoin);
-				user.setUserCoin(userCoins);
 				User savedUser = userRepository.save(user);
 				if (savedUser != null) {
 					logger.debug("eth wallet info saved of user: {}", savedUser.getFullName());
