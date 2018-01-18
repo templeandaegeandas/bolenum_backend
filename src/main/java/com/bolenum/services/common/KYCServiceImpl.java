@@ -123,8 +123,11 @@ public class KYCServiceImpl implements KYCService {
 				}
 			}
 		}
-		notificationService.saveNotification(user, admin, "KYC uploaded by "+user.getFullName(), savedKyc.getId(),
-				NotificationType.KYC_NOTIFICATION);
+		if (savedKyc != null) {
+			notificationService.saveNotification(user, admin,
+					"KYC as " + savedKyc.getDocumentType() + " uploaded by " + user.getFullName(), savedKyc.getId(),
+					NotificationType.KYC_NOTIFICATION);
+		}
 		return savedKyc;
 	}
 
