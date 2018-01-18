@@ -113,8 +113,9 @@ public class NotificationServiceImpl implements NotificationService {
 			sort = Direction.ASC;
 		}
 
-		Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
-
+		//Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
+		
+		Pageable pageRequest =new PageRequest(pageNumber, pageSize);
 		return notificationRepositroy.findByReceiverAndCreatedOnBetween(admin, startDate, endDate, false, pageRequest);
 	}
 
