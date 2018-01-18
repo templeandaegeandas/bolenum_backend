@@ -2,7 +2,6 @@ package com.bolenum.controller.user;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -189,9 +188,6 @@ public class UserController {
 			}
 			user.setBtcWalletUuid(String.valueOf(user.getUserId()));
 			user.setIsEnabled(true);
-			List<UserCoin> userCoins = new ArrayList<>();
-			userCoins.add(userCoin);
-			user.setUserCoin(userCoins);
 			User savedUser = userService.saveUser(user);
 			logger.debug("user mail verify savedUser: {}", savedUser);
 			if (savedUser != null) {
