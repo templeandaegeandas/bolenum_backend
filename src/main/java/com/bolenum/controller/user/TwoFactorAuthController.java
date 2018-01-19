@@ -1,3 +1,16 @@
+/*@Description Of Class
+ * 
+ * TwoFactorAuthController class is responsible for below listed task: 
+ *    
+ *    Generate Google Authentication  QR Code  
+ *    Authenticate Google AuthKey
+ *    Set two factor authentication via mobile
+ *    Send OTP for two factor authentication
+ *    Verifies two factor authentication vai OTP 
+ *    Remove two factor authentication
+ *    
+ */
+
 package com.bolenum.controller.user;
 
 import java.io.IOException;
@@ -51,12 +64,13 @@ public class TwoFactorAuthController {
 	@Autowired
 	private AuthService authService;
 	
-	/**
+	/**@Description Use generate Google Authentication  QR Code
 	 * 
 	 * @return
 	 * @throws URISyntaxException
 	 * @throws WriterException
 	 * @throws IOException
+	 * @returns QR code
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.GEN_GOOGLE_AUTH_QR, method = RequestMethod.POST)
@@ -72,10 +86,10 @@ public class TwoFactorAuthController {
 		}
 	}
 
-	/**
+	/**@Description use to authenticate Google AuthKey
 	 * 
 	 * @param secret
-	 * @return
+	 * @return authentication.success OR authentication.failure
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.VERIFY_GOOGLE_AUTH_KEY, method = RequestMethod.PUT)
@@ -98,9 +112,9 @@ public class TwoFactorAuthController {
 	}
 
 
-	/**
+	/**@Description use to set two factor authentication via mobile
 	 * 
-	 * @return
+	 * @return authentication via.mobile success OR authentication via.mobile failure 
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.TWO_FACTOR_AUTH_VIA_MOBILE, method = RequestMethod.PUT)
@@ -126,11 +140,11 @@ public class TwoFactorAuthController {
 		}
 	}
 
-	/**
+	/**@Description use to send OTP for two factor authentication
 	 * 
 	 * @param loginForm
 	 * @param bindingResult
-	 * @return
+	 * @return otp.send.successfully
 	 */
 	@RequestMapping(value = UrlConstant.SEND_2FA_OTP, method = RequestMethod.PUT)
 	ResponseEntity<Object> sendOtpForTwoFactorAuth(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult) {
@@ -145,11 +159,11 @@ public class TwoFactorAuthController {
 		}
 	}
 
-	/**
+	/**@Description  Use to verifies two factor authentication OTP 
 	 * @param loginForm
 	 * @param bindingResult
 	 * @param otp
-	 * @return
+	 * @return otp.verification.successful OR otp.verification.failure
 	 */
 	@RequestMapping(value = UrlConstant.VERIFY_2FA_OTP, method = RequestMethod.PUT)
 	ResponseEntity<Object> verify2faOtp(@Valid @RequestBody LoginForm loginForm, BindingResult bindingResult, @RequestParam("otp") int otp) throws InvalidOtpException {
@@ -172,9 +186,9 @@ public class TwoFactorAuthController {
 		}
 	}
 
-	/**
+	/**@Description use to remove two  factor authentication
 	 * 
-	 * @return
+	 * @return  removed.success OR removed.fail
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.REMOVE_TWO_FACTOR_AUTH, method = RequestMethod.DELETE)

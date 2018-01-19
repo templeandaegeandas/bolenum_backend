@@ -1,3 +1,11 @@
+/*@Description Of Class
+ * 
+ * FileUploadServiceImpl class is responsible for below listed task: 
+ *   
+ *     Upload file
+ *     Update user image
+ *    
+ **/
 package com.bolenum.services.user;
 
 import java.awt.image.BufferedImage;
@@ -41,7 +49,17 @@ public class FileUploadServiceImpl implements FileUploadService {
 	private LocaleService localeService;
 
 	private static final Logger logger = LoggerFactory.getLogger(FileUploadServiceImpl.class);
-
+	
+	
+	/**@Description Use to upload file 
+	 * @param       multipartFile
+	 * @param       storageLocation
+	 * @param       user
+	 * @param       documentType
+	 * @param       validExtentions
+	 * @param       maxSize
+	 * @return      updated File Names
+	 */
 	@Override
 	public String uploadFile(MultipartFile multipartFile, String storageLocation, User user, DocumentType documentType,
 			String[] validExtentions, long maxSize) throws IOException, PersistenceException, MaxSizeExceedException {
@@ -83,7 +101,16 @@ public class FileUploadServiceImpl implements FileUploadService {
 		Files.setPosixFilePermissions(Paths.get(file.toString()), perms);
 		return updatedFileName;
 	}
-
+	/**@Description Use to update user image 
+	 * @param       imageBase64
+	 * @param       storageLocation
+	 * @param       user
+	 * @param       maxSize
+	 * @throws      IOException
+	 * @throws      MaxSizeExceedException
+	 * @throws      PersistenceException
+	 * @return      updated File Names
+	 */
 	@Override
 	public String updateUserImage(String imageBase64, String storageLocation, User user, String[] validExtentions,
 			long maxSize) throws IOException, MaxSizeExceedException, PersistenceException {

@@ -1,3 +1,16 @@
+/*@Description Of Class
+ * 
+ * DisputeController class is responsible for below listed task: 
+ *     
+ *     Request dispute order
+ *     Request dispute by seller
+ *     Raised dispute order list
+ *     Get raised dispute order
+ *     Action on raised dispute order(send Dispute Notification)
+ */
+
+
+
 package com.bolenum.controller.common;
 
 import java.io.IOException;
@@ -66,16 +79,16 @@ public class DisputeController {
 	private NotificationService notificationService;
 
 	/**
-	 * 
-	 * @param orderId
-	 * @param transactionId
-	 * @param file
-	 * @param comment
-	 * @return
-	 * @throws IOException
-	 * @throws PersistenceException
-	 * @throws MaxSizeExceedException
-	 * @throws MobileNotVerifiedException
+	 * @description use to request dispute the order
+	 * @param       orderId
+	 * @param       transactionId
+	 * @param       file
+	 * @param       comment
+	 * @return      dispute raised success
+	 * @throws      IOException
+	 * @throws      PersistenceException
+	 * @throws      MaxSizeExceedException
+	 * @throws      MobileNotVerifiedException
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.RAISE_DISPUTE, method = RequestMethod.POST)
@@ -132,10 +145,10 @@ public class DisputeController {
 		}
 	}
 
-	/**
+	/**@description Request dispute by seller
 	 * @created by Vishal Kumar
 	 * @param orderId
-	 * @return
+	 * @return dispute.raised.success OR dispute.raised.failed
 	 * 
 	 * @modified by Himanshu Kumar
 	 * 
@@ -191,12 +204,12 @@ public class DisputeController {
 	}
 
 	/**
-	 * 
-	 * @param pageNumber
-	 * @param pageSize
-	 * @param sortBy
-	 * @param sortOrder
-	 * @return
+	 * @description  Use to get raised dispute order list
+	 * @param        pageNumber
+	 * @param        pageSize
+	 * @param        sortBy
+	 * @param        sortOrder
+	 * @return       listOfDisputeOrder
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.RAISED_DISPUTE_LIST, method = RequestMethod.GET)
@@ -209,10 +222,9 @@ public class DisputeController {
 				listOfDisputeOrder);
 	}
 
-	/**
-	 * 
-	 * @param disputeId
-	 * @return
+	/**@description get raised dispute order
+	   @param       disputeId
+	 * @return      disputeOrder
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.RAISED_DISPUTE_ORDER, method = RequestMethod.GET)
@@ -227,12 +239,12 @@ public class DisputeController {
 	}
 
 	/**
-	 * 
-	 * @param disputeId
-	 * @param commentForDisputeRaiser
-	 * @param commentForDisputeRaisedAgainst
-	 * @param disputeStatus
-	 * @return
+	 * @description Use to take action on raised dispute order(send Dispute Notification)
+	 * @param       disputeId
+	 * @param       commentForDisputeRaiser
+	 * @param       commentForDisputeRaisedAgainst
+	 * @param       disputeStatus
+	 * @return      response dispute order action success
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.ACTION_ON_RAISED_DISPUTE_ORDER, method = RequestMethod.POST)

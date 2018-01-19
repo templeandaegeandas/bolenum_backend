@@ -1,3 +1,12 @@
+ /*@Description Of Class
+ * 
+ * CurrencyPairController class is responsible for below listed task: 
+ * 
+ *     Create currency pair
+ *     Get currency pair list  
+ */
+
+
 package com.bolenum.controller.admin;
 
 import java.util.List;
@@ -41,11 +50,11 @@ public class CurrencyPairController {
 
 	public static final Logger logger = LoggerFactory.getLogger(CurrencyPairController.class);
 
-	/**
+	/**@description Use to create currency pair
 	 * 
 	 * @param currencyId
 	 * @param pairedCurrencyId
-	 * @return
+	 * @return currency pair add success
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.POST)
@@ -75,6 +84,12 @@ public class CurrencyPairController {
 				localeService.getMessage("currency.pair.already.exist"), Optional.empty());
 	}
 
+	/**@description Use to get currency pair list
+	 * 
+	 * @param currencyId
+	 * @param pairedCurrencyId
+	 * @return currencyPairList
+	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR_LIST, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyPairList() {

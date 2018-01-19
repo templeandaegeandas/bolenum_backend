@@ -1,5 +1,16 @@
-/**
+/**Description Of Class
  * 
+ *     FiatOrderController class is responsible for below listed task:
+ *     
+ *     Create a Fiat order
+ *     Initialize order
+ *     Add user bank details
+ *     Confirm Fiat Paid Order
+ *     Use to cancel order
+ *     Confirmation of Seller transaction of fiat orders
+ *     Get order by order id
+ *     Get list of orders against type of Orders(SELL/BUY)
+ *     
  */
 package com.bolenum.controller.user;
 
@@ -87,8 +98,8 @@ public class FiatOrderController {
 
 	private static final String INVALIDORDER = "invalid.order";
 
-	/**
-	 * to create a Fiat order, if order based on volume and price does not match any
+	
+	 /**@Description to create a Fiat order, if order based on volume and price does not match any
 	 * existing order then only it will be saved. Otherwise existing order list will
 	 * be returned
 	 * 
@@ -131,7 +142,13 @@ public class FiatOrderController {
 	}
 
 	// @changed by vishal kumar: unrelated response removed
-
+	/**@Description Use to initialize order
+	 * 
+	 * @param orderId
+	 * @param orders
+	 * @param BindingResult
+	 * @return order.processed.success OR order.processed.failure 
+	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CREATE_ORDER_FIAT, method = RequestMethod.PUT)
 	public ResponseEntity<Object> initializeOrder(@RequestParam("orderId") long matchedOrderId,
@@ -206,7 +223,12 @@ public class FiatOrderController {
 		}
 		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.processed.success"), map);
 	}
-
+	/**@Description Use to add user bank details form
+	 * 
+	 * @param BankAccountDetails
+	 *
+	 * @return Form 
+	 */
 	private AddUserBankDetailsForm response(BankAccountDetails bank) {
 		AddUserBankDetailsForm form = new AddUserBankDetailsForm();
 		form.setAccountHolderName(bank.getAccountHolderName());
@@ -216,11 +238,11 @@ public class FiatOrderController {
 	}
 
 	/**
-	 * buyer has paid the amount to seller and sending confirmation
+	 *@Description buyer has paid the amount to seller and sending confirmation
 	 * 
-	 * @param orderId
-	 *            of buyer
-	 *
+	 *@param orderId
+	 *           
+	 *@return order.seller.notified
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_PAID, method = RequestMethod.PUT)
@@ -238,7 +260,13 @@ public class FiatOrderController {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage(INVALIDORDER),
 				Optional.empty());
 	}
-
+	
+	 /**@Description use to cancel order
+	 * 
+	 *@param orderId
+	 *           
+	 *@return order cancel
+	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_CANCEL, method = RequestMethod.PUT)
 	public ResponseEntity<Object> cancelOrder(@RequestParam("orderId") long orderId) {
@@ -267,13 +295,9 @@ public class FiatOrderController {
 				Optional.empty());
 	}
 
-	/**
-	 * 
-	 * this process confirmation of Seller
-	 * 
-	 * @param orderId
-	 *            of seller
-	 *
+	/**@Description this process confirmation of Seller transaction of fiat orders
+	 * @param orderId  of seller
+	 *@return order.transaction.success
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.ORDER_FIAT_TX, method = RequestMethod.PUT)
@@ -318,7 +342,7 @@ public class FiatOrderController {
 	}
 
 	/**
-	 * get order by order id
+	 * @Description get order by order id
 	 * 
 	 * @param orderId
 	 * @param orderType
@@ -375,11 +399,9 @@ public class FiatOrderController {
 				Optional.empty());
 	}
 
-	/**
-	 * get list of orders against type of Orders(SELL/BUY), If requested order is
+	/**@Description get list of orders against type of Orders(SELL/BUY), If requested order is
 	 * BUY then it will return SELL order list, and for SELL order return BUY order
 	 * list
-	 * 
 	 * @param order
 	 * @return list or orders
 	 */

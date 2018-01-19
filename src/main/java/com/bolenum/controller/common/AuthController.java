@@ -1,5 +1,12 @@
-/**
+/*@Description Of Class
  * 
+ * AuthController class is responsible for below listed task: 
+ *    
+ *   login user
+ *   logout user
+ *   forget password
+ *   verify authentication link
+ *   
  */
 package com.bolenum.controller.common;
 
@@ -70,10 +77,11 @@ public class AuthController {
 	private static final String LOGIN_SUCCESS = "login.success";
 
 	/**
-	 * 
+	 * @Descripton Validate user for login
 	 * @param loginForm
 	 * @param bindingResult
-	 * @return
+	 * @return user 
+	 * @return token
 	 */
 
 	@RequestMapping(value = UrlConstant.USER_LOGIN, method = RequestMethod.POST)
@@ -120,10 +128,10 @@ public class AuthController {
 	}
 
 	/**
-	 * controller that respond when hit comes for logout activity of user
+	 *@Description controller that respond when hit comes for logout activity of user
 	 * 
 	 * @param token
-	 * @return
+	 * @return null
 	 */
 	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.USER_LOOUT, method = RequestMethod.DELETE)
@@ -138,10 +146,10 @@ public class AuthController {
 	}
 
 	/**
-	 * used for forget password
+	 * @description used for forget password
 	 * 
 	 * @param email
-	 * @return
+	 * @return verification link
 	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS, method = RequestMethod.GET)
 	public ResponseEntity<Object> forgetPassword(@RequestParam String email) {
@@ -162,12 +170,12 @@ public class AuthController {
 	}
 
 	/**
-	 * to verify authentication link send at the time of forget password
+	 * @description  verify authentication link sent at the time of forget password
 	 * 
 	 * @param token
 	 * @param resetPasswordForm
 	 * @param result
-	 * @return
+	 * @return verified user email id
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.FORGET_PASS_VERIFY, method = RequestMethod.PUT)
