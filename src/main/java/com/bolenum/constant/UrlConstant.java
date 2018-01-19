@@ -14,12 +14,6 @@ public class UrlConstant {
 	/**
 	 * BTC URL
 	 */
-	// public static final String HOT_WALLET = "hotwallet/create";
-	// public static final String WALLET_ADDR = "hotwallet/primaryaddress";
-	// public static final String WALLET_BAL = "hotwallet/balance";
-	// public static final String CREATE_TX = "hotwallet/transaction";
-	// public static final String ADMIN_HOT_WALLET = "hotwallet/create/adminwallet";
-	// public static final String WALLET_ADDRESS = "hotwallet/address";
 	public static final String HASH_CONFIRMATION = "transaction/hash/confirmation";
 	public static final String CREATE_ACCOUNT = "create/account";
 	/**
@@ -154,5 +148,11 @@ public class UrlConstant {
 	public static final String RAISED_DISPUTE_ORDER = "raised/dispute";
 	public static final String RAISED_DISPUTE_LIST = "raised/dispute/list";
 	public static final String ACTION_ON_RAISED_DISPUTE_ORDER = "action/raised/dispute";
+	
+	/*********************Chart API **************************************/
+	public static final String CONFIG = "chart/config";
+	public static final String SYMBOLE_INFO = "chart/symbols";
+	public static final String HISTORY_INFO = "chart/history";
+
 
 }
