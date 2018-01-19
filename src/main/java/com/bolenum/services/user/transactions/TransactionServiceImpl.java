@@ -564,9 +564,14 @@ public class TransactionServiceImpl implements TransactionService {
 
 	public void fetchBTCConfirmation(Page<Transaction> page) {
 		page.forEach(transaction -> {
+			/*
+			 * Add a check for isFetchStatus
+			 * 
+			 * 
+			 * */
 			if ("BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
-					&& !STATUS.equals(transaction.getTxStatus()) && !transaction.isInAppTransaction()) {
-
+					&& !STATUS.equals(transaction.getTxStatus()) && !transaction.isInAppTransaction() && !transaction.isFetchStatus()) {
+				
 				try {
 					BtcdClient btcdClient = ResourceUtils.getBtcdProvider();
 					com.neemre.btcdcli4j.core.domain.Transaction transaction1 = btcdClient
@@ -580,6 +585,11 @@ public class TransactionServiceImpl implements TransactionService {
 						transactionRepo.save(transaction);
 					}
 				} catch (BitcoindException | CommunicationException e) {
+					/*set isfetchstatus to true of unconfirmed hash, so  we make sure
+					next time it will not create any exception.*/
+					transaction.setFetchStatus(true);
+					transactionRepo.save(transaction);
+					
 					logger.error("btc transaction confiramtion fetch error: {}", e);
 				}
 			}

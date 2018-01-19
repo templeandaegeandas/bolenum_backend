@@ -1,3 +1,15 @@
+/*@Description Of Class
+ * 
+ * RoleController class is responsible for below listed task: 
+ *   
+ *     Add Roles
+ *     Delete roles
+ *     Get roles
+ */
+
+
+
+
 package com.bolenum.controller.common;
 
 /**
@@ -39,12 +51,10 @@ public class RoleController {
 	@Autowired
 	private LocaleService localService;
 
-	/**
-	 * to add role
-	 * 
+	/**@description  Use to add role
 	 * @param role
 	 * @param result
-	 * @return response
+	 * @return role add success
 	 */
 
 	@RequestMapping(value = UrlConstant.ROLE_URI, method = RequestMethod.POST)
@@ -58,11 +68,9 @@ public class RoleController {
 		}
 	}
 
-	/**
-	 * to delete roles
-	 * 
+	/**@description Use to delete roles
 	 * @param id
-	 * @return
+	 * @return requested role removed successfully
 	 */
 	@RequestMapping(value = UrlConstant.ROLE_URI, method = RequestMethod.DELETE)
 	public ResponseEntity<Object> deleteRoles(Long id) {
@@ -76,11 +84,9 @@ public class RoleController {
 		}
 	}
 	
-	/**
-	 * to view roles
-	 * 
+	/**@description Use to get role
 	 * @param id
-	 * @return
+	 * @return role
 	 */
 	@RequestMapping(value = UrlConstant.ROLE_URI, method = RequestMethod.GET)
 	public ResponseEntity<Object> getRoles(Long id) {

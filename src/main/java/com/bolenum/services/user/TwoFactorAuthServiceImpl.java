@@ -1,3 +1,17 @@
+/*@Description Of class
+ * 
+ * TwoFactorAuthServiceImpl class is responsible for below listed task: 
+ *   
+ *    QR Code Generate
+ *    Perform Authentication
+ *    Set two factor authentication
+ *    Send Otp For Two Factor Authentication
+ *    Verify otp for two factor authentication
+ *    Check unused passwords
+ *    Get two factor key
+ *    Generate Key Uri
+ **/
+
 package com.bolenum.services.user;
 
 import java.io.File;
@@ -23,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.bolenum.enums.TwoFactorAuthOption;
@@ -71,7 +86,17 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	private LocaleService localeService;
 
 	private static final Logger logger = LoggerFactory.getLogger(TwoFactorAuthServiceImpl.class);
-
+	
+	
+	/**
+	 * @description use to generate QR code
+	 * @param user
+	 * @return Map
+	 * @throws URISyntaxException
+	 * @throws WriterException
+	 * @throws IOException
+	 * 
+	 */
 	@Override
 	public Map<String, String> qrCodeGeneration(User user) throws URISyntaxException, WriterException, IOException {
 		String key = getTwoFactorKey(user);
@@ -89,7 +114,13 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		map.put("base64Image", base64Image);
 		return map;
 	}
-
+	/**
+	 * @description Use to perform authentication for user
+	 * @param value
+	 * @param user
+	 * @return Boolean
+	 * @throws UsernameNotFoundException
+	 */
 	@Override
 	public boolean performAuthentication(String value, User user) {
 		Integer totp = Integer.valueOf((value.equals("") ? "-1" : value));
@@ -97,13 +128,24 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 		boolean matches = gAuth.authorize(user.getGoogle2FaAuthKey(), totp);
 		return (unused && matches);
 	}
-
+	/**
+	 * @description use to set two factor authentication 
+	 * @param twoFactorAuthOption
+	 * @param user
+	 * @return User
+	 */
 	@Override
 	public User setTwoFactorAuth(TwoFactorAuthOption twoFactorAuthOption, User user) {
 		user.setTwoFactorAuthOption(twoFactorAuthOption);
 		return userRepository.save(user);
 	}
-
+	/**
+	 * @description Use to send otp for two factor authentication user
+	 * @param user
+	 * @return OTP
+	 * @throws Exception
+	 * @return otp
+	 */
 	@Override
 	public OTP sendOtpForTwoFactorAuth(User user) {
 		Random r = new Random();
@@ -118,7 +160,13 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 			return null;
 		}
 	}
-
+	/**
+	 * @description Use to verify otp for two factor authentication 
+	 * @param OTP
+	 * @return OTP
+	 * @throws InvalidOtpException
+	 * @return boolean
+	 */
 	@Override
 	public boolean verify2faOtp(int otp) throws InvalidOtpException {
 		OTP existingOtp = otpRepository.findByOtpNumber(otp);
@@ -164,9 +212,9 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	}
 
 	/**
-	 * 
+	 * @description Use to get two factor key
 	 * @param user
-	 * @return String
+	 * @return key
 	 */
 	private String getTwoFactorKey(User user) {
 		final GoogleAuthenticatorKey googleAuthkey = gAuth.createCredentials();
@@ -181,7 +229,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	}
 
 	/**
-	 * 
+	 * @description use to generate key URI
 	 * @param account
 	 * @param issuer
 	 * @param secret
@@ -197,7 +245,7 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
 	}
 
 	/**
-	 * 
+	 * @description use to create QR code
 	 * @param qrCodeData
 	 * @param filePath
 	 * @param charset

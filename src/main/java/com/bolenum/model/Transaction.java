@@ -94,6 +94,25 @@ public class Transaction {
 	 */
 	private String transferFeeCurrency;
 
+	/**
+	 * for checking transfer hash , whether hash can be fetch or not.
+	 */
+	private boolean isFetchStatus=false;
+
+	/**
+	 * @return the isFetchStatus
+	 */
+	public boolean isFetchStatus() {
+		return isFetchStatus;
+	}
+
+	/**
+	 * @param isFetchStatus the isFetchStatus to set
+	 */
+	public void setFetchStatus(boolean isFetchStatus) {
+		this.isFetchStatus = isFetchStatus;
+	}
+
 	public Transaction() {
 
 	}
@@ -113,6 +132,7 @@ public class Transaction {
 		this.gasPrice = gasPrice;
 		this.fromUser = fromUser;
 		this.toUser = toUser;
+		
 	}
 
 	/**
