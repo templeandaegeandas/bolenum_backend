@@ -97,20 +97,20 @@ public class Transaction {
 	/**
 	 * for checking transfer hash , whether hash can be fetch or not.
 	 */
-	private boolean isFetchStatus=false;
+	private boolean isFetchError=false;
 
 	/**
-	 * @return the isFetchStatus
+	 * @return the isFetchError
 	 */
-	public boolean isFetchStatus() {
-		return isFetchStatus;
+	public boolean isFetchError() {
+		return isFetchError;
 	}
 
 	/**
-	 * @param isFetchStatus the isFetchStatus to set
+	 * @param isFetchError the isFetchError to set
 	 */
-	public void setFetchStatus(boolean isFetchStatus) {
-		this.isFetchStatus = isFetchStatus;
+	public void setFetchError(boolean isFetchError) {
+		this.isFetchError = isFetchError;
 	}
 
 	public Transaction() {

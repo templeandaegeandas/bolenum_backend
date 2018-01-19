@@ -570,7 +570,7 @@ public class TransactionServiceImpl implements TransactionService {
 			 * 
 			 * */
 			if ("BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
-					&& !STATUS.equals(transaction.getTxStatus()) && !transaction.isInAppTransaction() && !transaction.isFetchStatus()) {
+					&& !STATUS.equals(transaction.getTxStatus()) && !transaction.isInAppTransaction() && !transaction.isFetchError()) {
 				
 				try {
 					BtcdClient btcdClient = ResourceUtils.getBtcdProvider();
@@ -585,9 +585,9 @@ public class TransactionServiceImpl implements TransactionService {
 						transactionRepo.save(transaction);
 					}
 				} catch (BitcoindException | CommunicationException e) {
-					/*set isfetchstatus to true of unconfirmed hash, so  we make sure
+					/*set isFetchError to true of unconfirmed hash, so  we make sure
 					next time it will not create any exception.*/
-					transaction.setFetchStatus(true);
+					transaction.setFetchError(true);
 					transactionRepo.save(transaction);
 					
 					logger.error("btc transaction confiramtion fetch error: {}", e);
