@@ -11,9 +11,7 @@
  */
 package com.bolenum.controller.user;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -274,9 +272,6 @@ public class BTCWalletController {
 				userCoin.setCurrencyType(CurrencyType.CRYPTO);
 				userCoin.setUser(user);
 				userCoin = userCoinRepository.save(userCoin);
-				List<UserCoin> list = new ArrayList<>();
-				list.add(userCoin);
-				user.setUserCoin(list);
 				userService.saveUser(user);
 				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
 						Optional.empty());

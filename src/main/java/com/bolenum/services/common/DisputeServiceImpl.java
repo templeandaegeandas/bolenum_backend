@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.enums.DisputeStatus;
+import com.bolenum.enums.NotificationType;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
 import com.bolenum.exceptions.MaxSizeExceedException;
@@ -182,6 +183,7 @@ public class DisputeServiceImpl implements DisputeService {
 
 	/**
 	 * used to send dispute notification to buyer and seller with admin comment
+	 * 
 	 */
 	@Override
 	public void sendDisputeNotification(DisputeOrder disputeOrder, User disputeRaiser, User disputeRaisedAgainst) {
@@ -199,7 +201,8 @@ public class DisputeServiceImpl implements DisputeService {
 
 		notificationService.sendNotification(disputeRaisedAgainst, messageForDisputeRaisedAgainst, "dispute.summary");
 
-		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getReason(), null, null);
+		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getReason(), null,
+				NotificationType.DISPUTE_NOTIFICATION);
 
 	}
 

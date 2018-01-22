@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bolenum.constant.UrlConstant;
+import com.bolenum.enums.CurrencyType;
 import com.bolenum.model.Currency;
 import com.bolenum.services.admin.CurrencyService;
 import com.bolenum.services.common.LocaleService;
@@ -57,11 +58,20 @@ public class CurrencyPairController {
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_PAIR, method = RequestMethod.POST)
-	public ResponseEntity<Object> createCurrencyPair(@RequestParam("marketCurrencyId") long currencyId,
-			@RequestParam("pairedCurrencyId") long pairedCurrencyId) {
-		Currency marketCurrency = currencyService.findCurrencyById(currencyId);
-		Currency pairedCurrency = currencyService.findCurrencyById(pairedCurrencyId);
+	public ResponseEntity<Object> createCurrencyPair(
+			@RequestParam("marketCurrencyAbbreviation") String marketCurrencyAbbreviation,
+			@RequestParam("pairedCurrencyAbbreviation") String pairedCurrencyAbbreviation) {
+		Currency marketCurrency = currencyService.findByCurrencyAbbreviation(marketCurrencyAbbreviation);
+		Currency pairedCurrency = currencyService.findByCurrencyAbbreviation(pairedCurrencyAbbreviation);
 		if (marketCurrency == null || pairedCurrency == null) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("currency.pair.not.valid"), Optional.empty());
+		}
+		if (CurrencyType.FIAT.equals(marketCurrency.getCurrencyType())) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("You can't create NGN market"), Optional.empty());
+		}
+		if (marketCurrency.equals(pairedCurrency)) {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
 					localeService.getMessage("currency.pair.not.valid"), Optional.empty());
 		}

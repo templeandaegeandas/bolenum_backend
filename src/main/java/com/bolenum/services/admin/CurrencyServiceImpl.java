@@ -151,7 +151,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 				|| pairedCurrency.getMarket().contains(marketCurrency)) {
 			return null;
 		}
-		List<Currency> newPairList = new ArrayList<>();
+		List<Currency> newPairList = marketCurrency.getMarket();
 		newPairList.add(pairedCurrency);
 		marketCurrency.setMarket(newPairList);
 		return currencyRepo.save(marketCurrency);

@@ -260,14 +260,19 @@ public class OrderController {
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.CANCEL_ORDER, method = RequestMethod.DELETE)
 	public ResponseEntity<Object> cancelOrders(@RequestParam("orderId") long orderId) {
-		boolean status = ordersService.cancelOrder(orderId);
-		if (status) {
-			simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
-					com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
-			return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"),
-					Optional.empty());
+		Orders order = ordersService.findByOrderId(orderId);
+		if (order == null) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("order.cancel.error"), Optional.empty());
 		}
-		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.cancel.error"),
+		if (!OrderStatus.SUBMITTED.equals(order.getOrderStatus())) {
+			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
+					localeService.getMessage("order.execution.state"), Optional.empty());
+		}
+		ordersService.cancelOrder(order);
+		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
+				com.bolenum.enums.MessageType.ORDER_BOOK_NOTIFICATION);
+		return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("order.cancel"),
 				Optional.empty());
 	}
 }

@@ -8,9 +8,9 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -133,9 +133,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				UserCoin userCoin = new UserCoin(credentials.getAddress(), 0.0, tokenName, fileName, encPwd,
 						passwordKey, CurrencyType.ERC20TOKEN, user);
 				userCoin = userCoinRepository.save(userCoin);
-				List<UserCoin> userCoins = new ArrayList<>();
-				userCoins.add(userCoin);
-				user.setUserCoin(userCoins);
 				User savedUser = userRepository.save(user);
 				if (savedUser != null) {
 					logger.debug("eth wallet info saved of user: {}", savedUser.getFullName());
@@ -348,15 +345,14 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			tx.setToAddress(transaction._to.getValue());
 			tx.setTransactionStatus(TransactionStatus.DEPOSIT);
 			tx.setTransactionType(TransactionType.INCOMING);
-			logger.debug("receiver user : {}", toUser);
-			logger.debug("receiver user id: {}", toUser.getUserId());
+			logger.debug("receiver user: {} and ID: {}", toUser.getEmailId(), toUser.getUserId());
 			tx.setToUser(toUser);
 			if (erc20Token != null) {
 				tx.setTxAmount(transaction._value.getValue().doubleValue() / erc20Token.getDecimalValue());
 			}
 			tx.setCurrencyName(tokenName);
 			tx.setTransferStatus(TransferStatus.INITIATED);
-			if (toUser.getUserId() == 1) {
+			if (adminEmail.equalsIgnoreCase(toUser.getEmailId())) {
 				tx.setTransferStatus(TransferStatus.COMPLETED);
 			}
 			Transaction saved = transactionRepo.save(tx);
@@ -405,19 +401,22 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			Double estimattedFee = getEstimetedFeeErc20Token();
 			Boolean result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), estimattedFee,
 					TransactionStatus.TRANSFER, estimattedFee, transaction.getCurrencyName());
-			transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.PENDING));
-			transactionRepo.save(transactions);
 			if (result) {
+				transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.PENDING));
+				transactionRepo.save(transactions);
 				Double balance = getErc20WalletBalance(transaction.getToUser(), erc20Token,
 						transaction.getCurrencyName());
 				logger.debug("wallet balance is: {}", balance);
-				userCoin.setBalance(userCoin.getBalance() + totalBalance);
-				userCoinRepository.save(userCoin);
-				logger.debug("saved!");
-				transferErc20Token(userCoin.getUser(), erc20Token, adminCoin.getWalletAddress(), balance,
-						transaction.getCurrencyName());
-				transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.COMPLETED));
-				transactionRepo.save(transactions);
+
+				TransactionReceipt receipt = transferErc20Token(userCoin.getUser(), erc20Token,
+						adminCoin.getWalletAddress(), balance, transaction.getCurrencyName());
+				if (receipt != null && receipt.getTransactionHash() != null) {
+					userCoin.setBalance(userCoin.getBalance() + balance);
+					userCoinRepository.save(userCoin);
+					logger.debug("saved!");
+					transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.COMPLETED));
+					transactionRepo.save(transactions);
+				}
 			}
 		}
 		if ("ETH".equals(transaction.getCurrencyName())) {
@@ -430,7 +429,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 						TransactionStatus.TRANSFER, estFee, transaction.getCurrencyName());
 				if (res) {
 					transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.COMPLETED));
-					userCoin.setBalance(userCoin.getBalance() + totalBalance);
+					userCoin.setBalance(userCoin.getBalance() + balance);
 					userCoinRepository.save(userCoin);
 					transactionRepo.save(transactions);
 				}
@@ -471,7 +470,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			logger.debug("transaction by hash: {}", transaction);
 			if (transaction == null) {
 				transaction = new Transaction();
-				transaction.setTxHash(ethSendTransaction.getTransactionHash());
+				transaction.setTxHash(txHash);
 				transaction.setFromAddress(userCoin.getWalletAddress());
 				transaction.setToAddress(toAddress);
 				transaction.setTxAmount(amount);

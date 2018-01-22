@@ -29,7 +29,6 @@ import com.bolenum.model.Role;
 import com.bolenum.model.States;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.Erc20Token;
-import com.bolenum.model.coin.UserCoin;
 import com.bolenum.model.fees.TradingFee;
 import com.bolenum.model.fees.WithdrawalFee;
 import com.bolenum.services.admin.CurrencyService;
@@ -127,6 +126,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 		saveCurrency();
 		saveInitialErc20Tokens();
+		saveInitialCurrencyPair();
 		try {
 			erc20TokenService.saveIncomingErc20Transaction(currencyAbbreviation);
 		} catch (IOException | CipherException e) {
@@ -271,10 +271,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			User user = userService.saveUser(form);
 			etherumWalletService.createEthWallet(user, "ETH");
 			String address = btcWalletService.getBtcAccountAddress("");
-			UserCoin userCoin = userService.saveUserCoin(address, user, "BTC");
-			List<UserCoin> userCoins = new ArrayList<>();
-			userCoins.add(userCoin);
-			user.setUserCoin(userCoins);
+			userService.saveUserCoin(address, user, "BTC");
 			user.setBtcWalletUuid("");
 			user.setIsEnabled(true);
 			User savedUser = userService.saveUser(user);
@@ -381,5 +378,32 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 			}
 
 		}
+	}
+
+	void saveInitialCurrencyPair() {
+		Currency currencyBTC = currencyService.findByCurrencyAbbreviation("BTC");
+		Currency currencyETH = currencyService.findByCurrencyAbbreviation("ETH");
+		Currency currencyBLN = currencyService.findByCurrencyAbbreviation("BLN");
+		Currency currencyNGN = currencyService.findByCurrencyAbbreviation("NGN");
+		if (currencyBTC.getMarket().isEmpty()) {
+			List<Currency> currencyList = new ArrayList<>();
+			currencyList.add(currencyETH);
+			currencyList.add(currencyBLN);
+			currencyBTC.setMarket(currencyList);
+			currencyService.saveCurrency(currencyBTC);
+		}
+		if (currencyETH.getMarket().isEmpty()) {
+			List<Currency> currencyList = new ArrayList<>();
+			currencyList.add(currencyBLN);
+			currencyETH.setMarket(currencyList);
+			currencyService.saveCurrency(currencyETH);
+		}
+		if (currencyBLN.getMarket().isEmpty()) {
+			List<Currency> currencyList = new ArrayList<>();
+			currencyList.add(currencyNGN);
+			currencyBLN.setMarket(currencyList);
+			currencyService.saveCurrency(currencyBLN);
+		}
+		logger.debug("Currency Pair Saved!");
 	}
 }

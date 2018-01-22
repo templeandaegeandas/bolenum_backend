@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.DisputeStatus;
+import com.bolenum.enums.NotificationType;
 import com.bolenum.exceptions.MaxSizeExceedException;
 import com.bolenum.exceptions.MobileNotVerifiedException;
 import com.bolenum.exceptions.PersistenceException;
@@ -40,6 +41,8 @@ import com.bolenum.model.orders.book.Orders;
 import com.bolenum.services.common.DisputeService;
 import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.order.book.OrderAsyncService;
+import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.util.ResponseHandler;
 
 import io.swagger.annotations.Api;
@@ -69,6 +72,12 @@ public class DisputeController {
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
 
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private NotificationService notificationService;
+
 	/**
 	 * @description use to request dispute the order
 	 * @param       orderId
@@ -89,7 +98,7 @@ public class DisputeController {
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException {
 
 		Orders orders = disputeService.checkEligibilityToDispute(orderId);
-
+		User admin = userService.findByEmail("admin@bolenum.com");
 		if (orders == null) {
 			logger.debug("order not exist");
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
@@ -110,6 +119,11 @@ public class DisputeController {
 			if (response != null) {
 				orderAsyncService.saveOrder(orders);
 				User buyer = orders.getUser();
+				
+				notificationService.saveNotification(buyer, admin,
+						"Dispute raised by a buyer name as " + buyer.getFullName(), null,
+						NotificationType.DISPUTE_NOTIFICATION);
+				
 				simpMessagingTemplate.convertAndSend(
 						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + buyer.getUserId(),
 						com.bolenum.enums.MessageType.DISPUTE_NOTIFICATION);
@@ -144,7 +158,7 @@ public class DisputeController {
 	public ResponseEntity<Object> requestDisputeBySeller(@RequestParam("orderId") Long orderId) {
 
 		Orders orders = disputeService.checkEligibilityToDispute(orderId);
-
+		User admin = userService.findByEmail("admin@bolenum.com");
 		if (orders == null) {
 			logger.debug("order not exist");
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
@@ -162,6 +176,11 @@ public class DisputeController {
 			if (response != null) {
 				orderAsyncService.saveOrder(orders);
 				User seller = orders.getUser();
+				
+				notificationService.saveNotification(seller, admin,
+						"Dispute raised by a seller name as " + seller.getFullName(), null,
+						NotificationType.DISPUTE_NOTIFICATION);
+				
 				simpMessagingTemplate.convertAndSend(
 						UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + seller.getUserId(),
 						com.bolenum.enums.MessageType.DISPUTE_NOTIFICATION);

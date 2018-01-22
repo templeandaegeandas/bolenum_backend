@@ -123,6 +123,7 @@ public class OrdersServiceImpl implements OrdersService {
 		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndOrderTypeAndPairedCurrency(user, orderStatus,
 				orderType, pairedCurrency);
 		double total = 0.0;
+		// TODO use stream api
 		for (Orders order : orders) {
 			total = total + order.getVolume() + order.getLockedVolume();
 		}
@@ -133,6 +134,7 @@ public class OrdersServiceImpl implements OrdersService {
 		List<Orders> orders = ordersRepository.findByUserAndOrderStatusAndPairedCurrency(user, orderStatus,
 				pairedCurrency);
 		double total = 0.0;
+		// TODO use stream api
 		for (Orders order : orders) {
 			total = total + order.getVolume() + order.getLockedVolume();
 		}
@@ -149,6 +151,7 @@ public class OrdersServiceImpl implements OrdersService {
 	public double getPlacedOrderVolume(User user) {
 		List<Orders> orders = findOrdersListByUserAndOrderStatus(user, OrderStatus.SUBMITTED);
 		double total = 0.0;
+		// TODO use stream api
 		for (Orders order : orders) {
 			total = total + order.getVolume() + order.getLockedVolume();
 		}
@@ -218,6 +221,7 @@ public class OrdersServiceImpl implements OrdersService {
 		Double remainingVolume = orders.getTotalVolume();
 		logger.debug("Process Market Order, remaining Volume: {}", GenericUtils.getDecimalFormat(remainingVolume));
 		if (OrderType.BUY.equals(orderType)) {
+			// TODO production bug of multi thread env
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyOrderByPriceAsc(OrderType.SELL,
 							OrderStatus.SUBMITTED, marketCurrency, pairedCurrency);
@@ -249,6 +253,7 @@ public class OrdersServiceImpl implements OrdersService {
 			}
 			processed = true;
 		} else {
+			// TODO production bug of multi thread env
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyOrderByPriceDesc(OrderType.BUY,
 							OrderStatus.SUBMITTED, marketCurrency, pairedCurrency);
@@ -315,8 +320,11 @@ public class OrdersServiceImpl implements OrdersService {
 		logger.debug("Order type is equal with buy: {}", orderType.equals(OrderType.BUY));
 		// checking the order type is BUY
 		if (OrderType.BUY.equals(orderType)) {
-			// fetching the seller list whose selling price is less than equal
-			// to buying price
+			/*
+			 * fetching the seller list whose selling price is less than equal to buying
+			 * price
+			 */
+			// TODO production bug of multi thread env
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyAndPriceLessThanEqualOrderByPriceAsc(
 							OrderType.SELL, OrderStatus.SUBMITTED, marketCurrency, pairedCurrency, price);
@@ -353,6 +361,7 @@ public class OrdersServiceImpl implements OrdersService {
 			/**
 			 * fetching the list of BUYERS whose buy price is greater than sell price
 			 */
+			// TODO production bug of multi thread env
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndAndMarketCurrencyAndPairedCurrencyAndPriceGreaterThanEqualOrderByPriceDesc(
 							OrderType.BUY, OrderStatus.SUBMITTED, marketCurrency, pairedCurrency, price);
@@ -718,14 +727,14 @@ public class OrdersServiceImpl implements OrdersService {
 	}
 
 	@Override
-	public boolean cancelOrder(long orderId) {
-		Orders order = ordersRepository.findOne(orderId);
-		if (order != null) {
-			order.setOrderStatus(OrderStatus.CANCELLED);
-			ordersRepository.save(order);
-			return true;
-		}
-		return false;
+	public void cancelOrder(Orders order) {
+		order.setOrderStatus(OrderStatus.CANCELLED);
+		ordersRepository.save(order);
+	}
+
+	@Override
+	public Orders findByOrderId(long orderId) {
+		return ordersRepository.findOne(orderId);
 	}
 
 	@Override

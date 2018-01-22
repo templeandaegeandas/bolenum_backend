@@ -23,7 +23,6 @@ package com.bolenum.controller.user;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +83,7 @@ import io.swagger.annotations.Api;
 
 /**
  * @Author Himanshu Kumar
+ * 
  * @Date 11-Sep-2017
  */
 
@@ -210,9 +210,6 @@ public class UserController {
 			}
 			user.setBtcWalletUuid(String.valueOf(user.getUserId()));
 			user.setIsEnabled(true);
-			List<UserCoin> userCoins = new ArrayList<>();
-			userCoins.add(userCoin);
-			user.setUserCoin(userCoins);
 			User savedUser = userService.saveUser(user);
 			logger.debug("user mail verify savedUser: {}", savedUser);
 			if (savedUser != null) {
@@ -533,7 +530,7 @@ public class UserController {
 		User user = GenericUtils.getLoggedInUser();
 		Page<Notification> listOfUserNotification = notificationService.getListOfNotification(user, pageNumber,
 				pageSize, sortOrder, sortBy);
-		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage(MESSAGE_SUCCESS),
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(MESSAGE_SUCCESS),
 				listOfUserNotification);
 
 	}
@@ -553,7 +550,7 @@ public class UserController {
 			@RequestParam("arrayOfNotification") Long[] arrayOfNotification) {
 		notificationService.changeNotificationsStatus(arrayOfNotification);
 
-		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage(MESSAGE_SUCCESS),
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(MESSAGE_SUCCESS),
 				arrayOfNotification);
 	}
 
@@ -569,7 +566,7 @@ public class UserController {
 	public ResponseEntity<Object> countUserNotification() {
 		User user = GenericUtils.getLoggedInUser();
 		Long totalUnseenNotification = notificationService.countUnSeenNotification(user);
-		return ResponseHandler.response(HttpStatus.OK, true, localService.getMessage(MESSAGE_SUCCESS),
+		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(MESSAGE_SUCCESS),
 				totalUnseenNotification);
 	}
 
