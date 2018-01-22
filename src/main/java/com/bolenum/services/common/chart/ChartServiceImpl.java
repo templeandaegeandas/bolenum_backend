@@ -25,22 +25,23 @@ public class ChartServiceImpl implements ChartService {
 
         Map<String, Object> result = new HashMap<>();
         if (marketCurrency != null && pairCurrency != null) {
-            result.put("name", pairCurrency.getCurrencyAbbreviation() + " / " + marketCurrency.getCurrencyAbbreviation());
-            result.put("exchange-traded", marketCurrency.getCurrencyAbbreviation());
-            result.put("exchange-listed", marketCurrency.getCurrencyAbbreviation());
+            result.put("name", pairCurrency.getCurrencyAbbreviation() + "/" + marketCurrency.getCurrencyAbbreviation());
+            //result.put("exchange-traded", marketCurrency.getCurrencyAbbreviation());
+           // result.put("exchange-listed", marketCurrency.getCurrencyAbbreviation());
             result.put("timezone", "Asia/Kolkata");
             result.put("minmovement", 1);
             result.put("minmovement2", 0);
             result.put("pointvalue", 1);
-            result.put("session", "0001-2330");
+            result.put("session", "24x7");
             result.put("has_intraday", true);
             result.put("has_daily", true);
             result.put("has_weekly_and_monthly", true);
             result.put("has_no_volume", false);
-            result.put("description", "Bolenum Exchange " + pairCurrency.getCurrencyAbbreviation() + " / " + marketCurrency.getCurrencyAbbreviation());
-            result.put("type", "stock");
+            result.put("description", "Bolenum Exchange " + pairCurrency.getCurrencyAbbreviation() + "/" + marketCurrency.getCurrencyAbbreviation());
+            result.put("type", "bitcoin");
             result.put("supported_resolutions", SUPPORTED_RESOLUTIONS);
             result.put("pricescale", 100);
+            result.put("has_empty_bars",true);
             result.put("ticker", marketCurrency.getCurrencyId() + "BE" + pairCurrency.getCurrencyId());
         }
         return result;
