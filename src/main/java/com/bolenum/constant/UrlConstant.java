@@ -151,8 +151,8 @@ public class UrlConstant {
 	
 	/*********************Chart API **************************************/
 	public static final String CONFIG = "chart/config";
-	public static final String SYMBOLE_INFO = "chart/symbols";
-	public static final String HISTORY_INFO = "chart/history";
+	public static final String SYMBOLE = "chart/symbols";
+	public static final String HISTORY = "chart/history";
 
 
 }

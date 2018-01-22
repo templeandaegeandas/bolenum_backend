@@ -27,16 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public Page<User> getUserListWithSearch(@Param("searchData") String searchData, @Param("userId") Long userId,
 			Pageable pageable);
 
-	/**
-	 * This query returns all users list that are not deleted and kyc document
-	 * status is submitted with searching according to firstName, lastName and
-	 * emailId
-	 * 
-	 * @param searchData
-	 * @param documentStatus
-	 * @param pageable
-	 * @return List of users who have kyc documents status is submitted
-	 */
+
 	public User findByUserId(Long id);
 
 	public User findByMobileNumber(String mobileNumber);
