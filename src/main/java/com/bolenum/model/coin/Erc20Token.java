@@ -43,6 +43,10 @@ public class Erc20Token {
 		
 	}
 
+	/**
+	 *
+	 * @return id
+	 */
 	public Long getId() {
 		return id;
 	}

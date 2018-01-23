@@ -33,6 +33,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private Environment environment;
 
+	/* (non-Javadoc)
+	 * @see org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter#configure(org.springframework.security.config.annotation.web.builders.HttpSecurity)
+	 */
 	@Override
 	protected void configure(final HttpSecurity http) throws Exception {
 
@@ -46,6 +49,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.addFilterBefore(tokenFilter, BasicAuthenticationFilter.class);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter#configure(org.springframework.security.config.annotation.web.builders.WebSecurity)
+	 */
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers("/favicon.ico");

@@ -32,6 +32,10 @@ public class ChartController {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
+    /**
+     * This method is use for symbol information of chart.
+     * @param marketId
+     */
     @RequestMapping(value = UrlConstant.SYMBOLE_INFO, method = RequestMethod.GET)
     public ResponseEntity<Object> chartSymboleInfo(@RequestParam("symbol") String marketId) {
         Map<String, Object> map = new HashMap<>();
@@ -43,6 +47,13 @@ public class ChartController {
     }
 
    // @RequestMapping(value = UrlConstant.HISTORY_INFO, method = RequestMethod.GET)
+    /**
+     * This method is use for history information of chart.
+     * @param marketId
+     * @param fromDate
+     * @param toDate
+     * @param resolution
+     */
     public ResponseEntity<Object> chartHistoryInfo(@RequestParam("symbol") String marketId
                                                    , @RequestParam("from") String fromDate, @RequestParam("to") String toDate, @RequestParam(name = "resolution", required = false, defaultValue = "60") String resolution) {
         Map<String, Object> map = new HashMap<>();
@@ -53,6 +64,13 @@ public class ChartController {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
+    /**
+     * This method is use for trade history of chart.
+     * @param symbol
+     * @param from
+     * @param to
+     * @param resolution
+     */
     @RequestMapping(value = UrlConstant.HISTORY_INFO, method = RequestMethod.GET)
 	ResponseEntity<Object> tradeChartHistory(@RequestParam String symbol,@RequestParam String from,@RequestParam String to,@RequestParam String resolution) {
 		///Map<String, Object> result = new HashMap<String,Object>();

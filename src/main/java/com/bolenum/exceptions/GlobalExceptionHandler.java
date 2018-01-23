@@ -143,6 +143,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
 
+	/**
+	 *
+	 * @param ex
+	 * @param request
+	 * @return
+	 */
 	@ExceptionHandler({ InsufficientBalanceException.class })
 	protected ResponseEntity<Object> handleInsufficientBalanceException(final InsufficientBalanceException ex,
 			final WebRequest request) {

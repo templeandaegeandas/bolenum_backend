@@ -111,6 +111,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		return currencyService.countCourencies();
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	@Async
 	public void createErc20Wallet(User user, String tokenName) {

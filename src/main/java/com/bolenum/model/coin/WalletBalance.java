@@ -21,6 +21,10 @@ public class WalletBalance {
 
 	Double balanceBLN;
 
+	/**
+	 *
+	 * @return userId
+	 */
 	public Long getUserId() {
 		return userId;
 	}

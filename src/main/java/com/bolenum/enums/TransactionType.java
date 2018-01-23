@@ -16,6 +16,11 @@ public enum TransactionType {
 		this.txType = txType;
 	}
 
+	/**
+	 * This method is use to get transaction type.
+	 * @param Nothing
+	 * @return txType
+	 */
 	public String getTransactionType() {
 		return txType;
 	}

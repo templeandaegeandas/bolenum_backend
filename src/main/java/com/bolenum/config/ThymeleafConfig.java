@@ -16,6 +16,11 @@ public class ThymeleafConfig {
 //        return templateEngine;
 //    }
 
+    /**
+     * This method is use to get ClassLoaderTemplateResolver.
+     * @param Nothing.
+	 * @return ClassLoaderTemplateResolver.
+     */
     @Bean
     public ClassLoaderTemplateResolver htmlTemplateResolver(){
         ClassLoaderTemplateResolver emailTemplateResolver = new ClassLoaderTemplateResolver();
