@@ -335,11 +335,11 @@ public class OrdersServiceImpl implements OrdersService {
 			 * price
 			 */
 			// TODO production bug of multi thread env
-//			List<Orders> sellOrderList = ordersRepository
-//					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyAndPriceLessThanEqualOrderByPriceAsc(
-//							OrderType.SELL, OrderStatus.SUBMITTED, marketCurrency, pairedCurrency, price);
+			List<Orders> sellOrderList = ordersRepository
+					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyAndPriceLessThanEqualOrderByPriceAsc(
+							OrderType.SELL, OrderStatus.SUBMITTED, marketCurrency, pairedCurrency, price);
 			
-			List<Orders> sellOrderList = matchingOrdersList(orderType, marketCurrency, pairedCurrency, price, remainingVolume);
+//			List<Orders> sellOrderList = matchingOrdersList(orderType, marketCurrency, pairedCurrency, price, remainingVolume);
 			/**
 			 * checking user self order, return false if self order else proceed. Feature
 			 * has been paused on Dec 12 2017
@@ -374,11 +374,11 @@ public class OrdersServiceImpl implements OrdersService {
 			 * fetching the list of BUYERS whose buy price is greater than sell price
 			 */
 			// TODO production bug of multi thread env
-//			List<Orders> buyOrderList = ordersRepository
-//					.findByOrderTypeAndOrderStatusAndAndMarketCurrencyAndPairedCurrencyAndPriceGreaterThanEqualOrderByPriceDesc(
-//							OrderType.BUY, OrderStatus.SUBMITTED, marketCurrency, pairedCurrency, price);
+			List<Orders> buyOrderList = ordersRepository
+					.findByOrderTypeAndOrderStatusAndAndMarketCurrencyAndPairedCurrencyAndPriceGreaterThanEqualOrderByPriceDesc(
+							OrderType.BUY, OrderStatus.SUBMITTED, marketCurrency, pairedCurrency, price);
 			
-			List<Orders> buyOrderList = matchingOrdersList(orderType, marketCurrency, pairedCurrency, price, remainingVolume);
+//			List<Orders> buyOrderList = matchingOrdersList(orderType, marketCurrency, pairedCurrency, price, remainingVolume);
 			/**
 			 * checking user self order, return false if self order else proceed. Feature
 			 * has been paused on Dec 12 2017
