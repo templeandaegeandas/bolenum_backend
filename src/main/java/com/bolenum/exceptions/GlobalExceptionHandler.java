@@ -39,8 +39,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * to handle Illegal Argument Exception
-	 * 
+	 * This method is use to handle Illegal Argument Exception
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
@@ -54,8 +53,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * to handle IOException
-	 * 
+	 * This method is use to handle IOException
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
@@ -67,8 +65,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * 
-	 * 
+	 * This method is use to handle bad request.
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
@@ -82,7 +79,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * 
+	 * This method is use to handle bad request.
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
@@ -96,7 +93,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * 
+	 * This method is use to handle bad request.
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
@@ -108,7 +105,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * 
+	 * This method is use to handle bad request.
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
@@ -120,7 +117,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * 
+	 * This method is use to handle bad request.
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
@@ -132,7 +129,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * 
+	 * This method is use to handle bad request.
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
@@ -144,7 +141,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 *
+	 * This method is use to handle bad request. 
 	 * @param ex
 	 * @param request
 	 * @return
@@ -156,6 +153,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), Optional.empty());
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler#handleMissingServletRequestParameter(org.springframework.web.bind.MissingServletRequestParameterException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)
+	 */
 	@Override
 	protected ResponseEntity<Object> handleMissingServletRequestParameter(
 			final MissingServletRequestParameterException ex, final HttpHeaders headers, final HttpStatus status,
@@ -164,6 +164,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler#handleMethodArgumentNotValid(org.springframework.web.bind.MethodArgumentNotValidException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)
+	 */
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex,
 			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
@@ -171,6 +174,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, ex.getMessage(), null);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler#handleHttpMessageNotWritable(org.springframework.http.converter.HttpMessageNotWritableException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)
+	 */
 	@Override
 	protected ResponseEntity<Object> handleHttpMessageNotWritable(final HttpMessageNotWritableException ex,
 			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
@@ -179,7 +185,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	/**
-	 * 
+	 * This method is use for internal handle.
 	 * @param ex
 	 * @param request
 	 * @return ResponseEntity
