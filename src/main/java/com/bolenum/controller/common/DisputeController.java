@@ -133,7 +133,7 @@ public class DisputeController {
 						com.bolenum.enums.MessageType.DISPUTE_NOTIFICATION);
 
 				logger.debug("response of raised dispute ={}", response.getCreatedOn());
-				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
+				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.success"),
 						response);
 			} else {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
@@ -190,7 +190,7 @@ public class DisputeController {
 						com.bolenum.enums.MessageType.DISPUTE_NOTIFICATION);
 
 				logger.debug("response of raised dispute ={}", response.getCreatedOn());
-				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.succes"),
+				return ResponseHandler.response(HttpStatus.OK, false, localeService.getMessage("dispute.raised.success"),
 						response);
 			} else {
 				return ResponseHandler.response(HttpStatus.BAD_REQUEST, true,
