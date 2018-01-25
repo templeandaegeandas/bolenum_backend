@@ -86,6 +86,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Value("${bolenum.deployed.contract.address}")
 	private String contractAddress;
+	
+	@Value("${bolenum.deployed.contract.decimalValue}")
+	private Double decimalValue;
 
 	@Value("${bolenum.deployed.contract.wallet.address}")
 	private String walletAddress;
@@ -361,7 +364,7 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		if (count == 3) {
 			Currency currencyBLN = currencyService
 					.saveCurrency(new Currency(currencyName, currencyAbbreviation, CurrencyType.ERC20TOKEN));
-			Erc20Token erc20TokenBLN = new Erc20Token(walletAddress, contractAddress, currencyBLN);
+			Erc20Token erc20TokenBLN = new Erc20Token(walletAddress, contractAddress, currencyBLN, decimalValue);
 			List<Erc20Token> erc20Tokens = new ArrayList<>();
 			erc20Tokens.add(erc20TokenBLN);
 			erc20TokenService.saveInitialErc20Token(erc20Tokens);
