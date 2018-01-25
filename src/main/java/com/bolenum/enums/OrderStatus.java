@@ -15,6 +15,11 @@ public enum OrderStatus {
 		this.status = orderStatus;
 	}
 
+	/**
+	 * This method is use to get order status.
+	 * @param Nothing
+	 * @return status
+	 */
 	public String getOrderStatus() {
 		return status;
 	}

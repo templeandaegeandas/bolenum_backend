@@ -68,7 +68,7 @@ public class KYCController {
 	public static final Logger logger = LoggerFactory.getLogger(KYCController.class);
 
 	/**
-	 * 
+	 * This method is use to upload Kyc Document.
 	 * @param file
 	 * @throws IOException
 	 * @throws documentType
@@ -186,8 +186,8 @@ public class KYCController {
 		return ResponseHandler.response(HttpStatus.OK, true, localeService.getMessage("message.success"), listOfUser);
 	}
 
-	/**@description use to get KYC by Userid
-	 * 
+	/**
+	 * @description use to get KYC by Userid 
 	 * @param userId
 	 * @return listOfUser
 	 * 

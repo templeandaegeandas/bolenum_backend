@@ -343,7 +343,6 @@ public class FiatOrderController {
 
 	/**
 	 * @Description get order by order id
-	 * 
 	 * @param orderId
 	 * @param orderType
 	 * @return single order

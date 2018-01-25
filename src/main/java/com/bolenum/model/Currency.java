@@ -76,50 +76,88 @@ public class Currency {
 		this.currencyType=currencyType;
 	}
 
+
+
+	/**
+	 * @return the currencyId
+	 */
 	public Long getCurrencyId() {
 		return currencyId;
 	}
 
+	/**
+	 * @param currencyId the currencyId to set
+	 */
 	public void setCurrencyId(Long currencyId) {
 		this.currencyId = currencyId;
 	}
 
+	/**
+	 * @return the currencyName
+	 */
 	public String getCurrencyName() {
 		return currencyName;
 	}
 
+	/**
+	 * @param currencyName the currencyName to set
+	 */
 	public void setCurrencyName(String currencyName) {
 		this.currencyName = currencyName;
 	}
 
+	/**
+	 * @return the currencyAbbreviation
+	 */
 	public String getCurrencyAbbreviation() {
 		return currencyAbbreviation;
 	}
 
+	/**
+	 * @param currencyAbbreviation the currencyAbbreviation to set
+	 */
 	public void setCurrencyAbbreviation(String currencyAbbreviation) {
 		this.currencyAbbreviation = currencyAbbreviation;
 	}
 
+	/**
+	 * @return the createdOn
+	 */
 	public Date getCreatedOn() {
 		return createdOn;
 	}
 
+	/**
+	 * @param createdOn the createdOn to set
+	 */
 	public void setCreatedOn(Date createdOn) {
 		this.createdOn = createdOn;
 	}
 
+	/**
+	 * @return the updatedOn
+	 */
 	public Date getUpdatedOn() {
 		return updatedOn;
 	}
 
+	/**
+	 * @param updatedOn the updatedOn to set
+	 */
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
 	}
 
+	/**
+	 * @return the deletedOn
+	 */
 	public Date getDeletedOn() {
 		return deletedOn;
 	}
 
+	/**
+	 * @param deletedOn the deletedOn to set
+	 */
 	public void setDeletedOn(Date deletedOn) {
 		this.deletedOn = deletedOn;
 	}

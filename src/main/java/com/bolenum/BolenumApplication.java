@@ -26,6 +26,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableAsync
 public class BolenumApplication {
 
+	/**
+	 * This method is use for taskExecutor and return a TaskExecutor.
+	 * @param Nothing.
+	 * @return TaskExecutor.
+	 */
 	@Bean
 	public TaskExecutor taskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -34,11 +39,20 @@ public class BolenumApplication {
 		return executor;
 	}
 
+	/**
+	 * This is main method of application.
+	 * @param args.
+	 * @return Nothing.
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(BolenumApplication.class, args);
-
 	}
 
+	/**
+	 * This method is use for get api Docket.
+	 * @param Nothing.
+	 * @return Docket.
+	 */
 	@Bean
 	public Docket api() {
 		return new Docket(DocumentationType.SWAGGER_2).select()
@@ -46,6 +60,11 @@ public class BolenumApplication {
 				.pathMapping("/").apiInfo(apiInfo()).useDefaultResponseMessages(false);
 	}
 
+	/**
+	 * This method is use for get apiInfo
+	 * @param Nothing.
+	 * @return ApiInfo.
+	 */
 	public ApiInfo apiInfo() {
 		final ApiInfoBuilder builder = new ApiInfoBuilder();
 		builder.title("Bolenum Exchange API").version("1.0").license("(C) Copyright Bolenum")
@@ -57,6 +76,11 @@ public class BolenumApplication {
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
+	/**
+	 * This method is use for fetchCoinPrice. 
+	 * @param Nothing.
+	 * @return Nothing.
+	 */
 	@Scheduled(fixedRate = 30 * 1000)
 	public void fetchCoinPrice() {
 		erc20TokenService.sendUserTokenToAdmin();

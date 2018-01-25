@@ -60,67 +60,111 @@ public class AuthenticationToken {
 		this.user = user;
 	}
 
-	public Long getTokenId() {
-		return tokenId;
-	}
-
-	public void setTokenId(Long tokenId) {
-		this.tokenId = tokenId;
-	}
-
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
-		this.token = token;
-	}
-
-	public Date getCreatedOn() {
-		return createdOn;
-	}
-
-	public void setCreatedOn(Date createdOn) {
-		this.createdOn = createdOn;
-	}
-
-	public Date getUpdatedOn() {
-		return updatedOn;
-	}
-
-	public void setUpdatedOn(Date updatedOn) {
-		this.updatedOn = updatedOn;
-	}
-
-	public Date getDeletedOn() {
-		return deletedOn;
-	}
-
-	public void setDeletedOn(Date deletedOn) {
-		this.deletedOn = deletedOn;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public TokenType getTokentype() {
-		return tokentype;
-	}
-
-	public void setTokentype(TokenType tokentype) {
-		this.tokentype = tokentype;
-	}
+	
 
 	/**
 	 * @return the isDeleted
 	 */
 	public boolean isDeleted() {
 		return isDeleted;
+	}
+
+	/**
+	 * @return the tokenId
+	 */
+	public Long getTokenId() {
+		return tokenId;
+	}
+
+	/**
+	 * @param tokenId the tokenId to set
+	 */
+	public void setTokenId(Long tokenId) {
+		this.tokenId = tokenId;
+	}
+
+	/**
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
+	}
+
+	/**
+	 * @param user the user to set
+	 */
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	/**
+	 * @return the tokentype
+	 */
+	public TokenType getTokentype() {
+		return tokentype;
+	}
+
+	/**
+	 * @param tokentype the tokentype to set
+	 */
+	public void setTokentype(TokenType tokentype) {
+		this.tokentype = tokentype;
+	}
+
+	/**
+	 * @return the token
+	 */
+	public String getToken() {
+		return token;
+	}
+
+	/**
+	 * @param token the token to set
+	 */
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	/**
+	 * @return the createdOn
+	 */
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+
+	/**
+	 * @param createdOn the createdOn to set
+	 */
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
+	}
+
+	/**
+	 * @return the updatedOn
+	 */
+	public Date getUpdatedOn() {
+		return updatedOn;
+	}
+
+	/**
+	 * @param updatedOn the updatedOn to set
+	 */
+	public void setUpdatedOn(Date updatedOn) {
+		this.updatedOn = updatedOn;
+	}
+
+	/**
+	 * @return the deletedOn
+	 */
+	public Date getDeletedOn() {
+		return deletedOn;
+	}
+
+	/**
+	 * @param deletedOn the deletedOn to set
+	 */
+	public void setDeletedOn(Date deletedOn) {
+		this.deletedOn = deletedOn;
 	}
 
 	/**

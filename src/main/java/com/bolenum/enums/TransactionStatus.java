@@ -16,6 +16,11 @@ public enum TransactionStatus {
 		this.txStatus = txType;
 	}
 
+	/**
+	 * This method is use to get transaction status.
+	 * @param Nothing
+	 * @return txStatus
+	 */
 	public String getTransactionStatus() {
 		return txStatus;
 	}

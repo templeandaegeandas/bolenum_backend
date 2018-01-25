@@ -66,7 +66,6 @@ public class TwoFactorAuthController {
 	
 	/**@Description Use generate Google Authentication  QR Code
 	 * 
-	 * @return
 	 * @throws URISyntaxException
 	 * @throws WriterException
 	 * @throws IOException
@@ -112,8 +111,9 @@ public class TwoFactorAuthController {
 	}
 
 
-	/**@Description use to set two factor authentication via mobile
-	 * 
+	/**
+	 * @Description use to set two factor authentication via mobile
+	 * @param Nothing
 	 * @return authentication via.mobile success OR authentication via.mobile failure 
 	 */
 	@Secured("ROLE_USER")
@@ -140,8 +140,8 @@ public class TwoFactorAuthController {
 		}
 	}
 
-	/**@Description use to send OTP for two factor authentication
-	 * 
+	/**
+	 * @Description use to send OTP for two factor authentication
 	 * @param loginForm
 	 * @param bindingResult
 	 * @return otp.send.successfully
@@ -159,7 +159,8 @@ public class TwoFactorAuthController {
 		}
 	}
 
-	/**@Description  Use to verifies two factor authentication OTP 
+	/**
+	 * @Description  Use to verifies two factor authentication OTP 
 	 * @param loginForm
 	 * @param bindingResult
 	 * @param otp
@@ -186,8 +187,9 @@ public class TwoFactorAuthController {
 		}
 	}
 
-	/**@Description use to remove two  factor authentication
-	 * 
+	/**
+	 * @Description use to remove two  factor authentication
+	 * @param Nothing
 	 * @return  removed.success OR removed.fail
 	 */
 	@Secured("ROLE_USER")

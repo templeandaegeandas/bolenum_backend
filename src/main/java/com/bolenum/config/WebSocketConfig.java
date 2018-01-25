@@ -19,12 +19,18 @@ import com.bolenum.constant.UrlConstant;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
+	/* (non-Javadoc)
+	 * @see org.springframework.web.socket.config.annotation.AbstractWebSocketMessageBrokerConfigurer#configureMessageBroker(org.springframework.messaging.simp.config.MessageBrokerRegistry)
+	 */
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry config) {
 		config.enableSimpleBroker(UrlConstant.WS_BROKER);
 		config.setApplicationDestinationPrefixes(UrlConstant.WS_APPLICATION_DEST_PREFIX);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer#registerStompEndpoints(org.springframework.web.socket.config.annotation.StompEndpointRegistry)
+	 */
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint(UrlConstant.WS_REGISTER_ENDPOINT).setAllowedOrigins("*").withSockJS();

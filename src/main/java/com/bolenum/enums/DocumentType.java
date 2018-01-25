@@ -11,6 +11,11 @@ public enum DocumentType {
 		this.docType=documentType;
 	}
 	
+	/**
+	 * This method is use to get document type.
+	 * @param Nothing
+	 * @return docType
+	 */
 	public String getDocumentType() {
 		return docType;
 	}

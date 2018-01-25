@@ -47,7 +47,7 @@ public class RoleController {
 
 	@Autowired
 	private RoleService roleService;
-	
+
 	@Autowired
 	private LocaleService localService;
 
@@ -83,7 +83,7 @@ public class RoleController {
 					"please request valid role");
 		}
 	}
-	
+
 	/**@description Use to get role
 	 * @param id
 	 * @return role
@@ -98,8 +98,4 @@ public class RoleController {
 					"please request valid role");
 		}
 	}
-	
-	
-
-
 }
