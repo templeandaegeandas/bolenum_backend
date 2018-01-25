@@ -10,7 +10,7 @@ import com.bolenum.model.User;
  * @date 19-Dec-2017
  */
 public interface TradeTransactionService {
-	public Boolean performTradeTransaction(String currencyAbr, String currencyType, double qtyTraded, User buyer,
+	public Boolean performTradeTransaction(double tfee, String currencyAbr, String currencyType, double qtyTraded, User buyer,
 			User seller, Long tradeId);
 	public Boolean performTradeTransactionFee(String currencyAbr, String currencyType, double tradeFee, User buyer,
 			User seller, Long tradeId);
