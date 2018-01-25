@@ -1,3 +1,19 @@
+/*@Description Of class
+ * 
+ * AuthServiceImpl class is responsible for below listed task: 
+ *  	
+ *  	LogOut
+ *      Login
+ *      Validate user
+ *      Send token to reset password
+ *      Reset password
+ *      Verify token for reset password
+ *      Login response
+ *      
+ * **/
+
+
+
 package com.bolenum.services.common;
 
 import java.util.Date;
@@ -60,8 +76,12 @@ public class AuthServiceImpl implements AuthService {
 
 	public static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
-	/**
-	 * For login activity of user
+	/**@description use to login activity of user
+	 * @param password
+	 * @param user
+	 * @param ipAddress
+	 * @param browserName
+	 * @return AuthenticationToken
 	 */
 	@Override
 	public AuthenticationToken login(String password, User user, String ipAddress, String browserName,
@@ -80,10 +100,9 @@ public class AuthServiceImpl implements AuthService {
 		}
 	}
 
-	/**
-	 * 
+	/**@description use to send response after login
 	 * @param token
-	 * @return
+	 * @return Map
 	 */
 	@Override
 	public Map<String, Object> loginResponse(AuthenticationToken token) {
@@ -100,9 +119,9 @@ public class AuthServiceImpl implements AuthService {
 		return map;
 	}
 
-	/**
-	 * used to validate user for the presence of valid user according to requested
-	 * email
+	/**@description use to get user validate
+	 * @param email
+	 * @return user
 	 */
 	@Override
 	public User validateUser(String email) {
@@ -110,9 +129,11 @@ public class AuthServiceImpl implements AuthService {
 		return userRepository.findByEmailId(email);
 	}
 
-	/**
-	 * for logout activity of user
+	/**@description use to get user logout
+	 * @param token
+	 * @return boolean
 	 */
+
 	@Override
 	public boolean logOut(String token) {
 		AuthenticationToken authToken = authenticationTokenRepo.findByToken(token);
@@ -128,8 +149,9 @@ public class AuthServiceImpl implements AuthService {
 		}
 	}
 
-	/**
-	 * to send token as verification link at the time of reset password
+	/**@description use to send token so that user can reset password
+	 * @param user
+	 * @return AuthenticationToken
 	 */
 
 	public AuthenticationToken sendTokenToResetPassword(User user) {
@@ -154,8 +176,9 @@ public class AuthServiceImpl implements AuthService {
 
 	}
 
-	/**
-	 * method used for verification of token at the time of reset password
+	/**@description use to verify token for reset password
+	 * @param token
+	 * @return User
 	 */
 	@Override
 	public User verifyTokenForResetPassword(String token) {
@@ -170,8 +193,9 @@ public class AuthServiceImpl implements AuthService {
 		return null;
 	}
 
-	/**
-	 * for Reset password
+	/**@description use to send token so that user can reset password
+	 * @param user    
+	 * @param resetPasswordForm
 	 */
 	@Override
 	public void resetPassword(User user, ResetPasswordForm resetPasswordForm) {

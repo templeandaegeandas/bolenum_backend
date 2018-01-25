@@ -1,9 +1,17 @@
-
+/*@Description Of Class
+ * 
+ * BTCWalletController class is responsible for below listed task: 
+ *     
+ *     Get wallet address and balance
+ *     Get btc to eth price
+ *     Get withdraw amount
+ *     Save deposit Transaction
+ *     Create Account.
+ *     
+ */
 package com.bolenum.controller.user;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -85,11 +93,11 @@ public class BTCWalletController {
 
 	private Logger logger = LoggerFactory.getLogger(BTCWalletController.class);
 
-	/**
-	 * to get the wallet address and QR code for get deposited in the
-	 * wallet @description getWalletAddressAndQrCode @param coin code @return
-	 * ResponseEntity<Map<String,Object>> @exception
-	 *
+	/**@Description use to get the wallet address and QR code for get deposited in the wallet 
+	 * @param currencyType
+	 * @param coinCode
+	 * @exception IllegalArgumentException
+	 * @return MAP<ADDRESS ,BALANCE> 
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.DEPOSIT, method = RequestMethod.GET)
@@ -151,10 +159,10 @@ public class BTCWalletController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), map);
 	}
 
-	/**
+	/**@description Use to get btc to Eth price
 	 * 
 	 * @param currencyAbbreviation
-	 * @return
+	 * @return marketPrice
 	 */
 	@RequestMapping(value = UrlConstant.MARKET_PRICE, method = RequestMethod.GET)
 	public ResponseEntity<Object> getBtcToEthPrice(@RequestParam("symbol") String currencyAbbreviation) {
@@ -162,15 +170,14 @@ public class BTCWalletController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"), marketPrice);
 	}
 
-	/**
-	 * 
+	/**@description use to get withdraw amount
 	 * @param currencyType
 	 * @param withdrawBalanceForm
 	 * @param coinCode
-	 * @return
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 * @throws InsufficientBalanceException
+	 * @return withdraw coin success
 	 * 
 	 */
 	@Secured("ROLE_USER")
@@ -228,10 +235,10 @@ public class BTCWalletController {
 				Optional.empty());
 	}
 
-	/**
+	/**@description Use to save deposit Transaction 
 	 * 
 	 * @param transaction
-	 * @return
+	 * @return transactionResponse
 	 * 
 	 */
 	@RequestMapping(value = UrlConstant.DEPOSIT_TRANSACTION_STATUS, method = RequestMethod.POST)
@@ -246,10 +253,10 @@ public class BTCWalletController {
 		}
 	}
 
-	/**
+	/**@description Use to createAccount.
 	 * 
 	 * @param currencyAbbreviation
-	 * @return
+	 * @return message.success OR message.error
 	 */
 	@RequestMapping(value = UrlConstant.CREATE_ACCOUNT, method = RequestMethod.POST)
 	public ResponseEntity<Object> createAccount(@RequestParam("uuid") long uuid) {
@@ -265,9 +272,6 @@ public class BTCWalletController {
 				userCoin.setCurrencyType(CurrencyType.CRYPTO);
 				userCoin.setUser(user);
 				userCoin = userCoinRepository.save(userCoin);
-				List<UserCoin> list = new ArrayList<>();
-				list.add(userCoin);
-				user.setUserCoin(list);
 				userService.saveUser(user);
 				return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage("message.success"),
 						Optional.empty());

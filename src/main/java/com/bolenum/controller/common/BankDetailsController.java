@@ -1,3 +1,15 @@
+/*@Description Of Class
+ * 
+ * BankDetailsController class is responsible for below listed task: 
+ *    
+ *       Add bank details by user
+ *       Update the bank details by user
+ *       View user bank details by admin and user both
+ *       View user bank details by admin
+ */
+
+
+
 package com.bolenum.controller.common;
 
 import java.util.List;
@@ -54,11 +66,11 @@ public class BankDetailsController {
 	public static final Logger logger = LoggerFactory.getLogger(BankDetailsController.class);
 
 	/**
-	 * to add bank details by user
+	 * @Description Add bank details by user
 	 * 
 	 * @param addUserBankDetailsForm
 	 * @param result
-	 * @return
+	 * @return message bank details add successfully 
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.USER_BANK_DETAILS, method = RequestMethod.POST)
@@ -105,9 +117,9 @@ public class BankDetailsController {
 	}
 
 	/**
-	 * used for update the bank details by user
-	 * 
-	 * @return
+	 * @Description used for update the bank details by user
+	 * @Param EditUserBankDetailsForm
+	 * @Return message bank details pdate success
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.USER_BANK_DETAILS, method = RequestMethod.PUT)
@@ -139,9 +151,9 @@ public class BankDetailsController {
 	}
 
 	/**
-	 * to view user bank details used by admin as well as user
+	 * @Description To view user bank details by admin and user both
 	 * 
-	 * @return
+	 * @return list of bank account details
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.USER_BANK_DETAILS, method = RequestMethod.GET)
@@ -162,10 +174,10 @@ public class BankDetailsController {
 	}
 
 	/**
-	 * to view user bank details by admin
+	 * @description To view user bank details by admin
 	 * 
-	 * @param id
-	 * @return
+	 * @param userId
+	 * @return list of bank account details
 	 * 
 	 */
 	@Secured("ROLE_ADMIN")

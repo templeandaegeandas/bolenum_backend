@@ -1,3 +1,12 @@
+/*@Description Of Class
+ * 
+ * AuthenticationServiceImpl class is responsible for below listed task: 
+ *   
+ *    Find token
+ *    Check token expired or not.
+ *    Count active users with in seven days.
+ *    
+ */
 package com.bolenum.services.user;
 
 import java.util.Calendar;
@@ -19,14 +28,18 @@ public class AuthenticationServiceImpl implements AuthenticationTokenService {
 	@Autowired
 	private AuthenticationTokenRepo authenticationTokenRepo;
 
+	
+	/**@Description use to find token by name
+	 * @param token
+	 * @return true/false expired/not expired
+	 */
 	@Override
 	public AuthenticationToken findByToken(String token) {
 		return authenticationTokenRepo.findByToken(token);
 	}
 
-	/**
-	 * to verify the token expired or not
-	 * 
+	/**@Description to verify the token expired or not
+	 * @param verificationTokenToCheck
 	 * @return true/false expired/not expired
 	 */
 	@Override
@@ -39,8 +52,8 @@ public class AuthenticationServiceImpl implements AuthenticationTokenService {
 		return currentTime > expirationTime;
 	}
 
-	/**
-	 * to count number of user who logged in within 7 days
+	/**@Description to count number of user who logged in within 7 days
+	 * @return startDate , endDate
 	 */
 	@Override
 	public Long countActiveUsers() {

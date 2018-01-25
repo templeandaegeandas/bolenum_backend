@@ -1,3 +1,16 @@
+/*@Description Of class
+ * 
+ * BankAccountDetailsServiceImpl interface is responsible for below listed task: 
+ * 
+ * 		Bank details find by account number
+ * 		Save bank details
+ *      Update user bank details
+ *      Find user
+ *      Find user by id
+ *      Primary bank account details
+ *      Check is bank account added
+ */
+
 package com.bolenum.services.common;
 
 import java.util.List;
@@ -23,8 +36,9 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 	@Autowired
 	private BankAccountDetailsRepo bankAccountDetailsRepo;
 
-	/**
-	 * to find bank account details with respect to account number
+	/**@description use to get bank account details by using account number
+	 * @param       accountNumber
+	 * @return      bank account details
 	 */
 	@Override
 	public BankAccountDetails findByAccountNumber(String accountNumber) {
@@ -32,8 +46,9 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 		return bankAccountDetailsRepo.findByAccountNumber(accountNumber);
 	}
 
-	/**
-	 * to save bank Account details
+	/**@description use to save bank account details
+	 * @param       bank account details
+	 * @return      bank account details
 	 */
 	@Override
 	public BankAccountDetails saveBankDetails(BankAccountDetails bankAccountDetails) {
@@ -41,8 +56,10 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 		return bankAccountDetailsRepo.saveAndFlush(bankAccountDetails);
 	}
 
-	/**
-	 * to update user bank details
+	/**@description use to update bank account details
+	 * @param       editUserBankDetailsForm          
+	 * @param       isUserBankDetailsExist
+	 * @return      bank account details
 	 */
 	@Override
 	public BankAccountDetails updateUserBankDetails(EditUserBankDetailsForm editUserBankDetailsForm,
@@ -78,24 +95,29 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 		return bankAccountDetailsRepo.saveAndFlush(bankAccountDetails);
 	}
 
-	/**
-	 * 
-	 * returns BankAccountDetails with respect to specific user
-	 * 
+	/**@description use to find bank account details by user
+	 * @param       user
+	 * @return      list of bank account details
 	 */
 	@Override
 	public List<BankAccountDetails> findByUser(User user) {
 		return bankAccountDetailsRepo.findByUser(user);
 	}
 
-	/**
-	 * returns BankAccountDetails with respect to specific user id
+	/**@description use to find bank account details by ID
+	 * @param       id
+	 * @return      list of bank account details
 	 */
 	@Override
 	public BankAccountDetails findByID(Long id) {
 		return bankAccountDetailsRepo.findById(id);
 	}
-
+	
+	
+	/**@description use to find primary bank account details by user
+	 * @param       user
+	 * @return      list of bank account details
+	 */
 	@Override
 	public BankAccountDetails primaryBankAccountDetails(User user) {
 		List<BankAccountDetails> bankAccountDetails = bankAccountDetailsRepo.findByUser(user);
@@ -111,7 +133,10 @@ public class BankAccountDetailsServiceImpl implements BankAccountDetailsService 
 		}
 		return bankAccountDetail;
 	}
-
+	/**@description use to check bank account added or not
+	 * @param       user
+	 * @return      boolean
+	 */
 	@Override
 	public boolean isBankAccountAdded(User user) {
 		List<BankAccountDetails> bankAccountDetails = bankAccountDetailsRepo.findByUser(user);

@@ -1,3 +1,17 @@
+/*@Description Of Class
+ * 
+ * CurrencyController class is responsible for below listed task: 
+ *   
+ *     To add new currency 
+ *     To edit currency
+ *     Get currency list
+ *     Get currency list for admin
+ *     Get currency list for market
+ *     To get currency by Id
+ *     To save BLNNGN Price
+ */
+
+
 package com.bolenum.controller.admin;
 
 import java.util.List;
@@ -50,13 +64,13 @@ public class CurrencyController {
 	@Autowired
 	private CurrencyService currencyService;
 
-	private final static String CURRENCY_LIST_SUCCESS = "currency.list.success";
+	private static final  String CURRENCY_LIST_SUCCESS = "currency.list.success";
 
-	/**
+	/**@description use to add currency 
 	 * 
 	 * @param currencyForm
 	 * @param result
-	 * @return
+	 * @return currency.add.success OR currency.add.failure
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.POST)
@@ -97,11 +111,11 @@ public class CurrencyController {
 
 	}
 
-	/**
+	/**@description Use to edit currency
 	 * 
 	 * @param currencyForm
 	 * @param result
-	 * @return
+	 * @return currency.update.success OR currency.not.found
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.PUT)
@@ -133,13 +147,13 @@ public class CurrencyController {
 	}
 
 	/**
-	 * 
+	 * @description Use to get currency list
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortBy
 	 * @param sortOrder
 	 * @param searchData
-	 * @return
+	 * @return currencyList
 	 */
 	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_TRADING, method = RequestMethod.GET)
@@ -148,7 +162,10 @@ public class CurrencyController {
 		return ResponseHandler.response(HttpStatus.OK, false, localService.getMessage(CURRENCY_LIST_SUCCESS),
 				currencyList);
 	}
-
+	/**
+	 * @description Use to get currency list for admin
+	 * @return currencyList
+	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_ADMIN, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyListForAdmin() {
@@ -157,14 +174,14 @@ public class CurrencyController {
 				currencyList);
 	}
 
-	/**
+	/** @description Use to get currency list for market
 	 * 
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortBy
 	 * @param sortOrder
 	 * @param searchData
-	 * @return
+	 * @return currencyList
 	 */
 	@RequestMapping(value = UrlConstant.CURRENCY_LIST_FOR_MARKET, method = RequestMethod.GET)
 	public ResponseEntity<Object> getCurrencyListForMarket() {
@@ -173,10 +190,10 @@ public class CurrencyController {
 				currencyList);
 	}
 
-	/**
+	/**@description Use to get currency by Id
 	 * 
 	 * @param currencyId
-	 * @return
+	 * @return currency
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_FOR_TRADING, method = RequestMethod.GET)
@@ -190,7 +207,11 @@ public class CurrencyController {
 					null);
 		}
 	}
-
+	/**@description Use to save BLNNGN Price
+	 * 
+	 * @param currencyId
+	 * @return savedCurrency
+	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.CURRENCY_NGN_PRICE_SAVE, method = RequestMethod.PUT)
 	public ResponseEntity<Object> saveBLNNGNPrice(@RequestParam("priceNGN") double priceNGN) {

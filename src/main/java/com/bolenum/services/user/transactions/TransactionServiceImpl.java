@@ -564,9 +564,14 @@ public class TransactionServiceImpl implements TransactionService {
 
 	public void fetchBTCConfirmation(Page<Transaction> page) {
 		page.forEach(transaction -> {
+			/*
+			 * Add a check for isFetchStatus
+			 * 
+			 * 
+			 * */
 			if ("BTC".equalsIgnoreCase(transaction.getCurrencyName()) && transaction.getTxHash() != null
-					&& !STATUS.equals(transaction.getTxStatus()) && !transaction.isInAppTransaction()) {
-
+					&& !STATUS.equals(transaction.getTxStatus()) && !transaction.isInAppTransaction() && !transaction.isFetchError()) {
+				
 				try {
 					BtcdClient btcdClient = ResourceUtils.getBtcdProvider();
 					logger.debug("transaction hash for fetching confirmation: {}", transaction.getTxHash());
@@ -581,6 +586,11 @@ public class TransactionServiceImpl implements TransactionService {
 						transactionRepo.save(transaction);
 					}
 				} catch (BitcoindException | CommunicationException e) {
+					/*set isFetchError to true of unconfirmed hash, so  we make sure
+					next time it will not create any exception.*/
+					transaction.setFetchError(true);
+					transactionRepo.save(transaction);
+					
 					logger.error("btc transaction confiramtion fetch error: {}", e);
 				}
 			}

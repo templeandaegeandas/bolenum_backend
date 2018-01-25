@@ -8,9 +8,9 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -133,9 +133,6 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				UserCoin userCoin = new UserCoin(credentials.getAddress(), 0.0, tokenName, fileName, encPwd,
 						passwordKey, CurrencyType.ERC20TOKEN, user);
 				userCoin = userCoinRepository.save(userCoin);
-				List<UserCoin> userCoins = new ArrayList<>();
-				userCoins.add(userCoin);
-				user.setUserCoin(userCoins);
 				User savedUser = userRepository.save(user);
 				if (savedUser != null) {
 					logger.debug("eth wallet info saved of user: {}", savedUser.getFullName());
@@ -410,10 +407,10 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 				Double balance = getErc20WalletBalance(transaction.getToUser(), erc20Token,
 						transaction.getCurrencyName());
 				logger.debug("wallet balance is: {}", balance);
-				
-				TransactionReceipt receipt = transferErc20Token(userCoin.getUser(), erc20Token, adminCoin.getWalletAddress(), balance,
-						transaction.getCurrencyName());
-				if(receipt != null && receipt.getTransactionHash() != null) {
+
+				TransactionReceipt receipt = transferErc20Token(userCoin.getUser(), erc20Token,
+						adminCoin.getWalletAddress(), balance, transaction.getCurrencyName());
+				if (receipt != null && receipt.getTransactionHash() != null) {
 					userCoin.setBalance(userCoin.getBalance() + balance);
 					userCoinRepository.save(userCoin);
 					logger.debug("saved!");
@@ -432,8 +429,10 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 						TransactionStatus.TRANSFER, estFee, transaction.getCurrencyName());
 				if (res) {
 					transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.COMPLETED));
+					logger.debug("User previous balance: {}", userCoin.getBalance());
 					userCoin.setBalance(userCoin.getBalance() + balance);
 					userCoinRepository.save(userCoin);
+					logger.debug("User new balance saved!");
 					transactionRepo.save(transactions);
 				}
 			}
@@ -498,6 +497,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 					logger.debug("transaction saved successfully of user: {}", userCoin.getUser().getEmailId());
 					return true;
 				}
+			}
+			else {
+				return true;
 			}
 		} catch (Exception e) {
 			logger.error("ETH transaction failed:  {}", e);
