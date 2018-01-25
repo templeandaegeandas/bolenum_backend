@@ -10,6 +10,11 @@ public enum TransferStatus {
 		this.status = txType;
 	}
 
+	/**
+	 * This method is use to get transfer status.
+	 * @param Nothing
+	 * @return status
+	 */
 	public String getTransferStatus() {
 		return status;
 	}

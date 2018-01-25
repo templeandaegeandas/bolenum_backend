@@ -90,7 +90,7 @@ public class PrivilegesController {
 	}
 
 	/**@Description use to view privileges
-	 * 
+	 * @param Nothing.
 	 * @return setOfPrivilege
 	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.GET)

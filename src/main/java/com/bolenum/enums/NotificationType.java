@@ -16,6 +16,11 @@ public enum NotificationType {
 		this.notification = notification;
 	}
 	
+	/**
+	 * This method is use to get notification type.
+	 * @param Nothing
+	 * @return notification
+	 */
 	public String getNotificationType() {
 		return notification;
 	}

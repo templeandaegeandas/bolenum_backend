@@ -119,6 +119,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
+	/* (non-Javadoc)
+	 * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
+	 */
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		addPrivileges();
@@ -145,6 +148,11 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		saveInitialFee();
 	}
 
+	/**
+	 * this method save initial fee at the time of application start
+	 * @param Nothing.
+	 * @return void.
+	 */
 	private void saveInitialFee() {
 		TradingFee fee = tradingFeeService.getTradingFee();
 		if (fee == null) {
@@ -156,11 +164,11 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * this will create ethereum wallet location at the time of application
-	 * start @description createInitDirectories @param @return void @exception
-	 * 
+	 * this method create ethereum wallet location at the time of application
+	 * start @description createInitDirectories 
+	 * @param Nothing.
+	 * @return void.
 	 */
-
 	private void createDocumentsDirectories() {
 		Path profileImg = Paths.get(userDocumetsLocation);
 
@@ -176,7 +184,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * 
+	 * This method create GoogleAuthQrCodeDirectories.
+	 * @param Nothing.
+	 * @return void. 
 	 */
 	private void createGoogleAuthQrCodeDirectories() {
 		Path profileImg = Paths.get(googleQrCodeLocation);
@@ -194,9 +204,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * this will create ethereum wallet location at the time of application
-	 * start @description createInitDirectories @param @return void @exception
-	 * 
+	 * This method create ethereum wallet location at the time of application start.
+	 * @param Nothing.
+	 * @return void. 
 	 */
 	private void createInitDirectories() {
 		Path ethWallet = Paths.get(ethWalletLocation);
@@ -212,6 +222,11 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 
 	}
 
+	/**
+	 * This method create ProfilePicDirectories.
+	 * @param Nothing.
+	 * @return void. 
+	 */
 	private void createProfilePicDirectories() {
 		Path profileImg = Paths.get(userProfileImageLocation);
 
@@ -227,7 +242,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * @description addRole @param @return void @exception
+	 * This method add Role. 
+	 * @param Nothing
+	 * @return void
 	 */
 	private void addRole() {
 		Role role = new Role("ROLE_USER", "user role", privilegeService.findAllPrevileges());
@@ -235,7 +252,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * @description addPrivileges @param @return void @exception
+	 * This method add Privileges 
+	 * @param Nothing.
+	 * @return void
 	 */
 	private void addPrivileges() {
 		Privilege add = new Privilege("add", "adding");
@@ -250,7 +269,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * @description createAdmin @param @return void @exception
+	 * This method createAdmin. 
+	 * @param Nothing.
+	 * @return void.
 	 */
 	private void createAdmin() {
 		Role r = new Role("ROLE_ADMIN", "Admin role", privilegeService.findAllPrevileges());
@@ -285,7 +306,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * 
+	 * This method save countries.
+	 * @param Nothing.
+	 * @return Nothing.
 	 */
 	void saveCountries() {
 		long count = countriesAndStateService.countCountries();
@@ -307,7 +330,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * 
+	 * This method save state.
+	 * @param Nothing.
+	 * @return Nothing.
 	 */
 	void saveStates() {
 		long count = countriesAndStateService.countStates();
@@ -328,6 +353,12 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	
+	/**
+	 * This method save Initial Erc20Tokens.
+	 * @param Nothing.
+	 * @return Nothing.
+	 */
 	void saveInitialErc20Tokens() {
 		long count = erc20TokenService.countErc20Token();
 		if (count == 3) {
@@ -352,7 +383,9 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * to add currency
+	 * This method use to add currency.
+	 * @param Nothing.
+	 * @return Nothing.
 	 */
 	void saveCurrency() {
 		long count = currencyService.countCourencies();
@@ -383,6 +416,11 @@ public class Bootstrap implements ApplicationListener<ContextRefreshedEvent> {
 		}
 	}
 
+	/**
+	 * This method save initial currency pair.
+	 * @param Nothing.
+	 * @return Nothing.
+	 */
 	void saveInitialCurrencyPair() {
 		Currency currencyBTC = currencyService.findByCurrencyAbbreviation("BTC");
 		Currency currencyETH = currencyService.findByCurrencyAbbreviation("ETH");
