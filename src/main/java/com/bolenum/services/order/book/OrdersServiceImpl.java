@@ -1,5 +1,6 @@
 package com.bolenum.services.order.book;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -113,6 +114,13 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		return balance;
 	}
+	
+	private double clipPrice(double price) {
+		int numDecPlaces = (int)Math.log10(1 / 0.00000001);
+		BigDecimal bd = new BigDecimal(price);
+		BigDecimal rounded = bd.setScale(numDecPlaces, BigDecimal.ROUND_HALF_UP);
+		return rounded.doubleValue();
+	}
 
 	/**
 	 * @description getPlacedOrderVolumeOfCurrency @param @return double @exception
@@ -160,6 +168,8 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Override
 	public Boolean processOrder(Orders orders) throws InterruptedException, ExecutionException {
+		double clippedPrice = clipPrice(orders.getPrice());
+		orders.setPrice(clippedPrice);
 		orders = ordersRepository.save(orders);
 		logger.debug("saved requested order id: {}", orders.getId());
 		Boolean status;
@@ -328,6 +338,8 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> sellOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyAndPriceLessThanEqualOrderByPriceAsc(
 							OrderType.SELL, OrderStatus.SUBMITTED, marketCurrency, pairedCurrency, price);
+			
+//			List<Orders> sellOrderList = matchingOrdersList(orderType, marketCurrency, pairedCurrency, price, remainingVolume);
 			/**
 			 * checking user self order, return false if self order else proceed. Feature
 			 * has been paused on Dec 12 2017
@@ -365,6 +377,8 @@ public class OrdersServiceImpl implements OrdersService {
 			List<Orders> buyOrderList = ordersRepository
 					.findByOrderTypeAndOrderStatusAndAndMarketCurrencyAndPairedCurrencyAndPriceGreaterThanEqualOrderByPriceDesc(
 							OrderType.BUY, OrderStatus.SUBMITTED, marketCurrency, pairedCurrency, price);
+			
+//			List<Orders> buyOrderList = matchingOrdersList(orderType, marketCurrency, pairedCurrency, price, remainingVolume);
 			/**
 			 * checking user self order, return false if self order else proceed. Feature
 			 * has been paused on Dec 12 2017
@@ -531,7 +545,26 @@ public class OrdersServiceImpl implements OrdersService {
 		}
 		return remainingVolume;
 	}
-
+	
+	public List<Orders> matchingOrdersList(OrderType orderType, Currency marketCurrency, Currency pairedCurrency, double price, double volume) {
+		Pageable pageRequest;
+		List<Orders> orders;
+		if(OrderType.BUY.equals(orderType)) {
+			pageRequest = new PageRequest(0, Integer.MAX_VALUE, Direction.ASC, "price");
+			orders =  ordersRepository.findMatchingOrdersList(
+					OrderType.SELL, marketCurrency, pairedCurrency, price, volume, pageRequest);
+			orders.addAll(ordersRepository.findSingleMatchingOrdersList(
+					OrderType.SELL, marketCurrency, pairedCurrency, price, pageRequest));
+			return orders;
+		}
+		pageRequest = new PageRequest(0, Integer.MAX_VALUE, Direction.DESC, "price");
+		orders = ordersRepository.findMatchingOrdersList(
+				OrderType.BUY, marketCurrency, pairedCurrency, price, volume, pageRequest);
+		orders.addAll(ordersRepository.findSingleMatchingOrdersList(
+				OrderType.BUY, marketCurrency, pairedCurrency, price, pageRequest));
+		return orders;
+	}
+	
 	@Override
 	public Page<Orders> getBuyOrdersListByPair(long marketCurrencyId, long pairedCurrencyId) {
 		PageRequest pageRequest = new PageRequest(0, Integer.MAX_VALUE, Direction.DESC, "price");

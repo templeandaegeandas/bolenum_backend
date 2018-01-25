@@ -33,10 +33,11 @@ public class Erc20Token {
 	private Boolean isDeleted = false;
 	private Date createdDate = new Date();
 	
-	public Erc20Token(String walletAddress, String contractAddress, Currency currency) {
+	public Erc20Token(String walletAddress, String contractAddress, Currency currency, double decimalValue) {
 		this.walletAddress = walletAddress;
 		this.contractAddress = contractAddress;
 		this.currency = currency;
+		this.decimalValue = decimalValue;
 	}
 	
 	public Erc20Token() {

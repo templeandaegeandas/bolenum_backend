@@ -96,6 +96,7 @@ public class OrderController {
 			return ResponseHandler.response(HttpStatus.BAD_REQUEST, true, localeService.getMessage("order.volume.zero"),
 					null);
 		}
+		orders.setTotalVolume(orders.getVolume());
 		User user = GenericUtils.getLoggedInUser();
 		boolean kycVerified = userService.isKycVerified(user);
 		if (!kycVerified) {

@@ -1,11 +1,11 @@
 package com.bolenum.services.common.chart;
 
-import org.springframework.web.bind.annotation.RequestParam;
+import com.bolenum.model.Currency;
 
 import java.util.Map;
 
 public interface ChartService {
-    Map<String, Object> getSymbolInfo(Long marketId, Long pairId);
+    Map<String, Object> getSymbolInfo(Currency marketId, Currency pairId);
 
     Map<String, Object> getChartConfig();
 

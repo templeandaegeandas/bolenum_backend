@@ -77,6 +77,7 @@ import com.bolenum.services.user.wallet.EtherumWalletService;
 import com.bolenum.util.ErrorCollectionUtil;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResponseHandler;
+
 import io.swagger.annotations.Api;
 
 /**

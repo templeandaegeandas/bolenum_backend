@@ -22,6 +22,12 @@ import com.bolenum.model.orders.book.Orders;
  *
  */
 public interface OrdersRepository extends JpaRepository<Orders, Long> {
+	
+	@Query("select o from Orders o where o.orderType=:orderType and o.orderStatus='SUBMITTED' and o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency and o.price<=:price group by id having (sum(volume)<=:volume)")
+	List<Orders> findMatchingOrdersList(@Param("orderType") OrderType ordertype, @Param("marketCurrency") Currency marketCurrency, @Param("pairedCurrency") Currency pairedCurrency, @Param("price") Double price, @Param("volume") Double volume, Pageable pageable);
+	
+	@Query("select o from Orders o where o.orderType=:orderType and o.orderStatus='SUBMITTED' and o.marketCurrency=:marketCurrency and o.pairedCurrency=:pairedCurrency and o.price<=:price")
+	List<Orders> findSingleMatchingOrdersList(@Param("orderType") OrderType ordertype, @Param("marketCurrency") Currency marketCurrency, @Param("pairedCurrency") Currency pairedCurrency, @Param("price") Double price, Pageable pageable);
 
 	List<Orders> findByOrderTypeAndOrderStatusAndMarketCurrencyAndPairedCurrencyAndPriceLessThanEqualOrderByPriceAsc(
 			OrderType ordertype, OrderStatus orderStatus, Currency marketCurrency, Currency pairedCurrency,

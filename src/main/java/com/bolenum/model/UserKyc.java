@@ -10,6 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.bolenum.enums.DocumentStatus;
 import com.bolenum.enums.DocumentType;
 
@@ -34,7 +36,8 @@ public class UserKyc {
 	@Enumerated(EnumType.STRING)
 	private DocumentStatus documentStatus = DocumentStatus.SUBMITTED;
 	private String rejectionMessage;
-	private Date uploadedDate = new Date();
+	@UpdateTimestamp
+	private Date uploadedDate;
 	private Date verifiedDate;
 	private Boolean isVerified = false;
 

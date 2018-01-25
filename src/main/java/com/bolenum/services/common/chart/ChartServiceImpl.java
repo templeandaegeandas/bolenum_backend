@@ -2,7 +2,6 @@ package com.bolenum.services.common.chart;
 
 import com.bolenum.model.Currency;
 import com.bolenum.repo.order.book.TradeRepository;
-import com.bolenum.services.admin.CurrencyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,36 +15,32 @@ import java.util.*;
 public class ChartServiceImpl implements ChartService {
     private static final String[] SUPPORTED_RESOLUTIONS = new String[]{"60", "180", "360", "720", "D", "W", "M"};
     private static Logger logger = LoggerFactory.getLogger(ChartServiceImpl.class);
-    @Autowired
-    private CurrencyService currencyService;
+
 
     @Autowired
-
     private TradeRepository tradeRepository;
 
     @Override
-    public Map<String, Object> getSymbolInfo(Long marketId, Long pairId) {
-        Currency marketCurrency = currencyService.findCurrencyById(marketId);
-        Currency pairCurrency = currencyService.findCurrencyById(pairId);
+    public Map<String, Object> getSymbolInfo(Currency marketCurrency, Currency pairCurrency) {
+
         Map<String, Object> result = new HashMap<>();
         if (marketCurrency != null && pairCurrency != null) {
-            result.put("name", pairCurrency.getCurrencyAbbreviation() + " / " + marketCurrency.getCurrencyAbbreviation());
-           // result.put("exchange-traded", marketCurrency.getCurrencyAbbreviation());
-            result.put("exchange-listed", marketCurrency.getCurrencyAbbreviation());
+            result.put("name", marketCurrency.getCurrencyId() + "BE" + pairCurrency.getCurrencyId());
             result.put("timezone", "Asia/Kolkata");
             result.put("minmovement", 1);
             result.put("minmovement2", 0);
             result.put("pointvalue", 1);
-            result.put("session", "0001-2330");
+            result.put("session", "24x7");
             result.put("has_intraday", true);
             result.put("has_daily", true);
             result.put("has_weekly_and_monthly", true);
             result.put("has_no_volume", false);
             result.put("description", "Bolenum Exchange " + pairCurrency.getCurrencyAbbreviation() + "/" + marketCurrency.getCurrencyAbbreviation());
-            result.put("type", "stock");
+            result.put("type", "bitcoin");
             result.put("supported_resolutions", SUPPORTED_RESOLUTIONS);
             result.put("pricescale", 100);
-            result.put("ticker", marketCurrency.getCurrencyAbbreviation());
+            result.put("has_empty_bars", true);
+            result.put("ticker", marketCurrency.getCurrencyId() + "BE" + pairCurrency.getCurrencyId());
         }
         return result;
     }
@@ -63,48 +58,35 @@ public class ChartServiceImpl implements ChartService {
 
     @Override
     public Map<String, Object> getHistroyInfo(Long marketId, Long pairId, String fromDate, String toDate, String resolution) {
-        Currency marketCurrency = currencyService.findCurrencyById(marketId);
-        Currency pairCurrency = currencyService.findCurrencyById(pairId);
 
-        Map<String, Object> result = new HashMap<>();
 
         Long start = Long.parseLong(fromDate);
-        long stLong = start.longValue() * 1000;
-        Calendar startDate = Calendar.getInstance();
-        startDate.setTimeInMillis(stLong);
+        Calendar startDateCal = Calendar.getInstance();
+        startDateCal.setTimeInMillis(start * 1000);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String strDate = sdf.format(startDate.getTime());
+        String startDate = sdf.format(startDateCal.getTime());
 
         Long end = Long.parseLong(toDate);
-        long endLong = end.longValue() * 1000;
-        Calendar endDate = Calendar.getInstance();
-        endDate.setTimeInMillis(endLong);
-        SimpleDateFormat endSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String strendDate = endSdf.format(endDate.getTime());
-        BigDecimal timeInterval = BigDecimal.valueOf(0);
-        // Get open close high low according to time interval
-        Map<String, Object> historyAndTimeinterval = getHistoryFilterByTimeInterval(marketCurrency.getCurrencyId(), pairCurrency.getCurrencyId(), strDate, strendDate, resolution);
-        List<Object[]> historyObj = (List<Object[]>) historyAndTimeinterval.get("historyObj");
+        Calendar endDateCal = Calendar.getInstance();
+        endDateCal.setTimeInMillis(end * 1000);
 
-        timeInterval = (BigDecimal) historyAndTimeinterval.get("timeInterval");
+        SimpleDateFormat endSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String endDate = endSdf.format(endDateCal.getTime());
+
+        logger.debug("start Date: {}, End Date: {}", startDate, endDate);
+
+        // Get open close high low according to time interval
+        List<Object[]> historyObj = getHistoryFilterByTimeInterval(marketId, pairId, startDate, endDate, resolution);
 
         // Get existance and non-existance data according to charting library api
-        Map<String, Object> mainData = getData(historyObj, marketCurrency, pairCurrency, fromDate, toDate, resolution);
-        result.put("history", mainData);
-        return result;
+        return getData(historyObj);
     }
 
-    private Map<String, Object> getData(List<Object[]> historyObj, Currency marketCurrency, Currency pairCurrency, String fromDate, String toDate, String resolution) {
+    private Map<String, Object> getData(List<Object[]> historyObj) {
         // Build json object according charting library
         Map<String, Object> mainData = getJsonAccordingToChartApi(historyObj);
         List<BigDecimal> timestamp = (List<BigDecimal>) mainData.get("t");
-        mainData.put("t", mainData.get("t"));
-        mainData.put("v", mainData.get("v"));
-        mainData.put("o", mainData.get("o"));
-        mainData.put("h", mainData.get("h"));
-        mainData.put("l", mainData.get("l"));
-        mainData.put("c", mainData.get("c"));
 
         if (!timestamp.isEmpty()) {
             /*if (timestamp.size() >= 1 && timestamp.size() <= 5) {
@@ -121,7 +103,7 @@ public class ChartServiceImpl implements ChartService {
         return mainData;
     }
 
-    // If trade chart have only one entry in database
+   /* // If trade chart have only one entry in database
     @SuppressWarnings("unchecked")
     public Map<String, Object> singleRecord(Currency marketCurrency, Currency pairCurrency, String from, String to, String resolution) {
         Long start = new Long(from);
@@ -146,7 +128,7 @@ public class ChartServiceImpl implements ChartService {
         // Build json object according charting library
         Map<String, Object> mainData = getJsonAccordingToChartApi(historyObj);
         return mainData;
-    }
+    }*/
 
     private Map<String, Object> getJsonAccordingToChartApi(List<Object[]> historyObj) {
         List<BigDecimal> timestamp = new ArrayList<>();
@@ -155,7 +137,8 @@ public class ChartServiceImpl implements ChartService {
         List<BigDecimal> high = new ArrayList<>();
         List<BigDecimal> low = new ArrayList<>();
         List<BigDecimal> close = new ArrayList<>();
-        for (Object[] current : historyObj) {
+
+        historyObj.forEach(current -> {
             BigDecimal currTimestamp = new BigDecimal(current[0].toString());
             BigDecimal currVolume = new BigDecimal(current[1].toString());
             BigDecimal currOpen = new BigDecimal(current[2].toString());
@@ -168,59 +151,54 @@ public class ChartServiceImpl implements ChartService {
             high.add(currHigh);
             low.add(currLow);
             close.add(currClose);
-        }
+        });
+
         //////////////////////////set data //////////////////////////////
         Map<String, Object> mainData = new HashMap<>();
         mainData.put("t", timestamp);
-        mainData.put("v", volume);
+        mainData.put("c", close);
         mainData.put("o", open);
+        mainData.put("v", volume);
         mainData.put("h", high);
         mainData.put("l", low);
-        mainData.put("c", close);
         return mainData;
     }
 
-    private Map<String, Object> getHistoryFilterByTimeInterval(Long marketCurrency, Long pairCurrency, String strDate, String strendDate, String resolution) {
-        Map<String, Object> result = new HashMap<>();
+    private List<Object[]> getHistoryFilterByTimeInterval(Long marketCurrency, Long pairCurrency, String startDate, String endDate, String resolution) {
         List<Object[]> historyObj;
-        BigDecimal interval = BigDecimal.valueOf(0);
+        BigDecimal interval = BigDecimal.valueOf(3600);
         switch (resolution) {
             case "60":
                 interval = new BigDecimal(3600);
-                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, strDate, strendDate);
+                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, startDate, endDate);
                 break;
             case "180":
                 interval = new BigDecimal(10800);
-                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, strDate, strendDate);
+                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, startDate, endDate);
                 break;
             case "360":
                 interval = new BigDecimal(21600);
-                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, strDate, strendDate);
+                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, startDate, endDate);
                 break;
             case "720":
                 interval = new BigDecimal(1800);
-                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, strDate, strendDate);
+                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, startDate, endDate);
                 break;
             case "D":
                 interval = new BigDecimal(86400);
-                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, strDate, strendDate);
+                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, startDate, endDate);
                 break;
             case "W":
                 interval = new BigDecimal(604800);
-                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, strDate, strendDate);
+                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, startDate, endDate);
                 break;
-//            case "M":
-//                interval = new BigDecimal(18144000);
-//                historyObj = tradeRepository.getTradeHistoryMonth(marketCurrency, pairCurrency, strDate, strendDate);
-//                break;
+            case "M":
+                historyObj = tradeRepository.getTradeHistoryMonth(marketCurrency, pairCurrency, startDate, endDate);
+                break;
             default:
-                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, strDate, strendDate);
+                historyObj = tradeRepository.getTradeHistory(interval, marketCurrency, pairCurrency, startDate, endDate);
                 break;
         }
-        result.put("historyObj", historyObj);
-        result.put("timeInterval", interval);
-        return result;
+        return historyObj;
     }
-
-
 }
