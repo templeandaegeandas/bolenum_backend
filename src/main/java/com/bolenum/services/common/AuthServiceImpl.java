@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.dto.common.ResetPasswordForm;
 import com.bolenum.enums.TokenType;
 import com.bolenum.exceptions.InvalidPasswordException;
@@ -148,7 +149,9 @@ public class AuthServiceImpl implements AuthService {
 		AuthenticationToken authenticationToken = new AuthenticationToken(token, user);
 
 		String url = serverUrl + urlForResetPassword + token;
-		emailService.mailSend(user.getEmailId(), localeService.getMessage("message.subject.forget.password"), url);
+		Map<String, Object> map = new HashMap<>();
+		map.put("url", url);
+		emailService.mailSend(user.getEmailId(), localeService.getMessage("message.subject.forget.password"), map,EmailTemplate.RESET_PASSWORD_TEMPLATE);
 		authenticationToken.setTokentype(TokenType.FORGOT_PASSWORD);
 		return authenticationTokenRepo.saveAndFlush(authenticationToken);
 

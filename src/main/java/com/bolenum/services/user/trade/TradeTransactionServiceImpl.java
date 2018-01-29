@@ -4,12 +4,15 @@
 package com.bolenum.services.user.trade;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.UserCoin;
 import com.bolenum.repo.common.coin.UserCoinRepository;
@@ -52,6 +55,15 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "
 				+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + currencyAbr
 				+ " have been processed successfully!";
+		Map<String, Object> map = new HashMap<>();
+		map.put("sellerEmailAddress", seller.getEmailId());
+		map.put("sellerName", seller.getFullName());
+		map.put("buyerEmailAddress", buyer.getFullName());
+		map.put("buyerName", buyer.getFullName());
+		map.put("tradeid", tradeId);
+		map.put("currencyAbbreviation", currencyAbr);
+		map.put("currencyType", currencyType);
+		map.put("quantityTraded", qtyTraded);
 		Boolean txStatus;
 		switch (currencyType) {
 		case "CRYPTO":
@@ -63,9 +75,11 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 				 * if trade for users, then return result with mail notification to users
 				 */
 				if (txStatus) {
-					notificationService.sendNotification(seller, msg, TRADESUMMARY);
+					notificationService.sendNotification(seller, TRADESUMMARY, map,
+							EmailTemplate.TRADE_SUMMERY_TEMPLATE);
 					notificationService.saveNotification(buyer, seller, msg, null, null);
-					notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+					notificationService.sendNotification(buyer, TRADESUMMARY, map,
+							EmailTemplate.TRADE_SUMMERY_TEMPLATE);
 					notificationService.saveNotification(buyer, seller, msg1, null, null);
 					return true;
 				}
@@ -77,9 +91,11 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 				 * if transaction for users, then return result with mail notification to users
 				 */
 				if (txStatus) {
-					notificationService.sendNotification(seller, msg, TRADESUMMARY);
+					notificationService.sendNotification(seller, TRADESUMMARY, map,
+							EmailTemplate.TRADE_SUMMERY_TEMPLATE);
 					notificationService.saveNotification(buyer, seller, msg, null, null);
-					notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+					notificationService.sendNotification(buyer, TRADESUMMARY, map,
+							EmailTemplate.TRADE_SUMMERY_TEMPLATE);
 					notificationService.saveNotification(buyer, seller, msg1, null, null);
 					logger.debug("Message : {} , Message1: {}", msg, msg1);
 					return true;
@@ -94,9 +110,9 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 			 * if transaction for users, then return result with mail notification to users
 			 */
 			if (txStatus) {
-				notificationService.sendNotification(seller, msg, TRADESUMMARY);
+				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMERY_TEMPLATE);
 				notificationService.saveNotification(buyer, seller, msg, null, null);
-				notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+				notificationService.sendNotification(buyer, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMERY_TEMPLATE);
 				notificationService.saveNotification(buyer, seller, msg1, null, null);
 				logger.debug("Message : {}", msg);
 				logger.debug("Message : {}", msg1);

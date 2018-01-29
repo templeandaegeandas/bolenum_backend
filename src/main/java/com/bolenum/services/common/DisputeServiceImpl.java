@@ -2,6 +2,8 @@ package com.bolenum.services.common;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.enums.DisputeStatus;
 import com.bolenum.enums.NotificationType;
 import com.bolenum.enums.OrderStatus;
@@ -188,18 +191,35 @@ public class DisputeServiceImpl implements DisputeService {
 	@Override
 	public void sendDisputeNotification(DisputeOrder disputeOrder, User disputeRaiser, User disputeRaisedAgainst) {
 
-		String messageForDisputeRaiser = "hi , " + "  " + disputeRaiser.getFirstName() + '\n'
-				+ "your have requested to dispute your order against " + disputeRaisedAgainst.getFirstName()
-				+ ".your order id is" + disputeOrder.getOrders().getId() + "and your dispute is "
-				+ disputeOrder.getDisputeStatus() + disputeOrder.getCommentForDisputeRaiser();
+		// String messageForDisputeRaiser = "hi , " + " " + disputeRaiser.getFirstName()
+		// + '\n'
+		// + "your have requested to dispute your order against " +
+		// disputeRaisedAgainst.getFirstName()
+		// + ".your order id is" + disputeOrder.getOrders().getId() + "and your dispute
+		// is "
+		// + disputeOrder.getDisputeStatus() +
+		// disputeOrder.getCommentForDisputeRaiser();
 
-		notificationService.sendNotification(disputeRaiser, messageForDisputeRaiser, "dispute.summary");
+		Map<String, Object> map = new HashMap<>();
+		map.put("disputeRaiserName", disputeRaiser.getFullName());
+		map.put("disputeRaiserEmailID", disputeRaiser.getEmailId());
+		map.put("disputeRaisedAgainstName", disputeRaisedAgainst.getFullName());
+		map.put("disputeRaisedAgainstEmailId", disputeRaisedAgainst.getEmailId());
+		map.put("orderId", disputeOrder.getOrders().getId());
+		map.put("disputeStatus", disputeOrder.getDisputeStatus());
+		map.put("comment", disputeOrder.getCommentForDisputeRaiser());
+		notificationService.sendNotification(disputeRaiser, "dispute.summary", map,
+				EmailTemplate.DISPUTE_MAIL_TEMPLATE);
 
-		String messageForDisputeRaisedAgainst = "hi , " + disputeRaisedAgainst.getFirstName() + '\n'
-				+ disputeRaiser.getFirstName() + "has raised dispute against you for order id "
-				+ disputeOrder.getOrders().getId() + disputeOrder.getCommentForDisputeRaisedAgainst();
+		// String messageForDisputeRaisedAgainst = "hi , " +
+		// disputeRaisedAgainst.getFirstName() + '\n'
+		// + disputeRaiser.getFirstName() + "has raised dispute against you for order id
+		// "
+		// + disputeOrder.getOrders().getId() +
+		// disputeOrder.getCommentForDisputeRaisedAgainst();
 
-		notificationService.sendNotification(disputeRaisedAgainst, messageForDisputeRaisedAgainst, "dispute.summary");
+		notificationService.sendNotification(disputeRaisedAgainst, "dispute.summary", map,
+				EmailTemplate.DISPUTE_MAIL_TEMPLATE);
 
 		notificationService.saveNotification(disputeRaiser, disputeRaisedAgainst, disputeOrder.getReason(), null,
 				NotificationType.DISPUTE_NOTIFICATION);

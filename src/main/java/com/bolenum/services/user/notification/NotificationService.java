@@ -3,8 +3,11 @@
  */
 package com.bolenum.services.user.notification;
 
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.enums.NotificationType;
 import com.bolenum.model.User;
 import com.bolenum.model.notification.Notification;
@@ -16,7 +19,7 @@ import com.bolenum.model.notification.Notification;
 public interface NotificationService {
 	public Notification saveNotification(User sender, User receiver, String msg, Long notificationRelationId, NotificationType notificationType);
 
-	public boolean sendNotification(User user, String message, String subject);
+	//public boolean sendNotification(User user, String message, String subject);
 
 	public Page<Notification> getNotification(User receiver, int pageNumber, int pageSize);
 
@@ -30,5 +33,11 @@ public interface NotificationService {
 	public Long countUnSeenNotification(User user);
 
 	public void changeNotificationsStatus(Long[] arrayOfNotification);
+
+	//boolean sendNotification(User user, String message, Map<String, Object> map);
+
+	//boolean sendNotification(User user, String subject);
+
+	boolean sendNotification(User user, String subject, Map<String, Object> map, String tradeSummeryTemplate);
   
 }

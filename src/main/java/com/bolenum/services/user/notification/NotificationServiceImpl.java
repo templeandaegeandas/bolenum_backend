@@ -5,6 +5,7 @@ package com.bolenum.services.user.notification;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.enums.NotificationType;
 import com.bolenum.model.User;
 import com.bolenum.model.notification.Notification;
@@ -46,8 +48,8 @@ public class NotificationServiceImpl implements NotificationService {
 	 * to send the notification
 	 */
 	@Override
-	public boolean sendNotification(User user, String message, String subject) {
-		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage(subject), message);
+	public boolean sendNotification(User user, String subject, Map<String,Object> map,String emailTemplate) {
+		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage(subject),map,emailTemplate.toString());
 		try {
 			if (status.get()) {
 				logger.debug("notification send to : {}", user.getEmailId());

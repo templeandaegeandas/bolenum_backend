@@ -23,6 +23,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.EmailTemplate;
+
 /**
  * 
  * @Author Himanshu
@@ -44,47 +46,54 @@ public class MailServiceImpl implements MailService {
 	@Value("${bolenum.mail.from}")
 	private String mailFrom;
 
+	@Value("${bolenum.domain.name}")
+	private String domainName;
+
 	@Override
 	public void registrationMailSend(String to, String token) {
 
-		// SimpleMailMessage message = new SimpleMailMessage();
-		
 		MimeMessage message = emailSender.createMimeMessage();
 		try {
-			
+
 			MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
 					StandardCharsets.UTF_8.name());
-			Map<String, Object> model = new HashMap<String, Object>();
+			Map<String, Object> model = new HashMap<>();
 			model.put("url", serverUrl + "/#/login?token=" + token);
 			model.put("to", to);
 			helper.setTo(to);
-			String html = ThymeleafUtil.getProcessedHtml("emailTemplate", model);
+			String html = ThymeleafUtil.getProcessedHtml(model, EmailTemplate.REGISTRATION);
 			helper.setText(html, true);
 			helper.setSubject("Verification link for registration");
-			helper.setFrom(new InternetAddress(mailFrom, "Bolenum Exchange").toString());
+			helper.setFrom(new InternetAddress(mailFrom, domainName).toString());
 			emailSender.send(message);
-		} catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException | MessagingException e) {
 			logger.error("registrationMailSend exce: {}", e);
-		} catch (MessagingException e) {
-			e.printStackTrace();
+
 		}
-		
+
 	}
 
+	/**
+	 * 
+	 * @modify by Himanshu Kumar
+	 * 
+	 */
 	@Override
 	@Async
-	public Future<Boolean> mailSend(String to, String subject, String text) {
-		SimpleMailMessage message = new SimpleMailMessage();
-		message.setSubject(subject);
-		message.setText(text);
+	public Future<Boolean> mailSend(String to, String subject, Map<String, Object> map,String emailTemplate) {
+		MimeMessage message = emailSender.createMimeMessage();
 		try {
-			message.setFrom(new InternetAddress(mailFrom, "Bolenum Exchange").toString());
-			message.setTo(to);
-			mailSender.send(message);
-			logger.debug("mail sent succssfully to: {}", to);
-			return new AsyncResult<>(true);
-		} catch (UnsupportedEncodingException | MailException e) {
-			logger.error("mail seding failed to: {} {}", to, e);
+
+			MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+					StandardCharsets.UTF_8.name());
+			helper.setTo(to);
+			String html = ThymeleafUtil.getProcessedHtml(map,emailTemplate);
+			helper.setText(html, true);
+			helper.setSubject(subject);
+			helper.setFrom(new InternetAddress(mailFrom, domainName).toString());
+			emailSender.send(message);
+		} catch (UnsupportedEncodingException | MessagingException e) {
+			logger.error("registrationMailSend exce: {}", e);
 		}
 		return new AsyncResult<>(false);
 	}
