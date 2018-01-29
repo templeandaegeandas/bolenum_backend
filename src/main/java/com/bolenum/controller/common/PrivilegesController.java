@@ -1,3 +1,14 @@
+/*@Description Of Class
+ * 
+ * PrivilegesController class is responsible for below listed task: 
+ * 
+ *    Add privileges
+ *    Delete privileges
+ *    View privileges
+ *    
+ */
+
+
 package com.bolenum.controller.common;
 
 import java.util.Set;
@@ -42,12 +53,11 @@ public class PrivilegesController {
 	@Autowired
 	private LocaleService localService;
 
-	/**
-	 * to add privileges
+	/**Description to add privileges
 	 * 
 	 * @param privilege
 	 * @param result
-	 * @return response
+	 * @return privilege add success
 	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.POST)
 	public ResponseEntity<Object> addPrivileges(@Valid @RequestBody Privilege privilege, BindingResult result) {
@@ -63,12 +73,9 @@ public class PrivilegesController {
 		}
 	}
 
-	/**
-	 * 
-	 * to delete privileges
-	 * 
+	/**@Description to delete privileges
 	 * @param id
-	 * @return response
+	 * @return requested privileges removed successfully
 	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.DELETE)
 	public ResponseEntity<Object> deletePrivileges(Long id) {
@@ -82,13 +89,9 @@ public class PrivilegesController {
 		}
 	}
 
-	/**
-	 * 
-	 * to view privileges
-	 * 
-	 * @param id
-	 * @return response
-	 * 
+	/**@Description use to view privileges
+	 * @param Nothing.
+	 * @return setOfPrivilege
 	 */
 	@RequestMapping(value = UrlConstant.PRIVILEGE_URI, method = RequestMethod.GET)
 	public ResponseEntity<Object> getPrivileges() {

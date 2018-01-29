@@ -9,6 +9,11 @@ public enum CurrencyType {
 			this.currType = currencyType;
 		}
 
+	/**
+	 * This method is use to get currency type.
+	 * @param Nothing
+	 * @return currType
+	 */
 	public String getCurrencyType() {
 		return currType;
 	}

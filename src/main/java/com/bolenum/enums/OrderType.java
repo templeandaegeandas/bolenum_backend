@@ -15,6 +15,11 @@ public enum OrderType {
 		this.type = orderType;
 	}
 
+	/**
+	 * This method is use to get order type.
+	 * @param Nothing
+	 * @return type
+	 */
 	public String getOrderType() {
 		return type;
 	}

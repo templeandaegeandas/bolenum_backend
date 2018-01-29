@@ -118,7 +118,7 @@ public class DisputeServiceImpl implements DisputeService {
 	public DisputeOrder raiseDisputeBySeller(Orders order) {
 		Orders matchedOrder = order.getMatchedOrder();
 		User disputeRaisedAgainst = matchedOrder.getUser();
-		if (OrderStatus.LOCKED.equals(order.getOrderStatus()) && OrderType.BUY.equals(order.getOrderType())) {
+		if (OrderStatus.LOCKED.equals(order.getOrderStatus()) && OrderType.SELL.equals(order.getOrderType())) {
 			User disputeRaiser = order.getUser();
 			DisputeOrder disputeOrder = new DisputeOrder();
 			disputeOrder.setOrders(order);

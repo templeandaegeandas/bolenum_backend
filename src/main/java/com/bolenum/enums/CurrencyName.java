@@ -15,6 +15,11 @@ public enum CurrencyName {
 		this.currName = currencyName;
 	}
 
+	/**
+	 * This method is use to get currency name.
+	 * @param Nothing
+	 * @return currName
+	 */
 	public String getCurrencyName() {
 		return currName;
 	}

@@ -15,6 +15,11 @@ public enum OrderStandard {
 		this.orderStd = orderStd;
 	}
 
+	/**
+	 * This method is use to get order standard.
+	 * @param Nothing
+	 * @return orderStd
+	 */
 	public String getOrderStandard() {
 		return orderStd;
 	}

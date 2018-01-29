@@ -1,3 +1,18 @@
+/*@Description Of Class
+ * 
+ * KYCController class is responsible for below listed task: 
+ *   
+ *    Upload KYC document
+ *    Approve KYC document
+ *    DisApprove KYC document
+ *    Get KYC by id
+ *    Get list of KYC
+ *    Get list of KYC of Particular User
+ *    Get KYC by user id
+ */
+
+
+
 package com.bolenum.controller.common;
 
 import java.io.IOException;
@@ -53,12 +68,14 @@ public class KYCController {
 	public static final Logger logger = LoggerFactory.getLogger(KYCController.class);
 
 	/**
-	 * 
+	 * This method is use to upload Kyc Document.
 	 * @param file
-	 * @return
 	 * @throws IOException
+	 * @throws documentType
 	 * @throws PersistenceException
 	 * @throws MaxSizeExceedException
+	 * @return user document uploaded success
+	 * 
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.UPLOAD_DOCUMENT, method = RequestMethod.POST)
@@ -86,9 +103,9 @@ public class KYCController {
 	}
 
 	/**
-	 * 
-	 * @param userId
-	 * @return
+	 * @description Use to approve KYC document
+	 * @param       userId
+	 * @return      userKyc
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.APPROVE_DOCUMENT, method = RequestMethod.PUT)
@@ -103,10 +120,9 @@ public class KYCController {
 		}
 	}
 
-	/**
-	 * 
-	 * @param data
-	 * @return
+	/**@description Use to disapprove KYC document
+	   @param       data
+	 * @return      user document disapprove success , userKey
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.DISAPPROVE_DOCUMENT, method = RequestMethod.PUT)
@@ -122,11 +138,9 @@ public class KYCController {
 		}
 	}
 
-	/**
-	 * 
-	 * @param kycId
-	 * 
-	 * @return
+	/**@description Use to get KYC by id
+	   @param       kycId
+	 * @return      userKyc
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.GET_KYC_BY_ID, method = RequestMethod.GET)
@@ -142,13 +156,13 @@ public class KYCController {
 	}
 
 	/**
-	 * 
+	 * @description use to get list of KYC
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortBy
 	 * @param sortOrder
 	 * @param searchData
-	 * @return
+	 * @return listOfUser
 	 */
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST, method = RequestMethod.GET)
@@ -161,10 +175,8 @@ public class KYCController {
 				listOfUser);
 	}
 
-	/**
-	 * 
-	 * @return
-	 * 
+	/**@description use to get list of KYC of particular user
+	 * @return      listOfUser
 	 */
 	@Secured("ROLE_USER")
 	@RequestMapping(value = UrlConstant.SUBMITTED_KYC_LIST_OF_USER, method = RequestMethod.GET)
@@ -175,9 +187,9 @@ public class KYCController {
 	}
 
 	/**
-	 * 
+	 * @description use to get KYC by Userid 
 	 * @param userId
-	 * @return
+	 * @return listOfUser
 	 * 
 	 */
 	@Secured({ "ROLE_USER", "ROLE_ADMIN" })

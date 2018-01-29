@@ -1,3 +1,22 @@
+/*@Description Of class
+ * 
+ * UserServiceImpl class is responsible for below listed task: 
+ *   
+ *     Save user
+ *     Find by email
+ *     Re Register
+ *     Change password
+ *     Update user profile
+ *     Add mobile number
+ *     Re send OTP
+ *     Verify OTP
+ *     Mail verification
+ *     Find by user id
+ *     Upload image
+ *     KYC Verified
+ *     Save user coin
+ **/
+
 package com.bolenum.services.user;
 
 import java.io.IOException;
@@ -89,7 +108,9 @@ public class UserServiceImpl implements UserService {
 	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	/**
-	 * to register user if and only if when user details not present in database
+	 *@description use to register user if and only if when user details not present in database
+	 *@param       user
+	 *
 	 */
 	@Override
 	public void registerUser(User user) {
@@ -103,10 +124,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
-	 * to send mail which contains verification link and Authentication token
+	 * @description to send mail which contains verification link and Authentication token
 	 * 
-	 * @param user
-	 * @return
+	 * @param  user
+	 * @return authenticationToken
 	 */
 	private AuthenticationToken mailVerification(User user) {
 		String token = TokenGenerator.generateToken();
@@ -115,8 +136,9 @@ public class UserServiceImpl implements UserService {
 		return authenticationToken;
 	}
 
-	/**
-	 * find user with respect to email id
+	/**@description  find user with respect to email id
+	 * @param        email
+	 * @return       user
 	 */
 	@Override
 	public User findByEmail(String email) {
@@ -124,14 +146,22 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByEmailId(email);
 	}
 
-	/**
-	 * to save user details
+	/**@description  use to save user
+	 * @param        user
+	 * @return       user
 	 */
 	@Override
 	public User saveUser(User user) {
 		return userRepository.saveAndFlush(user);
 	}
-
+	
+	
+	/**@description  use to save user coin
+	 * @param        walletAddress
+	 * @param        user
+	 * @param        tokenName
+	 * @return       userCoin
+	 */
 	@Override
 	public UserCoin saveUserCoin(String walletAddress, User user, String tokenName) {
 		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);
@@ -146,10 +176,8 @@ public class UserServiceImpl implements UserService {
 		return userCoin;
 	}
 
-	/**
-	 * 
-	 * to re register user if already details present in user table
-	 * 
+	/**@description  use to re register user if already details present in user table
+	 * @param        userSignupForm
 	 */
 
 	@Override
@@ -170,8 +198,10 @@ public class UserServiceImpl implements UserService {
 		registerUser(isUserExist);
 	}
 
-	/**
-	 * to change password
+	/**@description use to change password of user
+	 * @param       user
+	 * @param       passwordForm
+	 * @return      boolean
 	 */
 	@Override
 	public Boolean changePassword(User user, PasswordForm passwordForm) {
@@ -184,10 +214,11 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
-	/**
-	 * to update user profile
+	/**@description use to update user profile
+	 * @param       user
+	 * @param       editUserForm
+	 * @return      user
 	 */
-
 	@Override
 	public User updateUserProfile(EditUserForm editUserForm, User user) {
 
@@ -229,7 +260,12 @@ public class UserServiceImpl implements UserService {
 		return userRepository.saveAndFlush(user);
 
 	}
-
+	/**@description use to add mobile number
+	 * @param       mobileNumber
+	 * @param       countryCode
+	 * @param       user
+	 * @return      user
+	 */
 	@Override
 	public User addMobileNumber(String mobileNumber, String countryCode, User user) throws PersistenceException {
 		User existinguser = userRepository.findByMobileNumber(mobileNumber);
@@ -263,7 +299,11 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 	}
-
+	/**@description use to verify otp
+	 * @param       otp
+	 * @param       user
+	 * @return      boolean
+	 */
 	@Override
 	public Boolean verifyOTP(Integer otp, User user) throws InvalidOtpException {
 		OTP existingOtp = otpRepository.findByOtpNumber(otp);
@@ -289,7 +329,9 @@ public class UserServiceImpl implements UserService {
 			throw new InvalidOtpException(localService.getMessage("otp.invalid"));
 		}
 	}
-
+	/**@description use to resends otp
+	 * @param       user
+	 */
 	@Override
 	public void resendOTP(User user) {
 		String mobileNumber = user.getMobileNumber();
@@ -301,8 +343,9 @@ public class UserServiceImpl implements UserService {
 		otpRepository.save(otp);
 	}
 
-	/**
-	 * find user with respect to id
+	/**@description use to find user by id
+	 * @param       id
+	 * @return      user
 	 */
 	@Override
 	public User findByUserId(Long id) {
@@ -311,7 +354,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	/**
-	 * to upload profile image with all validation of image file
+	 * @description use to upload profile image with all validation of image file.
+	 * @param       imageBase64
+	 * @param       userId
+	 * @throws      IOException
+	 * @throws      PersistenceException
+	 * @throws      MaxSizeExceedException
+	 * @return      user
 	 */
 	@Override
 	public User uploadImage(String imageBase64, Long userId)
@@ -330,11 +379,9 @@ public class UserServiceImpl implements UserService {
 		return null;
 	}
 
-	/**
-	 * return true if user's KYC document is verified, else false
-	 * 
+	/**@description  use to verify user KYC
+	 * @return       boolean
 	 * @param user
-	 * 
 	 */
 	@Override
 	public boolean isKycVerified(User user) {

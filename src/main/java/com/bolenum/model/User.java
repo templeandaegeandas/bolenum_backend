@@ -152,122 +152,214 @@ public class User {
 				+ (this.lastName == null ? "" : this.lastName);
 	}
 
+
+
+	/**
+	 * @return the emailId
+	 */
 	public String getEmailId() {
 		return emailId;
 	}
 
+	/**
+	 * @param emailId the emailId to set
+	 */
 	public void setEmailId(String emailId) {
 		this.emailId = emailId;
 	}
 
+	/**
+	 * @return the password
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * @param password the password to set
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	/**
+	 * @return the address
+	 */
 	public String getAddress() {
 		return address;
 	}
 
+	/**
+	 * @param address the address to set
+	 */
 	public void setAddress(String address) {
 		this.address = address;
 	}
 
+	/**
+	 * @return the city
+	 */
 	public String getCity() {
 		return city;
 	}
 
+	/**
+	 * @param city the city to set
+	 */
 	public void setCity(String city) {
 		this.city = city;
 	}
 
+	/**
+	 * @return the state
+	 */
 	public String getState() {
 		return state;
 	}
 
+	/**
+	 * @param state the state to set
+	 */
 	public void setState(String state) {
 		this.state = state;
 	}
 
+	/**
+	 * @return the country
+	 */
 	public String getCountry() {
 		return country;
 	}
 
+	/**
+	 * @param country the country to set
+	 */
 	public void setCountry(String country) {
 		this.country = country;
 	}
 
+	/**
+	 * @return the countryCode
+	 */
 	public String getCountryCode() {
 		return countryCode;
 	}
 
+	/**
+	 * @param countryCode the countryCode to set
+	 */
 	public void setCountryCode(String countryCode) {
 		this.countryCode = countryCode;
 	}
 
+	/**
+	 * @return the mobileNumber
+	 */
 	public String getMobileNumber() {
 		return mobileNumber;
 	}
 
+	/**
+	 * @param mobileNumber the mobileNumber to set
+	 */
 	public void setMobileNumber(String mobileNumber) {
 		this.mobileNumber = mobileNumber;
 	}
 
+	/**
+	 * @return the isMobileVerified
+	 */
 	public Boolean getIsMobileVerified() {
 		return isMobileVerified;
 	}
 
+	/**
+	 * @param isMobileVerified the isMobileVerified to set
+	 */
 	public void setIsMobileVerified(Boolean isMobileVerified) {
 		this.isMobileVerified = isMobileVerified;
 	}
 
+	/**
+	 * @return the gender
+	 */
 	public String getGender() {
 		return gender;
 	}
 
+	/**
+	 * @param gender the gender to set
+	 */
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
 
+	/**
+	 * @return the dob
+	 */
 	public Date getDob() {
 		return dob;
 	}
 
+	/**
+	 * @param dob the dob to set
+	 */
 	public void setDob(Date dob) {
 		this.dob = dob;
 	}
 
+	/**
+	 * @return the termsConditions
+	 */
 	public Boolean getTermsConditions() {
 		return termsConditions;
 	}
 
+	/**
+	 * @param termsConditions the termsConditions to set
+	 */
 	public void setTermsConditions(Boolean termsConditions) {
 		this.termsConditions = termsConditions;
 	}
 
+	/**
+	 * @return the isEnabled
+	 */
 	public Boolean getIsEnabled() {
 		return isEnabled;
 	}
 
+	/**
+	 * @param isEnabled the isEnabled to set
+	 */
 	public void setIsEnabled(Boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
 
+	/**
+	 * @return the isDeleted
+	 */
 	public Boolean getIsDeleted() {
 		return isDeleted;
 	}
 
+	/**
+	 * @param isDeleted the isDeleted to set
+	 */
 	public void setIsDeleted(Boolean isDeleted) {
 		this.isDeleted = isDeleted;
 	}
 
+	/**
+	 * @return the isLocked
+	 */
 	public Boolean getIsLocked() {
 		return isLocked;
 	}
 
+	/**
+	 * @param isLocked the isLocked to set
+	 */
 	public void setIsLocked(Boolean isLocked) {
 		this.isLocked = isLocked;
 	}

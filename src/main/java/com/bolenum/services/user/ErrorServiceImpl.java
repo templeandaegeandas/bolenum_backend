@@ -1,3 +1,9 @@
+/*@Description Of Class
+ * 
+ * ErrorServiceImpl class is responsible for below listed task: 
+ *   
+ *   Save error   
+ */
 package com.bolenum.services.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +18,10 @@ public class ErrorServiceImpl implements ErrorService {
 	@Autowired
 	private ErrorRepository errorRepository;
 
+	/**@Description use to save error
+	 * @param error
+	 * @return error
+	 */
 	@Override
 	public Error saveError(Error error) {
 		return errorRepository.save(error);

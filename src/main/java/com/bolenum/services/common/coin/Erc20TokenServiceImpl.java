@@ -111,6 +111,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		return currencyService.countCourencies();
 	}
 
+	/**
+	 * 
+	 */
 	@Override
 	@Async
 	public void createErc20Wallet(User user, String tokenName) {
@@ -429,8 +432,10 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 						TransactionStatus.TRANSFER, estFee, transaction.getCurrencyName());
 				if (res) {
 					transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.COMPLETED));
+					logger.debug("User previous balance: {}", userCoin.getBalance());
 					userCoin.setBalance(userCoin.getBalance() + balance);
 					userCoinRepository.save(userCoin);
+					logger.debug("User new balance saved!");
 					transactionRepo.save(transactions);
 				}
 			}
@@ -495,6 +500,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 					logger.debug("transaction saved successfully of user: {}", userCoin.getUser().getEmailId());
 					return true;
 				}
+			}
+			else {
+				return true;
 			}
 		} catch (Exception e) {
 			logger.error("ETH transaction failed:  {}", e);

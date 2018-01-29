@@ -307,7 +307,7 @@ public class OrdersDTO {
 	public Orders copy(Orders orders) {
 		orders.setId(this.id);
 		orders.setVolume(this.volume);
-		orders.setTotalVolume(this.totalVolume);
+		orders.setTotalVolume(this.volume);
 		orders.setPrice(this.price);
 		orders.setOrderStandard(this.orderStandard);
 		orders.setOrderType(this.orderType);

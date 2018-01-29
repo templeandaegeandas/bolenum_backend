@@ -324,7 +324,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			User seller = sellerOrder.getUser();
 			double qtyTraded = sellerOrder.getLockedVolume();
 			try {
-				Boolean result = tradeTransactionService.performTradeTransaction(currencyAbr, currencyType, qtyTraded,
+				Boolean result = tradeTransactionService.performTradeTransaction(0 , currencyAbr, currencyType, qtyTraded,
 						buyer, seller, null);
 				logger.debug("perform fiat transaction result: {} of sell order id: {} and buy order id:{}", result,
 						sellerOrder.getId(), buyersOrder.getId());
@@ -336,6 +336,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 					ordersRepository.save(sellerOrder);
 					buyersOrder.setOrderStatus(OrderStatus.COMPLETED);
 					ordersRepository.save(buyersOrder);
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER, MessageType.ORDER_BOOK_NOTIFICATION);
 					Trade trade = new Trade(buyersOrder.getPrice(), qtyTraded, buyer, seller,
 							sellerOrder.getMarketCurrency(), sellerOrder.getPairedCurrency(),
 							sellerOrder.getOrderStandard(), 0.0, 0.0, null, null);

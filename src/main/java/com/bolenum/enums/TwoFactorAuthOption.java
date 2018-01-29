@@ -9,6 +9,11 @@ public enum TwoFactorAuthOption {
 		this.twoFactType = twoFactType;
 	}
 
+	/**
+	 * This method is use to get transaction type.
+	 * @param Nothing
+	 * @return twoFactType
+	 */
 	public String getTransactionType() {
 		return twoFactType;
 	}

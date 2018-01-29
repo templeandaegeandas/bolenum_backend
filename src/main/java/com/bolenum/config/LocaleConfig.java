@@ -22,6 +22,11 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 @Configuration
 public class LocaleConfig extends WebMvcConfigurerAdapter{
 
+    /**
+     * This method is use to get MessageSource.
+     * @param Nothing.
+	 * @return MessageSource.
+     */
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
@@ -32,6 +37,11 @@ public class LocaleConfig extends WebMvcConfigurerAdapter{
         return messageSource;
     }
 
+    /**
+     * This method is use to get LocaleResolver.
+     * @param Nothing.
+	 * @return LocaleResolver.
+     */
     @Bean
     public LocaleResolver localeResolver() {
         SessionLocaleResolver slr = new SessionLocaleResolver();
@@ -39,6 +49,11 @@ public class LocaleConfig extends WebMvcConfigurerAdapter{
         return slr;
     }
 
+    /**
+     * This method is use to get LocaleChangeInterceptor.
+     * @param Nothing.
+	 * @return LocaleChangeInterceptor.
+     */
     @Bean
     public LocaleChangeInterceptor localeChangeInterceptor() {
         LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
@@ -46,6 +61,9 @@ public class LocaleConfig extends WebMvcConfigurerAdapter{
         return lci;
     }
 
+    /* (non-Javadoc)
+     * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter#addInterceptors(org.springframework.web.servlet.config.annotation.InterceptorRegistry)
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(localeChangeInterceptor());

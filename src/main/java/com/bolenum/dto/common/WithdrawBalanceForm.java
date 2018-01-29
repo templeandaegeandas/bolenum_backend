@@ -18,20 +18,34 @@ public class WithdrawBalanceForm {
 	@NotBlank
 	private String toAddress;
 
+	/**
+	 * @return the withdrawAmount
+	 */
 	public Double getWithdrawAmount() {
 		return withdrawAmount;
 	}
 
+	/**
+	 * @param withdrawAmount the withdrawAmount to set
+	 */
 	public void setWithdrawAmount(Double withdrawAmount) {
 		this.withdrawAmount = withdrawAmount;
 	}
 
+	/**
+	 * @return the toAddress
+	 */
 	public String getToAddress() {
 		return toAddress;
 	}
 
+	/**
+	 * @param toAddress the toAddress to set
+	 */
 	public void setToAddress(String toAddress) {
 		this.toAddress = toAddress;
 	}
+
+	
 
 }

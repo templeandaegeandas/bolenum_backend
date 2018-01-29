@@ -1,3 +1,14 @@
+/*@Description Of Class
+ * 
+ * WebSocketController class is responsible for below listed task: 
+ *       
+ *       
+ * 
+ * 
+ * 
+ */
+
+
 package com.bolenum.controller.web.socket;
 
 import org.slf4j.Logger;
@@ -24,14 +35,25 @@ public class WebSocketController {
 
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
-
+    
+	
+	
+	/**@Description: Use to send message to user
+	 * 
+	 * @param webSocketMessage
+	 * 
+	 */
 	@MessageMapping(UrlConstant.WS_SENDER_USER)
 	void sendMesageToUser(WebSocketMessage webSocketMessage) {
 		logger.debug("Message type: {}",webSocketMessage.getMessageType());
 		simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ADMIN,
 				webSocketMessage.getMessageType());
 	}
-
+	/**@Description: Use to send message to admin
+	 * 
+	 * @param webSocketMessage
+	 * 
+	 */
 	@MessageMapping(UrlConstant.WS_SENDER_ADMIN)
 	void sendMesageToAdmin(WebSocketMessage webSocketMessage) {
 		logger.debug("Message type: {}",webSocketMessage.getMessageType());
