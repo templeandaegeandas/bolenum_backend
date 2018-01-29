@@ -63,6 +63,7 @@ import com.bolenum.repo.user.transactions.TransactionRepo;
 import com.bolenum.services.common.coin.Erc20TokenService;
 import com.bolenum.services.order.book.OrderAsyncService;
 import com.bolenum.services.user.UserService;
+import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.trade.TradeTransactionService;
 import com.bolenum.services.user.wallet.WalletService;
 import com.bolenum.util.CryptoUtil;
@@ -129,6 +130,11 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Autowired
 	private TradeTransactionService tradeTransactionService;
+	
+	@Autowired
+	private NotificationService notificationService;
+	
+	private static final String TRADESUMMARY = "trade.summary";
 
 	/**
 	 * to perform in app transaction for ethereum
@@ -375,7 +381,10 @@ public class TransactionServiceImpl implements TransactionService {
 		/**
 		 * Seller performing transaction; to send ETH to buyer in case of ETH/BTC pair
 		 */
-		boolean res = tradeTransactionService.performTradeTransaction(toCurrAbrrivaiton, toCurrencyType, qtyTraded,
+		
+		double tfee = GenericUtils.getDecimalFormat(buyerTradeFee + sellerTradeFee);
+		
+		boolean res = tradeTransactionService.performTradeTransaction(tfee ,toCurrAbrrivaiton, toCurrencyType, qtyTraded,
 				buyer, seller, trade.getId());
 
 		logger.debug("Seller performed trade transaction: {}", res);
@@ -387,6 +396,25 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("seller tx perfromed status saved: {}", trade.getIsTxSeller());
 			// unlocking locked volume
 			unlockVolumeSeller(orders, matchedOrder, qtyTraded);
+			
+			
+			String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
+					+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrAbrrivaiton
+					+ " have been processed successfully!";
+			
+			String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "
+					+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrAbrrivaiton
+					+ " have been processed successfully!";
+			
+			notificationService.sendNotification(seller, msg, TRADESUMMARY);
+			notificationService.saveNotification(buyer, seller, msg, null, null);
+			notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+			notificationService.saveNotification(seller, buyer, msg1, null, null);
+			
+			
+			
+			logger.debug("Message : {}", msg);
+			logger.debug("Message : {}", msg1);
 		}
 		double sellerQty = GenericUtils.getDecimalFormat(pairedCurrencyVolume - sellerTradeFee);
 		logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
@@ -394,7 +422,7 @@ public class TransactionServiceImpl implements TransactionService {
 		/**
 		 * Buyer performing transaction; to send BTC to Seller in case of ETH/BTC pair
 		 */
-		boolean buyerRes = tradeTransactionService.performTradeTransaction(pairCurrAbrrivaiton, pairCurrencyType,
+		boolean buyerRes = tradeTransactionService.performTradeTransaction(tfee ,pairCurrAbrrivaiton, pairCurrencyType,
 				sellerQty, seller, buyer, trade.getId());
 		logger.debug("buyer performed trade transaction: {}", buyerRes);
 		if (buyerRes) {
@@ -405,10 +433,25 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("Buyer tx perfrom status saved: {}", trade.getIsTxBuyer());
 			// unlocking locked volume
 			unlockVolumeBuyer(orders, matchedOrder, qtyTraded, buyerTradeFee);
+			
+			String msg = "Hi " + seller.getFirstName() + ", Your transaction of buying "
+					+ GenericUtils.getDecimalFormatString(sellerQty) + " " + pairCurrAbrrivaiton
+					+ " have been processed successfully!";
+			String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of selling "
+					+ GenericUtils.getDecimalFormatString(sellerQty + tfee ) + " " + pairCurrAbrrivaiton
+					+ " have been processed successfully!";
+			
+			notificationService.sendNotification(seller, msg, TRADESUMMARY);
+			notificationService.saveNotification(buyer, seller, msg, null, null);
+			notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+			notificationService.saveNotification(seller, buyer, msg1, null, null);
+			
+			logger.debug("Message : {}", msg);
+			logger.debug("Message : {}", msg1);
 
 		}
 		User admin = userService.findByEmail(adminEmail);
-		double tfee = GenericUtils.getDecimalFormat(buyerTradeFee + sellerTradeFee);
+		
 		logger.debug("actual quantity admin will get from buyer: {} and seller: {} total fee: {} {} of trade Id: {} ",
 				GenericUtils.getDecimalFormatString(buyerTradeFee), GenericUtils.getDecimalFormatString(sellerTradeFee),
 				GenericUtils.getDecimalFormatString(tfee), pairCurrAbrrivaiton, trade.getId());
@@ -430,6 +473,36 @@ public class TransactionServiceImpl implements TransactionService {
 		}
 		return new AsyncResult<>(true);
 	}
+	
+	
+	
+	/*private void tradeNotification(boolean buyerSenderFlag,User buyer,
+			User seller,double qtyTraded,double tfee,String currAbrrivaiton) {
+		String msg,msg1="";
+		if(buyerSenderFlag) {
+		msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
+				+ GenericUtils.getDecimalFormatString(qtyTraded ) + " " + currAbrrivaiton
+				+ " have been processed successfully!";
+		msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "
+				+ GenericUtils.getDecimalFormatString(qtyTraded + tfee) + " " + currAbrrivaiton
+				+ " have been processed successfully!";
+		}else {
+			msg = "Hi " + seller.getFirstName() + ", Your transaction of buying  "
+					+ GenericUtils.getDecimalFormatString(qtyTraded + tfee) + " " + currAbrrivaiton
+					+ " have been processed successfully!";
+			msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of selling "
+					+ GenericUtils.getDecimalFormatString(qtyTraded ) + " " + currAbrrivaiton
+					+ " have been processed successfully!";
+		}
+		notificationService.sendNotification(seller, msg, TRADESUMMARY);
+		notificationService.saveNotification(buyer, seller, msg, null, null);
+		notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+		notificationService.saveNotification(seller, buyer, msg1, null, null);
+		
+		logger.debug("Message : {}", msg);
+		logger.debug("Message : {}", msg1);
+		
+	}*/
 
 	private void unlockVolumeBuyer(Orders orders, Orders matchedOrder, double qtyTraded, double buyerTradeFee) {
 		/**

@@ -1,12 +1,8 @@
 package com.bolenum.controller.common;
 
-import com.bolenum.constant.UrlConstant;
-import com.bolenum.model.Currency;
-import com.bolenum.services.admin.CurrencyService;
-import com.bolenum.services.common.chart.ChartService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.Api;
+import java.util.Map;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +13,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import com.bolenum.constant.UrlConstant;
+import com.bolenum.model.Currency;
+import com.bolenum.services.admin.CurrencyService;
+import com.bolenum.services.common.chart.ChartService;
+
+import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping(value = UrlConstant.BASE_USER_URI_V1)
