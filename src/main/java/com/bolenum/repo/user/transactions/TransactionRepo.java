@@ -6,9 +6,12 @@ package com.bolenum.repo.user.transactions;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.persistence.LockModeType;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -36,10 +39,12 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 	Page<Transaction> findByToUserAndCurrencyNameAndTransactionStatusOrTransactionStatus(@Param("toUser") User toUser,
 			@Param("currencyName") String currencyName, Pageable pageable);
 
-	Transaction findFirstByTransactionStatusAndTransferStatusOrderByCreatedOnAsc(TransactionStatus transactionStatus,
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	Transaction findFirstByTransactionStatusAndTransferStatusNotInOrderByCreatedOnAsc(TransactionStatus transactionStatus,
 			TransferStatus transferStatus);
 
-	List<Transaction> findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatus(User toUser, String currencyName,
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	List<Transaction> findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatusNotIn(User toUser, String currencyName,
 			TransactionStatus transactionStatus, TransferStatus transferStatus);
 
 	@Query("select sum(t.fee) from Transaction t where t.transactionStatus='TRANSFER' and t.currencyName =:currencyName")

@@ -15,6 +15,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.persistence.PersistenceException;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -380,17 +381,19 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 	}
 
 	@Override
+	@Transactional
 	public void sendUserTokenToAdmin() {
-		Transaction transaction = transactionRepo.findFirstByTransactionStatusAndTransferStatusOrderByCreatedOnAsc(
-				TransactionStatus.DEPOSIT, TransferStatus.INITIATED);
+		Transaction transaction = transactionRepo.findFirstByTransactionStatusAndTransferStatusNotInOrderByCreatedOnAsc(
+				TransactionStatus.DEPOSIT, TransferStatus.COMPLETED);
 		if (transaction == null) {
 			return;
 		}
 		List<Transaction> transactions = transactionRepo
-				.findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatus(transaction.getToUser(),
-						transaction.getCurrencyName(), TransactionStatus.DEPOSIT, TransferStatus.INITIATED);
-		transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.PROCESSING));
-		transactionRepo.save(transactions);
+				.findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatusNotIn(transaction.getToUser(),
+						transaction.getCurrencyName(), TransactionStatus.DEPOSIT, TransferStatus.COMPLETED);
+		// transactions.forEach(transact ->
+		// transact.setTransferStatus(TransferStatus.PROCESSING));
+		// transactionRepo.save(transactions);
 		double totalBalance = transactions.stream().filter(tran -> (tran.getTxAmount() > 0))
 				.mapToDouble(Transaction::getTxAmount).sum();
 		logger.debug("total transaction balance: {} of user: {}", totalBalance, transaction.getToUser().getEmailId());
@@ -401,12 +404,24 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
 					transaction.getToUser());
 			logger.debug("userErc20Token: {}", userCoin);
+
+			Double walletBalance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
+
 			Double estimattedFee = getEstimetedFeeErc20Token();
-			Boolean result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), estimattedFee,
-					TransactionStatus.TRANSFER, estimattedFee, transaction.getCurrencyName());
+
+			Double tranferBalance = walletBalance - estimattedFee;
+			Boolean result = false;
+			if (tranferBalance <= 0) {
+				tranferBalance = Math.abs(tranferBalance);
+				result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), tranferBalance,
+						TransactionStatus.TRANSFER, tranferBalance, transaction.getCurrencyName());
+			} else {
+				result = true;
+			}
 			if (result) {
-				transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.PENDING));
-				transactionRepo.save(transactions);
+				// transactions.forEach(transact ->
+				// transact.setTransferStatus(TransferStatus.PENDING));
+				// transactionRepo.save(transactions);
 				Double balance = getErc20WalletBalance(transaction.getToUser(), erc20Token,
 						transaction.getCurrencyName());
 				logger.debug("wallet balance is: {}", balance);
@@ -427,7 +442,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 					transaction.getToUser());
 			Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
 			Double estFee = GenericUtils.getEstimetedFeeEthereum();
-			if (balance > 0) {
+			if (balance >= 0.1) {
 				boolean res = performEthTransaction(userCoin, adminCoin.getWalletAddress(), balance - estFee,
 						TransactionStatus.TRANSFER, estFee, transaction.getCurrencyName());
 				if (res) {
