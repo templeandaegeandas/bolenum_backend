@@ -179,11 +179,11 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 				msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
 						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
-						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
+						+ GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice()) + " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
 				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
-						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + seller.getFirstName();
+						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
+						+ GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice()) + " " + pairCurr + " with " + seller.getFirstName();
 				logger.debug("msg: {}", msg);
 			}
 			logger.debug("orders saving finished and matched order saving started");
@@ -263,7 +263,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				seller = matched.getUser();
 				msg = "Hi " + matched.getUser().getFirstName() + " your " + matched.getOrderType() + " is in process, "
 						+ exitingOrder.getUser().getFirstName() + " has paid you the amount:"
-						+ exitingOrder.getLockedVolume() * exitingOrder.getPrice()
+						+ GenericUtils.getDecimalFormatString(exitingOrder.getLockedVolume() * exitingOrder.getPrice())
 						+ " Please confirm amount by login into bolenumexchage.";
 				notificationService.sendNotification(seller, msg, TRADESUMMARY);
 				notificationService.saveNotification(buyer, seller, msg, matched.getId(),
