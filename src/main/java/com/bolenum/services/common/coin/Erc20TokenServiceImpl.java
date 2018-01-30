@@ -104,7 +104,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 	@Autowired
 	private EtherumWalletService etherumWalletService;
-
+	
 	private static final Logger logger = LoggerFactory.getLogger(Erc20TokenServiceImpl.class);
 
 	@Override
@@ -336,7 +336,14 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 							saveTx(userCoin.getUser(), tx, tokenName, erc20Token);
 						}
 					}
-				}, err -> logger.error("Erc20Token incoming transaction saving subscribe error: {}", err));
+				}, err -> {
+					logger.error("Erc20Token incoming transaction saving subscribe error: {}", err);
+					try {
+						saveIncomingErc20Transaction(tokenName);
+					} catch (IOException | CipherException e) {
+						e.printStackTrace();
+					}
+				});
 	}
 
 	private void saveTx(User toUser, TransferEventResponse transaction, String tokenName, Erc20Token erc20Token) {
@@ -391,6 +398,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 		List<Transaction> transactions = transactionRepo
 				.findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatusNotIn(transaction.getToUser(),
 						transaction.getCurrencyName(), TransactionStatus.DEPOSIT, TransferStatus.COMPLETED);
+		logger.debug("list transaction size: {}", transactions.size());
 		// transactions.forEach(transact ->
 		// transact.setTransferStatus(TransferStatus.PROCESSING));
 		// transactionRepo.save(transactions);
@@ -407,17 +415,34 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 
 			Double walletBalance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
 
+			logger.debug(" walletBalance: {}",walletBalance);
+			
 			Double estimattedFee = getEstimetedFeeErc20Token();
 
+			logger.debug(" estimattedFee: {}",estimattedFee);
+			
 			Double tranferBalance = walletBalance - estimattedFee;
+			
+			logger.debug(" tranferBalance: {}",tranferBalance);
+			
 			Boolean result = false;
 			if (tranferBalance <= 0) {
 				tranferBalance = Math.abs(tranferBalance);
-				result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), tranferBalance,
-						TransactionStatus.TRANSFER, tranferBalance, transaction.getCurrencyName());
+				long weiValue = Math.round(tranferBalance*1000000000000000000l);
+				logger.debug("wie value: {}", weiValue);
+				logger.debug("wie value: {}", weiValue/1000000000000000000d);
+				Double newTransferBalance = (weiValue/1000000000000000000d);
+				logger.debug("new balance: {}",newTransferBalance);
+				logger.debug(" tranferBalance: {}",tranferBalance);
+				result = performEthTransaction(adminCoin, userCoin.getWalletAddress(), newTransferBalance,
+						TransactionStatus.TRANSFER, newTransferBalance, transaction.getCurrencyName());
+				logger.debug(" result: {}",result);
 			} else {
 				result = true;
 			}
+			
+			logger.debug(" result ",result);
+			
 			if (result) {
 				// transactions.forEach(transact ->
 				// transact.setTransferStatus(TransferStatus.PENDING));
@@ -441,6 +466,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(transaction.getCurrencyName(),
 					transaction.getToUser());
 			Double balance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
+			logger.debug("wallet balance: {}", balance);
 			Double estFee = GenericUtils.getEstimetedFeeEthereum();
 			if (balance >= 0.1) {
 				boolean res = performEthTransaction(userCoin, adminCoin.getWalletAddress(), balance - estFee,
@@ -453,6 +479,9 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 					logger.debug("User new balance saved!");
 					transactionRepo.save(transactions);
 				}
+			}else {
+				transactions.forEach(transact -> transact.setTransferStatus(TransferStatus.COMPLETED));
+				transactionRepo.save(transactions);
 			}
 		}
 	}
