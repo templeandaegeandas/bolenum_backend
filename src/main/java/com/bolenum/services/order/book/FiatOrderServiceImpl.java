@@ -37,6 +37,7 @@ import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.services.user.trade.TradeTransactionService;
 import com.bolenum.services.user.wallet.WalletService;
+import com.bolenum.util.GenericUtils;
 
 /**
  * @author chandan kumar singh
@@ -177,7 +178,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				seller = orders.getUser();
 
 				msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
+						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
 						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
 				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
@@ -189,9 +190,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			orderAsyncService.saveOrder(matchedOrder);
 			logger.debug("matched order saving finished");
 			notificationService.sendNotification(seller, msg1, TRADESUMMARY);
-			notificationService.saveNotification(seller, buyer, msg1, null, null);
+			notificationService.saveNotification(buyer,seller , msg1, null, null);
 			notificationService.sendNotification(buyer, msg, TRADESUMMARY);
-			notificationService.saveNotification(buyer, seller, msg, null, null);
+			notificationService.saveNotification(seller,buyer, msg, null, null);
 			return orders;
 		}
 		return orders;
