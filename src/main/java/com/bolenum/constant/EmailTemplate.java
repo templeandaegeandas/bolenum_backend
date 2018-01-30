@@ -22,5 +22,6 @@ public class EmailTemplate {
 	public static final String KYC_DISAPPROVE_MAIL_TEMPLATE="kycDisapprove";
 	public static final String DISPUTE_MAIL_TEMPLATE="disputeTemplate";
 	public static final String REGISTRATION="registration";
+	public static final String TRADE_SUMMARY="tradeSummry";
 	
 }

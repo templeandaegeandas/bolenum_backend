@@ -10,7 +10,9 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -45,6 +47,7 @@ import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.OrderType;
 import com.bolenum.enums.TransactionStatus;
@@ -406,9 +409,16 @@ public class TransactionServiceImpl implements TransactionService {
 					+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrAbrrivaiton
 					+ " have been processed successfully!";
 			
-			notificationService.sendNotification(seller, msg, null, TRADESUMMARY);
+			Map<String, Object> data = new HashMap<>();
+			data.put("name", seller.getFirstName());
+			data.put("orderType", OrderType.SELL);
+			data.put("qtyTraded", qtyTraded);
+			data.put("currencyAbbr", toCurrAbrrivaiton);
+			notificationService.sendNotification(seller, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY);
 			notificationService.saveNotification(buyer, seller, msg, null, null);
-			notificationService.sendNotification(buyer, msg1, null, TRADESUMMARY);
+			data.put("name", buyer.getFirstName());
+			data.put("orderType", OrderType.BUY);
+			notificationService.sendNotification(buyer, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY);
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
 			
 			
@@ -440,10 +450,16 @@ public class TransactionServiceImpl implements TransactionService {
 			String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of selling "
 					+ GenericUtils.getDecimalFormatString(sellerQty + tfee ) + " " + pairCurrAbrrivaiton
 					+ " have been processed successfully!";
-			
-			notificationService.sendNotification(seller, msg, null, TRADESUMMARY);
+			Map<String, Object> data = new HashMap<>();
+			data.put("name", seller.getFirstName());
+			data.put("orderType", OrderType.SELL);
+			data.put("qtyTraded", sellerQty + tfee);
+			data.put("currencyAbbr", pairCurrAbrrivaiton);
+			notificationService.sendNotification(seller, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY);
 			notificationService.saveNotification(buyer, seller, msg, null, null);
-			notificationService.sendNotification(buyer, msg1, null, TRADESUMMARY);
+			data.put("name", buyer.getFirstName());
+			data.put("orderType", OrderType.BUY);
+			notificationService.sendNotification(buyer, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY);
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
 			
 			logger.debug("Message : {}", msg);

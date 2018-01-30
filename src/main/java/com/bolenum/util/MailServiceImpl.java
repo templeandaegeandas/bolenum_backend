@@ -14,9 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -33,9 +30,6 @@ import com.bolenum.constant.EmailTemplate;
 @Service
 public class MailServiceImpl implements MailService {
 	public static final Logger logger = LoggerFactory.getLogger(MailServiceImpl.class);
-
-	@Autowired
-	private MailSender mailSender;
 
 	@Autowired
 	private JavaMailSender emailSender;
@@ -80,14 +74,14 @@ public class MailServiceImpl implements MailService {
 	 */
 	@Override
 	@Async
-	public Future<Boolean> mailSend(String to, String subject, Map<String, Object> map,String emailTemplate) {
+	public Future<Boolean> mailSend(String to, String subject, Map<String, Object> map, String emailTemplate) {
 		MimeMessage message = emailSender.createMimeMessage();
 		try {
 
 			MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
 					StandardCharsets.UTF_8.name());
 			helper.setTo(to);
-			String html = ThymeleafUtil.getProcessedHtml(map,emailTemplate);
+			String html = ThymeleafUtil.getProcessedHtml(map, emailTemplate);
 			helper.setText(html, true);
 			helper.setSubject(subject);
 			helper.setFrom(new InternetAddress(mailFrom, domainName).toString());

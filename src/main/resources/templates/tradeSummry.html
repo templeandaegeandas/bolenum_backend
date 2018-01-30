@@ -24,7 +24,8 @@
             <td style="background: #fff; font-size: 26px; padding: 30px 20px 15px 20px;  text-align: center;" colspan="3"> Your Trade Info !</td>
         </tr>
         <tr>
-            <td style="background: #fff; color: #858383; line-height: 22px; background: #fff;  padding: 9px 20px 45px 37px; font-size: 13px;" colspan="3">Hi <strong>Pankaj</strong>, Your <strong>SELL order</strong> has been locked, quantity: <strong>1.0 BLN</strong>, on <strong>10.0 NGN</strong> with <strong>Mohd</strong>.</td>
+            <td style="background: #fff; color: #858383; line-height: 22px; background: #fff;  padding: 9px 20px 45px 37px; font-size: 13px;" colspan="3">Hi <span th:text="${name}">name</span>, Your transaction of <span th:if="${orderType=='BUY'}">buying</span><span th:if="${orderType=='SELL'}">selling</span>
+					<span th:text="${qtyTraded}">qty</span> <span th:text="${currencyAbbr}">BLN</span> have been processed successfully!.</td>
         </tr>
         
         <!-- <tr>
