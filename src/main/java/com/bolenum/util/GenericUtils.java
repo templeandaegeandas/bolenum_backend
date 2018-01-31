@@ -82,12 +82,6 @@ public class GenericUtils {
 		return estimedtedFee;
 	}
 
-	public static DecimalFormat getDecimalFormat() {
-		DecimalFormat df = new DecimalFormat("0");
-		df.setMaximumFractionDigits(8);
-		return df;
-	}
-
 	/**
 	 * 
 	 * @description to get the decimal digit up to 8.
@@ -103,7 +97,7 @@ public class GenericUtils {
 	}
 
 	public static String getDecimalFormatString(Double amount) {
-		DecimalFormat df = new DecimalFormat("0");
+		DecimalFormat df = new DecimalFormat("#0.00000000");
 		df.setMaximumFractionDigits(8);
 		return df.format(amount);
 	}
