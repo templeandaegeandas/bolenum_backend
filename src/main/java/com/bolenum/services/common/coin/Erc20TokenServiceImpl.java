@@ -422,7 +422,7 @@ public class Erc20TokenServiceImpl implements Erc20TokenService {
 			logger.debug(" tranferBalance: {}",tranferBalance);
 			
 			Boolean result = false;
-			if (tranferBalance <= 0) {
+			if (tranferBalance < 0) {
 				tranferBalance = Math.abs(tranferBalance);
 				long weiValue = Math.round(tranferBalance*1000000000000000000l);
 				logger.debug("wie value: {}", weiValue);
