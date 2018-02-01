@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.dto.common.AddUserBankDetailsForm;
 import com.bolenum.dto.orders.OrdersDTO;
@@ -207,13 +208,22 @@ public class FiatOrderController {
 		if (OrderType.BUY.equals(orders.getOrderType())) {
 			map.put(ORDERID, order.getId());
 		} else {
+			Map<String, Object> infoMap = new HashMap<>();
 			User bankDetailsUser = orders.getUser();
 			BankAccountDetails accountDetails = bankAccountDetailsService.primaryBankAccountDetails(bankDetailsUser);
 			String msg = "Hi " + matchedOrder.getUser().getFirstName()
 					+ ", Your order's seller bank details: Account holder name:" + accountDetails.getAccountHolderName()
 					+ " Account Number: " + accountDetails.getAccountNumber()
 					+ " Please login to bolenum exchange to confirm your payment.";
-			notificationService.sendNotification(matchedOrder.getUser(), msg, "trade.summary");
+
+			User buyer = matchedOrder.getUser();
+			infoMap.put("buyerName", buyer.getFullName());
+			infoMap.put("buyerEmailId", buyer.getEmailId());
+			infoMap.put("sellerAccountName", accountDetails.getAccountHolderName());
+			infoMap.put("sellerAccountNumber", accountDetails.getAccountNumber());
+
+			notificationService.sendNotification(matchedOrder.getUser(), "trade.summary", infoMap,
+					EmailTemplate.SELLER_ACCOUNT_DETAILS);
 			notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg, matchedOrderId,
 					NotificationType.MATCHED_NOTIFICATION);
 			map.put(ORDERID, order.getId());

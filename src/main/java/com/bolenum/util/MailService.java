@@ -1,8 +1,10 @@
 package com.bolenum.util;
 
+import java.util.Map;
 import java.util.concurrent.Future;
 
 public interface MailService {
+
 
 	/**
 	 * This method is use for mail Send
@@ -19,5 +21,8 @@ public interface MailService {
 	 * @param token
 	 */
 	void registrationMailSend(String to, String token) ;
+
+
+	Future<Boolean> mailSend(String to, String subject, Map<String, Object> map, String emailTemplate);
 
 }

@@ -3,6 +3,8 @@
  */
 package com.bolenum.services.user.notification;
 
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 
 import com.bolenum.enums.NotificationType;
@@ -25,6 +27,7 @@ public interface NotificationService {
 	 * @return
 	 */
 	public Notification saveNotification(User sender, User receiver, String msg, Long notificationRelationId, NotificationType notificationType);
+
 
 	/**
 	 * This method is use to send Notification
@@ -81,5 +84,9 @@ public interface NotificationService {
 	 * @param arrayOfNotification
 	 */
 	public void changeNotificationsStatus(Long[] arrayOfNotification);
+
+
+
+	boolean sendNotification(User user, String subject, Map<String, Object> map, String tradeSummeryTemplate);
   
 }

@@ -4,12 +4,15 @@
 package com.bolenum.services.user.trade;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.UserCoin;
 import com.bolenum.repo.common.coin.UserCoinRepository;
@@ -39,6 +42,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 	 * this will perform trade transaction for buyer to seller
 	 */
 	@Override
+
 	public Boolean performTradeTransaction(double tfee, String currencyAbr, String currencyType, double qtyTraded,
 			User buyer, User seller, Long tradeId) {
 		Boolean txStatus;
@@ -83,6 +87,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 		}
 		return false;
 	}
+
 
 	/**
 	 * @description perform Erc20token Trade

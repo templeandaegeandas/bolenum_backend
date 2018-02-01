@@ -2,8 +2,10 @@ package com.bolenum.services.common;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.enums.DocumentStatus;
 import com.bolenum.enums.DocumentType;
 import com.bolenum.enums.NotificationType;
@@ -143,22 +146,27 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setRejectionMessage(null);
 		User user = userKyc.getUser();
 		User admin = userRepository.findByEmailId("admin@bolenum.com");
-
+		Map<String, Object> map = new HashMap<>();
+		map.put("to", user.getEmailId());
+		map.put("name", user.getFirstName());
 		if (DocumentType.NATIONAL_ID.equals(userKyc.getDocumentType())) {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
 					localeService.getMessage("email.text.approve.user.kyc.nationalId"));
-			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
-					localeService.getMessage("email.text.approve.user.kyc.nationalId"));
 
+			map.put("message", localeService.getMessage("email.text.approve.user.kyc.nationalId"));
+
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"), map,
+					EmailTemplate.KYC_APPROVE_MAIL_TEMPLATE);
 			notificationService.saveNotification(admin, user, "Your KYC as NATIONAL_ID has been approved", kycId,
 					NotificationType.KYC_NOTIFICATION);
 
 		} else {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
 					localeService.getMessage("email.text.approve.user.kyc.addressproof"));
-			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"),
-					localeService.getMessage("email.text.approve.user.kyc.addressproof"));
 
+			map.put("message", localeService.getMessage("email.text.approve.user.kyc.addressproof"));
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.approve.user.kyc"), map,
+					EmailTemplate.KYC_APPROVE_MAIL_TEMPLATE);
 			notificationService.saveNotification(admin, user, "Your KYC as RESIDENCE_PROOF has been approved", kycId,
 					NotificationType.KYC_NOTIFICATION);
 
@@ -178,20 +186,29 @@ public class KYCServiceImpl implements KYCService {
 		userKyc.setDocumentStatus(DocumentStatus.DISAPPROVED);
 		userKyc.setRejectionMessage(rejectionMessage);
 		User user = userKyc.getUser();
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("to", user.getEmailId());
+		map.put("name", user.getFirstName());
+		map.put("rejectionMessage", rejectionMessage);
+		map.put("documentType", userKyc.getDocumentType());
+       
 		User admin = userRepository.findByEmailId("admin@bolenum.com");
+		
 		if (DocumentType.NATIONAL_ID.equals(userKyc.getDocumentType())) {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
 					localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
-			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
-					localeService.getMessage("email.text.disapprove.user.kyc.nationalId"));
+
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"), map,
+					EmailTemplate.KYC_DISAPPROVE_MAIL_TEMPLATE);
 
 			notificationService.saveNotification(admin, user, "Your KYC as NATIONAL_ID has been disapproved", kycId,
 					NotificationType.KYC_NOTIFICATION);
 		} else {
 			smsServiceUtil.sendMessage(user.getMobileNumber(), user.getCountryCode(),
 					localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
-			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"),
-					localeService.getMessage("email.text.disapprove.user.kyc.addressproof"));
+			mailService.mailSend(user.getEmailId(), localeService.getMessage("email.subject.disapprove.user.kyc"), map,
+					EmailTemplate.KYC_DISAPPROVE_MAIL_TEMPLATE);
 
 			notificationService.saveNotification(admin, user, "Your KYC as as RESIDENCE_PROOF has been disapproved",
 					kycId, NotificationType.KYC_NOTIFICATION);

@@ -23,6 +23,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.MessageType;
@@ -156,6 +157,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			orders.setOrderStatus(OrderStatus.LOCKED);
 			orders.setMatchedOn(new Date());
 			logger.debug("orders saving started");
+
 			if (OrderType.BUY.equals(orders.getOrderType())) {
 				orders.setMatchedOrder(matchedOrder);
 				matchedOrder.setMatchedOrder(orders);
@@ -169,6 +171,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
 						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
+
 			}
 			orders = orderAsyncService.saveOrder(orders);
 			if (OrderType.SELL.equals(orders.getOrderType())) {
@@ -189,11 +192,31 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			logger.debug("orders saving finished and matched order saving started");
 			orderAsyncService.saveOrder(matchedOrder);
 			logger.debug("matched order saving finished");
-			notificationService.sendNotification(seller, msg1, TRADESUMMARY);
-			notificationService.saveNotification(buyer,seller , msg1, null, null);
-			notificationService.sendNotification(buyer, msg, TRADESUMMARY);
-			notificationService.saveNotification(seller,buyer, msg, null, null);
+			
+			Map<String, Object> map = new HashMap<>();
+			if (buyer != null) {
+				map.put("name1", buyer.getFullName());
+				map.put("name2", seller.getFirstName());
+				map.put("orderType", matchedOrder.getOrderType());
+				map.put("qtyTraded", qtyTraded);
+				map.put("orderPrice", orders.getPrice());
+				map.put("toCurrency", toCurrency);
+				map.put("pairCurr", pairCurr);
+				map.put("totalPrice", qtyTraded * orders.getPrice());
+				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+				notificationService.saveNotification(seller, buyer, msg1, null, null);
+			}
+
+			if (seller != null) {
+				map.put("name1", seller.getFullName());
+				map.put("name2", buyer.getFirstName());
+				notificationService.sendNotification(buyer, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+				notificationService.saveNotification(buyer, seller, msg, null, null);
+			}
+
+
 			return orders;
+
 		}
 		return orders;
 	}
@@ -259,13 +282,25 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		User seller = null;
 		if (matched != null) {
 			if (OrderType.BUY.equals(exitingOrder.getOrderType())) {
+
 				buyer = exitingOrder.getUser();
 				seller = matched.getUser();
 				msg = "Hi " + matched.getUser().getFirstName() + " your " + matched.getOrderType() + " is in process, "
 						+ exitingOrder.getUser().getFirstName() + " has paid you the amount:"
 						+ GenericUtils.getDecimalFormatString(exitingOrder.getLockedVolume() * exitingOrder.getPrice())
 						+ " Please confirm amount by login into bolenumexchage.";
-				notificationService.sendNotification(seller, msg, TRADESUMMARY);
+
+				Map<String, Object> map = new HashMap<>();
+				map.put("buyerName", buyer.getFullName());
+				map.put("buyerEmailId", buyer.getEmailId());
+				map.put("sellerName", seller.getFullName());
+				map.put("sellerEmailId", seller.getEmailId());
+				map.put("orderType", matched.getOrderType());
+				map.put("lockedVolume", exitingOrder.getLockedVolume());
+				map.put("orderPrice", exitingOrder.getPrice());
+				map.put("totalPrice", exitingOrder.getLockedVolume() * exitingOrder.getPrice());
+
+				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.BUYER_PAID_CONFIRMATION);
 				notificationService.saveNotification(buyer, seller, msg, matched.getId(),
 						NotificationType.PAID_NOTIFICATION);
 				exitingOrder.setConfirm(true);
@@ -298,8 +333,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			User seller = sellerOrder.getUser();
 			double qtyTraded = sellerOrder.getLockedVolume();
 			try {
-				Boolean result = tradeTransactionService.performTradeTransaction(0 , currencyAbr, currencyType, qtyTraded,
-						buyer, seller, null);
+				Boolean result = tradeTransactionService.performTradeTransaction(0, currencyAbr, currencyType,
+						qtyTraded, buyer, seller, null);
 				logger.debug("perform fiat transaction result: {} of sell order id: {} and buy order id:{}", result,
 						sellerOrder.getId(), buyersOrder.getId());
 				if (result) {
@@ -310,7 +345,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 					ordersRepository.save(sellerOrder);
 					buyersOrder.setOrderStatus(OrderStatus.COMPLETED);
 					ordersRepository.save(buyersOrder);
-					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER, MessageType.ORDER_BOOK_NOTIFICATION);
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
+							MessageType.ORDER_BOOK_NOTIFICATION);
 					Trade trade = new Trade(buyersOrder.getPrice(), qtyTraded, buyer, seller,
 							sellerOrder.getMarketCurrency(), sellerOrder.getPairedCurrency(),
 							sellerOrder.getOrderStandard(), 0.0, 0.0, null, null);
