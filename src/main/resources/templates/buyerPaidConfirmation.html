@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Bolenumexchange</title>
+</head>
+<body style="background-color: #f5f3f3; font-family: sans-serif;">
+	<table width="600" align="center" cellspacing="0" cellpadding="0">
+		<tr>
+			<td style="padding: 30px 0px">
+				<!-- <img src="images/logo.png"/> -->
+			</td>
+		</tr>
+		<tr style="background: #DB2828;">
+			<td style="color: #fff; padding: 10px 20px; font-size: 20px;">Trade
+				Summery</td>
+			<td style="padding: 10px 20px; float: right">
+				<!-- <img src="images/verify-icn.png"/> -->
+			</td>
+		</tr>
+		<tr>
+			<td
+				style="background: #fff; padding: 13px 17px; font-size: 13px; text-align: center;"
+				colspan="3"><img
+				src="https://pbs.twimg.com/profile_images/874996574811770880/-p-n0XEA_400x400.jpg"
+				width="70" height="73" style="margin-right: 5px;" /></td>
+		</tr>
+		<tr>
+			<td
+				style="background: #fff; font-size: 26px; padding: 30px 20px 15px 20px; text-align: center;"
+				colspan="3">Your Trade Info !</td>
+		</tr>
+		<tr>
+			<td
+				style="background: #fff; color: #858383; line-height: 22px; background: #fff; padding: 9px 20px 45px 37px; font-size: 13px;"
+				colspan="3">Hi <span th:text="${sellerName}">name</span>, Your
+				<span th:if="${orderType=='BUY'}">buy</span><span
+				th:if="${orderType=='SELL'}">sell</span> <span> is in process
+					, : </span> <span th:text="${buyerName}"></span> has paid you the amount:
+				<span th:text="${totalPrice}"></span> Please confirm amount by login
+				into bolenumexchage.
+			</td>
+		</tr>
+
+		<!-- <tr>
+            <td style="background: #fff; text-align: center;" colspan="3">
+                <button style="background: #DB2828; border-radius: 4px; cursor: pointer; margin-bottom: 50px; border: 0; padding: 13px 17px; margin: 0 auto; color: #fff; text-transform: uppercase;">Verify Email Address</button>
+            </td>
+        </tr> -->
+		<tr style="background: #fff;">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr style="background: #fff;">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<!-- <tr>
+            <td style="background: #fff; color: #858383; padding: 13px 17px; font-size: 13px;  text-align: center;" colspan="3"><img src="https://image.freepik.com/free-icon/timer-or-chronometer-tool_318-64956.jpg" width="15" height="15" style="margin-right: 5px;"/> Please note that this link will expire in 2 hours of request.</td>
+        </tr>  -->
+		<tr style="background: #fff;">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr style="background: #fff;">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr style="background: #fff;">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr style="background: #2e2e2e; text-align: center;">
+			<td
+				style="color: #8b8b8b; padding: 8px; font-size: 13px; margin-top: 40px;"
+				colspan="3"><span>Copyright @ BolenumExchange.</span></td>
+		</tr>
+		<tr>
+			<td colspan="3">&nbsp;</td>
+		</tr>
+
+	</table>
+</body>
+</html>

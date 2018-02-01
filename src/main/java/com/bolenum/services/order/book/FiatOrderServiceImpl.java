@@ -193,22 +193,27 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			logger.debug("matched order saving finished");
 			Map<String, Object> map = new HashMap<>();
 			if (buyer != null) {
-				map.put("buyerName", buyer.getFullName());
-				map.put("buyerEmailId", buyer.getEmailId());
-				map.put("sellerName", seller.getFullName());
-				map.put("sellerEmailId", seller.getEmailId());
+				map.put("name1", buyer.getFullName());
+				map.put("name2", seller.getFirstName());
 				map.put("orderType", matchedOrder.getOrderType());
-				map.put("quantityTraded", qtyTraded);
+				map.put("qtyTraded", qtyTraded);
 				map.put("orderPrice", orders.getPrice());
 				map.put("toCurrency", toCurrency);
-				map.put("pairedCurrency", pairCurr);
+				map.put("pairCurr", pairCurr);
 				map.put("totalPrice", qtyTraded * orders.getPrice());
+				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+				notificationService.saveNotification(seller, buyer, msg1, null, null);
 			}
-			notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMERY_TEMPLATE);
-			notificationService.saveNotification(seller, buyer, msg1, null, null);
-			notificationService.sendNotification(buyer, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMERY_TEMPLATE);
-			notificationService.saveNotification(buyer, seller, msg, null, null);
+
+			if (seller != null) {
+				map.put("name1", seller.getFullName());
+				map.put("name2", buyer.getFirstName());
+				notificationService.sendNotification(buyer, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+				notificationService.saveNotification(buyer, seller, msg, null, null);
+			}
+
 			return orders;
+
 		}
 		return orders;
 	}
@@ -281,6 +286,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ exitingOrder.getUser().getFirstName() + " has paid you the amount:"
 						+ exitingOrder.getLockedVolume() * exitingOrder.getPrice()
 						+ " Please confirm amount by login into bolenumexchage.";
+
 				Map<String, Object> map = new HashMap<>();
 				map.put("buyerName", buyer.getFullName());
 				map.put("buyerEmailId", buyer.getEmailId());
@@ -291,7 +297,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				map.put("orderPrice", exitingOrder.getPrice());
 				map.put("totalPrice", exitingOrder.getLockedVolume() * exitingOrder.getPrice());
 
-				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMERY_TEMPLATE);
+				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.BUYER_PAID_CONFIRMATION);
 				notificationService.saveNotification(buyer, seller, msg, matched.getId(),
 						NotificationType.PAID_NOTIFICATION);
 				exitingOrder.setConfirm(true);
@@ -324,8 +330,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			User seller = sellerOrder.getUser();
 			double qtyTraded = sellerOrder.getLockedVolume();
 			try {
-				Boolean result = tradeTransactionService.performTradeTransaction(0 , currencyAbr, currencyType, qtyTraded,
-						buyer, seller, null);
+				Boolean result = tradeTransactionService.performTradeTransaction(0, currencyAbr, currencyType,
+						qtyTraded, buyer, seller, null);
 				logger.debug("perform fiat transaction result: {} of sell order id: {} and buy order id:{}", result,
 						sellerOrder.getId(), buyersOrder.getId());
 				if (result) {
@@ -336,7 +342,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 					ordersRepository.save(sellerOrder);
 					buyersOrder.setOrderStatus(OrderStatus.COMPLETED);
 					ordersRepository.save(buyersOrder);
-					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER, MessageType.ORDER_BOOK_NOTIFICATION);
+					simpMessagingTemplate.convertAndSend(UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_ORDER,
+							MessageType.ORDER_BOOK_NOTIFICATION);
 					Trade trade = new Trade(buyersOrder.getPrice(), qtyTraded, buyer, seller,
 							sellerOrder.getMarketCurrency(), sellerOrder.getPairedCurrency(),
 							sellerOrder.getOrderStandard(), 0.0, 0.0, null, null);

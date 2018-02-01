@@ -19,7 +19,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.bolenum.constant.EmailTemplate;
 import com.bolenum.enums.NotificationType;
 import com.bolenum.model.User;
 import com.bolenum.model.notification.Notification;
@@ -108,13 +107,10 @@ public class NotificationServiceImpl implements NotificationService {
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
 
-		Direction sort;
+		Direction sort = Direction.ASC;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;
-		} else {
-			sort = Direction.ASC;
 		}
-
 		//Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		
 		Pageable pageRequest =new PageRequest(pageNumber, pageSize);
