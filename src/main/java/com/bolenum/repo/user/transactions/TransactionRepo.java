@@ -6,12 +6,9 @@ package com.bolenum.repo.user.transactions;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.LockModeType;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -61,8 +58,7 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 	 * @param transferStatus
 	 * @return
 	 */
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	Transaction findFirstByTransactionStatusAndTransferStatusNotInOrderByCreatedOnAsc(TransactionStatus transactionStatus,
+	Transaction findFirstByTransactionStatusAndTransferStatusOrderByCreatedOnAsc(TransactionStatus transactionStatus,
 			TransferStatus transferStatus);
 
 	/**
@@ -73,8 +69,7 @@ public interface TransactionRepo extends JpaRepository<Transaction, Serializable
 	 * @param transferStatus
 	 * @return
 	 */
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	List<Transaction> findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatusNotIn(User toUser, String currencyName,
+	List<Transaction> findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatus(User toUser, String currencyName,
 			TransactionStatus transactionStatus, TransferStatus transferStatus);
 
 	/**
