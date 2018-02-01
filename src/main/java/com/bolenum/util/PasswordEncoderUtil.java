@@ -20,12 +20,23 @@ public class PasswordEncoderUtil {
 	@Value("${bolenum.tokensecret}")
 	private String secret;
 
+	/**
+	 * This method is use for String encode
+	 * @param rawPassword
+	 * @return
+	 */
 	public String encode(CharSequence rawPassword) {
 		if (passwordEncoder == null)
 			create();
 		return passwordEncoder.encode(rawPassword);
 	}
 
+	/**
+	 * This method is use for matches
+	 * @param rawPassword
+	 * @param encodedPassword
+	 * @return
+	 */
 	public boolean matches(CharSequence rawPassword, String encodedPassword) {
 		if (passwordEncoder == null)
 			create();

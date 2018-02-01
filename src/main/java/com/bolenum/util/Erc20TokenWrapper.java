@@ -54,6 +54,11 @@ public final class Erc20TokenWrapper extends Contract {
         super(BINARY, contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
 
+    /**
+     * This method is use to get Transfer Events
+     * @param transactionReceipt
+     * @return
+     */
     public List<TransferEventResponse> getTransferEvents(TransactionReceipt transactionReceipt) {
         final Event event = new Event("Transfer", 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}),
@@ -70,6 +75,12 @@ public final class Erc20TokenWrapper extends Contract {
         return responses;
     }
 
+    /**
+     * This method is use for transfer Event Observable
+     * @param startBlock
+     * @param endBlock
+     * @return
+     */
     public Observable<TransferEventResponse> transferEventObservable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
         final Event event = new Event("Transfer", 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}),
@@ -90,6 +101,11 @@ public final class Erc20TokenWrapper extends Contract {
         });
     }
 
+    /**
+     * This method is use to get Approval Events
+     * @param transactionReceipt
+     * @return
+     */
     public List<ApprovalEventResponse> getApprovalEvents(TransactionReceipt transactionReceipt) {
         final Event event = new Event("Approval", 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}),
@@ -106,6 +122,12 @@ public final class Erc20TokenWrapper extends Contract {
         return responses;
     }
 
+    /**
+     * Tgis method is use for approval Event Observable
+     * @param startBlock
+     * @param endBlock
+     * @return
+     */
     public Observable<ApprovalEventResponse> approvalEventObservable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
         final Event event = new Event("Approval", 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}),
@@ -126,6 +148,11 @@ public final class Erc20TokenWrapper extends Contract {
         });
     }
 
+    /**
+     * This method is use for name
+     * @return
+     * @throws IOException
+     */
     public Future<Utf8String> name() throws IOException {
         Function function = new Function("name", 
                 Arrays.<Type>asList(), 
@@ -133,11 +160,24 @@ public final class Erc20TokenWrapper extends Contract {
         return executeCallSingleValueReturn(function);
     }
 
+    /**
+     * This method is use to approve Transaction Receipt
+     * @param _spender
+     * @param _amount
+     * @return
+     * @throws IOException
+     * @throws TransactionException
+     */
     public TransactionReceipt approve(Address _spender, Uint256 _amount) throws IOException, TransactionException {
         Function function = new Function("approve", Arrays.<Type>asList(_spender, _amount), Collections.<TypeReference<?>>emptyList());
         return executeTransaction(function);
     }
 
+    /**
+     * This method is use for total Supply
+     * @return
+     * @throws IOException
+     */
     public Future<Uint256> totalSupply() throws IOException {
         Function function = new Function("totalSupply", 
                 Arrays.<Type>asList(), 
@@ -145,11 +185,25 @@ public final class Erc20TokenWrapper extends Contract {
         return executeCallSingleValueReturn(function);
     }
 
+    /**
+     * This method is use for transfer From
+     * @param _from
+     * @param _to
+     * @param _amount
+     * @return
+     * @throws IOException
+     * @throws TransactionException
+     */
     public TransactionReceipt transferFrom(Address _from, Address _to, Uint256 _amount) throws IOException, TransactionException {
         Function function = new Function("transferFrom", Arrays.<Type>asList(_from, _to, _amount), Collections.<TypeReference<?>>emptyList());
         return  executeTransaction(function);
     }
 
+    /**
+     * This method is use for decimals
+     * @return
+     * @throws IOException
+     */
     public Uint8 decimals() throws IOException {
         Function function = new Function("decimals", 
                 Arrays.<Type>asList(), 
@@ -157,6 +211,12 @@ public final class Erc20TokenWrapper extends Contract {
         return executeCallSingleValueReturn(function);
     }
 
+    /**
+     * This method is use for balanceof
+     * @param _owner
+     * @return
+     * @throws IOException
+     */
     public Uint256 balanceOf(Address _owner) throws IOException {
         Function function = new Function("balanceOf", 
                 Arrays.<Type>asList(_owner), 
@@ -164,6 +224,11 @@ public final class Erc20TokenWrapper extends Contract {
         return executeCallSingleValueReturn(function);
     }
 
+    /**
+     * This method is use for owner
+     * @return
+     * @throws IOException
+     */
     public Future<Address> owner() throws IOException {
         Function function = new Function("owner", 
                 Arrays.<Type>asList(), 
@@ -171,6 +236,12 @@ public final class Erc20TokenWrapper extends Contract {
         return executeCallSingleValueReturn(function);
     }
 
+    
+    /**
+     * This method is use for symbol
+     * @return
+     * @throws IOException
+     */
     public Future<Utf8String> symbol() throws IOException {
         Function function = new Function("symbol", 
                 Arrays.<Type>asList(), 
@@ -178,11 +249,26 @@ public final class Erc20TokenWrapper extends Contract {
         return executeCallSingleValueReturn(function);
     }
 
+    /**
+     * This method is use for transfer Transaction Receipt 
+     * @param _to
+     * @param _amount
+     * @return
+     * @throws IOException
+     * @throws TransactionException
+     */
     public TransactionReceipt transfer(Address _to, Uint256 _amount) throws IOException, TransactionException {
         Function function = new Function("transfer", Arrays.<Type>asList(_to, _amount), Collections.<TypeReference<?>>emptyList());
         return executeTransaction(function);
     }
 
+    /**
+     * This method is use for Future allowance
+     * @param _owner
+     * @param _spender
+     * @return
+     * @throws IOException
+     */
     public Future<Uint256> allowance(Address _owner, Address _spender) throws IOException {
         Function function = new Function("allowance", 
                 Arrays.<Type>asList(_owner, _spender), 
@@ -190,20 +276,64 @@ public final class Erc20TokenWrapper extends Contract {
         return executeCallSingleValueReturn(function);
     }
 
+    /**
+     * This method is use for RemoteCall deploy
+     * @param web3j
+     * @param credentials
+     * @param gasPrice
+     * @param gasLimit
+     * @param initialWeiValue
+     * @param totalSupply
+     * @param tokenName
+     * @param decimalUnits
+     * @param tokenSymbol
+     * @return
+     */
     public static RemoteCall<Erc20TokenWrapper> deploy(Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue, Uint256 totalSupply, Utf8String tokenName, Uint8 decimalUnits, Utf8String tokenSymbol) {
         String encodedConstructor = FunctionEncoder.encodeConstructor(Arrays.<Type>asList(totalSupply, tokenName, decimalUnits, tokenSymbol));
         return deployRemoteCall(Erc20TokenWrapper.class, web3j, credentials, gasPrice, gasLimit, BINARY, encodedConstructor, initialWeiValue);
     }
 
+    /**
+     * This method is use for RemoteCall deploy
+     * @param web3j
+     * @param transactionManager
+     * @param gasPrice
+     * @param gasLimit
+     * @param initialWeiValue
+     * @param totalSupply
+     * @param tokenName
+     * @param decimalUnits
+     * @param tokenSymbol
+     * @return
+     */
     public static RemoteCall<Erc20TokenWrapper> deploy(Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit, BigInteger initialWeiValue, Uint256 totalSupply, Utf8String tokenName, Uint8 decimalUnits, Utf8String tokenSymbol) {
         String encodedConstructor = FunctionEncoder.encodeConstructor(Arrays.<Type>asList(totalSupply, tokenName, decimalUnits, tokenSymbol));
         return deployRemoteCall(Erc20TokenWrapper.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, encodedConstructor, initialWeiValue);
     }
 
+    /**
+     * This method is use to load Erc20TokenWrapper
+     * @param contractAddress
+     * @param web3j
+     * @param credentials
+     * @param gasPrice
+     * @param gasLimit
+     * @return
+     */
     public static Erc20TokenWrapper load(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
     	return new Erc20TokenWrapper(contractAddress, web3j, credentials, gasPrice, gasLimit);
     }
 
+    /**
+     * This method is use to load Erc20TokenWrapper
+     * @param contractAddress
+     * @param web3j
+     * @param transactionManager
+     * @param gasPrice
+     * @param gasLimit
+     * @return
+     */
     public static Erc20TokenWrapper load(String contractAddress, Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit) {
     	return new Erc20TokenWrapper(contractAddress, web3j, transactionManager, gasPrice, gasLimit);
     }
