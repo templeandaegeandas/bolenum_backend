@@ -350,7 +350,11 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		if (adminWalletBalance == null) {
 			adminWalletBalance = 0.0;
 		}
+		logger.debug("Admin available balance: {}", adminWalletBalance);
+		logger.debug("User deposit balance: {}", usersDepositBalance);
+		
 		adminWalletBalance = adminWalletBalance - usersDepositBalance;
+		logger.debug("admin balance - user deposit: {}", adminWalletBalance);
 		if (adminWalletBalance < withdrawAmount) {
 			throw new InsufficientBalanceException(localeService.getMessage("withdraw.invalid.available.balance"));
 		}
