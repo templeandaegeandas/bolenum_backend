@@ -17,5 +17,10 @@ public interface KYCRepo extends JpaRepository<UserKyc, Long>{
     @Query("select k from UserKyc k where (k.user.firstName like %:searchData% or k.user.lastName like %:searchData% or k.user.emailId like %:searchData%) and k.documentStatus = :documentStatus")
 	Page<UserKyc> findByDocumentStatus(@Param("documentStatus") DocumentStatus documentStatus, @Param("searchData") String searchData, Pageable pageable);
 
+	/**
+	 * This method is use to find UserKyc by user.
+	 * @param user
+	 * @return
+	 */
 	List<UserKyc> findByUser(User user);
 }

@@ -8,5 +8,10 @@ import com.bolenum.model.States;
 
 public interface StatesRepo extends JpaRepository<States, Long>{
 
+	/**
+	 * This method is use to find States by country id
+	 * @param countryid
+	 * @return
+	 */
 	List<States> findByCountryId(Long countryid);
 }

@@ -14,5 +14,10 @@ import com.bolenum.model.UserActivity;
 
 public interface UserActivityRepository extends JpaRepository<UserActivity, Long> {
 
+	/**
+	 * This method is use for find By Authentication Token
+	 * @param authenticationToken
+	 * @return
+	 */
 	UserActivity findByAuthenticationToken(AuthenticationToken authenticationToken);
 }

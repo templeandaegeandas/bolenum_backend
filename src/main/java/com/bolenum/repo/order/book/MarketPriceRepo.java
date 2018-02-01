@@ -17,7 +17,7 @@ import com.bolenum.model.orders.book.MarketPrice;
 public interface MarketPriceRepo extends JpaRepository<MarketPrice, Serializable> {
 
 	/**
-	 * @description findByCurrency
+	 * This method is use to find MarketPrice by currency
 	 * @param 
 	 * @return MarketPrice
 	 * @exception 
@@ -25,6 +25,11 @@ public interface MarketPriceRepo extends JpaRepository<MarketPrice, Serializable
 	 */
 	MarketPrice findByCurrency(Currency currency);
 	
+	/**
+	 * This method is use to find MarketPrice by Currency CurrencyAbbreviation
+	 * @param currencyAbbreviation
+	 * @return
+	 */
 	MarketPrice findByCurrencyCurrencyAbbreviation(String currencyAbbreviation);
 
 }
