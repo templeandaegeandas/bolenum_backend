@@ -21,6 +21,14 @@ public class ResponseHandler {
 	private ResponseHandler() {
 	}
 
+	/**
+	 * This method is use for response
+	 * @param httpStatus
+	 * @param isError
+	 * @param message
+	 * @param responseObject
+	 * @return
+	 */
 	public static ResponseEntity<Object> response(HttpStatus httpStatus, Boolean isError, String message,
 			Object responseObject) {
 		Map<String, Object> map = new HashMap<>();

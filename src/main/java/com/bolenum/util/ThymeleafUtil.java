@@ -23,6 +23,12 @@ public class ThymeleafUtil {
 		templateEngine = tempTemplateEngine;
 	}
 	
+	/**
+	 * This method is use get Processed Html
+	 * @param templateName
+	 * @param dynamicValueMap
+	 * @return
+	 */
 	public static String getProcessedHtml(String templateName,Map<String,Object> dynamicValueMap) {
 		
 		Context context = new Context();

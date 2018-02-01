@@ -1,6 +1,7 @@
 package com.bolenum.services.order.book;
 
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,12 +23,14 @@ import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.OrderStandard;
 import com.bolenum.enums.OrderStatus;
 import com.bolenum.enums.OrderType;
+import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
 import com.bolenum.model.User;
 import com.bolenum.model.orders.book.Orders;
 import com.bolenum.model.orders.book.Trade;
 import com.bolenum.repo.order.book.OrdersRepository;
 import com.bolenum.services.admin.fees.TradingFeeService;
+import com.bolenum.services.common.LocaleService;
 import com.bolenum.services.user.transactions.TransactionService;
 import com.bolenum.services.user.wallet.WalletService;
 import com.bolenum.util.GenericUtils;
@@ -56,6 +59,9 @@ public class OrdersServiceImpl implements OrdersService {
 
 	@Autowired
 	private TransactionService transactionService;
+	
+	@Autowired
+	private LocaleService localeService;
 
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
@@ -110,7 +116,7 @@ public class OrdersServiceImpl implements OrdersService {
 		String balance = walletService.getBalance(tickter, currencyType, user);
 		// user must have balance then user is eligible for placing order
 		if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
-			balance = "proceed";
+			throw new InsufficientBalanceException(MessageFormat.format(localeService.getMessage("order.insufficient.balance"), userPlacedLockedOrderVolume, userPlacedOrderVolume, minBalance));
 		}
 		return balance;
 	}
