@@ -181,18 +181,20 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				seller = orders.getUser();
 
 				msg1 = "Hi " + seller.getFirstName() + ", Your " + orders.getOrderType()
-						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
-						+ GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice()) + " " + pairCurr + " with " + buyer.getFirstName();
+						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
+						+ toCurrency + ", on " + GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice())
+						+ " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
 				msg = "Hi " + buyer.getFirstName() + ", Your " + matchedOrder.getOrderType()
-						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
-						+ GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice()) + " " + pairCurr + " with " + seller.getFirstName();
+						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
+						+ toCurrency + ", on " + GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice())
+						+ " " + pairCurr + " with " + seller.getFirstName();
 				logger.debug("msg: {}", msg);
 			}
 			logger.debug("orders saving finished and matched order saving started");
 			orderAsyncService.saveOrder(matchedOrder);
 			logger.debug("matched order saving finished");
-			
+
 			Map<String, Object> map = new HashMap<>();
 			if (buyer != null) {
 				map.put("name1", buyer.getFullName());
@@ -203,20 +205,17 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				map.put("toCurrency", toCurrency);
 				map.put("pairCurr", pairCurr);
 				map.put("totalPrice", qtyTraded * orders.getPrice());
-				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
-				notificationService.saveNotification(seller, buyer, msg1, null, null);
+				notificationService.sendNotification(buyer, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+				notificationService.saveNotification(buyer, seller, msg1, null, null);
 			}
 
 			if (seller != null) {
 				map.put("name1", seller.getFullName());
 				map.put("name2", buyer.getFirstName());
-				notificationService.sendNotification(buyer, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
-				notificationService.saveNotification(buyer, seller, msg, null, null);
+				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+				notificationService.saveNotification(seller, buyer, msg, null, null);
 			}
-
-
 			return orders;
-
 		}
 		return orders;
 	}
