@@ -35,6 +35,13 @@ public class CryptoUtil {
 
 	}
 
+	/**
+	 * This method is use to get Secret Key Spec 
+	 * @param myKey
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 */
 	private static SecretKeySpec getSecretKeySpec(String myKey)
 			throws UnsupportedEncodingException, NoSuchAlgorithmException {
 		byte[] key = myKey.getBytes("UTF-8");
@@ -46,6 +53,11 @@ public class CryptoUtil {
 
 	
 	
+    /**
+     * This method is use for byte Array To Hex String
+     * @param b
+     * @return
+     */
     private static String byteArrayToHexString(byte[] b) {
         StringBuffer sb = new StringBuffer(b.length * 2);
         for (int i = 0; i < b.length; i++) {
@@ -68,6 +80,11 @@ public class CryptoUtil {
 //        return b;
 //    }
 
+    /**
+     * This method is use to get Secret Key
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
     public static String getSecretKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance(AES);
         keyGen.init(128);
@@ -80,6 +97,18 @@ public class CryptoUtil {
 	
 	
 	
+	/**
+	 * This method is for encrypt
+	 * @param strToEncrypt
+	 * @param secret
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 */
 	public static String encrypt(String strToEncrypt, String secret)
 			throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException {
@@ -89,6 +118,18 @@ public class CryptoUtil {
 		return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes("UTF-8")));
 	}
 
+	/**
+	 * This method is use for decrypt
+	 * @param strToDecrypt
+	 * @param secret
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidKeyException
+	 * @throws IllegalBlockSizeException
+	 * @throws BadPaddingException
+	 */
 	public static String decrypt(String strToDecrypt, String secret)
 			throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
 			IllegalBlockSizeException, BadPaddingException {

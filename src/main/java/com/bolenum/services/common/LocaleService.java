@@ -20,6 +20,11 @@ public class LocaleService {
     @Autowired
     private MessageSource messageSource;
 
+    /**
+     * This method is use to get message
+     * @param code
+     * @return
+     */
     public String getMessage(String code) {
         Locale locale = LocaleContextHolder.getLocale();
         return this.messageSource.getMessage(code, null, locale);

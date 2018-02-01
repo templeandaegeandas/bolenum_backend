@@ -18,6 +18,11 @@ public class ErrorCollectionUtil {
 	private ErrorCollectionUtil() {
 	}
 
+	/**
+	 * This method is use to get Error Map
+	 * @param bindingResult
+	 * @return
+	 */
 	public static Map<String, Object> getErrorMap(BindingResult bindingResult) {
 		Map<String, Object> errors = new LinkedHashMap<>();
 		bindingResult.getFieldErrors()
@@ -25,6 +30,11 @@ public class ErrorCollectionUtil {
 		return errors;
 	}
 
+	/**
+	 * This method is use to get Error
+	 * @param bindingResult
+	 * @return
+	 */
 	public static String getError(BindingResult bindingResult) {
 		List<FieldError> list = bindingResult.getFieldErrors();
 		return list.get(0).getDefaultMessage();

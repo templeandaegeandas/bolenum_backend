@@ -91,4 +91,10 @@ public class MailServiceImpl implements MailService {
 		}
 		return new AsyncResult<>(false);
 	}
+
+	@Override
+	public Future<Boolean> mailSend(String to, String subject, String text) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

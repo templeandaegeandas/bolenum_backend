@@ -23,7 +23,7 @@ import com.bolenum.model.UserKyc;
 public interface KYCService {
 
 	/**
-	 * 
+	 * This method is use to upload KycDocument
 	 * @param multipartFile
 	 * @param userId
 	 * @return User
@@ -34,14 +34,14 @@ public interface KYCService {
 			throws IOException, PersistenceException, MaxSizeExceedException, MobileNotVerifiedException;
 
 	/**
-	 * 
+	 * This method is use to approve KycDocument
 	 * @param userId
 	 * @returnn User
 	 */
 	UserKyc approveKycDocument(Long kycId);
 
 	/**
-	 * 
+	 * This method is use to disApproved KycDocument
 	 * @param userId
 	 * @param rejectionMessage
 	 * @return User
@@ -49,14 +49,14 @@ public interface KYCService {
 	UserKyc disApprovedKycDocument(Long kycId, String rejectionMessage);
 
 	/**
-	 * 
+	 * This method is use to get UserKyc By Id
 	 * @param kycId
 	 * @return UserKyc
 	 */
 	UserKyc getUserKycById(Long kycId);
 
 	/**
-	 * 
+	 * This method is use to validate Document Type
 	 * @param documentType
 	 * @return
 	 */
@@ -64,7 +64,7 @@ public interface KYCService {
 	DocumentType validateDocumentType(String documentType);
 
 	/**
-	 * 
+	 * This method is use to get ListOfKyc
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortBy
@@ -75,7 +75,7 @@ public interface KYCService {
 	public Page<UserKyc> getListOfKyc(int pageNumber, int pageSize, String sortBy, String sortOrder, String searchData);
 
 	/**
-	 * 
+	 * This method is use to get List Of Kyc ByUser
 	 * @param user
 	 * @return
 	 */

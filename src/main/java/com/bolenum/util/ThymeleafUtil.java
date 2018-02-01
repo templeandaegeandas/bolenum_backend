@@ -23,19 +23,19 @@ public class ThymeleafUtil {
 		templateEngine = tempTemplateEngine;
 	}
 
-	public static String getProcessedHtml(Map<String, Object> model,String templateName) {
+	/**
+	 * This method is use get Processed Html
+	 * 
+	 * @param templateName
+	 * @param dynamicValueMap
+	 * @return
+	 */
+	public static String getProcessedHtml(Map<String, Object> model, String templateName) {
 
 		Context context = new Context();
-//		if (dynamicValueMap != null) {
-//			Iterator itMap = dynamicValueMap.entrySet().iterator();
-//			while (itMap.hasNext()) {
-//				Map.Entry pair = (Map.Entry) itMap.next();
-//				context.setVariable(pair.getKey().toString(), pair.getValue());
-//			}
-//		}
 
 		if (model != null) {
-			model.forEach((key,value) -> context.setVariable(key, value));
+			model.forEach((key, value) -> context.setVariable(key, value));
 			return templateEngine.process(templateName, context);
 		}
 		return "";

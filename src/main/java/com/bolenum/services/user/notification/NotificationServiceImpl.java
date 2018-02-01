@@ -150,4 +150,10 @@ public class NotificationServiceImpl implements NotificationService {
 		}
 	}
 
+	@Override
+	public boolean sendNotification(User user, String message, String subject) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
