@@ -20,10 +20,29 @@ import com.bolenum.model.User;
 public interface AuthenticationTokenRepo extends JpaRepository<AuthenticationToken, Serializable> {
 	AuthenticationToken findByToken(String token);
 
+	/**
+	 * This method is use to find By User And Token type
+	 * @param user
+	 * @param tokentype
+	 * @return
+	 */
 	List<AuthenticationToken> findByUserAndTokentype(User user, TokenType tokentype);
 
+	/**
+	 * This method is use to find By User And Is Deleted
+	 * @param user
+	 * @param isDeleted
+	 * @return
+	 */
 	List<AuthenticationToken> findByUserAndIsDeleted(User user, boolean isDeleted);
 
+	/**
+	 * This method is use to find By User And Is Deleted And Token type
+	 * @param user
+	 * @param isDeleted
+	 * @param token
+	 * @return
+	 */
 	List<AuthenticationToken> findByUserAndIsDeletedAndTokentype(User user, boolean isDeleted, TokenType token);
 
 	@Query("Select count(distinct a.user) from AuthenticationToken a where a.tokentype=:tokentype and a.createdOn between :startDate and :endDate and a.user.role.name ='ROLE_USER'")

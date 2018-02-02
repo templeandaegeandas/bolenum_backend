@@ -491,32 +491,34 @@ public class TransactionServiceImpl implements TransactionService {
 		return new AsyncResult<>(true);
 	}
 
-	/*
-	 * private void tradeNotification(boolean buyerSenderFlag,User buyer, User
-	 * seller,double qtyTraded,double tfee,String currAbrrivaiton) { String
-	 * msg,msg1=""; if(buyerSenderFlag) { msg = "Hi " + seller.getFirstName() +
-	 * ", Your transaction of selling " +
-	 * GenericUtils.getDecimalFormatString(qtyTraded ) + " " + currAbrrivaiton +
-	 * " have been processed successfully!"; msg1 = "Hi " + buyer.getFirstName() +
-	 * ", Your transaction of buying " +
-	 * GenericUtils.getDecimalFormatString(qtyTraded + tfee) + " " + currAbrrivaiton
-	 * + " have been processed successfully!"; }else { msg = "Hi " +
-	 * seller.getFirstName() + ", Your transaction of buying  " +
-	 * GenericUtils.getDecimalFormatString(qtyTraded + tfee) + " " + currAbrrivaiton
-	 * + " have been processed successfully!"; msg1 = "Hi " + buyer.getFirstName() +
-	 * ", Your transaction of selling " +
-	 * GenericUtils.getDecimalFormatString(qtyTraded ) + " " + currAbrrivaiton +
-	 * " have been processed successfully!"; }
-	 * notificationService.sendNotification(seller, msg, TRADESUMMARY);
-	 * notificationService.saveNotification(buyer, seller, msg, null, null);
-	 * notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
-	 * notificationService.saveNotification(seller, buyer, msg1, null, null);
-	 * 
-	 * logger.debug("Message : {}", msg); logger.debug("Message : {}", msg1);
-	 * 
-	 * }
-	 */
-
+	/*private void tradeNotification(boolean buyerSenderFlag,User buyer,
+			User seller,double qtyTraded,double tfee,String currAbrrivaiton) {
+		String msg,msg1="";
+		if(buyerSenderFlag) {
+		msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
+				+ GenericUtils.getDecimalFormatString(qtyTraded ) + " " + currAbrrivaiton
+				+ " have been processed successfully!";
+		msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "
+				+ GenericUtils.getDecimalFormatString(qtyTraded + tfee) + " " + currAbrrivaiton
+				+ " have been processed successfully!";
+		}else {
+			msg = "Hi " + seller.getFirstName() + ", Your transaction of buying  "
+					+ GenericUtils.getDecimalFormatString(qtyTraded + tfee) + " " + currAbrrivaiton
+					+ " have been processed successfully!";
+			msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of selling "
+					+ GenericUtils.getDecimalFormatString(qtyTraded ) + " " + currAbrrivaiton
+					+ " have been processed successfully!";
+		}
+		notificationService.sendNotification(seller, msg, TRADESUMMARY);
+		notificationService.saveNotification(buyer, seller, msg, null, null);
+		notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
+		notificationService.saveNotification(seller, buyer, msg1, null, null);
+		
+		logger.debug("Message : {}", msg);
+		logger.debug("Message : {}", msg1);
+		
+	}
+*/
 	private void unlockVolumeBuyer(Orders orders, Orders matchedOrder, double qtyTraded, double buyerTradeFee) {
 		/**
 		 * unlocking locked volume of buyers

@@ -13,10 +13,25 @@ import com.bolenum.model.User;
  */
 public interface BankAccountDetailsRepo extends JpaRepository<BankAccountDetails, Long> {
 
+	/**
+	 * This method is use to find BankAccountDetails By Account Number
+	 * @param accountNumber
+	 * @return
+	 */
 	public BankAccountDetails findByAccountNumber(String accountNumber);
 
+	/**
+	 * This method is use to find List<BankAccountDetails> by User
+	 * @param user
+	 * @return
+	 */
 	public List<BankAccountDetails> findByUser(User user);
 
+	/**
+	 * This method is use to find BankAccountDetails by id
+	 * @param id
+	 * @return
+	 */
 	public BankAccountDetails findById(Long id);
 
 }
