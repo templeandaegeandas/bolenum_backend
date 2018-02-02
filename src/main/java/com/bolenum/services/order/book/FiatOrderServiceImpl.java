@@ -148,7 +148,6 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			matchedOrder.setOrderStatus(OrderStatus.LOCKED);
 			matchedOrder.setVolume(remain);
 			logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
-			matchedOrder.setLockedVolume(qtyTraded);
 			matchedOrder.setMatchedOn(new Date());
 			logger.debug("locked volume after set: {}", matchedOrder.getLockedVolume());
 			remainingVolume = 0.0;
@@ -172,7 +171,6 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
 						+ GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice()) + " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
-
 			}
 			
 			if (OrderType.SELL.equals(orders.getOrderType())) {
