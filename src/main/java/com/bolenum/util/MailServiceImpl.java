@@ -55,7 +55,7 @@ public class MailServiceImpl implements MailService {
 			model.put("url", serverUrl + "/#/login?token=" + token);
 			model.put("to", to);
 			helper.setTo(to);
-			String html = ThymeleafUtil.getProcessedHtml(model, EmailTemplate.REGISTRATION);
+			String html = ThymeleafUtil.getProcessedHtml(model, EmailTemplate.REGISTRATION_TEMPLATE);
 			helper.setText(html, true);
 			helper.setSubject("Verification link for registration");
 			helper.setFrom(new InternetAddress(mailFrom, domainName).toString());

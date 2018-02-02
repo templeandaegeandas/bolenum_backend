@@ -164,12 +164,12 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				buyer = orders.getUser();
 				seller = matchedOrder.getUser();
 				msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
-						+ " order has been locked,  quantity: " + qtyTraded + " " + toCurrency + ", on "
-						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + seller.getFirstName();
+						+ " order has been locked,  quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
+						+ GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice()) + " " + pairCurr + " with " + seller.getFirstName();
 				logger.debug("msg: {}", msg);
 				msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
-						+ " order has been locked, quantity: " + qtyTraded + " " + toCurrency + ", on "
-						+ qtyTraded * orders.getPrice() + " " + pairCurr + " with " + buyer.getFirstName();
+						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
+						+ GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice()) + " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
 
 			}
@@ -201,10 +201,10 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				map.put("name2", seller.getFirstName());
 				map.put("orderType", matchedOrder.getOrderType());
 				map.put("qtyTraded", qtyTraded);
-				map.put("orderPrice", orders.getPrice());
+				map.put("orderPrice", GenericUtils.getDecimalFormatString(orders.getPrice()));
 				map.put("toCurrency", toCurrency);
 				map.put("pairCurr", pairCurr);
-				map.put("totalPrice", qtyTraded * orders.getPrice());
+				map.put("totalPrice", GenericUtils.getDecimalFormatString((qtyTraded * orders.getPrice())));
 				notificationService.sendNotification(buyer, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
 				notificationService.saveNotification(buyer, seller, msg1, null, null);
 			}
@@ -296,10 +296,12 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				map.put("sellerEmailId", seller.getEmailId());
 				map.put("orderType", matched.getOrderType());
 				map.put("lockedVolume", exitingOrder.getLockedVolume());
-				map.put("orderPrice", exitingOrder.getPrice());
-				map.put("totalPrice", exitingOrder.getLockedVolume() * exitingOrder.getPrice());
+				map.put("orderPrice", GenericUtils.getDecimalFormatString(exitingOrder.getPrice()));
+				map.put("totalPrice", GenericUtils
+						.getDecimalFormatString((exitingOrder.getLockedVolume() * exitingOrder.getPrice())));
 
-				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.BUYER_PAID_CONFIRMATION);
+				notificationService.sendNotification(seller, TRADESUMMARY, map,
+						EmailTemplate.BUYER_PAID_CONFIRMATION_TEMPLATE);
 				notificationService.saveNotification(buyer, seller, msg, matched.getId(),
 						NotificationType.PAID_NOTIFICATION);
 				exitingOrder.setConfirm(true);
