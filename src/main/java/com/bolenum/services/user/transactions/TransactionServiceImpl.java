@@ -413,13 +413,15 @@ public class TransactionServiceImpl implements TransactionService {
 			data.put("orderType", OrderType.SELL);
 			data.put("qtyTraded", GenericUtils.getDecimalFormatString(qtyTraded));
 			data.put("currencyAbbr", toCurrAbrrivaiton);
-
+			// sending seller mail template
 			notificationService.sendNotification(seller, TRADESUMMARY, data,
 					EmailTemplate.TRADE_SUMMARY_CRYPTO_SELL_TEMPLATE);
-
+			// saving seller mail notification
 			notificationService.saveNotification(buyer, seller, msg, null, null);
+			
 			data.put("name", buyer.getFirstName());
 			data.put("orderType", OrderType.BUY);
+			// sending byer mail template
 			notificationService.sendNotification(buyer, TRADESUMMARY, data,
 					EmailTemplate.TRADE_SUMMARY_CRYPTO_BUY_TEMPLATE);
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
@@ -427,6 +429,7 @@ public class TransactionServiceImpl implements TransactionService {
 			logger.debug("Message : {}", msg);
 			logger.debug("Message : {}", msg1);
 		}
+		
 		double sellerQty = GenericUtils.getDecimalFormat(pairedCurrencyVolume - sellerTradeFee);
 		logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
 				pairCurrAbrrivaiton);
@@ -451,19 +454,20 @@ public class TransactionServiceImpl implements TransactionService {
 			String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of selling "
 					+ GenericUtils.getDecimalFormatString(sellerQty + tfee) + " " + pairCurrAbrrivaiton
 					+ " have been processed successfully!";
+			
 			Map<String, Object> data = new HashMap<>();
 			data.put("name", seller.getFirstName());
-			data.put("orderType", OrderType.SELL);
+			data.put("orderType", OrderType.BUY);
 			data.put("qtyTraded", GenericUtils.getDecimalFormatString(sellerQty + tfee));
 			data.put("currencyAbbr", pairCurrAbrrivaiton);
 			notificationService.sendNotification(seller, TRADESUMMARY, data,
-					EmailTemplate.TRADE_SUMMARY_CRYPTO_SELL_TEMPLATE);
+					EmailTemplate.TRADE_SUMMARY_CRYPTO_BUY_TEMPLATE);
 			notificationService.saveNotification(buyer, seller, msg, null, null);
 
 			data.put("name", buyer.getFirstName());
-			data.put("orderType", OrderType.BUY);
+			data.put("orderType", OrderType.SELL);
 			notificationService.sendNotification(buyer, TRADESUMMARY, data,
-					EmailTemplate.TRADE_SUMMARY_CRYPTO_BUY_TEMPLATE);
+					EmailTemplate.TRADE_SUMMARY_CRYPTO_SELL_TEMPLATE);
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
 
 			logger.debug("Message : {}", msg);
