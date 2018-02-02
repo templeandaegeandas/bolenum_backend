@@ -164,12 +164,14 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				buyer = orders.getUser();
 				seller = matchedOrder.getUser();
 				msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
-						+ " order has been locked,  quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
-						+ GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice()) + " " + pairCurr + " with " + seller.getFirstName();
+						+ " order has been locked,  quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
+						+ toCurrency + ", on " + GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice())
+						+ " " + pairCurr + " with " + seller.getFirstName();
 				logger.debug("msg: {}", msg);
 				msg1 = "Hi " + seller.getFirstName() + ", Your " + matchedOrder.getOrderType()
-						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrency + ", on "
-						+ GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice()) + " " + pairCurr + " with " + buyer.getFirstName();
+						+ " order has been locked, quantity: " + GenericUtils.getDecimalFormatString(qtyTraded) + " "
+						+ toCurrency + ", on " + GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice())
+						+ " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
 			}
 			
@@ -206,14 +208,16 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				map.put("toCurrency", toCurrency);
 				map.put("pairCurr", pairCurr);
 				map.put("totalPrice", GenericUtils.getDecimalFormatString((qtyTraded * orders.getPrice())));
-				notificationService.sendNotification(buyer, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+				notificationService.sendNotification(buyer, TRADESUMMARY, map,
+						EmailTemplate.TRADE_SUMMARY_FIAT_BUY_TEMPLATE);
 				notificationService.saveNotification(buyer, seller, msg1, null, null);
 			}
 
 			if (seller != null) {
 				map.put("name1", seller.getFullName());
 				map.put("name2", buyer.getFirstName());
-				notificationService.sendNotification(seller, TRADESUMMARY, map, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+				notificationService.sendNotification(seller, TRADESUMMARY, map,
+						EmailTemplate.TRADE_SUMMARY_FIAT_SELL_TEMPLATE);
 				notificationService.saveNotification(seller, buyer, msg, null, null);
 			}
 			return orders;
