@@ -21,12 +21,14 @@ import com.bolenum.model.orders.book.Orders;
 public interface FiatOrderService {
 
 	/**
+	 * This method is use to create Orders
 	 * @param orders
 	 * @return
 	 */
 	public Orders createOrders(Orders orders);
 
 	/**
+	 * This method is use to check Fiat Order Eligibility
 	 * @param user
 	 * @param orders
 	 * @return
@@ -34,6 +36,7 @@ public interface FiatOrderService {
 	public String checkFiatOrderEligibility(User user, Orders orders);
 
 	/**
+	 * This method is use to process Fiat Order List
 	 * @param matchedOrder
 	 * @param orders
 	 * @return
@@ -41,6 +44,7 @@ public interface FiatOrderService {
 	public Orders processFiatOrderList(Orders matchedOrder, Orders orders);
 
 	/**
+	 * This method is use to get Placed Order Volume Of Currency
 	 * @param user
 	 * @param orderStatus
 	 * @param orderType
@@ -50,18 +54,21 @@ public interface FiatOrderService {
 	double getPlacedOrderVolumeOfCurrency(User user, OrderStatus orderStatus, OrderType orderType, Currency currency);
 
 	/**
+	 * This method is use to process Cancel Order
 	 * @param order
 	 * @return
 	 */
 	public boolean processCancelOrder(Orders order);
 
 	/**
+	 * This method is use for buyer Paid Confirmtion
 	 * @param order
 	 * @return
 	 */
 	public boolean buyerPaidConfirmtion(Orders order);
 
 	/**
+	 * This method is use to process Transaction Fiat Orders
 	 * @param order
 	 * @param currencyAbr
 	 * @param currencyType
@@ -70,6 +77,7 @@ public interface FiatOrderService {
 	public Future<Boolean> processTransactionFiatOrders(Orders order, String currencyAbr, String currencyType);
 
 	/**
+	 * This method is use for existing Orders
 	 * @param order
 	 * @param page
 	 * @param size
@@ -80,6 +88,7 @@ public interface FiatOrderService {
 	public Page<Orders> existingOrders(Orders order, int page, int size, long marketCurrencyId, long pairedCurrencyId);
 
 	/**
+	 * This method is use for byers Wallet Address And CurrencyAbbr
 	 * @param user
 	 * @param marketCurrency
 	 * @param pairedCurrency

@@ -148,12 +148,11 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			matchedOrder.setOrderStatus(OrderStatus.LOCKED);
 			matchedOrder.setVolume(remain);
 			logger.debug("reamining volume after set: {}", matchedOrder.getVolume());
-			matchedOrder.setLockedVolume(qtyTraded);
 			matchedOrder.setMatchedOn(new Date());
 			logger.debug("locked volume after set: {}", matchedOrder.getLockedVolume());
 			remainingVolume = 0.0;
 			orders.setVolume(remainingVolume);
-			orders.setLockedVolume(qtyTraded);
+			
 			orders.setOrderStatus(OrderStatus.LOCKED);
 			orders.setMatchedOn(new Date());
 			logger.debug("orders saving started");
@@ -161,6 +160,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			if (OrderType.BUY.equals(orders.getOrderType())) {
 				orders.setMatchedOrder(matchedOrder);
 				matchedOrder.setMatchedOrder(orders);
+				matchedOrder.setLockedVolume(qtyTraded);
 				buyer = orders.getUser();
 				seller = matchedOrder.getUser();
 				msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
@@ -173,12 +173,12 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ toCurrency + ", on " + GenericUtils.getDecimalFormatString(qtyTraded * orders.getPrice())
 						+ " " + pairCurr + " with " + buyer.getFirstName();
 				logger.debug("msg1: {}", msg1);
-
 			}
-			orders = orderAsyncService.saveOrder(orders);
+			
 			if (OrderType.SELL.equals(orders.getOrderType())) {
 				matchedOrder.setMatchedOrder(orders);
 				orders.setMatchedOrder(matchedOrder);
+				orders.setLockedVolume(qtyTraded);
 				buyer = matchedOrder.getUser();
 				seller = orders.getUser();
 
@@ -193,6 +193,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ " " + pairCurr + " with " + seller.getFirstName();
 				logger.debug("msg: {}", msg);
 			}
+			orders = orderAsyncService.saveOrder(orders);
 			logger.debug("orders saving finished and matched order saving started");
 			orderAsyncService.saveOrder(matchedOrder);
 			logger.debug("matched order saving finished");
@@ -284,25 +285,28 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		User buyer = null;
 		User seller = null;
 		if (matched != null) {
+			logger.debug("buyer loked volume: {}", exitingOrder.getLockedVolume());
+			logger.debug("seller locked volume: {}", matched.getLockedVolume());
 			if (OrderType.BUY.equals(exitingOrder.getOrderType())) {
 
 				buyer = exitingOrder.getUser();
 				seller = matched.getUser();
 				msg = "Hi " + matched.getUser().getFirstName() + " your " + matched.getOrderType() + " is in process, "
 						+ exitingOrder.getUser().getFirstName() + " has paid you the amount:"
-						+ GenericUtils.getDecimalFormatString(exitingOrder.getLockedVolume() * exitingOrder.getPrice())
+						+ GenericUtils.getDecimalFormatString(matched.getLockedVolume() * exitingOrder.getPrice())
 						+ " Please confirm amount by login into bolenumexchage.";
-
+				
+				logger.debug(msg);
 				Map<String, Object> map = new HashMap<>();
 				map.put("buyerName", buyer.getFirstName());
 				map.put("buyerEmailId", buyer.getEmailId());
 				map.put("sellerName", seller.getFirstName());
 				map.put("sellerEmailId", seller.getEmailId());
 				map.put("orderType", matched.getOrderType());
-				map.put("lockedVolume", exitingOrder.getLockedVolume());
+				map.put("lockedVolume", matched.getLockedVolume());
 				map.put("orderPrice", GenericUtils.getDecimalFormatString(exitingOrder.getPrice()));
 				map.put("totalPrice", GenericUtils
-						.getDecimalFormatString((exitingOrder.getLockedVolume() * exitingOrder.getPrice())));
+						.getDecimalFormatString((matched.getLockedVolume() * exitingOrder.getPrice())));
 
 				notificationService.sendNotification(seller, TRADESUMMARY, map,
 						EmailTemplate.BUYER_PAID_CONFIRMATION_TEMPLATE);
