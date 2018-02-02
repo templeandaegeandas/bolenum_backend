@@ -287,7 +287,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				seller = matched.getUser();
 				msg = "Hi " + matched.getUser().getFirstName() + " your " + matched.getOrderType() + " is in process, "
 						+ exitingOrder.getUser().getFirstName() + " has paid you the amount:"
-						+ GenericUtils.getDecimalFormatString(exitingOrder.getLockedVolume() * exitingOrder.getPrice())
+						+ GenericUtils.getDecimalFormatString(matched.getLockedVolume() * exitingOrder.getPrice())
 						+ " Please confirm amount by login into bolenumexchage.";
 
 				Map<String, Object> map = new HashMap<>();
@@ -296,10 +296,10 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				map.put("sellerName", seller.getFullName());
 				map.put("sellerEmailId", seller.getEmailId());
 				map.put("orderType", matched.getOrderType());
-				map.put("lockedVolume", exitingOrder.getLockedVolume());
+				map.put("lockedVolume", matched.getLockedVolume());
 				map.put("orderPrice", GenericUtils.getDecimalFormatString(exitingOrder.getPrice()));
 				map.put("totalPrice", GenericUtils
-						.getDecimalFormatString((exitingOrder.getLockedVolume() * exitingOrder.getPrice())));
+						.getDecimalFormatString((matched.getLockedVolume() * exitingOrder.getPrice())));
 
 				notificationService.sendNotification(seller, TRADESUMMARY, map,
 						EmailTemplate.BUYER_PAID_CONFIRMATION_TEMPLATE);
