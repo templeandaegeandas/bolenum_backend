@@ -217,7 +217,7 @@ public class FiatOrderController {
 					+ " Please login to bolenum exchange to confirm your payment.";
 
 			User buyer = matchedOrder.getUser();
-			infoMap.put("buyerName", buyer.getFullName());
+			infoMap.put("buyerName", buyer.getFirstName());
 			infoMap.put("buyerEmailId", buyer.getEmailId());
 			infoMap.put("sellerAccountName", accountDetails.getAccountHolderName());
 			infoMap.put("sellerAccountNumber", accountDetails.getAccountNumber());

@@ -199,7 +199,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 
 			Map<String, Object> map = new HashMap<>();
 			if (buyer != null) {
-				map.put("name1", buyer.getFullName());
+				map.put("name1", buyer.getFirstName());
 				map.put("name2", seller.getFirstName());
 				map.put("orderType", matchedOrder.getOrderType());
 				map.put("qtyTraded", qtyTraded);
@@ -213,7 +213,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			}
 
 			if (seller != null) {
-				map.put("name1", seller.getFullName());
+				map.put("name1", seller.getFirstName());
 				map.put("name2", buyer.getFirstName());
 				notificationService.sendNotification(seller, TRADESUMMARY, map,
 						EmailTemplate.TRADE_SUMMARY_FIAT_SELL_TEMPLATE);
@@ -294,9 +294,9 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ " Please confirm amount by login into bolenumexchage.";
 
 				Map<String, Object> map = new HashMap<>();
-				map.put("buyerName", buyer.getFullName());
+				map.put("buyerName", buyer.getFirstName());
 				map.put("buyerEmailId", buyer.getEmailId());
-				map.put("sellerName", seller.getFullName());
+				map.put("sellerName", seller.getFirstName());
 				map.put("sellerEmailId", seller.getEmailId());
 				map.put("orderType", matched.getOrderType());
 				map.put("lockedVolume", exitingOrder.getLockedVolume());

@@ -348,6 +348,7 @@ public class TransactionServiceImpl implements TransactionService {
 			return list;
 		}
 	}
+	
 
 	@Override
 	@Async
@@ -416,12 +417,13 @@ public class TransactionServiceImpl implements TransactionService {
 
 			notificationService.sendNotification(seller, TRADESUMMARY, data,
 					EmailTemplate.TRADE_SUMMARY_CRYPTO_SELL_TEMPLATE);
-
+			
 			notificationService.saveNotification(buyer, seller, msg, null, null);
 			data.put("name", buyer.getFirstName());
 			data.put("orderType", OrderType.BUY);
 			notificationService.sendNotification(buyer, TRADESUMMARY, data,
 					EmailTemplate.TRADE_SUMMARY_CRYPTO_BUY_TEMPLATE);
+			
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
 
 			logger.debug("Message : {}", msg);
@@ -436,6 +438,7 @@ public class TransactionServiceImpl implements TransactionService {
 		boolean buyerRes = tradeTransactionService.performTradeTransaction(tfee, pairCurrAbrrivaiton, pairCurrencyType,
 				sellerQty, seller, buyer, trade.getId());
 		logger.debug("buyer performed trade transaction: {}", buyerRes);
+		
 		if (buyerRes) {
 			logger.debug("Buyer: {} has performed tx to Seller:{} of amount: {} {}", buyer.getEmailId(),
 					seller.getEmailId(), GenericUtils.getDecimalFormatString(sellerQty), pairCurrAbrrivaiton);
