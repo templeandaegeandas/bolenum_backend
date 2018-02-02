@@ -153,7 +153,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			logger.debug("locked volume after set: {}", matchedOrder.getLockedVolume());
 			remainingVolume = 0.0;
 			orders.setVolume(remainingVolume);
-			orders.setLockedVolume(qtyTraded);
+			
 			orders.setOrderStatus(OrderStatus.LOCKED);
 			orders.setMatchedOn(new Date());
 			logger.debug("orders saving started");
@@ -161,6 +161,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 			if (OrderType.BUY.equals(orders.getOrderType())) {
 				orders.setMatchedOrder(matchedOrder);
 				matchedOrder.setMatchedOrder(orders);
+				matchedOrder.setLockedVolume(qtyTraded);
 				buyer = orders.getUser();
 				seller = matchedOrder.getUser();
 				msg = "Hi " + buyer.getFirstName() + ", Your " + orders.getOrderType()
@@ -173,10 +174,11 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 				logger.debug("msg1: {}", msg1);
 
 			}
-			orders = orderAsyncService.saveOrder(orders);
+			
 			if (OrderType.SELL.equals(orders.getOrderType())) {
 				matchedOrder.setMatchedOrder(orders);
 				orders.setMatchedOrder(matchedOrder);
+				orders.setLockedVolume(qtyTraded);
 				buyer = matchedOrder.getUser();
 				seller = orders.getUser();
 
@@ -191,6 +193,7 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ " " + pairCurr + " with " + seller.getFirstName();
 				logger.debug("msg: {}", msg);
 			}
+			orders = orderAsyncService.saveOrder(orders);
 			logger.debug("orders saving finished and matched order saving started");
 			orderAsyncService.saveOrder(matchedOrder);
 			logger.debug("matched order saving finished");
