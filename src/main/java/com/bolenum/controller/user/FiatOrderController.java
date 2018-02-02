@@ -223,7 +223,7 @@ public class FiatOrderController {
 			infoMap.put("sellerAccountNumber", accountDetails.getAccountNumber());
 
 			notificationService.sendNotification(matchedOrder.getUser(), "trade.summary", infoMap,
-					EmailTemplate.SELLER_ACCOUNT_DETAILS);
+					EmailTemplate.SELLER_ACCOUNT_DETAILS_TEMPLATE);
 			notificationService.saveNotification(bankDetailsUser, matchedOrder.getUser(), msg, matchedOrderId,
 					NotificationType.MATCHED_NOTIFICATION);
 			map.put(ORDERID, order.getId());

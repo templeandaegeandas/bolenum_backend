@@ -411,13 +411,15 @@ public class TransactionServiceImpl implements TransactionService {
 			Map<String, Object> data = new HashMap<>();
 			data.put("name", seller.getFirstName());
 			data.put("orderType", OrderType.SELL);
-			data.put("qtyTraded", qtyTraded);
+			data.put("qtyTraded", GenericUtils.getDecimalFormatString(qtyTraded));
 			data.put("currencyAbbr", toCurrAbrrivaiton);
-			notificationService.sendNotification(seller, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+			notificationService.sendNotification(seller, TRADESUMMARY, data,
+					EmailTemplate.TRADE_SUMMARY_CRYPTO_TEMPLATE);
 			notificationService.saveNotification(buyer, seller, msg, null, null);
 			data.put("name", buyer.getFirstName());
 			data.put("orderType", OrderType.BUY);
-			notificationService.sendNotification(buyer, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+			notificationService.sendNotification(buyer, TRADESUMMARY, data,
+					EmailTemplate.TRADE_SUMMARY_CRYPTO_TEMPLATE);
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
 
 			logger.debug("Message : {}", msg);
@@ -452,11 +454,13 @@ public class TransactionServiceImpl implements TransactionService {
 			data.put("orderType", OrderType.SELL);
 			data.put("qtyTraded", sellerQty + tfee);
 			data.put("currencyAbbr", pairCurrAbrrivaiton);
-			notificationService.sendNotification(seller, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+			notificationService.sendNotification(seller, TRADESUMMARY, data,
+					EmailTemplate.TRADE_SUMMARY_CRYPTO_TEMPLATE);
 			notificationService.saveNotification(buyer, seller, msg, null, null);
 			data.put("name", buyer.getFirstName());
 			data.put("orderType", OrderType.BUY);
-			notificationService.sendNotification(buyer, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+			notificationService.sendNotification(buyer, TRADESUMMARY, data,
+					EmailTemplate.TRADE_SUMMARY_CRYPTO_TEMPLATE);
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
 
 			logger.debug("Message : {}", msg);
