@@ -33,13 +33,11 @@
 		<tr>
 			<td
 				style="background: #fff; color: #858383; line-height: 22px; background: #fff; padding: 9px 20px 45px 37px; font-size: 13px;"
-				colspan="3">Hi <span th:text="${name}">name</span>, Your
-				transaction of<span th:if="${orderType=='BUY'}">buying</span><span
-				th:if="${orderType=='SELL'}">selling</span> <span
-				th:text="${qtyTraded}">qty</span>&nbsp; <span
-				th:text="${currencyAbbr}">currencyAbbr</span> have been processed
-				successfully!
-			</td>
+				colspan="3">Hi <span th:text="${name1}">name</span>, Your sell order has been
+					locked, quantity : </span><span th:text="${qtyTraded}">qty</span> <span
+				th:text="${toCurrency}">currency</span> , on <span
+				th:text="${totalPrice}"></span> <span> </span><span
+				th:text="${pairCurr}"></span> with <span th:text="${name2}"></span></td>
 		</tr>
 
 		<!-- <tr>
