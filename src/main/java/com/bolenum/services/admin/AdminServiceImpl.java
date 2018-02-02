@@ -118,6 +118,9 @@ public class AdminServiceImpl implements AdminService {
 	public boolean adminValidateErc20WithdrawAmount(User user, String tokenName, Double withdrawAmount,
 			String toAddress) {
 		Erc20Token erc20Token = erc20TokenRepository.findByCurrencyCurrencyAbbreviation(tokenName);
+		if(erc20Token == null) {
+			return false;
+		}
 		return btcWalletService.adminValidateErc20WithdrawAmount(user, "ETH", withdrawAmount, toAddress, erc20Token);
 	}
 	

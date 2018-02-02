@@ -5,6 +5,7 @@ package com.bolenum.services.user.notification;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -46,8 +47,8 @@ public class NotificationServiceImpl implements NotificationService {
 	 * to send the notification
 	 */
 	@Override
-	public boolean sendNotification(User user, String message, String subject) {
-		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage(subject), message);
+	public boolean sendNotification(User user, String subject, Map<String,Object> map,String emailTemplate) {
+		Future<Boolean> status = mailService.mailSend(user.getEmailId(), localeService.getMessage(subject),map,emailTemplate.toString());
 		try {
 			if (status.get()) {
 				logger.debug("notification send to : {}", user.getEmailId());
@@ -106,13 +107,10 @@ public class NotificationServiceImpl implements NotificationService {
 		c.add(Calendar.DATE, -1);
 		Date startDate = c.getTime();
 
-		Direction sort;
+		Direction sort = Direction.ASC;
 		if (sortOrder.equals("desc")) {
 			sort = Direction.DESC;
-		} else {
-			sort = Direction.ASC;
 		}
-
 		//Pageable pageRequest = new PageRequest(pageNumber, pageSize, sort, sortBy);
 		
 		Pageable pageRequest =new PageRequest(pageNumber, pageSize);
@@ -150,6 +148,12 @@ public class NotificationServiceImpl implements NotificationService {
 			setActionOnNotifiction(id);
 
 		}
+	}
+
+	@Override
+	public boolean sendNotification(User user, String message, String subject) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

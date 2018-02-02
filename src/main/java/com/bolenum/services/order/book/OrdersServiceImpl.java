@@ -115,7 +115,8 @@ public class OrdersServiceImpl implements OrdersService {
 		// getting the user current wallet balance
 		String balance = walletService.getBalance(tickter, currencyType, user);
 		// user must have balance then user is eligible for placing order
-		if (Double.valueOf(balance) > 0 && (Double.valueOf(balance) >= Double.valueOf(minBalance))) {
+		if (Double.valueOf(balance) < Double.valueOf(minBalance)) {
+			logger.debug("You don't have sufficient balance, locked balance {}, order placed balance {}, required balance {}", userPlacedLockedOrderVolume, userPlacedOrderVolume, minBalance);
 			throw new InsufficientBalanceException(MessageFormat.format(localeService.getMessage("order.insufficient.balance"), userPlacedLockedOrderVolume, userPlacedOrderVolume, minBalance));
 		}
 		return balance;

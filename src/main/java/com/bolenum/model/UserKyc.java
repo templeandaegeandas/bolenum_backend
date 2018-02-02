@@ -36,6 +36,7 @@ public class UserKyc {
 	@Enumerated(EnumType.STRING)
 	private DocumentStatus documentStatus = DocumentStatus.SUBMITTED;
 	private String rejectionMessage;
+
 	@UpdateTimestamp
 	private Date uploadedDate;
 	private Date verifiedDate;
