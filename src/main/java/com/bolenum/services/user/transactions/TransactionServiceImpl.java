@@ -397,8 +397,9 @@ public class TransactionServiceImpl implements TransactionService {
 			// unlocking locked volume
 			unlockVolumeSeller(orders, matchedOrder, qtyTraded);
 			
+			tradeNotification(true,buyer,seller,qtyTraded,tfee,toCurrAbrrivaiton);
 			
-			String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
+		/*	String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
 					+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrAbrrivaiton
 					+ " have been processed successfully!";
 			
@@ -411,10 +412,8 @@ public class TransactionServiceImpl implements TransactionService {
 			notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
 			
-			
-			
 			logger.debug("Message : {}", msg);
-			logger.debug("Message : {}", msg1);
+			logger.debug("Message : {}", msg1);*/
 		}
 		double sellerQty = GenericUtils.getDecimalFormat(pairedCurrencyVolume - sellerTradeFee);
 		logger.debug("actual quantity seller will get: {} {}", GenericUtils.getDecimalFormatString(sellerQty),
@@ -434,7 +433,9 @@ public class TransactionServiceImpl implements TransactionService {
 			// unlocking locked volume
 			unlockVolumeBuyer(orders, matchedOrder, qtyTraded, buyerTradeFee);
 			
-			String msg = "Hi " + seller.getFirstName() + ", Your transaction of buying "
+			tradeNotification(false,buyer,seller,qtyTraded,tfee,toCurrAbrrivaiton);
+			
+			/*String msg = "Hi " + seller.getFirstName() + ", Your transaction of buying "
 					+ GenericUtils.getDecimalFormatString(sellerQty) + " " + pairCurrAbrrivaiton
 					+ " have been processed successfully!";
 			String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of selling "
@@ -447,7 +448,7 @@ public class TransactionServiceImpl implements TransactionService {
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
 			
 			logger.debug("Message : {}", msg);
-			logger.debug("Message : {}", msg1);
+			logger.debug("Message : {}", msg1);*/
 
 		}
 		User admin = userService.findByEmail(adminEmail);
@@ -476,7 +477,7 @@ public class TransactionServiceImpl implements TransactionService {
 	
 	
 	
-	/*private void tradeNotification(boolean buyerSenderFlag,User buyer,
+	private void tradeNotification(boolean buyerSenderFlag,User buyer,
 			User seller,double qtyTraded,double tfee,String currAbrrivaiton) {
 		String msg,msg1="";
 		if(buyerSenderFlag) {
@@ -502,7 +503,7 @@ public class TransactionServiceImpl implements TransactionService {
 		logger.debug("Message : {}", msg);
 		logger.debug("Message : {}", msg1);
 		
-	}*/
+	}
 
 	private void unlockVolumeBuyer(Orders orders, Orders matchedOrder, double qtyTraded, double buyerTradeFee) {
 		/**
