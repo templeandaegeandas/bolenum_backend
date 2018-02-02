@@ -281,6 +281,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 		User buyer = null;
 		User seller = null;
 		if (matched != null) {
+			logger.debug("buyer loked volume: {}", exitingOrder.getLockedVolume());
+			logger.debug("seller locked volume: {}", matched.getLockedVolume());
 			if (OrderType.BUY.equals(exitingOrder.getOrderType())) {
 
 				buyer = exitingOrder.getUser();
@@ -289,7 +291,8 @@ public class FiatOrderServiceImpl implements FiatOrderService {
 						+ exitingOrder.getUser().getFirstName() + " has paid you the amount:"
 						+ GenericUtils.getDecimalFormatString(matched.getLockedVolume() * exitingOrder.getPrice())
 						+ " Please confirm amount by login into bolenumexchage.";
-
+				
+				logger.debug(msg);
 				Map<String, Object> map = new HashMap<>();
 				map.put("buyerName", buyer.getFullName());
 				map.put("buyerEmailId", buyer.getEmailId());
