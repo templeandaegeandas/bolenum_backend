@@ -463,7 +463,7 @@ public class TransactionServiceImpl implements TransactionService {
 			Map<String, Object> data = new HashMap<>();
 			data.put("name", seller.getFirstName());
 			data.put("orderType", OrderType.BUY);
-			data.put("qtyTraded", GenericUtils.getDecimalFormatString(sellerQty + tfee));
+			data.put("qtyTraded", GenericUtils.getDecimalFormatString(sellerQty));
 			data.put("currencyAbbr", pairCurrAbrrivaiton);
 			notificationService.sendNotification(seller, TRADESUMMARY, data,
 					EmailTemplate.TRADE_SUMMARY_CRYPTO_BUY_TEMPLATE);
@@ -471,8 +471,10 @@ public class TransactionServiceImpl implements TransactionService {
 
 			data.put("name", buyer.getFirstName());
 			data.put("orderType", OrderType.SELL);
+			data.put("qtyTraded",GenericUtils.getDecimalFormatString(sellerQty + tfee));
 			notificationService.sendNotification(buyer, TRADESUMMARY, data,
 					EmailTemplate.TRADE_SUMMARY_CRYPTO_SELL_TEMPLATE);
+			
 			notificationService.saveNotification(seller, buyer, msg1, null, null);
 
 			logger.debug("Message : {}", msg);
