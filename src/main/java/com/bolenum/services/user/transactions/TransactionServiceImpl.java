@@ -400,6 +400,8 @@ public class TransactionServiceImpl implements TransactionService {
 			// unlocking locked volume
 			unlockVolumeSeller(orders, matchedOrder, qtyTraded);
 
+			//tradeNotification("seller",seller,buyer,qtyTraded,tfee,toCurrAbrrivaiton);
+			
 			String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
 					+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + toCurrAbrrivaiton
 					+ " have been processed successfully!";
@@ -441,6 +443,8 @@ public class TransactionServiceImpl implements TransactionService {
 			// unlocking locked volume
 			unlockVolumeBuyer(orders, matchedOrder, qtyTraded, buyerTradeFee);
 
+			//tradeNotification("buyer",seller,buyer,qtyTraded,tfee,pairCurrAbrrivaiton);
+			
 			String msg = "Hi " + seller.getFirstName() + ", Your transaction of buying "
 					+ GenericUtils.getDecimalFormatString(sellerQty) + " " + pairCurrAbrrivaiton
 					+ " have been processed successfully!";
@@ -487,10 +491,10 @@ public class TransactionServiceImpl implements TransactionService {
 		return new AsyncResult<>(true);
 	}
 
-	/*private void tradeNotification(boolean buyerSenderFlag,User buyer,
+	/*private void tradeNotification(String buyerSenderFlag,User buyer,
 			User seller,double qtyTraded,double tfee,String currAbrrivaiton) {
 		String msg,msg1="";
-		if(buyerSenderFlag) {
+		if(buyerSenderFlag.equals("seller")) {
 		msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
 				+ GenericUtils.getDecimalFormatString(qtyTraded ) + " " + currAbrrivaiton
 				+ " have been processed successfully!";
@@ -510,11 +514,23 @@ public class TransactionServiceImpl implements TransactionService {
 		notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
 		notificationService.saveNotification(seller, buyer, msg1, null, null);
 		
+		Map<String, Object> data = new HashMap<>();
+		data.put("name", seller.getFirstName());
+		data.put("orderType", OrderType.SELL);
+		data.put("qtyTraded", GenericUtils.getDecimalFormatString(qtyTraded ));
+		data.put("currencyAbbr", currAbrrivaiton);
+		notificationService.sendNotification(seller, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+		notificationService.saveNotification(buyer, seller, msg, null, null);
+		data.put("name", buyer.getFirstName());
+		data.put("orderType", OrderType.BUY);
+		notificationService.sendNotification(buyer, TRADESUMMARY, data, EmailTemplate.TRADE_SUMMARY_TEMPLATE);
+		notificationService.saveNotification(seller, buyer, msg1, null, null);
+		
 		logger.debug("Message : {}", msg);
 		logger.debug("Message : {}", msg1);
 		
-	}
-*/
+	}*/
+
 	private void unlockVolumeBuyer(Orders orders, Orders matchedOrder, double qtyTraded, double buyerTradeFee) {
 		/**
 		 * unlocking locked volume of buyers
