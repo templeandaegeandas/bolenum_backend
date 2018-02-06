@@ -47,58 +47,102 @@ public class Error {
 
 	}
 
+
+
+	/**
+	 * @return the id
+	 */
 	public Long getId() {
 		return id;
 	}
 
+	/**
+	 * @param id the id to set
+	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
+	/**
+	 * @return the fromAddress
+	 */
 	public String getFromAddress() {
 		return fromAddress;
 	}
 
+	/**
+	 * @param fromAddress the fromAddress to set
+	 */
 	public void setFromAddress(String fromAddress) {
 		this.fromAddress = fromAddress;
 	}
 
+	/**
+	 * @return the toAddress
+	 */
 	public String getToAddress() {
 		return toAddress;
 	}
 
+	/**
+	 * @param toAddress the toAddress to set
+	 */
 	public void setToAddress(String toAddress) {
 		this.toAddress = toAddress;
 	}
 
-	public String getError() {
+	/**
+	 * @return the errorMsg
+	 */
+	public String getErrorMsg() {
 		return errorMsg;
 	}
 
-	public void setError(String error) {
-		this.errorMsg = error;
+	/**
+	 * @param errorMsg the errorMsg to set
+	 */
+	public void setErrorMsg(String errorMsg) {
+		this.errorMsg = errorMsg;
 	}
 
+	/**
+	 * @return the currency
+	 */
 	public String getCurrency() {
 		return currency;
 	}
 
+	/**
+	 * @param currency the currency to set
+	 */
 	public void setCurrency(String currency) {
 		this.currency = currency;
 	}
 
+	/**
+	 * @return the amount
+	 */
 	public Double getAmount() {
 		return amount;
 	}
 
+	/**
+	 * @param amount the amount to set
+	 */
 	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
 
+	/**
+	 * @return the canRetry
+	 */
 	public Boolean getCanRetry() {
 		return canRetry;
 	}
 
+	/**
+	 * @param canRetry the canRetry to set
+	 */
 	public void setCanRetry(Boolean canRetry) {
 		this.canRetry = canRetry;
 	}

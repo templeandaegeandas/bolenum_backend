@@ -40,61 +40,133 @@ public class CurrencyForm {
 		this.currencyType = currencyType;
 	}
 
+	
+
+	/**
+	 * @return the currencyId
+	 */
 	public Long getCurrencyId() {
 		return currencyId;
 	}
 
+
+
+	/**
+	 * @param currencyId the currencyId to set
+	 */
 	public void setCurrencyId(Long currencyId) {
 		this.currencyId = currencyId;
 	}
 
+
+
+	/**
+	 * @return the currencyName
+	 */
 	public String getCurrencyName() {
 		return currencyName;
 	}
 
+
+
+	/**
+	 * @param currencyName the currencyName to set
+	 */
 	public void setCurrencyName(String currencyName) {
 		this.currencyName = currencyName;
 	}
 
+
+
+	/**
+	 * @return the currencyAbbreviation
+	 */
 	public String getCurrencyAbbreviation() {
 		return currencyAbbreviation;
 	}
 
+
+
+	/**
+	 * @param currencyAbbreviation the currencyAbbreviation to set
+	 */
 	public void setCurrencyAbbreviation(String currencyAbbreviation) {
 		this.currencyAbbreviation = currencyAbbreviation;
 	}
 
+
+
+	/**
+	 * @return the currencyType
+	 */
 	public CurrencyType getCurrencyType() {
 		return currencyType;
 	}
 
+
+
+	/**
+	 * @param currencyType the currencyType to set
+	 */
 	public void setCurrencyType(CurrencyType currencyType) {
 		this.currencyType = currencyType;
 	}
 
+
+
+	/**
+	 * @return the isDeleted
+	 */
 	public Boolean getIsDeleted() {
 		return isDeleted;
 	}
 
+
+
+	/**
+	 * @param isDeleted the isDeleted to set
+	 */
 	public void setIsDeleted(Boolean isDeleted) {
 		this.isDeleted = isDeleted;
 	}
 
+
+
+	/**
+	 * @return the onCreated
+	 */
 	public Date getOnCreated() {
 		return onCreated;
 	}
 
+
+
+	/**
+	 * @param onCreated the onCreated to set
+	 */
 	public void setOnCreated(Date onCreated) {
 		this.onCreated = onCreated;
 	}
 
+
+
+	/**
+	 * @return the onUpdated
+	 */
 	public Date getOnUpdated() {
 		return onUpdated;
 	}
 
+
+
+	/**
+	 * @param onUpdated the onUpdated to set
+	 */
 	public void setOnUpdated(Date onUpdated) {
 		this.onUpdated = onUpdated;
 	}
+
+
 
 	public Currency copy(Currency currency) {
 		currency.setCurrencyName(this.currencyName);

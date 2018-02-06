@@ -37,6 +37,11 @@ public class GenericUtils {
 		return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 	}
 
+	/**
+	 * This method is use to check valid mail
+	 * @param email
+	 * @return
+	 */
 	public static boolean isValidMail(String email) {
 		String emailPattern = "^(.+)@(.+)$";
 		Pattern pattern = Pattern.compile(emailPattern);
@@ -45,7 +50,7 @@ public class GenericUtils {
 	}
 
 	/**
-	 * @description
+	 * This method is use to convert Wei To Ether
 	 * @param
 	 * @return amount in either
 	 */
@@ -82,12 +87,6 @@ public class GenericUtils {
 		return estimedtedFee;
 	}
 
-	public static DecimalFormat getDecimalFormat() {
-		DecimalFormat df = new DecimalFormat("0");
-		df.setMaximumFractionDigits(8);
-		return df;
-	}
-
 	/**
 	 * 
 	 * @description to get the decimal digit up to 8.
@@ -102,8 +101,13 @@ public class GenericUtils {
 		return Double.parseDouble(formate);
 	}
 
+	/**
+	 * This method is use to get Decimal Format String
+	 * @param amount
+	 * @return
+	 */
 	public static String getDecimalFormatString(Double amount) {
-		DecimalFormat df = new DecimalFormat("0");
+		DecimalFormat df = new DecimalFormat("#0.00000000");
 		df.setMaximumFractionDigits(8);
 		return df.format(amount);
 	}

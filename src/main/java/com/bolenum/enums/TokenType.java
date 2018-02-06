@@ -10,6 +10,11 @@ public enum TokenType {
 		this.type = tokenType;
 	}
 
+	/**
+	 * This method is use to get token type.
+	 * @param Nothing
+	 * @return type
+	 */
 	public String getTokenType() {
 		return type;
 	}

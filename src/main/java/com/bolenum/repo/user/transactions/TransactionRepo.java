@@ -24,27 +24,68 @@ import com.bolenum.model.User;
 public interface TransactionRepo extends JpaRepository<Transaction, Serializable> {
 
 	/**
+	 * This method is use to find Transaction by Tx Hash
 	 * @description findByTxHash
 	 * 
 	 */
 	Transaction findByTxHash(String txHash);
 
+	/**
+	 * This method is use to find Transaction by From User And TransactionStatus And CurrencyName
+	 * @param fromUser
+	 * @param transactionStatus
+	 * @param currencyName
+	 * @param pageable
+	 * @return
+	 */
 	Page<Transaction> findByFromUserAndTransactionStatusAndCurrencyName(User fromUser,
 			TransactionStatus transactionStatus, String currencyName, Pageable pageable);
 
+	/**
+	 * This method is use to find Transaction By ToUser And CurrencyName And TransactionStatus Or TransactionStatus
+	 * @param toUser
+	 * @param currencyName
+	 * @param pageable
+	 * @return
+	 */
 	@Query("select t from Transaction t where t.toUser=:toUser and t.currencyName=:currencyName and (t.transactionStatus='WITHDRAW' or t.transactionStatus='DEPOSIT')")
 	Page<Transaction> findByToUserAndCurrencyNameAndTransactionStatusOrTransactionStatus(@Param("toUser") User toUser,
 			@Param("currencyName") String currencyName, Pageable pageable);
 
+	/**
+	 * This method is use to find transaction by TransactionStatus And TransferStatus NotIn OrderBy CreatedOn Asc
+	 * @param transactionStatus
+	 * @param transferStatus
+	 * @return
+	 */
 	Transaction findFirstByTransactionStatusAndTransferStatusOrderByCreatedOnAsc(TransactionStatus transactionStatus,
 			TransferStatus transferStatus);
 
+	/**
+	 * This method is use to find transaction by ToUser And CurrencyName And TransactionStatus And TransferStatus NotIn
+	 * @param toUser
+	 * @param currencyName
+	 * @param transactionStatus
+	 * @param transferStatus
+	 * @return
+	 */
 	List<Transaction> findByToUserAndCurrencyNameAndTransactionStatusAndTransferStatus(User toUser, String currencyName,
 			TransactionStatus transactionStatus, TransferStatus transferStatus);
 
+	/**
+	 * This method is use for total TrasferFee PaidBy Admin
+	 * @param currencyName
+	 * @return
+	 */
 	@Query("select sum(t.fee) from Transaction t where t.transactionStatus='TRANSFER' and t.currencyName =:currencyName")
 	Double totalTrasferFeePaidByAdmin(@Param("currencyName") String currencyName);
 
+	/**
+	 * tgis method is use to find transaction by TransactionStatus
+	 * @param transactionStatus
+	 * @param pageable
+	 * @return
+	 */
 	Page<Transaction> findByTransactionStatus(TransactionStatus transactionStatus, Pageable pageable);
 
 }

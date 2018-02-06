@@ -38,51 +38,89 @@ public class OTP {
 		
 	}
 
+	/**
+	 * @return the id
+	 */
 	public Long getId() {
 		return id;
 	}
 
+	/**
+	 * @param id the id to set
+	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
+	/**
+	 * @return the mobileNumber
+	 */
 	public String getMobileNumber() {
 		return mobileNumber;
 	}
 
+	/**
+	 * @param mobileNumber the mobileNumber to set
+	 */
 	public void setMobileNumber(String mobileNumber) {
 		this.mobileNumber = mobileNumber;
 	}
 
-	public Integer getOtp() {
+	/**
+	 * @return the otpNumber
+	 */
+	public Integer getOtpNumber() {
 		return otpNumber;
 	}
 
-	public void setOtp(Integer otp) {
-		this.otpNumber = otp;
+	/**
+	 * @param otpNumber the otpNumber to set
+	 */
+	public void setOtpNumber(Integer otpNumber) {
+		this.otpNumber = otpNumber;
 	}
 
+	/**
+	 * @return the isDeleted
+	 */
 	public Boolean getIsDeleted() {
 		return isDeleted;
 	}
 
+	/**
+	 * @param isDeleted the isDeleted to set
+	 */
 	public void setIsDeleted(Boolean isDeleted) {
 		this.isDeleted = isDeleted;
 	}
 
+	/**
+	 * @return the createdDate
+	 */
 	public Date getCreatedDate() {
 		return createdDate;
 	}
 
+	/**
+	 * @param createdDate the createdDate to set
+	 */
 	public void setCreatedDate(Date createdDate) {
 		this.createdDate = createdDate;
 	}
 
+	/**
+	 * @return the user
+	 */
 	public User getUser() {
 		return user;
 	}
 
+	/**
+	 * @param user the user to set
+	 */
 	public void setUser(User user) {
 		this.user = user;
 	}
+
+	
 }

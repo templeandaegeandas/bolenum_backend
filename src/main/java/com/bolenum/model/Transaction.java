@@ -329,34 +329,60 @@ public class Transaction {
 		this.gasPrice = gasPrice;
 	}
 
-	public User getFromUser() {
-		return fromUser;
-	}
+	
 
-	public void setFromUser(User fromUser) {
-		this.fromUser = fromUser;
-	}
-
-	public User getToUser() {
-		return toUser;
-	}
-
-	public void setToUser(User toUser) {
-		this.toUser = toUser;
-	}
-
+	/**
+	 * @return the transactionStatus
+	 */
 	public TransactionStatus getTransactionStatus() {
 		return transactionStatus;
 	}
 
+	/**
+	 * @param transactionStatus the transactionStatus to set
+	 */
 	public void setTransactionStatus(TransactionStatus transactionStatus) {
 		this.transactionStatus = transactionStatus;
 	}
 
+	/**
+	 * @return the fromUser
+	 */
+	public User getFromUser() {
+		return fromUser;
+	}
+
+	/**
+	 * @param fromUser the fromUser to set
+	 */
+	public void setFromUser(User fromUser) {
+		this.fromUser = fromUser;
+	}
+
+	/**
+	 * @return the toUser
+	 */
+	public User getToUser() {
+		return toUser;
+	}
+
+	/**
+	 * @param toUser the toUser to set
+	 */
+	public void setToUser(User toUser) {
+		this.toUser = toUser;
+	}
+
+	/**
+	 * @return the fee
+	 */
 	public Double getFee() {
 		return fee;
 	}
 
+	/**
+	 * @param fee the fee to set
+	 */
 	public void setFee(Double fee) {
 		this.fee = fee;
 	}

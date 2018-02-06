@@ -9,6 +9,11 @@ public enum DisputeStatus {
 		this.status = disputeStatus;
 	}
 
+	/**
+	 * This method is use to get document type.
+	 * @param Nothing
+	 * @return status
+	 */
 	public String getDocumentType() {
 		return status;
 	}

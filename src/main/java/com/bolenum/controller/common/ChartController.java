@@ -1,12 +1,8 @@
 package com.bolenum.controller.common;
 
-import com.bolenum.constant.UrlConstant;
-import com.bolenum.model.Currency;
-import com.bolenum.services.admin.CurrencyService;
-import com.bolenum.services.common.chart.ChartService;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.Api;
+import java.util.Map;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +13,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import com.bolenum.constant.UrlConstant;
+import com.bolenum.model.Currency;
+import com.bolenum.services.admin.CurrencyService;
+import com.bolenum.services.common.chart.ChartService;
+
+import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping(value = UrlConstant.BASE_USER_URI_V1)
@@ -43,7 +40,11 @@ public class ChartController {
         Map<String, Object> map = chartService.getChartConfig();
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
-
+  
+   /**
+     * This method is use for symbol information of chart.
+     * @param marketId
+     */
     @RequestMapping(value = UrlConstant.SYMBOLE, method = RequestMethod.GET)
     public ResponseEntity<Object> chartSymboleInfo(@RequestParam("symbol") String symbol) {
         logger.debug("symbole: {}", symbol);
@@ -60,6 +61,13 @@ public class ChartController {
         return new ResponseEntity<>(Optional.empty(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+     /**
+     * This method is use for history information of chart.
+     * @param marketId
+     * @param fromDate
+     * @param toDate
+     * @param resolution
+     */
     @RequestMapping(value = UrlConstant.HISTORY, method = RequestMethod.GET)
     public ResponseEntity<Object> chartHistoryInfo(@RequestParam("symbol") String symbol
             , @RequestParam("from") String fromDate, @RequestParam("to") String toDate, @RequestParam(name = "resolution", required = false, defaultValue = "60") String resolution) {
@@ -80,22 +88,4 @@ public class ChartController {
         }
         return new ResponseEntity<>(Optional.empty(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
-    //@RequestMapping(value = UrlConstant.HISTORY, method = RequestMethod.GET)
-    ResponseEntity<Object> tradeChartHistory(@RequestParam String symbol, @RequestParam String from, @RequestParam String to, @RequestParam String resolution) {
-        ///Map<String, Object> result = new HashMap<String,Object>();
-        ObjectMapper mapper = new ObjectMapper();
-        TypeReference<Object> mapType = new TypeReference<Object>() {
-        };
-        InputStream is = TypeReference.class.getResourceAsStream("/json/tradeHistory.json");
-        Object tradeHistoryList = new Object();
-        try {
-            tradeHistoryList = mapper.readValue(is, mapType);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //result.put("history", tradeHistoryList);
-        return new ResponseEntity<>(tradeHistoryList, HttpStatus.OK);
-    }
-
 }

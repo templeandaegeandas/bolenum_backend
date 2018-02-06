@@ -36,6 +36,7 @@ public class UserKyc {
 	@Enumerated(EnumType.STRING)
 	private DocumentStatus documentStatus = DocumentStatus.SUBMITTED;
 	private String rejectionMessage;
+
 	@UpdateTimestamp
 	private Date uploadedDate;
 	private Date verifiedDate;
@@ -44,76 +45,132 @@ public class UserKyc {
 	@ManyToOne
 	private User user;
 
-	public User getUser() {
-		return user;
-	}
 
-	public void setUser(User user) {
-		this.user = user;
-	}
 
+	/**
+	 * @return the id
+	 */
 	public Long getId() {
 		return id;
 	}
 
+	/**
+	 * @param id the id to set
+	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
+	/**
+	 * @return the documentType
+	 */
 	public DocumentType getDocumentType() {
 		return documentType;
 	}
 
+	/**
+	 * @param documentType the documentType to set
+	 */
 	public void setDocumentType(DocumentType documentType) {
 		this.documentType = documentType;
 	}
 
+	/**
+	 * @return the document
+	 */
 	public String getDocument() {
 		return document;
 	}
 
+	/**
+	 * @param document the document to set
+	 */
 	public void setDocument(String document) {
 		this.document = document;
 	}
 
+	/**
+	 * @return the documentStatus
+	 */
 	public DocumentStatus getDocumentStatus() {
 		return documentStatus;
 	}
 
+	/**
+	 * @param documentStatus the documentStatus to set
+	 */
 	public void setDocumentStatus(DocumentStatus documentStatus) {
 		this.documentStatus = documentStatus;
 	}
 
+	/**
+	 * @return the rejectionMessage
+	 */
 	public String getRejectionMessage() {
 		return rejectionMessage;
 	}
 
+	/**
+	 * @param rejectionMessage the rejectionMessage to set
+	 */
 	public void setRejectionMessage(String rejectionMessage) {
 		this.rejectionMessage = rejectionMessage;
 	}
 
+	/**
+	 * @return the uploadedDate
+	 */
 	public Date getUploadedDate() {
 		return uploadedDate;
 	}
 
+	/**
+	 * @param uploadedDate the uploadedDate to set
+	 */
 	public void setUploadedDate(Date uploadedDate) {
 		this.uploadedDate = uploadedDate;
 	}
 
+	/**
+	 * @return the verifiedDate
+	 */
 	public Date getVerifiedDate() {
 		return verifiedDate;
 	}
 
+	/**
+	 * @param verifiedDate the verifiedDate to set
+	 */
 	public void setVerifiedDate(Date verifiedDate) {
 		this.verifiedDate = verifiedDate;
 	}
 
+	/**
+	 * @return the isVerified
+	 */
 	public Boolean getIsVerified() {
 		return isVerified;
 	}
 
+	/**
+	 * @param isVerified the isVerified to set
+	 */
 	public void setIsVerified(Boolean isVerified) {
 		this.isVerified = isVerified;
+	}
+
+	/**
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
+	}
+
+	/**
+	 * @param user the user to set
+	 */
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	@Override

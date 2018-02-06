@@ -4,17 +4,19 @@
 package com.bolenum.services.user.trade;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bolenum.constant.EmailTemplate;
 import com.bolenum.model.User;
 import com.bolenum.model.coin.UserCoin;
 import com.bolenum.repo.common.coin.UserCoinRepository;
 import com.bolenum.services.common.coin.Erc20TokenService;
-import com.bolenum.services.user.notification.NotificationService;
 import com.bolenum.util.GenericUtils;
 import com.bolenum.util.ResourceUtils;
 import com.neemre.btcdcli4j.core.BitcoindException;
@@ -29,30 +31,22 @@ import com.neemre.btcdcli4j.core.client.BtcdClient;
 public class TradeTransactionServiceImpl implements TradeTransactionService {
 	private static Logger logger = LoggerFactory.getLogger(TradeTransactionServiceImpl.class);
 
-	@Autowired
-	private NotificationService notificationService;
 
 	@Autowired
 	private UserCoinRepository userCoinRepository;
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
-	private static final String TRADESUMMARY = "trade.summary";
 
 	/**
 	 * this will perform trade transaction for buyer to seller
 	 */
 	@Override
-	public Boolean performTradeTransaction(String currencyAbr, String currencyType, double qtyTraded, User buyer,
-			User seller, Long tradeId) {
 
-		String msg = "Hi " + seller.getFirstName() + ", Your transaction of selling "
-				+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + currencyAbr
-				+ " have been processed successfully!";
-		String msg1 = "Hi " + buyer.getFirstName() + ", Your transaction of buying "
-				+ GenericUtils.getDecimalFormatString(qtyTraded) + " " + currencyAbr
-				+ " have been processed successfully!";
+	public Boolean performTradeTransaction(double tfee, String currencyAbr, String currencyType, double qtyTraded,
+			User buyer, User seller, Long tradeId) {
 		Boolean txStatus;
+
 		switch (currencyType) {
 		case "CRYPTO":
 			if ("BTC".equalsIgnoreCase(currencyAbr)) {
@@ -63,10 +57,6 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 				 * if trade for users, then return result with mail notification to users
 				 */
 				if (txStatus) {
-					notificationService.sendNotification(seller, msg, TRADESUMMARY);
-					notificationService.saveNotification(buyer, seller, msg, null, null);
-					notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
-					notificationService.saveNotification(buyer, seller, msg1, null, null);
 					return true;
 				}
 			} else if ("ETH".equalsIgnoreCase(currencyAbr)) {
@@ -77,11 +67,6 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 				 * if transaction for users, then return result with mail notification to users
 				 */
 				if (txStatus) {
-					notificationService.sendNotification(seller, msg, TRADESUMMARY);
-					notificationService.saveNotification(buyer, seller, msg, null, null);
-					notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
-					notificationService.saveNotification(buyer, seller, msg1, null, null);
-					logger.debug("Message : {} , Message1: {}", msg, msg1);
 					return true;
 				}
 			}
@@ -94,12 +79,6 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 			 * if transaction for users, then return result with mail notification to users
 			 */
 			if (txStatus) {
-				notificationService.sendNotification(seller, msg, TRADESUMMARY);
-				notificationService.saveNotification(buyer, seller, msg, null, null);
-				notificationService.sendNotification(buyer, msg1, TRADESUMMARY);
-				notificationService.saveNotification(buyer, seller, msg1, null, null);
-				logger.debug("Message : {}", msg);
-				logger.debug("Message : {}", msg1);
 				return txStatus;
 			}
 			break;
@@ -108,6 +87,7 @@ public class TradeTransactionServiceImpl implements TradeTransactionService {
 		}
 		return false;
 	}
+
 
 	/**
 	 * @description perform Erc20token Trade

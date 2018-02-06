@@ -56,18 +56,32 @@ public class ResourceUtils {
 
 	}
 
+	/**
+	 * This method is use to get HttpProvider
+	 * @return
+	 */
 	public static CloseableHttpClient getHttpProvider() {
 		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
 		return HttpClients.custom().setConnectionManager(connManager).build();
 
 	}
 
+	/**
+	 * THis method is use to get BtcdProvider
+	 * @return
+	 * @throws BitcoindException
+	 * @throws CommunicationException
+	 */
 	public static BtcdClient getBtcdProvider() throws BitcoindException, CommunicationException {
 		BtcdClient btcdClient = new BtcdClientImpl(getHttpProvider(), getNodeConfig());
 		btcdClient.setTxFee(BigDecimal.valueOf(0.001));
 		return btcdClient;
 	}
 
+	/**
+	 * This method is use get NodeConfig
+	 * @return
+	 */
 	public static Properties getNodeConfig() {
 		return nodeConfig;
 	}
