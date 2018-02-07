@@ -373,7 +373,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 			}
 
 			availableBalance = etherumWalletService.getEthWalletBalanceForAdmin(userCoin);
-			availableBalance = availableBalance - (usersDepositBalance + tranferFees + adminMaintainBal);
+			availableBalance = availableBalance - (usersDepositBalance + adminMaintainBal);
 			logger.debug(
 					"Admin Available balance:{} Maintain Bal volume:{} , usersDepositBalance: {} and transfer fee: {} ",
 					availableBalance, adminMaintainBal, usersDepositBalance, tranferFees);
