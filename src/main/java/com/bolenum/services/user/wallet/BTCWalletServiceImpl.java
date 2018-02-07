@@ -5,6 +5,7 @@ package com.bolenum.services.user.wallet;
 
 import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.util.UUID;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import com.bolenum.constant.UrlConstant;
 import com.bolenum.enums.CurrencyType;
 import com.bolenum.enums.TransactionStatus;
 import com.bolenum.enums.TransactionType;
+import com.bolenum.enums.TransferStatus;
 import com.bolenum.exceptions.InsufficientBalanceException;
 import com.bolenum.model.Currency;
 import com.bolenum.model.Transaction;
@@ -51,6 +53,8 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 
 	private static final Logger logger = LoggerFactory.getLogger(BTCWalletServiceImpl.class);
 
+	private static final String STATUS = "CONFIRMED";
+	
 	@Autowired
 	private Erc20TokenService erc20TokenService;
 
@@ -87,6 +91,7 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	private static final String WITHDRAW_OWN_WALLET = "withdraw.own.wallet";
 	@Autowired
 	private TradeTransactionService tradeTransactionService;
+	
 
 	/**
 	 * used to validate available balance in wallet in case of doing transaction
@@ -284,10 +289,26 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 	@Override
 	public Future<Boolean> adminWithdrawErc20TokenAmount(User user, String tokenName, Double withdrawAmount,
 			String toAddress) {
+		
+		UserCoin senderUserCoin = userCoinRepository.findByTokenNameAndUser("ETH", user);
+		
+		logger.debug("senderUserCoin: {}", senderUserCoin);
+		
 		UserCoin toUserCoin = userCoinRepository.findByWalletAddress(toAddress);
+		
+		logger.debug("toUserCoin: {}", toUserCoin);
+	
+		
 		if (toUserCoin != null) {
 			toUserCoin.setBalance(toUserCoin.getBalance() + withdrawAmount);
 			UserCoin newUserCoin = userCoinRepository.save(toUserCoin);
+			
+			logger.debug("newUserCoin: {}", newUserCoin);
+			
+			boolean saveInAppResult=saveInAppTransaction(user, senderUserCoin, toUserCoin, toAddress, tokenName,withdrawAmount, 0.0);
+			
+			logger.debug("result : {}", saveInAppResult);
+			
 			if (newUserCoin != null) {
 				return new AsyncResult<>(true);
 			}
@@ -297,9 +318,40 @@ public class BTCWalletServiceImpl implements BTCWalletService {
 		}
 	}
 
+	public boolean saveInAppTransaction(User fromUser, UserCoin senderUserCoin, UserCoin receiverUserCoin,
+			String toAddress, String tokenName, Double amount, Double fee) {
+		Transaction transaction = new Transaction();
+		String txHash = UUID.randomUUID().toString();
+		transaction.setTxHash("InApp-" + txHash);
+		transaction.setFromAddress(senderUserCoin.getWalletAddress());
+		transaction.setToAddress(toAddress);
+		transaction.setTxAmount(amount);
+		transaction.setTransactionType(TransactionType.OUTGOING);
+		transaction.setTransactionStatus(TransactionStatus.WITHDRAW);
+		transaction.setTransferStatus(TransferStatus.COMPLETED);
+		transaction.setFromUser(fromUser);
+		transaction.setCurrencyName(tokenName);
+		transaction.setFee(fee);
+		transaction.setToUser(receiverUserCoin.getUser());
+		transaction.setInAppTransaction(true);
+		transaction.setTxStatus(STATUS);
+		Transaction saved = transactionRepo.saveAndFlush(transaction);
+		if (saved != null) {
+			simpMessagingTemplate.convertAndSend(
+					UrlConstant.WS_BROKER + UrlConstant.WS_LISTNER_USER + "/" + fromUser.getUserId(),
+					com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+			logger.debug("message sent to websocket: {}", com.bolenum.enums.MessageType.WITHDRAW_NOTIFICATION);
+			logger.debug("transaction saved successfully of user: {}", fromUser.getEmailId());
+			return true;
+		}
+		return false;
+	}
+
+	
 	@Override
 	public boolean adminValidateCryptoWithdrawAmount(User user, String tokenName, Double withdrawAmount,
-			String toAddress) {
+			String toAddress) {		
+		
 		Double availableBalance;
 		Double adminMaintainBal = 2.0;
 		UserCoin userCoin = userCoinRepository.findByTokenNameAndUser(tokenName, user);

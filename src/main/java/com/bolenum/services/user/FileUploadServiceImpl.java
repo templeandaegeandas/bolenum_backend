@@ -18,6 +18,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashSet;
@@ -75,7 +77,9 @@ public class FileUploadServiceImpl implements FileUploadService {
 
 		String updatedFileName = "";
 		if (documentType == null) {
-			updatedFileName = user.getUserId() + "_dispute" + "." + extension;
+			
+			updatedFileName = new SimpleDateFormat("MMddhhmmss").format(user.getCreatedOn()) + "_dispute" + "." + extension;
+	
 		} else {
 			updatedFileName = documentType + "_" + user.getUserId() + "." + extension;
 		}
